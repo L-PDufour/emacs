@@ -1,56 +1,96 @@
 {
-  description = "Custom Emacs build with Nix-managed packages";
+  description = "Custom Emacs build with Nix-managed packages, inspired by Neovim setup";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
-      flake-utils,
+      flake-parts,
+      ...
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+      perSystem =
+        {
+          config,
+          pkgs,
+          system,
+          ...
+        }:
+        let
+          inherit (pkgs) alejandra just mkShell;
 
-        # Define the list of Emacs packages you want to use
-        myEmacsPackages =
-          epkgs: with epkgs; [
-            vterm
-            magit
-            org
-            which-key
-            use-package
-            evil
-            projectile
-            company
-          ];
+          myEmacsPackages =
+            epkgs: with epkgs; [
+              vterm
+              magit
+              org
+              which-key
+              use-package
+              evil
+              projectile
+              company
+              # Add more packages as needed
+            ];
 
-        # Create a custom Emacs with the specified packages
-        myEmacs = pkgs.emacsWithPackages myEmacsPackages;
+          myEmacs = (pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages myEmacsPackages;
 
-      in
-      {
-        packages.default = pkgs.symlinkJoin {
-          name = "custom-emacs";
-          paths = [ myEmacs ];
-          buildInputs = [ pkgs.makeWrapper ];
-          postBuild = ''
-            mkdir -p $out/share/emacs/site-lisp
-            cp ${./init.el} $out/share/emacs/site-lisp/init.el
-            cp ${./config.el} $out/share/emacs/site-lisp/config.el
-            wrapProgram $out/bin/emacs \
-              --add-flags "-Q" \
-              --add-flags "-l $out/share/emacs/site-lisp/init.el"
-          '';
+          mkEmacsPlugin =
+            {
+              name ? "user",
+              src ? ./.,
+            }:
+            pkgs.stdenv.mkDerivation {
+              inherit name src;
+              buildPhase = "true";
+              installPhase = ''
+                mkdir -p $out/share/emacs/site-lisp
+                cp -r . $out/share/emacs/site-lisp/${name}
+              '';
+            };
+
+          userEmacsPlugin = mkEmacsPlugin {
+            name = "user";
+            src = ./.;
+          };
+
+        in
+        {
+          packages = {
+            default = pkgs.symlinkJoin {
+              name = "custom-emacs";
+              paths = [
+                myEmacs
+                userEmacsPlugin
+              ];
+              buildInputs = [ pkgs.makeWrapper ];
+              postBuild = ''
+                wrapProgram $out/bin/emacs \
+                  --add-flags "-Q" \
+                  --add-flags "-l $out/share/emacs/site-lisp/user/init.el"
+              '';
+              meta = myEmacs.meta // {
+                platforms = pkgs.emacs.meta.platforms;
+              };
+            };
+          };
+
+          apps.default = {
+            type = "app";
+            program = "${config.packages.default}/bin/emacs";
+          };
+
+          devShells.default = mkShell { buildInputs = [ just ]; };
+
+          formatter = alejandra;
         };
-
-        apps.default = flake-utils.lib.mkApp {
-          drv = self.packages.${system}.default;
-          name = "emacs";
-        };
-      }
-    );
+    };
 }
