@@ -1,7 +1,25 @@
 ;; config.el
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1))
 
-;; ... (your existing configuration)
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
+(setq inhibit-startup-message t)
 
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(global-display-line-numbers-mode 1)
+(setq history-lenght 25)
+(savehist-mode 1)
+(save-place-mode 1)
 ;; Org mode configuration
 (use-package org
   :config
@@ -39,7 +57,7 @@
 (use-package catppuccin-theme
   :ensure t
   :config
-  (setq catppuccin-flavor 'mocha) ;; or 'latte, 'frappe, 'macchiato, or 'mocha
+  (setq catppuccin-flavor 'frappe) ;; or 'latte, 'frappe, 'macchiato, or 'mocha
   (load-theme 'catppuccin t)
   (setq catppuccin-highlight-matches t)
   (setq catppuccin-italic-comments t)

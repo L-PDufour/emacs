@@ -2,10 +2,12 @@
 (require 'use-package)
 (load-file (expand-file-name "config.el" (file-name-directory load-file-name)))
 
-;; config.el
-; (use-package evil
-;   :config
-;   (evil-mode 1))
+; config.el
+(use-package evil
+  :config
+  (evil-mode 1))
+
+(evil-collection-init)
 
 (use-package which-key
   :config

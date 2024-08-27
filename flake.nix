@@ -36,6 +36,7 @@
               which-key
               use-package
               evil
+              evil-collection
               projectile
               company
               catppuccin-theme
