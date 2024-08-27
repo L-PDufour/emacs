@@ -3,9 +3,9 @@
 (load-file (expand-file-name "config.el" (file-name-directory load-file-name)))
 
 ;; config.el
-(use-package evil
-  :config
-  (evil-mode 1))
+; (use-package evil
+;   :config
+;   (evil-mode 1))
 
 (use-package which-key
   :config
