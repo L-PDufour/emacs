@@ -38,6 +38,7 @@
               evil
               projectile
               company
+              catppuccin-theme
               # Add more packages as needed
             ];
 
