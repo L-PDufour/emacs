@@ -26,22 +26,43 @@
           ...
         }:
         let
-          inherit (pkgs) alejandra just mkShell;
+          inherit (pkgs)
+            alejandra
+            just
+            mkShell
+            lib
+            ;
+
+          fetchGitRepo = import ./fetch-git-repo.nix { inherit pkgs; };
+
+          rpgtk =
+            fetchGitRepo "rpgtk" "https://codeberg.org/howardabrams/emacs-rpgtk.git"
+              "d7f6f53ecf1ea9eea5fb86faa46a1cd9420a10fe";
 
           myEmacsPackages =
-            epkgs: with epkgs; [
+            epkgs:
+            (with epkgs; [
               vterm
               magit
               org
               which-key
               use-package
+              command-log-mode
               evil
               evil-collection
+              evil-escape
+              ligature
               projectile
               company
               catppuccin-theme
-              # Add more packages as needed
-            ];
+              vertico
+              marginalia
+              orderless
+              consult
+              embark
+              embark-consult
+              wgrep
+            ]);
 
           myEmacs = (pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages myEmacsPackages;
 
@@ -50,6 +71,7 @@
               name ? "user",
               src ? ./.,
             }:
+
             pkgs.stdenv.mkDerivation {
               inherit name src;
               buildPhase = "true";
@@ -64,6 +86,15 @@
             src = ./.;
           };
 
+          rpgtkPlugin = pkgs.stdenv.mkDerivation {
+            name = "rpgtk";
+            src = rpgtk;
+            buildPhase = "true";
+            installPhase = ''
+              mkdir -p $out/share/emacs/site-lisp/rpgtk
+              cp -r * $out/share/emacs/site-lisp/rpgtk/
+            '';
+          };
         in
         {
           packages = {
@@ -72,10 +103,12 @@
               paths = [
                 myEmacs
                 userEmacsPlugin
+                rpgtkPlugin
               ];
               buildInputs = [ pkgs.makeWrapper ];
               postBuild = ''
                 wrapProgram $out/bin/emacs \
+                  --set EMACSLOADPATH ${myEmacs}/share/emacs/site-lisp:${userEmacsPlugin}/share/emacs/site-lisp:${rpgtkPlugin}/share/emacs/site-lisp:${rpgtkPlugin}/share/emacs/site-lisp/rpgtk: \
                   --add-flags "-Q" \
                   --add-flags "-l $out/share/emacs/site-lisp/user/init.el"
               '';
@@ -84,14 +117,11 @@
               };
             };
           };
-
           apps.default = {
             type = "app";
             program = "${config.packages.default}/bin/emacs";
           };
-
           devShells.default = mkShell { buildInputs = [ just ]; };
-
           formatter = alejandra;
         };
     };
