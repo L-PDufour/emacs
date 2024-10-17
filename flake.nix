@@ -1,128 +1,91 @@
 {
-  description = "Custom Emacs build with Nix-managed packages, inspired by Neovim setup";
+  description = "Custom Emacs build with Nix-managed packages";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-utils.url = "github:numtide/flake-utils";
   };
+
   outputs =
-    inputs@{
+    {
       self,
       nixpkgs,
-      flake-parts,
-      ...
+      flake-utils,
     }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "aarch64-darwin"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "x86_64-linux"
-      ];
-      perSystem =
-        {
-          config,
-          pkgs,
-          system,
-          ...
-        }:
-        let
-          inherit (pkgs)
-            alejandra
-            just
-            mkShell
-            lib
-            ;
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
 
-          fetchGitRepo = import ./fetch-git-repo.nix { inherit pkgs; };
+        myEmacsPackages =
+          epkgs: with epkgs; [
+            vterm
+            magit
+            org
+            which-key
+            use-package
+            command-log-mode
+            evil
+            evil-collection
+            evil-escape
+            ligature
+            projectile
+            company
+            catppuccin-theme
+            vertico
+            marginalia
+            orderless
+            consult
+            embark
+            embark-consult
+            wgrep
+          ];
 
-          rpgtk =
-            fetchGitRepo "rpgtk" "https://codeberg.org/howardabrams/emacs-rpgtk.git"
-              "d7f6f53ecf1ea9eea5fb86faa46a1cd9420a10fe";
+        myEmacs = (pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages myEmacsPackages;
 
-          myEmacsPackages =
-            epkgs:
-            (with epkgs; [
-              vterm
-              magit
-              org
-              which-key
-              use-package
-              command-log-mode
-              evil
-              evil-collection
-              evil-escape
-              ligature
-              projectile
-              company
-              catppuccin-theme
-              vertico
-              marginalia
-              orderless
-              consult
-              embark
-              embark-consult
-              wgrep
-            ]);
+        emacsConfig = pkgs.runCommand "emacs-config" { } ''
+          mkdir -p $out/share/emacs/site-lisp/user
+          cp ${./init.el} $out/share/emacs/site-lisp/user/init.el
+          cp ${./early-init.el} $out/share/emacs/site-lisp/user/early-init.el
+          ${pkgs.lib.optionalString (builtins.pathExists ./extras) "cp -r ${./extras} $out/share/emacs/site-lisp/user/extras"}
+        '';
 
-          myEmacs = (pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages myEmacsPackages;
-
-          mkEmacsPlugin =
-            {
-              name ? "user",
-              src ? ./.,
-            }:
-
-            pkgs.stdenv.mkDerivation {
-              inherit name src;
-              buildPhase = "true";
-              installPhase = ''
-                mkdir -p $out/share/emacs/site-lisp
-                cp -r . $out/share/emacs/site-lisp/${name}
-              '';
-            };
-
-          userEmacsPlugin = mkEmacsPlugin {
-            name = "user";
-            src = ./.;
-          };
-
-          rpgtkPlugin = pkgs.stdenv.mkDerivation {
-            name = "rpgtk";
-            src = rpgtk;
-            buildPhase = "true";
-            installPhase = ''
-              mkdir -p $out/share/emacs/site-lisp/rpgtk
-              cp -r * $out/share/emacs/site-lisp/rpgtk/
+      in
+      {
+        packages = {
+          default = pkgs.symlinkJoin {
+            name = "custom-emacs";
+            paths = [
+              myEmacs
+              emacsConfig
+            ];
+            buildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/emacs \
+                --add-flags "-Q" \
+                --add-flags "-l $out/share/emacs/site-lisp/user/early-init.el" \
+                --add-flags "-l $out/share/emacs/site-lisp/user/init.el" \
+                --prefix PATH : ${
+                  pkgs.lib.makeBinPath [
+                    pkgs.ripgrep
+                    pkgs.fd
+                  ]
+                }
             '';
           };
-        in
-        {
-          packages = {
-            default = pkgs.symlinkJoin {
-              name = "custom-emacs";
-              paths = [
-                myEmacs
-                userEmacsPlugin
-                rpgtkPlugin
-              ];
-              buildInputs = [ pkgs.makeWrapper ];
-              postBuild = ''
-                wrapProgram $out/bin/emacs \
-                  --set EMACSLOADPATH ${myEmacs}/share/emacs/site-lisp:${userEmacsPlugin}/share/emacs/site-lisp:${rpgtkPlugin}/share/emacs/site-lisp:${rpgtkPlugin}/share/emacs/site-lisp/rpgtk: \
-                  --add-flags "-Q" \
-                  --add-flags "-l $out/share/emacs/site-lisp/user/init.el"
-              '';
-              meta = myEmacs.meta // {
-                platforms = pkgs.emacs.meta.platforms;
-              };
-            };
-          };
-          apps.default = {
-            type = "app";
-            program = "${config.packages.default}/bin/emacs";
-          };
-          devShells.default = mkShell { buildInputs = [ just ]; };
-          formatter = alejandra;
         };
-    };
+
+        apps.default = {
+          type = "app";
+          program = "${self.packages.${system}.default}/bin/emacs";
+        };
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [
+            self.packages.${system}.default
+            pkgs.just
+          ];
+        };
+      }
+    );
 }
