@@ -1,0 +1,65 @@
+#+TITLE: Emacs Configuration
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+#+STARTUP: overview
+
+#+begin_src emacs-lisp
+;; Disable package initialization early
+(setq package-enable-at-startup nil)
+;; Set the font
+(add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono-12"))
+#+end_src
+
+* Basic Setup
+#+begin_src emacs-lisp
+(setq user-full-name "Your Name"
+      user-mail-address "your.email@example.com")
+#+end_src
+
+* Package Management
+#+begin_src emacs-lisp
+(require 'package)
+
+;; Add MELPA to package archives
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
+;; Initialize the package system
+(package-initialize)
+
+;; Ensure 'use-package' is installed
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; Use-package settings
+(setq use-package-always-ensure t)
+#+end_src
+
+;; Disable the toolbar, menu bar, and scroll bar
+
+#+begin_src emacs-lisp
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+
+;; Set the frame to fullscreen or maximize
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Hide the startup screen
+(setq inhibit-startup-screen t)
+
+;; Set Org mode to a minimal theme
+(setq org-hide-leading-stars t)
+(setq org-startup-indented t)
+
+#+end_src
+;; Add the rest of your configuration...
+
+** UI Customizations
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :config
+  (load-theme 'doom-one t))
+
+(use-package doom-modeline
+  :init (doom-modeline-mode 1))
+#+end_src
