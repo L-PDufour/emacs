@@ -29,8 +29,13 @@
 
 (use-package emacs
   :config
-  ;; Treesitter config
-
+(electric-pair-mode t)
+(show-paren-mode 1)
+(setq-default indent-tabs-mode nil)
+(save-place-mode t)
+(savehist-mode t)
+(recentf-mode t)
+(global-auto-revert-mode t)
   ;; Tell Emacs to prefer the treesitter mode
   ;; You'll want to run the command `M-x treesit-install-language-grammar' before editing.
   (setq major-mode-remap-alist
@@ -45,6 +50,13 @@
   ;; Auto parenthesis matching
   ((prog-mode . electric-pair-mode)))
 
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;;   Version Control
@@ -68,9 +80,17 @@
 (use-package yaml-mode
   :ensure t)
 
-(use-package json-mode
+(use-package lua-mode
   :ensure t)
 
+(use-package sly
+  :ensure t)
+
+(use-package typescript-mode
+  :ensure t)
+
+(use-package json-mode
+  :ensure t)
 ;; Emacs ships with a lot of popular programming language modes. If it's not
 ;; built in, you're almost certain to find a mode for the language you're
 ;; looking for with a quick Internet search.
@@ -86,19 +106,36 @@
 ;;  - https://www.masteringemacs.org/article/seamlessly-merge-multiple-documentation-sources-eldoc
 
 (use-package eglot
-  ;; no :ensure t here because it's built-in
-
-  ;; Configure hooks to automatically turn-on eglot for selected modes
-  ; :hook
-  ; (((python-mode ruby-mode elixir-mode) . eglot))
-
   :custom
   (eglot-send-changes-idle-time 0.1)
-  (eglot-extend-to-xref t)              ; activate Eglot in referenced non-project files
-
+  (eglot-extend-to-xref t)
+  (eglot-ignored-server-capabilities '(:documentHighlightProvider))
+  
   :config
-  (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
-  ;; Sometimes you need to tell Eglot where to find the language server
-  ; (add-to-list 'eglot-server-programs
-  ;              '(haskell-mode . ("haskell-language-server-wrapper" "--lsp")))
-  )
+  ;; Performance optimization
+  (fset #'jsonrpc--log-event #'ignore)
+  
+  ;; Custom server configurations
+  ;; (Add-To-List 'Eglot-Server-Programs
+  ;;   '((Python-Mode Python-Ts-Mode) . ("Pyright-Langserver" "--Stdio"))
+  ;;   '((Typescript-Mode Typescript-Ts-Mode) . ("Typescript-Language-Server" "--Stdio"))
+  ;;   '((Json-Mode Json-Ts-Mode) . ("Vscode-Json-Language-Server" "--Stdio"))
+  ;; )
+  
+  :hook
+  (((python-mode python-ts-mode
+     typescript-mode typescript-ts-mode
+     json-mode json-ts-mode
+     go-mode lua-mode) . eglot-ensure)
+   (eglot-managed-mode . (lambda ()
+     (setq-local eldoc-documentation-strategy
+       #'eldoc-documentation-compose-eagerly)))))
+
+(use-package envrc
+:vc (:url "https://github.com/purcell/envrc"
+       :rev :newest)
+ :hook (after-init . envrc-global-mode)
+ :custom
+ (envrc-remote t))
+
+

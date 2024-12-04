@@ -62,14 +62,19 @@
          )
   :config
   ;; Narrowing lets you restrict results to certain groups of candidates
-  (setq consult-narrow-key "<"))
+  (setq read-buffer-completion-ignore-case t
+        read-file-name-completion-ignore-case t
+        completion-ignore-case t
+   consult-narrow-key "<"))
 
 (use-package embark
   :ensure t
   :demand t
   :after avy
-  :bind (("C-c a" . embark-act))        ; bind this to an easy key to hit
+  :bind (("C-c a" . embark-act)
+         ([remap describe-bindings] . embark-bindings))
   :init
+  (setq prefix-help-command #'embark-prefix-help-command)
   ;; Add the option to run embark when using avy
   (defun bedrock/avy-action-embark (pt)
     (unwind-protect
@@ -96,58 +101,93 @@
 ;; Vertico: better vertical completion for minibuffer commands
 (use-package vertico
   :ensure t
-  :init
-  ;; You'll want to make sure that e.g. fido-mode isn't enabled
-  (vertico-mode))
+  :hook (after-init . vertico-mode))
 
 (use-package vertico-directory
   :ensure nil
   :after vertico
   :bind (:map vertico-map
-              ("M-DEL" . vertico-directory-delete-word)))
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-word)
+              ("M-DEL" . vertico-directory-delete-char)))
 
 ;; Marginalia: annotations for minibuffer
 (use-package marginalia
   :ensure t
-  :config
-  (marginalia-mode))
+  :hook (after-init . marginalia-mode))
 
 ;; Popup completion-at-point
+; (use-package corfu
+;   :ensure t
+;   :init
+;   (global-corfu-mode)
+;   :bind
+;   (:map corfu-map
+;         ("SPC" . corfu-insert-separator)
+;         ("C-n" . corfu-next)
+;         ("C-p" . corfu-previous)))
+;
+; ;; Part of corfu
+; (use-package corfu-popupinfo
+;   :after corfu
+;   :ensure nil
+;   :hook (corfu-mode . corfu-popupinfo-mode)
+;   :custom
+;   (corfu-popupinfo-delay '(0.25 . 0.1))
+;   (corfu-popupinfo-hide nil)
+;   :config
+;   (corfu-popupinfo-mode))
 (use-package corfu
   :ensure t
-  :init
-  (global-corfu-mode)
-  :bind
-  (:map corfu-map
-        ("SPC" . corfu-insert-separator)
-        ("C-n" . corfu-next)
-        ("C-p" . corfu-previous)))
-
-;; Part of corfu
-(use-package corfu-popupinfo
-  :after corfu
-  :ensure nil
-  :hook (corfu-mode . corfu-popupinfo-mode)
-  :custom
-  (corfu-popupinfo-delay '(0.25 . 0.1))
-  (corfu-popupinfo-hide nil)
+  :hook (after-init . global-corfu-mode)
+  :bind (:map corfu-map 
+         ("<tab>" . corfu-complete)
+         ("C-y" . corfu-insert))
   :config
-  (corfu-popupinfo-mode))
-
+  (setq corfu-auto t)  ; Enable automatic suggestions
+  (setq tab-always-indent 'complete)
+  (setq corfu-preview-current nil)
+  (setq corfu-min-width 20)
+  (setq corfu-popupinfo-delay '(1.25 . 0.5))
+  (corfu-popupinfo-mode 1)
+  
+  (with-eval-after-load 'savehist
+    (corfu-history-mode 1)
+    (add-to-list 'savehist-additional-variables 'corfu-history)))
 ;; Make corfu popup come up in terminal overlay
 (use-package corfu-terminal
   :if (not (display-graphic-p))
   :ensure t
   :config
   (corfu-terminal-mode))
-
 ;; Fancy completion-at-point functions; there's too much in the cape package to
 ;; configure here; dive in when you're comfortable!
+;; Add extensions
+
 (use-package cape
   :ensure t
+  :after corfu
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
+  :custom
+  (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-dabbrev #'cape-dict #'cape-keyword)))
   :init
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-file))
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block))
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
 
 ;; Pretty icons for corfu
 (use-package kind-icon
@@ -178,7 +218,9 @@
 (use-package orderless
   :ensure t
   :config
-  (setq completion-styles '(orderless)))
+  (setq completion-styles '(orderless basic))
+  (setq completion-category-defaults nil)
+  (setq completion-category-overrride nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
