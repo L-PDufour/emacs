@@ -68,8 +68,10 @@
   :ensure t
   :demand t
   :after avy
-  :bind (("C-c a" . embark-act))        ; bind this to an easy key to hit
+  :bind (("C-c a" . embark-act)
+         ([remap describe-bindings] . embark-bindings))
   :init
+  (setq prefix-help-command #'embark-prefix-help-command)
   ;; Add the option to run embark when using avy
   (defun bedrock/avy-action-embark (pt)
     (unwind-protect
@@ -96,9 +98,7 @@
 ;; Vertico: better vertical completion for minibuffer commands
 (use-package vertico
   :ensure t
-  :init
-  ;; You'll want to make sure that e.g. fido-mode isn't enabled
-  (vertico-mode))
+  :hook (after-init . vertico-mode))
 
 (use-package vertico-directory
   :ensure nil
@@ -109,30 +109,45 @@
 ;; Marginalia: annotations for minibuffer
 (use-package marginalia
   :ensure t
-  :config
-  (marginalia-mode))
+  :hook (after-init . marginalia-mode))
 
 ;; Popup completion-at-point
+; (use-package corfu
+;   :ensure t
+;   :init
+;   (global-corfu-mode)
+;   :bind
+;   (:map corfu-map
+;         ("SPC" . corfu-insert-separator)
+;         ("C-n" . corfu-next)
+;         ("C-p" . corfu-previous)))
+;
+; ;; Part of corfu
+; (use-package corfu-popupinfo
+;   :after corfu
+;   :ensure nil
+;   :hook (corfu-mode . corfu-popupinfo-mode)
+;   :custom
+;   (corfu-popupinfo-delay '(0.25 . 0.1))
+;   (corfu-popupinfo-hide nil)
+;   :config
+;   (corfu-popupinfo-mode))
 (use-package corfu
   :ensure t
-  :init
-  (global-corfu-mode)
-  :bind
-  (:map corfu-map
-        ("SPC" . corfu-insert-separator)
-        ("C-n" . corfu-next)
-        ("C-p" . corfu-previous)))
-
-;; Part of corfu
-(use-package corfu-popupinfo
-  :after corfu
-  :ensure nil
-  :hook (corfu-mode . corfu-popupinfo-mode)
-  :custom
-  (corfu-popupinfo-delay '(0.25 . 0.1))
-  (corfu-popupinfo-hide nil)
+  :hook (after-init . global-corfu-mode)
+  :bind (:map corfu-map ("<tab>" . corfu-complete))
   :config
-  (corfu-popupinfo-mode))
+  (setq tab-always-indent 'complete)
+  (setq corfu-preview-current nil)
+  (setq corfu-min-width 20)
+
+  (setq corfu-popupinfo-delay '(1.25 . 0.5))
+  (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
+
+  ;; Sort by input history (no need to modify `corfu-sort-function').
+  (with-eval-after-load 'savehist
+    (corfu-history-mode 1)
+    (add-to-list 'savehist-additional-variables 'corfu-history)))
 
 ;; Make corfu popup come up in terminal overlay
 (use-package corfu-terminal
@@ -178,7 +193,9 @@
 (use-package orderless
   :ensure t
   :config
-  (setq completion-styles '(orderless)))
+  (setq completion-styles '(orderless basic))
+  (setq completion-category-defaults nil)
+  (setq completion-category-overrride nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

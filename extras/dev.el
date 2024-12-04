@@ -29,8 +29,13 @@
 
 (use-package emacs
   :config
-  ;; Treesitter config
-
+(electric-pair-mode t)
+(show-paren-mode 1)
+(setq-default indent-tabs-mode nil)
+(save-place-mode t)
+(savehist-mode t)
+(recentf-mode t)
+(global-auto-revert-mode t)
   ;; Tell Emacs to prefer the treesitter mode
   ;; You'll want to run the command `M-x treesit-install-language-grammar' before editing.
   (setq major-mode-remap-alist
@@ -45,6 +50,13 @@
   ;; Auto parenthesis matching
   ((prog-mode . electric-pair-mode)))
 
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;;   Version Control
@@ -102,3 +114,12 @@
   ; (add-to-list 'eglot-server-programs
   ;              '(haskell-mode . ("haskell-language-server-wrapper" "--lsp")))
   )
+
+(use-package envrc
+:vc (:url "https://github.com/purcell/envrc"
+       :rev :newest)
+ :hook (after-init . envrc-global-mode)
+ :custom
+ (envrc-remote t))
+
+
