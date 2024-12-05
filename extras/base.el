@@ -140,17 +140,15 @@
 (use-package corfu
   :ensure t
   :hook (after-init . global-corfu-mode)
-  :bind (:map corfu-map 
+  :bind (:map corfu-map
          ("<tab>" . corfu-complete)
          ("C-y" . corfu-insert))
   :config
   (setq corfu-auto t)  ; Enable automatic suggestions
   (setq tab-always-indent 'complete)
-  (setq corfu-preview-current nil)
   (setq corfu-min-width 20)
-  (setq corfu-popupinfo-delay '(1.25 . 0.5))
-  (corfu-popupinfo-mode 1)
-  
+  (setq corfu-auto-delay 0.75)
+  (setq corfu-quit-no-match t) ;
   (with-eval-after-load 'savehist
     (corfu-history-mode 1)
     (add-to-list 'savehist-additional-variables 'corfu-history)))
@@ -167,27 +165,21 @@
 (use-package cape
   :ensure t
   :after corfu
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
-  :custom
-  (setq-local completion-at-point-functions
-            (list (cape-capf-super #'cape-dabbrev #'cape-dict #'cape-keyword)))
+  :bind ("C-c p" . cape-prefix-map)
   :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block))
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
+  ;; Add Cape completion sources
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+
+  :config
+  ;; Combine multiple completion sources
+  (setq-default completion-at-point-functions
+                (list
+                 (cape-capf-super
+                  #'cape-dabbrev
+                  #'cape-dict
+                  #'cape-keyword))))
 
 ;; Pretty icons for corfu
 (use-package kind-icon
