@@ -53,6 +53,8 @@
          ("M-s s" . consult-line)       ; consult-line instead of isearch, bind
          ("M-s L" . consult-line-multi) ; isearch to M-s s
          ("M-s o" . consult-outline)
+ :map minibuffer-local-map
+         ("C-r" . consult-history)
          ;; Isearch integration
          :map isearch-mode-map
          ("M-e" . consult-isearch-history)   ; orig. isearch-edit-string
@@ -63,34 +65,22 @@
   :config
   ;; Narrowing lets you restrict results to certain groups of candidates
   (setq read-buffer-completion-ignore-case t
+        completion-in-region-function #'consult-completion-in-region
         read-file-name-completion-ignore-case t
         completion-ignore-case t
    consult-narrow-key "<"))
 
 (use-package embark
   :ensure t
-  :demand t
-  :after avy
-  :bind (("C-c a" . embark-act)
-         ([remap describe-bindings] . embark-bindings))
-  :init
+  :bind (("<remap> <describe-bindings>" . embark-bindings)
+         ("C-c a" . embark-act))
+  :config
   (setq prefix-help-command #'embark-prefix-help-command)
-  ;; Add the option to run embark when using avy
-  (defun bedrock/avy-action-embark (pt)
-    (unwind-protect
-        (save-excursion
-          (goto-char pt)
-          (embark-act))
-      (select-window
-       (cdr (ring-ref avy-ring 0))))
-    t)
 
-  ;; After invoking avy-goto-char-timer, hit "." to run embark at the next
-  ;; candidate you select
-  (setf (alist-get ?. avy-dispatch-alist) 'bedrock/avy-action-embark))
-
-(use-package embark-consult
-  :ensure t)
+  (use-package embark-consult
+    :ensure t
+    :after (embark consult)
+    :hook (embark-collect-mode . consult-preview-at-point-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -101,7 +91,16 @@
 ;; Vertico: better vertical completion for minibuffer commands
 (use-package vertico
   :ensure t
-  :hook (after-init . vertico-mode))
+  :custom
+  (vertico-cycle t)
+  :hook
+  (after-init . vertico-mode)
+  :config
+  (with-eval-after-load 'crafted-defaults-config
+    (fido-mode -1)
+    (fido-vertical-mode -1)
+    (icomplete-mode -1)
+    (icomplete-vertical-mode -1)))
 
 (use-package vertico-directory
   :ensure nil
@@ -114,50 +113,62 @@
 ;; Marginalia: annotations for minibuffer
 (use-package marginalia
   :ensure t
-  :hook (after-init . marginalia-mode))
+  :init
+  (marginalia-mode 1)
+  :custom
+  (marginalia-annotators
+   '(marginalia-annotators-heavy
+     marginalia-annotators-light
+     nil)))
 
-;; Popup completion-at-point
-; (use-package corfu
-;   :ensure t
-;   :init
-;   (global-corfu-mode)
-;   :bind
-;   (:map corfu-map
-;         ("SPC" . corfu-insert-separator)
-;         ("C-n" . corfu-next)
-;         ("C-p" . corfu-previous)))
-;
-; ;; Part of corfu
-; (use-package corfu-popupinfo
-;   :after corfu
-;   :ensure nil
-;   :hook (corfu-mode . corfu-popupinfo-mode)
-;   :custom
-;   (corfu-popupinfo-delay '(0.25 . 0.1))
-;   (corfu-popupinfo-hide nil)
-;   :config
-;   (corfu-popupinfo-mode))
 (use-package corfu
   :ensure t
-  :hook (after-init . global-corfu-mode)
-  :bind (:map corfu-map
-         ("<tab>" . corfu-complete)
-         ("C-y" . corfu-insert))
+  :init
+  (global-corfu-mode 1)
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+
+  ;; Terminal support
   :config
-  (setq corfu-auto t)  ; Enable automatic suggestions
-  (setq tab-always-indent 'complete)
-  (setq corfu-min-width 20)
-  (setq corfu-auto-delay 0.75)
-  (setq corfu-quit-no-match t) ;
-  (with-eval-after-load 'savehist
-    (corfu-history-mode 1)
-    (add-to-list 'savehist-additional-variables 'corfu-history)))
-;; Make corfu popup come up in terminal overlay
-(use-package corfu-terminal
-  :if (not (display-graphic-p))
-  :ensure t
-  :config
-  (corfu-terminal-mode))
+  (unless (display-graphic-p)
+    (use-package corfu-terminal
+      :ensure t
+      :config (corfu-terminal-mode +1)))
+
+  ;; Popup info
+  (use-package corfu-popupinfo
+    :ensure t
+    :config
+    (corfu-popupinfo-mode 1)
+    (eldoc-add-command #'corfu-insert)
+    :bind (:map corfu-map
+           ("M-p" . corfu-popupinfo-scroll-down)
+           ("M-n" . corfu-popupinfo-scroll-up)
+           ("M-d" . corfu-popupinfo-toggle))))
+
+; (use-package corfu
+;   :ensure t
+;   :hook (after-init . global-corfu-mode)
+;   :bind (:map corfu-map
+;          ("<tab>" . corfu-complete)
+;          ("C-y" . corfu-insert))
+;   :config
+;   (setq corfu-auto t)  ; Enable automatic suggestions
+;   (setq tab-always-indent 'complete)
+;   (setq corfu-min-width 20)
+;   (setq corfu-auto-delay 0.75)
+;   (setq corfu-quit-no-match t) ;
+;   (with-eval-after-load 'savehist
+;     (corfu-history-mode 1)
+;     (add-to-list 'savehist-additional-variables 'corfu-history)))
+; ;; Make corfu popup come up in terminal overlay
+; (use-package corfu-terminal
+;   :if (not (display-graphic-p))
+;   :ensure t
+;   :config
+;   (corfu-terminal-mode))
 ;; Fancy completion-at-point functions; there's too much in the cape package to
 ;; configure here; dive in when you're comfortable!
 ;; Add extensions
@@ -165,21 +176,27 @@
 (use-package cape
   :ensure t
   :after corfu
-  :bind ("C-c p" . cape-prefix-map)
   :init
-  ;; Add Cape completion sources
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  ;; The functions that are added later will be the first in the list
 
-  :config
-  ;; Combine multiple completion sources
-  (setq-default completion-at-point-functions
-                (list
-                 (cape-capf-super
-                  #'cape-dabbrev
-                  #'cape-dict
-                  #'cape-keyword))))
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
+  (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
+  (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
+  (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
+
+  ;; Eshell-specific configuration
+  (defun my/corfu-eshell-setup ()
+    (setq-local corfu-quit-at-boundary t
+                corfu-quit-no-match t
+                corfu-auto nil)
+    (corfu-mode))
+
+  :hook (eshell-mode . my/corfu-eshell-setup))
 
 ;; Pretty icons for corfu
 (use-package kind-icon

@@ -82,7 +82,9 @@
 
 (use-package lua-mode
   :ensure t)
-
+    (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
+    (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
+    (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
 (use-package sly
   :ensure t)
 
@@ -110,18 +112,19 @@
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
   (eglot-ignored-server-capabilities '(:documentHighlightProvider))
-  
+
   :config
   ;; Performance optimization
   (fset #'jsonrpc--log-event #'ignore)
-  
+
   ;; Custom server configurations
   ;; (Add-To-List 'Eglot-Server-Programs
   ;;   '((Python-Mode Python-Ts-Mode) . ("Pyright-Langserver" "--Stdio"))
   ;;   '((Typescript-Mode Typescript-Ts-Mode) . ("Typescript-Language-Server" "--Stdio"))
   ;;   '((Json-Mode Json-Ts-Mode) . ("Vscode-Json-Language-Server" "--Stdio"))
   ;; )
-  
+  (add-to-list 'eglot-server-programs
+  '(lua-mode . ("lua-language-server")))
   :hook
   (((python-mode python-ts-mode
      typescript-mode typescript-ts-mode
@@ -134,6 +137,8 @@
 (use-package envrc
 :vc (:url "https://github.com/purcell/envrc"
        :rev :newest)
+  :init
+  (envrc-global-mode 1)  ;
  :hook (after-init . envrc-global-mode)
  :custom
  (envrc-remote t))
