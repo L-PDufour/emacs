@@ -40,3 +40,4 @@
                             (foreground-color . "#ffffff")
                             (ns-appearance . dark)
                             (ns-transparent-titlebar . t)))
+(provide 'early-init)
