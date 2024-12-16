@@ -269,92 +269,6 @@ The DWIM behaviour of this command is as follows:
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
-;; evil-want-keybinding must be declared before Evil and Evil Collection
-(setq evil-want-keybinding nil)
-
-(use-package evil
-  :ensure t
-  :init
-  (setq evil-undo-system 'undo-fu)
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  :custom
-  (evil-want-Y-yank-to-eol t)
-  :config
-  (evil-select-search-module 'evil-search-module 'evil-search)
-  (evil-mode 1))
-
-(use-package evil-collection
-  :after evil
-  :ensure t
-  :config
-  (evil-collection-init))
-
-(use-package undo-fu
-  :ensure t
-  :commands (undo-fu-only-undo
-             undo-fu-only-redo
-             undo-fu-only-redo-all
-             undo-fu-disable-checkpoint)
-  :custom
-  ;; 3 times the default values
-  (undo-limit (* 3 160000))
-  (undo-strong-limit (* 3 240000)))
-
-(use-package undo-fu-session
-  :ensure t
-  :config
-  (undo-fu-session-global-mode))
-
-(use-package vdiff
-  :ensure t
-  :defer t
-  :commands (vdiff-buffers
-             vdiff-buffers3
-             vdiff-quit
-             vdiff-files
-             vdiff-files3)
-  :custom
-  (vdiff-auto-refine t)
-  (vdiff-only-highlight-refinements t))
-
-(use-package evil-visualstar
-  :after evil
-  :ensure t
-  :defer t
-  :commands global-evil-visualstar-mode
-  :hook (after-init . global-evil-visualstar-mode))
-
-(use-package evil-surround
-  :after evil
-  :ensure t
-  :defer t
-  :commands global-evil-surround-mode
-  :custom
-  (evil-surround-pairs-alist
-   '((?\( . ("(" . ")"))
-     (?\[ . ("[" . "]"))
-     (?\{ . ("{" . "}"))
-
-     (?\) . ("(" . ")"))
-     (?\] . ("[" . "]"))
-     (?\} . ("{" . "}"))
-
-     (?< . ("<" . ">"))
-     (?> . ("<" . ">"))))
-  :hook (after-init . global-evil-surround-mode))
-
-(with-eval-after-load "evil"
-  (evil-define-operator my-evil-comment-or-uncomment (beg end)
-    "Toggle comment for the region between BEG and END."
-    (interactive "<r>")
-    (comment-or-uncomment-region beg end))
-  (evil-define-key 'normal 'global (kbd "gc") 'my-evil-comment-or-uncomment))
-
-(use-package evil-snipe
-  :defer t
-  :commands evil-snipe-mode
-  :hook (after-init . evil-snipe-mode))
 
 (use-package eglot
   :ensure nil
@@ -408,7 +322,7 @@ The DWIM behaviour of this command is as follows:
   :ensure t
   :defer t
   :commands (cape-dabbrev cape-file cape-elisp-block)
-  :bind ("C-c p" . cape-prefix-map)
+  :bind ("M-<tab>" . cape-prefix-map)
   :init
   ;; Add to the global default value of `completion-at-point-functions' which is
   ;; used by `completion-at-point'.
@@ -418,11 +332,6 @@ The DWIM behaviour of this command is as follows:
 
 ;; Hide warnings and display only errors
 (setq warning-minimum-level :error)
-
-(use-package which-key
-  :ensure t
-  :config
-  (which-key-mode))
 
 (setq pixel-scroll-precision-use-momentum nil)
 (pixel-scroll-precision-mode 1)
@@ -460,6 +369,7 @@ The DWIM behaviour of this command is as follows:
 
 ;; Git integration
 (use-package magit
+  :ensure t
   :bind ("C-c g" . magit-status)
   :config
   (setq magit-diff-refine-hunk t))
@@ -474,35 +384,180 @@ The DWIM behaviour of this command is as follows:
 (use-package lua-mode)
 (use-package markdown-mode)
 
-;; Org-mode enhancements
 (use-package org
+  :custom
+  ;; Directory and File Settings
+  (org-directory "~/Sync/org/")
+  (org-default-notes-file "~/Sync/org/refile.org")
+
+  :config
+  ;; Set agenda files using directory-files-recursively
+  (setq org-agenda-files
+        (directory-files-recursively "~/Sync/org/" "\\.org$"))
+
+  ;; Capture Templates
+  (setq org-capture-templates
+   '(("t" "Todo" entry (file "~/Sync/org/todos.org")
+      "* TODO %?\n  %U")
+     ("j" "Journal" entry (file "~/Sync/org/journal.org")
+      "* %<%Y-%m-%d> %?\n")
+     ("n" "Note" entry (file "~/Sync/org/notes.org")
+      "* %?\n  %U")))
+
+  ;; Additional Useful Org Mode Settings
+  (setq org-log-done 'time)  ; Log completion time
+  (setq org-enforce-todo-dependencies t)  ; Block todo items with subtasks
+  (setq org-archive-location
+        (concat org-directory "archive/%s_archive::"))
+
+  ;; Todo Keywords
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+
   :bind (("C-c l" . org-store-link)
+         ("C-c c" . org-capture)
          ("C-c a" . org-agenda)))
 
-(use-package org-contrib)
+(use-package org-contrib
+  :ensure t)
+
+;; Optional: Add some extra packages that complement Org Mode
+(use-package org-bullets
+  :ensure t
+  :hook (org-mode . org-bullets-mode))
 
 ;; EditorConfig support
 (use-package editorconfig
+  :ensure t
   :config
   (editorconfig-mode t))
 
 ;; Terminal emulation
 (use-package eat
+  :ensure t
   :config
   (setq eat-kill-buffer-on-exit t
         eat-enable-mouse t))
 
 ;; Quick navigation
 (use-package avy
+  :ensure t
   :bind ("C-c z" . avy-goto-word-1)
   :config
   (setq avy-all-windows 'all-frames))
 
+(use-package treesit
+  :ensure nil
+  :custom
+  (treesit-font-lock-level 4))
 
 (use-package treesit-auto
   :ensure t
+  :hook (after-init . global-treesit-auto-mode)
   :custom
   (treesit-auto-install 'prompt)
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+  (treesit-auto-add-to-auto-mode-alist 'all))
+
+(defun meow-setup ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-overwrite-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; SPC j/k will run the original command in MOTION state.
+   '("j" . "H-j")
+   '("k" . "H-k")
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   '("u" . meow-undo)
+   '("U" . meow-undo-in-selection)
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
+
+(use-package meow
+  :ensure t
+  :config
+  (meow-setup)
+  (meow-global-mode 1))
+
+(use-package meow-tree-sitter
+  :ensure t
+  :after meow
+  :config
+  (meow-tree-sitter-register-defaults))
+
+(use-package aggressive-indent
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
