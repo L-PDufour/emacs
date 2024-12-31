@@ -27,9 +27,11 @@
 ;; Bootstrap crafted-emacs in init.el
 ;; Adds crafted-emacs modules to the `load-path', sets up a module
 ;; writing template, sets the `crafted-emacs-home' variable.
+(load (expand-file-name "../../modules/crafted-init-config"
+                        user-emacs-directory))
 ;; Adjust the path (e.g. to an absolute one)
 ;; depending where you cloned Crafted Emacs.
-;; (load "~/.emacs.d/crafted-emacs/modules/crafted-init-config")
+;; (load "/path/to/crafted-emacs/modules/crafted-init-config")
 
 ;;; Packages phase
 ;; Collect list of packages to install. Do not just blindly copy this

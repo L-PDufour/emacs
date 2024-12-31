@@ -19,7 +19,7 @@
  '(eglot-autoshutdown t t)
  '(eshell-scroll-to-bottom-on-input 'this t)
  '(fancy-splash-image
-   "/home/laptop/.emacs.d/crafted-emacs/system-crafters-logo.png")
+   "/home/desktop/.emacs.d/crafted-emacs/system-crafters-logo.png")
  '(fast-but-imprecise-scrolling t)
  '(global-auto-revert-non-file-buffers t)
  '(ibuffer-movement-cycle nil)

@@ -75,7 +75,6 @@
 
 (crafted-emacs-load-modules '(defaults completion ui ide startup org lisp))
 (crafted-ide-configure-tree-sitter)
-(crafted-ide-configure-tree-sitter '(nix))
 ;;; Optional configuration
 
 ;; Profile emacs startup
