@@ -17,6 +17,9 @@
 ;; depending where you cloned Crafted Emacs.
 
 (load "~/.emacs.d/crafted-emacs/modules/crafted-early-init-config")
+(setq visible-bell t)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
 
 ;;; _
 (provide 'early-init)

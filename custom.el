@@ -35,6 +35,9 @@
  '(package-archive-priorities
    '(("gnu" . 99) ("nongnu" . 80) ("stable" . 70) ("melpa" . 0)))
  '(package-selected-packages nil)
+ '(package-vc-selected-packages
+   '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch
+                       "master")))
  '(scheme-program-name "guile" t)
  '(scroll-conservatively 101)
  '(scroll-margin 0)

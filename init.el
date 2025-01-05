@@ -8,7 +8,7 @@
 ;;; Commentary:
 
 ;; Base example init.el (extended from the info file).
-;; Basic example of loading a module.
+;;; Basic example of loading a module.
 
 ;;; Code:
 
@@ -40,13 +40,11 @@
 ;; packages for a module, for example,
 ;; `crafted-speedbar-config' does not require any packages to
 ;; be installed.
-
 ;; Add package definitions for completion packages
 ;; to `package-selected-packages'.
 
 
 ;; Manually select "ef-themes" package
-(add-to-list 'package-selected-packages 'ef-themes)
 
 ;; Install the packages listed in the `package-selected-packages' list.
 (package-install-selected-packages :noconfirm)
@@ -84,9 +82,18 @@
            (emacs-init-time)))
 (add-hook 'emacs-startup-hook #'ce-base-example/display-startup-time)
 
+
+(require 'my-themes)
+(require 'my-meow)
+(require 'my-keybinds)
+
+
 ;; Set default coding system (especially for Windows)
 (set-default-coding-systems 'utf-8)
 
-;;; _
 (provide 'init)
 ;;; init.el ends here
+(scroll-bar-mode -1)
+(scroll-bar-mode -1)
+(scroll-bar-mode -1)
+(scroll-bar-mode -1)
