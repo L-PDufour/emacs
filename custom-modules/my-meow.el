@@ -1,5 +1,20 @@
-;;; my-meow.el --- meow                              -*- lexical-binding: t; -*-
+;;; my-meow.el --- Meow configuration  -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2025  desktop
+
+;;; Commentary:
+
+;; Configuration for the Meow modal editing package.
+
+;;; Code:
+
+(use-package meow
+  :ensure t
+  :config
+  (meow-global-mode 1))
+
+(provide 'my-meow)
+;;; my-meow.el ends here
 
 (use-package meow
    :ensure t
@@ -98,8 +113,7 @@
 
 
 (provide 'my-meow)
-
+;;; my-meow.el ends here
 ;; Copyright (C) 2025  desktop
 
 ;; Author: desktop <desktop@nixos>
-;; Keywords: 

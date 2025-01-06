@@ -1,4 +1,9 @@
+;; Copyright (C) 2025  desktop
+
 ;;; my-themes.el --- themes                         -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
 ;;; Code:
 
 (use-package base16-theme
@@ -8,6 +13,3 @@
 
 (provide 'my-themes)
 ;;; my-themes.el ends here
-;; Copyright (C) 2025  desktop
-
-;; Author: desktop <desktop@nixos>

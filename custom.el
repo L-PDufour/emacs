@@ -11,12 +11,13 @@
  '(completion-styles '(orderless basic))
  '(completions-detailed t)
  '(corfu-auto t)
+ '(corfu-auto-delay 0.25)
  '(corfu-auto-prefix 2)
  '(corfu-cycle t)
  '(dired-auto-revert-buffer t t)
  '(dired-dwim-target t t)
  '(ediff-window-setup-function 'ediff-setup-windows-plain t)
- '(eglot-autoshutdown t t)
+ '(eglot-autoshutdown t)
  '(eshell-scroll-to-bottom-on-input 'this t)
  '(fancy-splash-image
    "/home/desktop/.emacs.d/crafted-emacs/system-crafters-logo.png")
@@ -45,9 +46,9 @@
  '(switch-to-buffer-in-dedicated-window 'pop)
  '(switch-to-buffer-obey-display-actions t)
  '(tab-always-indent 'complete)
- '(treesit-auto-langs '(nix))
+ '(treesit-auto-langs '(go java javascript lua latex markdown python typescript))
  '(vertico-cycle t)
- '(xref-show-definitions-function 'xref-show-definitions-completing-read t))
+ '(xref-show-definitions-function 'xref-show-definitions-completing-read))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
