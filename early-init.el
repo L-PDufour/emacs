@@ -16,6 +16,7 @@
 ;; Adjust the path (e.g. to an absolute one)
 ;; depending where you cloned Crafted Emacs.
 
+(setq gc-cons-threshold most-positive-fixnum)
 (load "~/.emacs.d/crafted-emacs/modules/crafted-early-init-config")
 (setq visible-bell t)
 (scroll-bar-mode -1)

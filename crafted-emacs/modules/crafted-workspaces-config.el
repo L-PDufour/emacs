@@ -12,14 +12,18 @@
 
 ;;; Code:
 
-(with-eval-after-load 'tabspaces
-  (customize-set-variable 'tabspaces-use-filtered-buffers-as-default t)
-  (customize-set-variable 'tabspaces-remove-to-default t)
-  (customize-set-variable 'tabspaces-include-buffers '("*scratch*")))
+(use-package tabspaces
+  :hook (after-init . tabspaces-mode) ;; enable tabspaces at startup
+  :custom
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*"))
+  (tabspaces-session t)
+  (tabspaces-session-auto-restore t))
 
-;; Activate it
-(customize-set-variable 'tabspaces-mode t)
-
+;; If you want to integrate with project management
+(with-eval-after-load 'project
+  (setq project-switch-commands #'tabspaces-project-switch-project-open-file))
 ;; Make sure project is initialized
 (project--ensure-read-project-list)
 

@@ -7,15 +7,6 @@
 ;; Configuration for the Meow modal editing package.
 
 ;;; Code:
-
-(use-package meow
-  :ensure t
-  :config
-  (meow-global-mode 1))
-
-(provide 'my-meow)
-;;; my-meow.el ends here
-
 (use-package meow
    :ensure t
    :config
@@ -93,8 +84,8 @@
    '("R" . meow-swap-grab)
    '("s" . meow-kill)
    '("t" . meow-till)
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
+   '("u" . undo-fu-only-undo)
+   '("U" . undo-fu-only-redo)
    '("v" . meow-visit)
    '("w" . meow-mark-word)
    '("W" . meow-mark-symbol)
@@ -104,6 +95,8 @@
    '("Y" . meow-sync-grab)
    '("z" . meow-pop-selection)
    '("'" . repeat)
+   '("/" . consult-line)
+   '("C-u" . undo-tree-visualize)
    '("<escape>" . ignore)))
 
 (require 'meow)
@@ -111,6 +104,11 @@
 (meow-setup-indicator)
 (meow-global-mode 1))
 
+(use-package meow-tree-sitter
+  :ensure t
+  :after meow
+  :config
+  (meow-tree-sitter-register-defaults))
 
 (provide 'my-meow)
 ;;; my-meow.el ends here

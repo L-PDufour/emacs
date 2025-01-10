@@ -58,16 +58,14 @@
 
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for a general `keyboard-quit'.
-
 The generic `keyboard-quit' does not do the expected thing when
 the minibuffer is open.  Whereas we want it to close the
 minibuffer, even without explicitly focusing it.
-
 The DWIM behaviour of this command is as follows:
-
 - When the region is active, disable it.
 - When a minibuffer is open, but not focused, close the minibuffer.
 - When the Completions buffer is selected, close it.
+- When an eldoc buffer exists, close it.
 - In every other case use the regular `keyboard-quit'."
   (interactive)
   (cond
@@ -83,7 +81,5 @@ The DWIM behaviour of this command is as follows:
 (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
 
 (provide 'my-keybinds)
-;; Copyright (C) 2025  desktop
 
-;; Author: desktop <desktop@nixos>
-;; Keywords: 
+;;; my-keybinds.el ends here

@@ -5,6 +5,7 @@
 /transient/
 /auto-save-list/
 /eshell/
+/undo-fu-session/
 /projects
 recentf**
 places**
@@ -14,3 +15,4 @@ places
 recentf
 places
 recentf
+bookmarks
