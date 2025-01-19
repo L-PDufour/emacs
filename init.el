@@ -177,7 +177,16 @@
 (use-package magit
   :ensure t)
 
+(use-package pdf-tools
+  :ensure t)
 
+(use-package nix-mode
+  :ensure t
+  :mode "\\.nix\\'")
+
+(use-package templ-ts-mode
+ :ensure t)
+  
 (use-package ispell
   :config
   (setq ispell-program-name "aspell")

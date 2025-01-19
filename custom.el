@@ -8,7 +8,6 @@
  '(bookmark-save-flag 1)
  '(completion-category-overrides '((file (styles partial-completion))) nil nil "Customized with use-package orderless")
  '(completion-cycle-threshold 3)
- '(completion-styles '(orderless basic) nil nil "Customized with use-package orderless")
  '(completions-detailed t)
  '(dired-auto-revert-buffer t)
  '(dired-dwim-target t)
@@ -25,26 +24,25 @@
  '(load-prefer-newer t t)
  '(marginalia-annotators
    '(marginalia-annotators-heavy marginalia-annotators-light nil) t)
- '(org-hide-emphasis-markers t t)
- '(org-link-descriptive t t)
- '(org-mouse-1-follows-link t t)
- '(org-return-follows-link t t)
+ '(org-agenda-files
+   '("/home/desktop/Sync/org/family/recipes/recipes.org"
+     "/home/desktop/Sync/org/family/shoppingList.org"
+     "/home/desktop/Sync/org/family/tasks.org"
+     "/home/desktop/Sync/org/personal/notes.org"
+     "/home/desktop/Sync/org/personal/todos.org"
+     "/home/desktop/Sync/org/school/GLO-4000.org"
+     "/home/desktop/Sync/org/school/IFT-1003.org"
+     "/home/desktop/Sync/org/school/IFT-1004.org"
+     "/home/desktop/Sync/org/school/tasks.org"
+     "/home/desktop/Sync/org/inbox.org"
+     "/home/desktop/Sync/org/inbox.sync-conflict-20250117-183316-B7UBXF4.org"))
+ '(org-hide-emphasis-markers t)
+ '(org-link-descriptive t)
+ '(org-mouse-1-follows-link t)
+ '(org-return-follows-link t)
  '(package-archive-priorities
    '(("gnu" . 99) ("nongnu" . 80) ("stable" . 70) ("melpa" . 0)))
- '(package-selected-packages
-   '(activities aggressive-indent all-the-icons avy base16-theme
-                breadcrumb cape cl-generic clj-refactor corfu-terminal
-                denote dired-subtree eat editorconfig eglot
-                elisp-demos embark-consult envrc erc faceup
-                flycheck-clojure geiser-guile geiser-racket go-eldoc
-                helpful ibuffer-project idlwave lua-mode magit
-                marginalia markdown-mode meow-tree-sitter ntlm
-                orderless org-appear package-lint-flymake peg popper
-                python sly-asdf sly-quicklisp sly-repl-ansi-color
-                so-long soap-client svg tabspaces track-changes tramp
-                trashed treesit-auto undo-fu undo-fu-session undo-tree
-                use-package verilog-mode vertico which-key
-                window-tool-bar))
+ '(package-selected-packages nil)
  '(package-vc-selected-packages
    '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch
                        "master")))

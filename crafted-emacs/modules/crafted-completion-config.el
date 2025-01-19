@@ -28,7 +28,6 @@
   (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
   :hook (after-init . vertico-mode))
 
-
 ;; Configure directory extension.
 (use-package vertico-directory
   :after vertico
@@ -109,6 +108,7 @@
   (with-eval-after-load 'savehist
     (corfu-history-mode 1)
     (add-to-list 'savehist-additional-variables 'corfu-history)))
+
 ;;; Cape
 (use-package cape
   :init
@@ -132,4 +132,4 @@
 
 (provide 'crafted-completion-config)
 ;;; crafted-completion.el ends here
-ceci
+
