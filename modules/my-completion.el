@@ -29,6 +29,7 @@
 
 ;; Configure directory extension.
 (use-package vertico-directory
+  :straight nil
   :after vertico
   ;; More convenient directory navigation commands
   :bind (:map vertico-map
@@ -43,13 +44,11 @@
   :hook (after-init . marginalia-mode))
 
 ;;; Consult
-;; Since Consult doesn't need to be required, we assume the user wants these
-;; setting if it is installed (regardless of the installation method).
-(when (locate-library "consult")
-  ;; Set some consult bindings
-  (keymap-global-set "C-s" 'consult-line)
-  (keymap-set minibuffer-local-map "C-r" 'consult-history)
-
+(use-package consult
+  :bind (("C-s" . consult-line)
+         :map minibuffer-local-map
+         ("C-r" . consult-history))
+  :init
   (setq completion-in-region-function #'consult-completion-in-region))
 
 ;;; Orderless
@@ -63,18 +62,17 @@
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
-;;; Embark
-(when (require 'embark nil :noerror)
+(use-package embark
+  :bind
+  (("C-." . embark-act)
+   ([remap describe-bindings] . embark-bindings))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command))
 
-  (keymap-global-set "<remap> <describe-bindings>" #'embark-bindings)
-  (keymap-global-set "C-." 'embark-act)
-
-  ;; Use Embark to show bindings in a key prefix with `C-h`
-  (setq prefix-help-command #'embark-prefix-help-command)
-
-  (when (require 'embark-consult nil :noerror)
-    (with-eval-after-load 'embark-consult
-      (add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode))))
+(use-package embark-consult
+  :after (embark consult)
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 ;;; Corfu
 (use-package corfu
@@ -110,7 +108,7 @@
   ;; Only add file and elisp-block completion globally
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  
+
   :config
    ;; Define the function to ignore elisp keywords
   (defun ignore-elisp-keywords (sym)
@@ -120,7 +118,7 @@
   (add-hook 'emacs-lisp-mode-hook
             (lambda ()
               (setq-local completion-at-point-functions
-                          (list (cape-capf-predicate 
+                          (list (cape-capf-predicate
                                 #'elisp-completion-at-point
                                 #'ignore-elisp-keywords))))))
 

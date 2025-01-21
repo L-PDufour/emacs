@@ -3,7 +3,6 @@
 ;;; Code:
 
 (use-package eshell
-  :ensure nil
   :init
   (defun bedrock/setup-eshell ()
     (keymap-set eshell-mode-map "C-r" 'consult-history)
@@ -25,7 +24,6 @@
 
 ;; Improve terminal experience
 (use-package eat
-  :ensure t
   :custom
   (eat-term-name "xterm-256color")  ; Better color support
   (eat-kill-buffer-on-exit t)       ; Clean up when terminal exits
@@ -35,7 +33,6 @@
 
 ;; Environment management
 (use-package envrc
-  :ensure t
   :hook (after-init . envrc-global-mode)
   :config
   (setq envrc-none-lighter nil)
@@ -43,7 +40,6 @@
 
 ;; Terminal popup
 (use-package popper
-  :ensure t ; or :straight t
   :bind (("C-`"   . popper-toggle)
          ("M-`"   . popper-cycle)
          ("C-M-`" . popper-toggle-type))

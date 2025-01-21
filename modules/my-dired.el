@@ -3,7 +3,7 @@
 ;;; Code:
 
 (use-package dired
-  :ensure nil
+  :straight nil
   :commands (dired)
   :hook
   ((dired-mode . dired-hide-details-mode)
@@ -25,8 +25,7 @@
   (setq dired-deletion-confirmer #'y-or-n-p))
 
 (use-package dired-subtree
-  :ensure t
-  :after dired
+   :after dired
   :bind
   ( :map dired-mode-map
     ("<tab>" . dired-subtree-toggle)
@@ -37,7 +36,6 @@
   (setq dired-subtree-use-backgrounds nil))
 
 (use-package trashed
-  :ensure t
   :commands (trashed)
   :config
   (setq trashed-action-confirmer 'y-or-n-p)

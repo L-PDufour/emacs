@@ -6,7 +6,6 @@
  ;; If there is more than one, they won't work right.
  '(Man-notify-method 'aggressive t)
  '(bookmark-save-flag 1)
- '(completion-category-overrides '((file (styles partial-completion))) nil nil "Customized with use-package orderless")
  '(completion-cycle-threshold 3)
  '(completions-detailed t)
  '(dired-auto-revert-buffer t)
@@ -28,14 +27,11 @@
    '("/home/desktop/Sync/org/family/recipes/recipes.org"
      "/home/desktop/Sync/org/family/shoppingList.org"
      "/home/desktop/Sync/org/family/tasks.org"
-     "/home/desktop/Sync/org/personal/notes.org"
-     "/home/desktop/Sync/org/personal/todos.org"
      "/home/desktop/Sync/org/school/GLO-4000.org"
      "/home/desktop/Sync/org/school/IFT-1003.org"
      "/home/desktop/Sync/org/school/IFT-1004.org"
      "/home/desktop/Sync/org/school/tasks.org"
-     "/home/desktop/Sync/org/inbox.org"
-     "/home/desktop/Sync/org/inbox.sync-conflict-20250117-183316-B7UBXF4.org"))
+     "/home/desktop/Sync/org/inbox.org"))
  '(org-hide-emphasis-markers t)
  '(org-link-descriptive t)
  '(org-mouse-1-follows-link t)
@@ -46,13 +42,12 @@
  '(package-vc-selected-packages
    '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch
                        "master")))
- '(scheme-program-name "guile" t)
+ '(scheme-program-name "guile")
  '(scroll-conservatively 101)
  '(scroll-margin 0)
  '(scroll-preserve-screen-position t)
  '(switch-to-buffer-in-dedicated-window 'pop)
  '(switch-to-buffer-obey-display-actions t)
- '(tab-always-indent 'complete nil nil "Customized with use-package corfu")
  '(tabspaces-include-buffers '("*scratch*") nil nil "Customized with use-package tabspaces")
  '(tabspaces-mode t)
  '(tabspaces-remove-to-default t nil nil "Customized with use-package tabspaces")
