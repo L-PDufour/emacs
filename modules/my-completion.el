@@ -80,24 +80,34 @@
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
+              ("M-SPC" . corfu-insert-separator)
               ("<tab>" . corfu-complete))
+  :config
+  ;; Enable auto completion and configure quitting
+  (setq corfu-auto t
+        corfu-quit-no-match 'separator)
+  (setq global-corfu-minibuffer
+        (lambda ()
+          (not (or (bound-and-true-p mct--active)
+                   (bound-and-true-p vertico--input)
+                   (eq (current-local-map) read-passwd-map)))))
   :custom
   (corfu-cycle t)
-  (corfu-auto nil)
-  (corfu-quit-at-boundary 'separator)
-  (corfu-quit-no-match 'separator)
-  (corfu-auto-delay 0.25)
+  (corfu-auto-delay 0.2)
   (corfu-auto-prefix 2)
-  (corfu-on-exact-match  'quit)
+  (corfu-preview-current t)
+  (corfu-preselect 'directory)
+  (corfu-on-exact-match nil)
   (tab-always-indent 'complete)
   (corfu-preview-current nil)
   (corfu-min-width 20)
-  ;; Disable auto completion
+  (add-hook 'eshell-mode-hook (lambda ()
+                                (setq-local corfu-auto nil)
+                                (corfu-mode)))
   (setq corfu-popupinfo-delay '(1.25 . 0.5))
   (corfu-popupinfo-mode 1)
   (unless (display-graphic-p)
     (corfu-terminal-mode +1))
-  ;; Sort by input history
   (with-eval-after-load 'savehist
     (corfu-history-mode 1)
     (add-to-list 'savehist-additional-variables 'corfu-history)))
@@ -105,24 +115,39 @@
 ;;; Cape
 (use-package cape
   :init
-  ;; Only add file and elisp-block completion globally
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
 
   :config
-   ;; Define the function to ignore elisp keywords
+  (setq cape-dabbrev-min-length 2)
+  (setq cape-dabbrev-check-other-buffers t)
+  ;; Define the function to ignore elisp keywords
   (defun ignore-elisp-keywords (sym)
     (not (keywordp sym)))
-
-  ;; Set up elisp-specific completion with keyword filtering
+  (setq-local completion-at-point-functions
+              (list (cape-capf-super #'cape-dabbrev #'cape-dict #'cape-keyword)))
   (add-hook 'emacs-lisp-mode-hook
             (lambda ()
               (setq-local completion-at-point-functions
                           (list (cape-capf-predicate
-                                #'elisp-completion-at-point
-                                #'ignore-elisp-keywords))))))
+                                 #'elisp-completion-at-point
+                                 #'ignore-elisp-keywords)))))
 
 
+
+  (defun my/enhanced-completion ()
+    (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       #'eglot-completion-at-point ; LSP completions first
+                       #'cape-file
+                       #'cape-dabbrev
+                       #'cape-keyword
+                       #'cape-dict))))
+  
+  (add-hook 'prog-mode-hook #'my/enhanced-completion))
+
+;; Set up elisp-specific completion with keyword filtering
 (provide 'my-completion)
 ;;; my-completion.el ends here
 
