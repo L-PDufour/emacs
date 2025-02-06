@@ -42,10 +42,6 @@
          (scheme-mode . rainbow-delimiters-mode)))
 
 ;; Optional: For structural editing
-(use-package paredit
-  :straight t
-  :hook ((emacs-lisp-mode . paredit-mode)
-         (scheme-mode . paredit-mode)))
 
 (provide 'my-lisp)
 

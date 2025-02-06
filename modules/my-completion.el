@@ -115,39 +115,15 @@
 ;;; Cape
 (use-package cape
   :init
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-keyword)
-
+  :bind ("C-c p" . cape-prefix-map)
   :config
-  (setq cape-dabbrev-min-length 2)
-  (setq cape-dabbrev-check-other-buffers t)
-  ;; Define the function to ignore elisp keywords
-  (defun ignore-elisp-keywords (sym)
-    (not (keywordp sym)))
-  (setq-local completion-at-point-functions
-              (list (cape-capf-super #'cape-dabbrev #'cape-dict #'cape-keyword)))
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda ()
-              (setq-local completion-at-point-functions
-                          (list (cape-capf-predicate
-                                 #'elisp-completion-at-point
-                                 #'ignore-elisp-keywords)))))
-
-
-
-  (defun my/enhanced-completion ()
-    (setq-local completion-at-point-functions
-                (list (cape-capf-super
-                       #'eglot-completion-at-point ; LSP completions first
-                       #'cape-file
-                       #'cape-dabbrev
-                       #'cape-keyword
-                       #'cape-dict))))
-  
-  (add-hook 'prog-mode-hook #'my/enhanced-completion))
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-hook 'completion-at-point-functions #'cape-history)
+  :config
+  (setq cape-dabbrev-check-other-buffers t))
 
 ;; Set up elisp-specific completion with keyword filtering
 (provide 'my-completion)
 ;;; my-completion.el ends here
-

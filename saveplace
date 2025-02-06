@@ -1,2 +1,45 @@
 ;;; -*- coding: utf-8; mode: lisp-data -*-
-nil
+(("/home/desktop/Documents/raywasm/main.c" . 221)
+ ("/home/desktop/.emacs.d/early-init.el" . 2569)
+ ("/home/desktop/.emacs.d/init.el" . 2111)
+ ("/home/desktop/.emacs.d/modules/my-completion.el" . 1545)
+ ("/home/desktop/.emacs.d/modules/my-prog.el" . 2457)
+ ("/home/desktop/Documents/raywasm/res/"
+  (dired-filename . "/home/desktop/Documents/raywasm/res/Characters"))
+ ("/home/desktop/Documents/raywasm/"
+  (dired-filename . "/home/desktop/Documents/raywasm/main.c"))
+ ("/home/desktop/Sync/org/school/IFT-1003.org" . 2677)
+ ("/home/desktop/.emacs.d/" (dired-filename . "/home/desktop/.emacs.d/init.el"))
+ ("/home/desktop/Sync/org/school/"
+  (dired-filename . "/home/desktop/Sync/org/school/IFT-1003.org"))
+ ("/home/desktop/Sync/org/school/IFT-1004.org" . 219)
+ ("/home/desktop/.emacs.d/straight/repos/tempel-collection/tempel-collection.el"
+  . 2298)
+ ("/home/desktop/.emacs.d/modules/my-themes.el" . 613)
+ ("/home/desktop/.emacs.d/straight/repos/elisp-demos/elisp-demos.org" . 68207)
+ ("/home/desktop/.emacs.d/test.lua" . 356)
+ ("/home/desktop/Documents/raywasm/Makefile" . 439)
+ ("/home/desktop/Documents/raywasm/README.org" . 231)
+ ("/home/desktop/Documents/so_long/.gitignore" . 9)
+ ("/home/desktop/Documents/so_long/.envrc" . 11)
+ ("/home/desktop/Documents/so_long/lib/MLX42/shaders/"
+  (dired-filename
+   . "/home/desktop/Documents/so_long/lib/MLX42/shaders/default.vert"))
+ ("/home/desktop/Documents/so_long/lib/MLX42/build/"
+  (dired-filename . "/home/desktop/Documents/so_long/lib/MLX42/build/Makefile"))
+ ("/home/desktop/Documents/so_long/lib/MLX42/build/Makefile" . 4848)
+ ("/home/desktop/Documents/so_long/"
+  (dired-filename . "/home/desktop/Documents/so_long/lib"))
+ ("/home/desktop/Documents/so_long/lib/"
+  (dired-filename . "/home/desktop/Documents/so_long/lib/MLX42"))
+ ("/home/desktop/Documents/so_long/lib/MLX42/"
+  (dired-filename . "/home/desktop/Documents/so_long/lib/MLX42/tools"))
+ ("/home/desktop/Documents/so_long/lib/MLX42/tools/"
+  (dired-filename
+   . "/home/desktop/Documents/so_long/lib/MLX42/tools/compile_shader.sh"))
+ ("/home/desktop/Documents/so_long/lib/MLX42/tools/compile_shader.sh" . 1277)
+ ("/home/desktop/Documents/so_long/libft/"
+  (dired-filename . "/home/desktop/Documents/so_long/libft/Makefile"))
+ ("/home/desktop/Documents/so_long/libft/Makefile" . 1945)
+ ("/home/desktop/Documents/so_long/Makefile" . 944)
+ ("/home/desktop/Documents/so_long/flake.nix" . 603))

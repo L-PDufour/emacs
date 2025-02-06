@@ -27,7 +27,6 @@
    '("/home/desktop/Sync/org/family/recipes/recipes.org"
      "/home/desktop/Sync/org/family/shoppingList.org"
      "/home/desktop/Sync/org/family/tasks.org"
-     "/home/desktop/Sync/org/school/GLO-4000.org"
      "/home/desktop/Sync/org/school/IFT-1003.org"
      "/home/desktop/Sync/org/school/IFT-1004.org"
      "/home/desktop/Sync/org/school/tasks.org"

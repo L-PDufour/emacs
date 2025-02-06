@@ -12,7 +12,7 @@
 
 ;; Performance optimization: Increase GC threshold during startup
 (setq gc-cons-threshold most-positive-fixnum)
-
+(add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
 ;; Reset after startup
 (add-hook 'emacs-startup-hook
           (lambda ()
@@ -52,8 +52,11 @@
 
 ;; Configure straight.el with use-package
 (straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
-
+(use-package straight
+  :custom
+  ;; add project and flymake to the pseudo-packages variable so straight.el doesn't download a separate version than what eglot downloads.
+  (straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake xref))
+  (straight-use-package-by-default t))
 ;; Core Emacs settings organized with use-package
 (use-package emacs
   :init
@@ -69,7 +72,7 @@
   (scroll-bar-mode -1)
   (tool-bar-mode -1)
 
-  ;; Performance settings
+  ;; Pperformance settings
   (setq frame-inhibit-implied-resize t)
   ;; Disable startup screen
   (setq inhibit-startup-screen t
