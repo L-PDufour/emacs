@@ -67,6 +67,7 @@
   :mode ("\\.html?\\'" . web-mode)
   :mode ("\\.css\\'" . web-mode)
   :config
+
   (setq web-mode-enable-auto-pairing t)
   (setq web-mode-enable-css-colorization t))
 
@@ -103,6 +104,7 @@
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
   :config
+
   (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (defun my/eglot-capf ()
     (setq-local completion-at-point-functions
@@ -189,11 +191,21 @@
         (scroll-up 3)))))
 
 (add-to-list 'eglot-server-programs
+             '(html-mode . ("vscode-html-language-server" "--stdio")))
+(add-to-list 'eglot-server-programs
+             '(css-mode . ("vscode-css-language-server" "--stdio")))
+(add-to-list 'eglot-server-programs
              '((js-mode typescript-mode) . ("typescript-language-server" "--stdio")))
+(add-to-list 'eglot-server-programs
+             '(web-mode . ("vscode-html-language-server" "--stdio")))
 (setq eglot-workspace-configuration
       '((:javascript . (:workspaceFolder :autoDiscoverRootFiles))))
 ;; Enable eglot for JavaScript
+(add-hook 'html-mode-hook 'eglot-ensure)
+(add-hook 'web-mode-hook 'eglot-ensure)
+(add-hook 'css-mode-hook 'eglot-ensure)
 (add-hook 'js-mode-hook 'eglot-ensure)
+(add-hook 'typescript-mode-hook 'eglot-ensure)
 
 ;; Set up Cape with Corfu for JavaScript/TypeScript
 (add-hook 'js-mode-hook
