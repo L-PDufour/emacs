@@ -39,19 +39,15 @@
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
-;;; Marginalia
 (use-package marginalia
   :hook (after-init . marginalia-mode))
 
-;;; Consult
 (use-package consult
   :bind (("C-s" . consult-line)
          :map minibuffer-local-map
          ("C-r" . consult-history))
   :init
   (setq completion-in-region-function #'consult-completion-in-region))
-
-;;; Orderless
 
 (use-package orderless
   :custom
@@ -74,44 +70,39 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-;;; Corfu
 (use-package corfu
-  :hook (after-init . global-corfu-mode)
+  :hook ((after-init . global-corfu-mode)
+         (eshell-mode . (lambda ()
+                          (setq-local corfu-auto nil)
+                          (corfu-mode))))
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
               ("M-SPC" . corfu-insert-separator)
               ("<tab>" . corfu-complete))
-  :config
-  ;; Enable auto completion and configure quitting
+  :init
   (setq corfu-auto t
-        corfu-quit-no-match 'separator)
-  (setq global-corfu-minibuffer
-        (lambda ()
-          (not (or (bound-and-true-p mct--active)
-                   (bound-and-true-p vertico--input)
-                   (eq (current-local-map) read-passwd-map)))))
-  :custom
-  (corfu-cycle t)
-  (corfu-auto-delay 0.2)
-  (corfu-auto-prefix 2)
-  (corfu-preview-current t)
-  (corfu-preselect 'directory)
-  (corfu-on-exact-match nil)
-  (tab-always-indent 'complete)
-  (corfu-preview-current nil)
-  (corfu-min-width 20)
-  (add-hook 'eshell-mode-hook (lambda ()
-                                (setq-local corfu-auto nil)
-                                (corfu-mode)))
-  (setq corfu-popupinfo-delay '(1.25 . 0.5))
-  (corfu-popupinfo-mode 1)
-  (unless (display-graphic-p)
-    (corfu-terminal-mode +1))
-  (with-eval-after-load 'savehist
-    (corfu-history-mode 1)
-    (add-to-list 'savehist-additional-variables 'corfu-history)))
+        corfu-cycle t
+        corfu-auto-delay 0.2
+        corfu-auto-prefix 2
+        corfu-preselect 'directory
+        corfu-on-exact-match nil
+        corfu-preview-current nil
+        corfu-min-width 20
+        corfu-quit-no-match 'separator
+        corfu-popupinfo-delay '(1.25 . 0.5)
+        tab-always-indent 'complete)
 
+  :config
+  (corfu-popupinfo-mode 1)
+  (corfu-history-mode 1)
+  ;; Enable terminal support
+  (unless (display-graphic-p)
+    (corfu-terminal-mode 1))
+
+  ;; Add to savehist
+  (with-eval-after-load 'savehist
+    (add-to-list 'savehist-additional-variables 'corfu-history)))
 ;;; Cape
 (use-package cape
   :init
@@ -121,8 +112,22 @@
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-history)
-  :config
-  (setq cape-dabbrev-check-other-buffers t))
+  (defun my/ignore-elisp-keywords (cand)
+    (or (not (keywordp cand))
+        (eq (char-after (car completion-in-region--data)) ?:)))
+
+  (defun my/setup-elisp ()
+    (setq-local completion-at-point-functions
+                `(,(cape-capf-super
+                    (cape-capf-predicate
+                     #'elisp-completion-at-point
+                     #'my/ignore-elisp-keywords)
+                    #'cape-dabbrev)
+                  cape-file)
+                cape-dabbrev-min-length 5))
+  (setq cape-dabbrev-check-other-buffers t)
+  :hook
+  (emacs-lisp-mode . my/setup-elisp))
 
 ;; Set up elisp-specific completion with keyword filtering
 (provide 'my-completion)

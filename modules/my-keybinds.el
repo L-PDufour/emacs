@@ -21,12 +21,12 @@ The DWIM behaviour of this command is as follows:
 - When the region is active, disable it.
 - When a minibuffer is open, but not focused, close the minibuffer.
 - When the Completions buffer is selected, close it.
-- When an eldoc buffer exists, close it.
+- When an eldoc box exists, close it.
 - In every other case use the regular `keyboard-quit'."
   (interactive)
   (cond
    ((region-active-p)
-    (keyboard-quit))
+    (deactivate-mark))
    ((derived-mode-p 'completion-list-mode)
     (delete-completion-window))
    ((> (minibuffer-depth) 0)

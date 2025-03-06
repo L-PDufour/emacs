@@ -3,13 +3,19 @@
 (use-package treesit-auto
   :straight t
   :config
+  (setq major-mode-remap-alist
+        '((c-mode . c-ts-mode)
+          (c++-mode . c++-ts-mode)
+          (css-mode . css-ts-mode)
+          (js-mode . js-ts-mode)
+          (js-json-mode . json-ts-mode)
+          (python-mode . python-ts-mode)
+          (sh-mode . bash-ts-mode)
+          (typescript-mode . typescript-ts-mode)
+          ;; Add other mappings as needed
+          ))
   (global-treesit-auto-mode)
   (treesit-auto-install-all))
-
-(use-package editorconfig
-  :straight t
-  :config
-  (editorconfig-mode 1))
 
 (use-package ibuffer-project
   :straight t
@@ -21,11 +27,67 @@
   :config
   (setq ibuffer-project-use-cache t))
 
+(use-package sly
+  :straight t
+  :config
+  (require 'sly-quicklisp "sly-quicklisp" :no-error)
+  (require 'sly-repl-ansi-color "sly-repl-ansi-color" :no-error)
+  (require 'sly-asdf "sly-asdf" :no-error)
+  :hook (lisp-mode . sly-editing-mode))
+
+(use-package aggressive-indent
+  :straight t
+  :hook ((emacs-lisp-mode . aggressive-indent-mode)
+         (scheme-mode . aggressive-indent-mode)))
+
+
+(use-package package-lint
+  :straight t)
+
+
+(use-package geiser-guile
+  :straight t
+  :init
+  (setq scheme-program-name "guile"))
+
+
+(use-package macrostep-geiser
+  :straight t
+  :after geiser-guile)
+
+
+(use-package rainbow-delimiters
+  :straight t
+  :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
+         (scheme-mode . rainbow-delimiters-mode)))
+(use-package expand-region
+  :bind ("C-+" . er/expand-region))
+
+(use-package web-mode
+  :mode ("\\.html?\\'" . web-mode)
+  :mode ("\\.css\\'" . web-mode)
+  :config
+  (setq web-mode-enable-auto-pairing t)
+  (setq web-mode-enable-css-colorization t))
 
 (use-package go-mode
-  :hook ((go-mode . flymake-mode)
+  :config
+  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+  :hook ((before-save . gofmt-before-save)
+         (go-mode . (lambda ()
+                      (setq indent-tabs-mode t) ; Use tabs for indentation
+                      (setq tab-width 4)        ; Set tab width to 4 spaces
+                      (setq gofmt-command "goimports"))) ; Use goimports for formatting;
+         (go-mode . subword-mode)
+         (go-mode . flymake-mode)
          (go-mode . flymake-show-buffer-diagnostics)
          (go-mode . eglot-ensure)))
+
+(use-package eldoc
+  :ensure nil
+  :hook (prog-mode . eldoc-mode)
+  :config
+  (setq eldoc-message-function #'message))
 
 (use-package nix-mode
   :mode "\\.nix\\'")
@@ -37,16 +99,17 @@
 (use-package eglot
   :straight (:type built-in)
   :after (corfu cape tempel)
+  :custom
+  (eglot-send-changes-idle-time 0.1)
+  (eglot-extend-to-xref t)
   :config
-  :config
+  (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (defun my/eglot-capf ()
     (setq-local completion-at-point-functions
                 (list (cape-capf-super
                        #'eglot-completion-at-point
                        #'tempel-expand
                        #'cape-file))))
-
-  (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
 
   ;; Orderless styling for Eglot completions
   (setq completion-category-overrides '((eglot (styles orderless))
@@ -56,9 +119,10 @@
   (setq eglot-autoshutdown t)
 
   ;; Wrap Eglot completion to prevent caching issues
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+  :hook
+  (eglot-managed-mode . my/eglot-capf))
 
-;; Configure Tempel
 (use-package tempel
   ;; Require trigger prefix before template name when completing.
   ;; :custom
@@ -68,8 +132,6 @@
          ("M-*" . tempel-insert))
 
   :init
-
-  ;; Setup completion at point
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
     ;; `tempel-expand' only triggers on exact matches. Alternatively use
@@ -84,69 +146,66 @@
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf))
 
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-  )
 
-;; Optional: Add tempel-collection.
-;; The package is young and doesn't have comprehensive coverage.
 (use-package tempel-collection
   :after tempel)
+
 (use-package eglot-tempel
   :preface (eglot-tempel-mode)
   :init
   (eglot-tempel-mode t))
-;; Optional: Use the Corfu completion UI
-(use-package corfu
-  :init
-  (global-corfu-mode))
-
-
-(use-package eldoc
-  :straight (:type built-in))
 
 (use-package flymake
   :straight (:type built-in)
   :bind ( :map flymake-mode-map
+          ("C-c e e" . consult-flymake)
           ("C-c e n" . flymake-goto-next-error)
-          ("C-c e p" . flymake-goto-previous-error))
+          ("C-c e p" . flymake-goto-prev-error))
   :hook (prog-mode . flymake-mode))
 
 (use-package eldoc-box
-  :after
-  (eglot eldoc)
-  :bind (:map eglot-mode-map
-              ("C-M-k" . my/eldoc-box-scroll-up)
-              ("C-M-j" . my/eldoc-box-scroll-down)
-              ("M-h" . eldoc-box-eglot-help-at-point))
+  :after (eglot eldoc)
+  :bind (
+         ("C-M-k" . my/eldoc-box-scroll-up)
+         ("C-M-j" . my/eldoc-box-scroll-down)
+         ("C-h ." . eldoc-box-help-at-point))
   :config
   (setq eldoc-box-max-pixel-height 600)
+
   (defun my/eldoc-box-scroll-up ()
-    "Scroll up in `eldoc-box--frame'"
+    "Scroll up in `eldoc-box` if it is open."
     (interactive)
-    (with-current-buffer eldoc-box--buffer
+    (when (and eldoc-box--frame (frame-live-p eldoc-box--frame))
       (with-selected-frame eldoc-box--frame
         (scroll-down 3))))
+
   (defun my/eldoc-box-scroll-down ()
-    "Scroll down in `eldoc-box--frame'"
+    "Scroll down in `eldoc-box` if it is open."
     (interactive)
-    (with-current-buffer eldoc-box--buffer
+    (when (and eldoc-box--frame (frame-live-p eldoc-box--frame))
       (with-selected-frame eldoc-box--frame
-        (scroll-up 3))))
-  (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode t)
-  )
+        (scroll-up 3)))))
 
+(add-to-list 'eglot-server-programs
+             '((js-mode typescript-mode) . ("typescript-language-server" "--stdio")))
+(setq eglot-workspace-configuration
+      '((:javascript . (:workspaceFolder :autoDiscoverRootFiles))))
+;; Enable eglot for JavaScript
+(add-hook 'js-mode-hook 'eglot-ensure)
 
-
-(use-package xref
-  :straight (:type built-in))
-;; If you're using Crafted Emacs, you might want to keep this line
-;; at the start of your config:
-;; (require 'crafted-ide-config nil :noerror)
+;; Set up Cape with Corfu for JavaScript/TypeScript
+(add-hook 'js-mode-hook
+          (lambda ()
+            ;; Enable Corfu completion
+            (corfu-mode 1)
+            ;; Combine completion sources
+            (setq-local completion-at-point-functions
+                        (list (cape-capf-super
+                               #'eglot-completion-at-point
+                               #'cape-file
+                               #'cape-dabbrev)))))
 (provide 'my-prog)
 ;;; my-prog.el ends here
 ;; Copyright (C) 2025  desktop
