@@ -94,7 +94,8 @@ The DWIM behaviour of this command is as follows:
 (define-key my-code-keymap (kbd "f") 'format-buffer)             ; format buffer
 (define-key my-code-keymap (kbd "a") 'eglot-code-actions)        ; code actions
 (define-key my-code-keymap (kbd "h") 'display-local-help)        ; help at point
-
+;; Make a single ESC act like ESC ESC ESC
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
 
