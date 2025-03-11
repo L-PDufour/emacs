@@ -35,6 +35,8 @@
 
   :config
   ;; Enable useful global modes
+  ;; Enable diff highlighting in margins
+
   (global-auto-revert-mode 1)
   (delete-selection-mode 1)
   (repeat-mode 1)
@@ -74,7 +76,27 @@
          (before-save . delete-trailing-whitespace)))
 
 
+(use-package diff-hl
+  :config
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (global-diff-hl-mode))
 
+(use-package undo-fu
+  :config
+  (global-unset-key (kbd "C-z"))
+  (global-set-key (kbd "C-z") 'undo-fu-only-undo)
+  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+
+(use-package undo-fu-session
+  :config
+  (undo-fu-session-global-mode)
+  :custom
+  (undo-fu-session-directory "~/.emacs.d/undo-fu-session")
+  (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+
+(use-package vundo
+  :config
+  (global-set-key (kbd "C-x u") 'vundo))
 ;; (use-package elisp-demos
 ;;   :straight t
 ;;   :after helpful
