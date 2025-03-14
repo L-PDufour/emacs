@@ -7,46 +7,53 @@
 
 ;; Load custom modules
 
-
+(setq read-process-output-max (* 4 1024 1024))
 ;; Core package configuration
 (use-package emacs
+  :ensure nil
   :custom
+  (column-number-mode t)
   ;; Essential settings only
   (package-install-upgrade-built-in t)
   (enable-recursive-minibuffers t)
   (make-backup-files nil)
+  (create-lockfiles nil)
+  (delete-selection-mode 1)
   (auto-save-default nil)
-  (read-process-output-max (* 4 1024 1024))
+  (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
   (process-adaptive-read-buffering nil)
-  ;;  (create-lockfiles nil)
+  (pixel-scroll-precision-mode t)                 ;; Enable precise pixel scrolling.
+  (pixel-scroll-precision-use-momentum nil)       ;; Disable momentum scrolling for pixel precision.
+  (history-length 25)                             ;; Set the length of the command history.
+  (split-width-threshold 300)                     ;; Prevent automatic window splitting if the window width exceeds 300 pixels.
+  (switch-to-buffer-obey-display-actions t)       ;; Make buffer switching respect display actions.
+  (tab-always-indent 'complete)                   ;; Make the TAB key complete text instead of just indenting.
+  (tab-width 4)                                   ;; Set the tab width to 4 spaces.
+  (treesit-font-lock-level 4)                     ;; Use advanced font locking for Treesit mode.
+  (truncate-lines t)                              ;; Enable line truncation to avoid wrapping long lines.
+  (use-dialog-box nil)                            ;; Disable dialog boxes in favor of minibuffer prompts.
+  (use-short-answers t)                           ;; Use short answers in prompts for quicker responses (y instead of yes)
+  (warning-minimum-level :emergency)
 
-  ;; UI preferences
-  ;; (scroll-conservatively 101)
-  ;; (scroll-margin 0)
-  ;; (display-line-numbers-width 3)
-
-  ;; Editor behavior
-  (indent-tabs-mode nil)
-  (tab-width 4)
-  ;; (fill-column 80)
-  ;; (require-final-newline t)
   ;; Make it easy to cycle through previous items in the mark ring
   (set-mark-command-repeat-pop t)
 
   :config
-  ;; Enable useful global modes
-  ;; Enable diff highlighting in margins
+  (global-hl-line-mode 1)      ;; Enable highlight of the current line
+  (global-auto-revert-mode 1)  ;; Enable global auto-revert mode to keep buffers up to date with their corresponding files.
+  (indent-tabs-mode -1)        ;; Disable the use of tabs for indentation (use spaces instead).
+  (recentf-mode 1)             ;; Enable tracking of recently opened files.
+  (savehist-mode 1)            ;; Enable saving of command history.
+  (save-place-mode 1)          ;; Enable saving the place in files for easier return.
+  (winner-mode 1)              ;; Enable winner mode to easily undo window configuration changes.
+  (file-name-shadow-mode 1)    ;; Enable shadowing of filenames for clarity.
 
-  (global-auto-revert-mode 1)
-  (delete-selection-mode 1)
+  (modify-coding-system-alist 'file "" 'utf-8)
+
   (repeat-mode 1)
-  (savehist-mode 1)
   (auto-save-visited-mode 1)
-  (setopt use-short-answers t)
-  (save-place-mode 1)
   (blink-cursor-mode 0)
-  (global-hl-line-mode)
-  (recentf-mode t)
+
   (let ((mono-font "FiraCode Nerd Font")
         (sans-font "DejaVu Sans"))
     (set-face-attribute 'default nil :family mono-font :weight 'medium :height 160)
@@ -70,7 +77,20 @@
   (when (file-exists-p custom-file)
     (load custom-file nil :nomessage))
 
-  :hook ((prog-mode . display-line-numbers-mode)
+  :hook (( after-init . (lambda ()
+						  (message "Emacs has fully loaded. This code runs after startup.")
+
+						  ;; Insert a welcome message in the *scratch* buffer displaying loading time and activated packages.
+						  (with-current-buffer (get-buffer-create "*scratch*")
+							(insert (format
+									 ";;    Welcome to Emacs!
+;;
+;;    Loading time : %s
+;;    Packages     : %s
+"
+									 (emacs-init-time)
+									 (number-to-string (length package-activated-list)))))))
+		 (prog-mode . display-line-numbers-mode)
          (conf-mode .display-line-numbers-mode)
          (org-mode . (lambda () (display-line-numbers-mode -1)))
          (before-save . delete-trailing-whitespace)))
