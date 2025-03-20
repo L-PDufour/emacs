@@ -25,7 +25,7 @@
   :mode (("\\.js\\'" . js-mode)
          ("\\.ts\\'" . typescript-mode))
   :config
-  (setq js-indent-level 2))
+  (setq js-indent-level 4))
 
 (provide 'my-web)
 ;;; my-web.el ends here

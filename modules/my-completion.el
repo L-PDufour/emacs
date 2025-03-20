@@ -110,7 +110,7 @@
   :config
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)XS
   (add-hook 'completion-at-point-functions #'cape-history)
   (defun my/ignore-elisp-keywords (cand)
     (or (not (keywordp cand))
@@ -125,9 +125,8 @@
                     #'cape-dabbrev)
                   cape-file)
                 cape-dabbrev-min-length 5))
-  (setq cape-dabbrev-check-other-buffers t)
-  :hook
-  (emacs-lisp-mode . my/setup-elisp))
+  (setq cape-dabbrev-check-other-buffers t))
+
 
 ;; Set up elisp-specific completion with keyword filtering
 (provide 'my-completion)
