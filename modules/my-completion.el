@@ -83,15 +83,14 @@
   :init
   (setq corfu-auto t
         corfu-cycle t
-        corfu-auto-delay 0.2
         corfu-auto-prefix 2
         corfu-preselect 'directory
         corfu-on-exact-match nil
         corfu-preview-current nil
         corfu-min-width 20
         corfu-quit-no-match 'separator
-        corfu-popupinfo-delay '(1.25 . 0.5)
-        tab-always-indent 'complete)
+        corfu-popupinfo-delay '(1.25 . 0.5))
+
 
   :config
   (corfu-popupinfo-mode 1)
@@ -107,10 +106,13 @@
 (use-package cape
   :init
   :bind ("C-c p" . cape-prefix-map)
+  :custom
+  (text-mode-ispell-word-completion nil)
+
   :config
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)XS
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-history)
   (defun my/ignore-elisp-keywords (cand)
     (or (not (keywordp cand))

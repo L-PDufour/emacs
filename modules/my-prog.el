@@ -2,6 +2,22 @@
 ;;; Commentary:
 ;;; Core programming configuration with Eglot and completion
 ;;; Code:
+(use-package project
+  :straight (:type built-in)
+  :bind ( :map project-prefix-map
+          ("e" . project-eshell))
+  :custom
+  ;; The commands in `project-switch-commands' must be found in
+  ;; `project-prefix-map'
+  (project-switch-commands
+   '((project-find-file "Find file")
+     (project-find-regexp "Find regexp")
+     (project-find-dir "Find directory")
+     (project-vc-dir "VC-Dir")
+     (project-eshell "Eshell")
+     (eat-project "EAT")
+     (project-any-command "Other"))))
+
 
 ;; Project management for ibuffer
 (use-package ibuffer-project
@@ -14,69 +30,116 @@
   :config
   (setq ibuffer-project-use-cache t))
 
-
-(use-package eldoc
+;;; Xref
+(use-package xref
   :straight (:type built-in)
-
-  :init
-  ;; Configure how the eldoc buffer should be displayed
-  (add-to-list 'display-buffer-alist
-               '("^\\*eldoc\\*$" ; Match exactly the eldoc buffer name
-                 (display-buffer-at-bottom)
-                 (window-height . 5) ; Small buffer (5 lines tall)
-                 (preserve-size . (nil . t)) ; Don't let it resize automatically
-                 (dedicated . t))) ; Make it a dedicated window
+  ;; :bind ("C-M-?". xref-find-references-and-replace) ; Emacs 29.1
+  :custom
+  (xref-show-definitions-function #'xref-show-definitions-completing-read)
+  (xref-show-xrefs-function #'xref-show-definitions-buffer)
+  (xref-file-name-display 'project-relative)
+  (xref-search-program 'ripgrep)
+  (xref-history-storage 'xref-window-local-history) ; Per-window history of `xref-go-*'
   :config
-  ;; Set up eldoc to prefer the buffer display and avoid echo area for longer docs
-  (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
-  (setq eldoc-echo-area-use-multiline-p nil)     ; Don't use echo area for multi-line
-  (setq eldoc-echo-area-prefer-doc-buffer t)     ; Prefer dedicated buffer
-  (setq eldoc-echo-area-display-truncation-message nil) ; Don't show truncation message
+  ;; We remove the fallback backend, `etags--xref-backend', which prompts the
+  ;; user for an etags table -- this is undesirable for me.
+  (setq-default xref-backend-functions nil)
+  ;; Then add `elisp--xref-backend' as the global value of
+  ;; `xref-backend-functions', which means it is run when the local value ends
+  ;; with `t'. See (info "(elisp) Running Hooks") for an explanation.
+  (add-hook 'xref-backend-functions #'elisp--xref-backend))
+  ;;; Consult-xref-stack
+(use-package consult-xref-stack
+  :straight (:host github
+				   :repo "brett-lempereur/consult-xref-stack"
+				   :branch "main")
+  :bind (([remap xref-go-back] . krisb-consult-xref-stack-backward)
+         ([remap xref-go-forward] . krisb-consult-xref-stack-forward))
+  :config
+  (defun krisb-consult-xref-stack-backward (arg)
+    "Call `xref-go-back' or `consult-xref-stack-backward' when called with ARG."
+    (interactive "p")
+    (call-interactively
+     (if (< 1 arg) 'consult-xref-stack-backward 'xref-go-back)))
 
-  ;; You can adjust this to control when eldoc will use a buffer vs. the echo area
-  (setq eldoc-echo-area-prefer-doc-buffer t)
+  (defun krisb-consult-xref-stack-forward (arg)
+    "Call `xref-go-forward' or `consult-xref-stack-forward' when called with ARG."
+    (interactive "p")
+    (call-interactively
+     (if (< 1 arg) 'consult-xref-stack-forward 'xref-go-forward))))
 
-  ;; Optional: Make the buffer dedicated to ensure it stays small
-  (add-hook 'eldoc-doc-buffer-hook
-            (lambda ()
-              (when-let ((win (get-buffer-window eldoc--doc-buffer-name)))
-                (set-window-dedicated-p win t)))))
-;; ElDoc for documentation display
-;; ElDoc for documentation display
+;;; Dumber-jump
+;; A lean fork of dumb-jump.
+(use-package dumber-jump
+  :ensure-system-package (rg . ripgrep)
+  :custom
+  (dumber-jump-default-project user-emacs-directory)
+  :init
+  ;; Add to global value so it is used as a fallback (when local value ends in
+  ;; t)
+  (add-hook 'xref-backend-functions #'dumber-jump-xref-activate)
+  :config
+  (setopt dumber-jump-project-denoters
+          (cl-remove-duplicates
+           (append dumber-jump-project-denoters project-vc-extra-root-markers))))
+
+;;; Eldoc
+(use-package eldoc
+  :diminish
+  :bind ( :map help-map
+          ("\." . eldoc-doc-buffer))
+  :custom
+  (eldoc-print-after-edit nil)
+  (eldoc-idle-delay 0.2)
+  (eldoc-documentation-strategy
+   'eldoc-documentation-compose-eagerly) ; Mash multiple sources together and display eagerly
+  (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit) ; Also respects `max-mini-window-height'
+  (eldoc-echo-area-display-truncation-message t)
+  (eldoc-echo-area-prefer-doc-buffer t)
+  (eldoc-help-at-pt t))                 ; Emacs 31.
+
 ;; (use-package eldoc
-;;   :ensure nil  ;; Built-in package, no need to ensure
-;;   :hook (prog-mode . eldoc-mode)
-;;   :custom
-;;   ;; Control how eldoc displays documentation
-;;   (eldoc-echo-area-use-multiline-p t)    ;; Allow multi-line messages
-;;   (eldoc-echo-area-prefer-doc-buffer t)  ;; Prefer displaying docs in a buffer for large docs
-;;   (eldoc-echo-area-display-truncation-message nil)  ;; Don't show truncation message
-;;   (eldoc-echo-area-preferred-display 'bottom)  ;; Display in the bottom part of echo area
-
-;;   ;; Idle time in seconds before documentation is displayed
-;;   (eldoc-idle-delay 0.2)
-
-;;   ;; Adjust documentation level of detail (can be verbose for some LSP servers)
-;;   (eldoc-documentation-strategy 'eldoc-documentation-default)
-
+;;   :straight (:type built-in)
+;;   :diminish
+;;   :init
+;;   ;; Configure how the eldoc buffer should be displayed
+;;   (add-to-list 'display-buffer-alist
+;;                '("^\\*eldoc\\*$" ; Match exactly the eldoc buffer name
+;;                  (display-buffer-at-bottom)
+;;                  (window-height . 5) ; Small buffer (5 lines tall)
+;;                  (preserve-size . (nil . t)) ; Don't let it resize automatically
+;;                  (dedicated . t))) ; Make it a dedicated window
 ;;   :config
-;;   ;; Use message function to display docs in the echo area
-;;   (setq eldoc-message-function #'message)
+;;   ;; Set up eldoc to prefer the buffer display and avoid echo area for longer docs
+;;   (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+;;   (setq eldoc-echo-area-use-multiline-p nil)     ; Don't use echo area for multi-line
+;;   (setq eldoc-echo-area-prefer-doc-buffer t)     ; Prefer dedicated buffer
+;;   (setq eldoc-echo-area-display-truncation-message nil) ; Don't show truncation message
 
-;;   ;; Optional: Make the eldoc documentation-buffer more readable
-;;   (add-hook 'eldoc-documentation-functions
-;;             #'eldoc-documentation-default))
+;;   ;; You can adjust this to control when eldoc will use a buffer vs. the echo area
+;;   (setq eldoc-echo-area-prefer-doc-buffer t)
 
+;;   ;; Optional: Make the buffer dedicated to ensure it stays small
+;;   (add-hook 'eldoc-doc-buffer-hook
+;;             (lambda ()
+;;               (when-let ((win (get-buffer-window eldoc--doc-buffer-name)))
+;;                 (set-window-dedicated-p win t)))))
 
+(use-package eglot-signature-eldoc-talkative
+  :straight
+  :after eglot
+  :config
+  (advice-add #'eglot-signature-eldoc-function :override #'eglot-signature-eldoc-talkative))
 
 
 ;; Core Eglot configuration - keep this in my-prog.el
 (use-package eglot
   :straight (:type built-in)
-  ;; :after (corfu cape tempel)
   :custom
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
+  (eglot-code-action-indications '(eldoc-hint margin))
+  (eglot-code-action-indicator "  α ")
   :config
   (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
 
@@ -86,23 +149,8 @@
                 (list (cape-capf-super
                        #'eglot-completion-at-point
                        #'tempel-expand
-                       #'cape-file
-                       #'cape-dabbrev))))
+                       #'cape-file))))
 
-  ;; Register language servers for web development
-  ;; HTML
-
-  ;; ;; JavaScript/TypeScript
-  ;; (add-to-list 'eglot-server-programs
-  ;;              '((js-mode typescript-mode ) . ("typescript-language-server" "--stdio")))
-
-  ;; ;; Configure workspace settings for JavaScript/TypeScript
-  ;; (setq eglot-workspace-configuration
-  ;;       '((:javascript . (:format (:insertSpaceAfterFunctionKeywordForAnonymousFunctions t
-  ;;                                                                                        :insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis nil)
-  ;;                                 :workspaceFolder :autoDiscoverRootFiles))))
-
-  ;; Orderless styling for Eglot completions
   (setq completion-category-overrides '((eglot (styles orderless))
                                         (eglot-capf (styles orderless))))
 
@@ -120,9 +168,21 @@
 ;; (typescript-mode . eglot-ensure))
 
 ;; Tempel for template expansion
+(use-package eglot-booster
+  :straight (:type git
+				   :host github
+				   :repo "jdtsmith/eglot-booster"
+				   :branch "master")  ;; equivalent to :rev :newest in your code
+  :after eglot
+  :config
+  (eglot-booster-mode 1))
+
 (use-package tempel
-  :bind (("M-+" . tempel-complete)
-         ("M-*" . tempel-insert))
+  :bind (:map tempel-map
+			  ("M-+" . tempel-complete)
+			  ("M-*" . tempel-insert)
+			  ("C-k" . tempel-next)
+			  ("C-j" . tempel-previous))
   :init
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions

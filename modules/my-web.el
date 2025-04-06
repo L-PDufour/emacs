@@ -21,11 +21,12 @@
 ;;                                                    ("html-languageserver" "--stdio"))))))
 
 ;; JS/TS mode setup
-(use-package js
+(use-package js2-mode
   :mode (("\\.js\\'" . js-mode)
          ("\\.ts\\'" . typescript-mode))
   :config
-  (setq js-indent-level 4))
+  (setq js-indent-level 4
+		))
 
 (provide 'my-web)
 ;;; my-web.el ends here

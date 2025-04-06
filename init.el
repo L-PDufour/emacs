@@ -197,87 +197,11 @@
 (require 'my-which-key)
 (require 'my-prog)
 (require 'my-org)
+(require 'my-meow)
+;; (require 'my-evil)
+;; (require 'my-lsp)
 
 (require 'my-keybinds)
 
-
-;; Evil mode configuration
-(use-package evil
-  :ensure t
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  ;; Set up leader key before evil loads
-  (setq evil-want-leader t)
-  (setq evil-leader/leader "SPC")
-  (setq evil-default-state 'emacs) ;; Use Emacs state as default
-  :config
-  ;; Make evil active in prog-mode and all modes derived from it
-  (evil-set-initial-state 'prog-mode 'normal)
-  (evil-mode 1))
-;; Evil Collection for better integration with many Emacs packages
-(use-package evil-collection
-  :after evil
-  :ensure t
-  :config
-  (evil-collection-init))
-
-;; Evil commentary for commenting code (gcc, gc motion)
-(use-package evil-commentary
-  :ensure t
-  :after evil
-  :config
-  (evil-commentary-mode))
-
-;; Evil surround for working with pairs (like parentheses, quotes)
-(use-package evil-surround
-  :ensure t
-  :after evil
-  :config
-  (global-evil-surround-mode 1))
-
-;; For Vim-like multiple cursors (optional)
-(use-package evil-mc
-  :ensure t
-  :after evil
-  :config
-  (global-evil-mc-mode 1))
-
-;; For Vim-like undo behavior (optional)
-(use-package undo-tree
-  :ensure t
-  :config
-  (global-undo-tree-mode)
-  (evil-set-undo-system 'undo-tree))
-
-(use-package evil-leader
-  :ensure t
-  :after evil
-  :config
-  (global-evil-leader-mode)
-  (evil-leader/set-leader "SPC")
-
-  ;; Define your leader key bindings
-  (evil-leader/set-key
-	"f" '(:ignore t :which-key "files")
-	"ff" 'find-file
-	"fs" 'save-buffer
-
-	"b" '(:ignore t :which-key "buffers")
-	"bb" 'switch-to-buffer
-	"bk" 'kill-buffer
-
-	"w" '(:ignore t :which-key "windows")
-	"wl" 'windmove-right
-	"wh" 'windmove-left
-	"wk" 'windmove-up
-	"wj" 'windmove-down
-	"wd" 'delete-window
-
-	"g" '(:ignore t :which-key "git")
-	"gs" 'magit-status
-
-	";" 'comment-dwim))
-(global-set-key (kbd "C-z") 'evil-toggle-state)
 (provide 'init)
 ;;; init.el ends here
