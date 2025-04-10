@@ -197,7 +197,7 @@
 (require 'my-which-key)
 (require 'my-prog)
 (require 'my-org)
-(require 'my-meow)
+;; (require 'my-meow)
 ;; (require 'my-evil)
 ;; (require 'my-lsp)
 
