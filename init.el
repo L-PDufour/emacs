@@ -177,6 +177,11 @@
 ;;                   ))
 ;;   (popper-mode +1)
 ;;   (popper-echo-mode +
+(use-package diminish
+  :ensure t
+  :config
+  (diminish 'line-number-mode))
+
 (require 'my-themes)
 (require 'my-dired)
 (require 'my-editing-utils)

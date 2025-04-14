@@ -98,33 +98,6 @@
   (eldoc-echo-area-prefer-doc-buffer t)
   (eldoc-help-at-pt t))                 ; Emacs 31.
 
-;; (use-package eldoc
-;;   :straight (:type built-in)
-;;   :diminish
-;;   :init
-;;   ;; Configure how the eldoc buffer should be displayed
-;;   (add-to-list 'display-buffer-alist
-;;                '("^\\*eldoc\\*$" ; Match exactly the eldoc buffer name
-;;                  (display-buffer-at-bottom)
-;;                  (window-height . 5) ; Small buffer (5 lines tall)
-;;                  (preserve-size . (nil . t)) ; Don't let it resize automatically
-;;                  (dedicated . t))) ; Make it a dedicated window
-;;   :config
-;;   ;; Set up eldoc to prefer the buffer display and avoid echo area for longer docs
-;;   (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
-;;   (setq eldoc-echo-area-use-multiline-p nil)     ; Don't use echo area for multi-line
-;;   (setq eldoc-echo-area-prefer-doc-buffer t)     ; Prefer dedicated buffer
-;;   (setq eldoc-echo-area-display-truncation-message nil) ; Don't show truncation message
-
-;;   ;; You can adjust this to control when eldoc will use a buffer vs. the echo area
-;;   (setq eldoc-echo-area-prefer-doc-buffer t)
-
-;;   ;; Optional: Make the buffer dedicated to ensure it stays small
-;;   (add-hook 'eldoc-doc-buffer-hook
-;;             (lambda ()
-;;               (when-let ((win (get-buffer-window eldoc--doc-buffer-name)))
-;;                 (set-window-dedicated-p win t)))))
-
 (use-package eglot-signature-eldoc-talkative
   :straight
   :after eglot
@@ -161,13 +134,7 @@
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   :hook
   (eglot-managed-mode . my/eglot-capf))
-;; Enable Eglot for all relevant programming modes
-;; (web-mode . eglot-ensure)
-;; (css-mode . eglot-ensure)
-;; (js-mode . eglot-ensure)
-;; (typescript-mode . eglot-ensure))
 
-;; Tempel for template expansion
 (use-package eglot-booster
   :straight (:type git
 				   :host github

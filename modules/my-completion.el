@@ -16,12 +16,23 @@
 
 ;;; Vertico
 ;; Enable vertico
+
 (use-package vertico
+  :bind (:map vertico-map
+              ("M-;" . my/vertico-smart-insert ))
   :config
   (fido-mode -1)
   (fido-vertical-mode -1)
   (icomplete-mode -1)
   (icomplete-vertical-mode -1)
+  (defun my/vertico-smart-insert ()
+    "Insert the current candidate and set up a transient keymap
+     that will exit the minibuffer if M-; is pressed again."
+    (interactive)
+    (vertico-insert)
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "M-;") #'exit-minibuffer)
+      (set-transient-map map t)))
   :custom
   (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
   (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
@@ -44,8 +55,23 @@
 
 (use-package consult
   :bind (("C-s" . consult-line)
+		 ([remap goto-line] . consult-goto-line)
          :map minibuffer-local-map
-         ("C-r" . consult-history))
+         ("C-r" . consult-history)
+
+         ;; Add bindings to the M-s (search-map)
+         :map search-map  ; This is the M-s prefix map
+         ("f" . consult-find)
+         ("g" . consult-grep)
+         ("r" . consult-ripgrep)
+         ("l" . consult-line)
+         ("o" . consult-outline)
+         ("m" . consult-mark)
+         ("i" . consult-imenu)
+         ("e" . consult-flymake)
+         ("k" . consult-keep-lines)
+         ("u" . consult-focus-lines))
+
   :init
   (setq completion-in-region-function #'consult-completion-in-region))
 
@@ -79,7 +105,7 @@
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
               ("M-SPC" . corfu-insert-separator)
-              ("<tab>" . corfu-complete))
+              ("M-;" . corfu-complete))
   :init
   (setq corfu-auto t
         corfu-cycle t
@@ -90,7 +116,6 @@
         corfu-min-width 20
         corfu-quit-no-match 'separator
         corfu-popupinfo-delay '(1.25 . 0.5))
-
 
   :config
   (corfu-popupinfo-mode 1)
@@ -108,12 +133,13 @@
   :bind ("C-c p" . cape-prefix-map)
   :custom
   (text-mode-ispell-word-completion nil)
-
   :config
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-history)
+
+  ;; Define custom functions
   (defun my/ignore-elisp-keywords (cand)
     (or (not (keywordp cand))
         (eq (char-after (car completion-in-region--data)) ?:)))
@@ -127,8 +153,11 @@
                     #'cape-dabbrev)
                   cape-file)
                 cape-dabbrev-min-length 5))
-  (setq cape-dabbrev-check-other-buffers t))
 
+  ;; Actually use the setup function by adding it to the appropriate hook
+  (add-hook 'emacs-lisp-mode-hook #'my/setup-elisp)
+
+  (setq cape-dabbrev-check-other-buffers t))
 
 ;; Set up elisp-specific completion with keyword filtering
 (provide 'my-completion)
