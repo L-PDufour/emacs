@@ -117,66 +117,21 @@
 (use-package vundo
   :config
   (global-set-key (kbd "C-x u") 'vundo))
-;; (use-package elisp-demos
-;;   :straight t
-;;   :after helpful
-;;   :config
-;;   (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
 
-;; (use-package helpful
-;;   :straight t
-;;   :bind
-;;   (([remap describe-command] . helpful-command)
-;;    ([remap describe-function] . helpful-callable)
-;;    ([remap describe-key] . helpful-key)
-;;    ([remap describe-symbol] . helpful-symbol)
-;;    ([remap describe-variable] . helpful-variable)
-;;    ("C-h F" . helpful-function)
-;;    :map helpful-mode-map
-;;    ([remap revert-buffer] . helpful-update))
-;;   :init
-;;   (keymap-global-set "C-h K" #'describe-keymap))
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
 
-;; (use-package breadcrumb
-;;   :straight t
-;;   :config
-;;   (breadcrumb-mode))
+(defun my--server ()
+  (unless (server-running-p)
+    (server-start)))
 
+(use-package server
+  :ensure nil   ; Good - server is built into Emacs
+  :hook
+  (after-init . my--server))
 
-
-;; (defun my--server ()
-;;   (unless (server-running-p)
-;;     (server-start)))
-
-;; (use-package server
-;;   :ensure nil   ; Good - server is built into Emacs
-;;   :hook
-;;   (after-init . my--server))
-
-
-
-;; Improve terminal experience
-
-;; Environment management
-
-
-;; Terminal popup
-;; (use-package popper
-;;   :bind (("C-`"   . popper-toggle)
-;;          ("M-`"   . popper-cycle)
-;;          ("C-M-`" . popper-toggle-type))
-;;   :init
-;;   (setq-default popper-reference-buffers
-;;                 '("\\*Messages\\*"
-;;                   "Output\\*$"
-;;                   "\\*Async Shell Command\\*"
-;;                   help-mode
-;;                   compilation-mode
-;;                   "*eat*"
-;;                   "^\\*eldoc.*\\*.*$" eldoc-mode
-;;                   ))
-;;   (popper-mode +1)
-;;   (popper-echo-mode +
 (use-package diminish
   :ensure t
   :config
