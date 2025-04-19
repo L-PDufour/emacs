@@ -104,25 +104,32 @@
   :config
   (advice-add #'eglot-signature-eldoc-function :override #'eglot-signature-eldoc-talkative))
 
-
 ;; Core Eglot configuration - keep this in my-prog.el
 (use-package eglot
   :straight (:type built-in)
+  :after project
   :custom
+  (completion-category-defaults nil)
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
   :config
   (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
-
-  ;; Define the central completion function that all modes can use
   (defun my/eglot-capf ()
     (setq-local completion-at-point-functions
-                (list (cape-capf-super
+                (cons (cape-capf-super
+                       #'cape-file
                        #'eglot-completion-at-point
-                       #'tempel-expand
-                       #'cape-file))))
+                       #'tempel-complete)
+                      completion-at-point-functions)))
+  ;; Define the central completion function that all modes can use
+  ;; (defun my/eglot-capf ()
+  ;;   (setq-local completion-at-point-functions
+  ;;               (list (cape-capf-super
+  ;;                      #'eglot-completion-at-point
+  ;;                      #'tempel-expand
+  ;;                      #'cape-file))))
 
   (setq completion-category-overrides '((eglot (styles orderless))
                                         (eglot-capf (styles orderless))))
