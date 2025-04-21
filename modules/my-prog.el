@@ -109,7 +109,6 @@
   :straight (:type built-in)
   :after project
   :custom
-  (completion-category-defaults nil)
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
@@ -117,10 +116,11 @@
   :config
   (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (defun my/eglot-capf ()
-    (setq-local completion-at-point-functions
-                (cons (cape-capf-super
+	(setq-local completion-at-point-functions
+				(cons (cape-capf-super
+                       #'eglot-completion-at-point  ;; Give eglot highest priority
                        #'cape-file
-                       #'eglot-completion-at-point
+                       #'cape-dabbrev             ;; Move dabbrev after eglot
                        #'tempel-complete)
                       completion-at-point-functions)))
   ;; Define the central completion function that all modes can use

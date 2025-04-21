@@ -77,7 +77,8 @@
   (when (file-exists-p custom-file)
     (load custom-file nil :nomessage))
 
-  :hook (( after-init . (lambda ()
+  :hook ((prog-mode . subword-mode)
+		 ( after-init . (lambda ()
 						  (message "Emacs has fully loaded. This code runs after startup.")
 
 						  ;; Insert a welcome message in the *scratch* buffer displaying loading time and activated packages.
@@ -91,9 +92,9 @@
 									 (emacs-init-time)
 									 (number-to-string (length package-activated-list)))))))
 		 (prog-mode . display-line-numbers-mode)
-         (conf-mode .display-line-numbers-mode)
-         (org-mode . (lambda () (display-line-numbers-mode -1)))
-         (before-save . delete-trailing-whitespace)))
+		 (conf-mode .display-line-numbers-mode)
+		 (org-mode . (lambda () (display-line-numbers-mode -1)))
+		 (before-save . delete-trailing-whitespace)))
 
 
 (use-package diff-hl

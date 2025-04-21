@@ -109,7 +109,7 @@
   :init
   (setq corfu-auto t
         corfu-cycle t
-        corfu-auto-prefix 2
+        corfu-auto-prefix 1
         corfu-preselect 'directory
         corfu-on-exact-match nil
         corfu-preview-current nil
@@ -120,6 +120,7 @@
   :config
   (corfu-popupinfo-mode 1)
   (corfu-history-mode 1)
+  (text-mode-ispell-word-completion nil)
   ;; Enable terminal support
   (unless (display-graphic-p)
     (corfu-terminal-mode 1))
