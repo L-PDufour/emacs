@@ -19,6 +19,7 @@
           ))
   (global-treesit-auto-mode)
   (treesit-auto-install-all))
+
 (use-package combobulate
   :straight (:host github :repo "mickeynp/combobulate" :branch "development")
   :config
@@ -35,5 +36,5 @@
   :hook ((prog-mode . combobulate-mode)))
 
 
-  (provide 'my-treesit)
+(provide 'my-treesit)
 ;;; my-treesit.el ends here

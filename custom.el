@@ -25,12 +25,12 @@
    '(marginalia-annotators-heavy marginalia-annotators-light nil) t)
  '(org-agenda-files
    '("/home/desktop/Sync/org/family/recipes/recipes.org"
-     "/home/desktop/Sync/org/family/shoppingList.org"
-     "/home/desktop/Sync/org/family/tasks.org"
-     "/home/desktop/Sync/org/school/IFT-1003.org"
-     "/home/desktop/Sync/org/school/IFT-1004.org"
-     "/home/desktop/Sync/org/school/tasks.org"
-     "/home/desktop/Sync/org/inbox.org"))
+	 "/home/desktop/Sync/org/family/shoppingList.org"
+	 "/home/desktop/Sync/org/family/tasks.org"
+	 "/home/desktop/Sync/org/school/IFT-1003.org"
+	 "/home/desktop/Sync/org/school/IFT-1004.org"
+	 "/home/desktop/Sync/org/school/tasks.org"
+	 "/home/desktop/Sync/org/inbox.org"))
  '(org-hide-emphasis-markers t)
  '(org-link-descriptive t)
  '(org-mouse-1-follows-link t)
@@ -39,7 +39,21 @@
    '(("gnu" . 99) ("nongnu" . 80) ("stable" . 70) ("melpa" . 0)))
  '(package-selected-packages nil)
  '(package-vc-selected-packages
-   '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch "master")))
+   '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch
+					   "master")))
+ '(safe-local-variable-values
+   '((dape-configs
+	  (js-debug-node :type "pwa-node" :request "attach" :port 9229
+					 :hostname "localhost" :sourceMaps t :cwd
+					 default-directory :program
+					 "web/assets/js/main.js")
+	  (js-debug-browser :type "pwa-chrome" :request "launch" :url
+						"http://localhost:3000" :webRoot
+						default-directory :sourceMaps t))
+	 (dape-configs
+	  (js-debug-browser :type "pwa-chrome" :request "launch" :url
+						"http://localhost:3000" :webRoot
+						default-directory :sourceMaps t))))
  '(scheme-program-name "guile")
  '(scroll-conservatively 101)
  '(scroll-margin 0)
@@ -50,8 +64,7 @@
  '(tabspaces-mode t)
  '(tabspaces-remove-to-default t nil nil "Customized with use-package tabspaces")
  '(tabspaces-use-filtered-buffers-as-default t nil nil "Customized with use-package tabspaces")
- '(treesit-auto-langs '(go java javascript lua latex markdown python typescript))
- '(xref-show-definitions-function 'xref-show-definitions-completing-read))
+ '(treesit-auto-langs '(go java javascript lua latex markdown python typescript)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -114,6 +114,9 @@
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
   :config
+  (add-to-list 'eglot-server-programs
+               '((js-mode js-ts-mode typescript-mode typescript-ts-mode)
+                 "typescript-language-server" "--stdio"))
   (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (defun my/eglot-capf ()
 	(setq-local completion-at-point-functions
@@ -132,7 +135,7 @@
   ;;                      #'cape-file))))
 
   (setq completion-category-overrides '((eglot (styles orderless))
-                                        (eglot-capf (styles orderless))))
+										(eglot-capf (styles orderless))))
 
   ;; Automatically shut down Eglot servers when no longer needed
   (setq eglot-autoshutdown t)
