@@ -21,12 +21,21 @@
 ;;                                                    ("html-languageserver" "--stdio"))))))
 
 ;; JS/TS mode setup
-(use-package js2-mode
-  :mode (("\\.js\\'" . js-mode)
-         ("\\.ts\\'" . typescript-mode))
+
+
+
+(use-package flymake-eslint
+  :straight '(flymake-eslint :type git :host github :repo "orzechowskid/flymake-eslint")
+  :custom
+  (flymake-eslint-prefer-json-diagnostics t))
+
+
+(use-package apheleia
   :config
-  (setq js-indent-level 4
-		))
+  (apheleia-global-mode +1)
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("prettier" "--stdin-filepath" filepath)))
+
 
 (provide 'my-web)
 ;;; my-web.el ends here

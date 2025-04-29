@@ -78,6 +78,7 @@
     (load custom-file nil :nomessage))
 
   :hook ((prog-mode . subword-mode)
+		 (prog-mode . font-lock-fontify-buffer)
 		 ( after-init . (lambda ()
 						  (message "Emacs has fully loaded. This code runs after startup.")
 
@@ -163,6 +164,9 @@
 ;; (require 'my-lsp)
 
 (require 'my-keybinds)
+(use-package dape
+  :ensure t)
+
 
 (provide 'init)
 ;;; init.el ends here

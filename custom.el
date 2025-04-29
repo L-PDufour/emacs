@@ -49,6 +49,10 @@
 					 "web/assets/js/main.js")
 	  (js-debug-browser :type "pwa-chrome" :request "launch" :url
 						"http://localhost:3000" :webRoot
+						default-directory :sourceMaps t))
+	 (dape-configs
+	  (js-debug-browser :type "pwa-chrome" :request "launch" :url
+						"http://localhost:3000" :webRoot
 						default-directory :sourceMaps t))))
  '(scheme-program-name "guile")
  '(scroll-conservatively 101)
