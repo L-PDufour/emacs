@@ -99,10 +99,28 @@
   (eldoc-help-at-pt t))                 ; Emacs 31.
 
 (use-package eglot-signature-eldoc-talkative
-  :straight
-  :after eglot
+  :straight (:host github :repo "emacsmirror/eglot-signature-eldoc-talkative")
+  :after (eglot flymake eldoc)
   :config
-  (advice-add #'eglot-signature-eldoc-function :override #'eglot-signature-eldoc-talkative))
+  (defun my-eglot-specific-eldoc ()
+
+	;; Use custom documentation-functions (with custom priorities, given
+	;; by order):
+	(setq-local eldoc-documentation-functions
+				(list
+				 #'eglot-signature-eldoc-talkative
+				 #'eglot-hover-eldoc-function
+				 t
+				 #'flymake-eldoc-function))
+
+	;; Optionally, in echo-area, only show the most important
+	;; documentation:
+	;; (setq-local eldoc-documentation-strategy
+	;;   #'eldoc-documentation-enthusiast)
+	)
+
+  (add-hook 'eglot-managed-mode-hook #'my-eglot-specific-eldoc))
+
 
 ;; Core Eglot configuration - keep this in my-prog.el
 (use-package eglot

@@ -164,9 +164,24 @@
 ;; (require 'my-lsp)
 
 (require 'my-keybinds)
-(use-package dape
-  :ensure t)
 
+(use-package dape
+  :config
+  (setq dape-configs
+        '((js-debug-node
+           :type "pwa-node"
+           :request "attach"
+           :port 9229
+           :hostname "localhost"
+           :sourceMaps t
+           :cwd default-directory
+           :program "web/assets/js/main.js")
+          (js-debug-browser
+           :type "pwa-chrome"
+           :request "launch"
+           :url "http://localhost:3000"
+           :webRoot default-directory
+           :sourceMaps t))))
 
 (provide 'init)
 ;;; init.el ends here

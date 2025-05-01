@@ -42,7 +42,15 @@
    '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch
 					   "master")))
  '(safe-local-variable-values
-   '((dape-configs
+   '((eval setq-local dape-configs
+		   '((js-debug-node :type "pwa-node" :request "attach" :port
+							9229 :hostname "localhost" :sourceMaps t
+							:cwd default-directory :program
+							"web/assets/js/main.js")
+			 (js-debug-browser :type "pwa-chrome" :request "launch"
+							   :url "http://localhost:3000" :webRoot
+							   default-directory :sourceMaps t)))
+	 (dape-configs
 	  (js-debug-node :type "pwa-node" :request "attach" :port 9229
 					 :hostname "localhost" :sourceMaps t :cwd
 					 default-directory :program
