@@ -31,6 +31,7 @@
 
 
 (use-package apheleia
+  :diminish
   :config
   (apheleia-global-mode +1)
   (setf (alist-get 'prettier apheleia-formatters)

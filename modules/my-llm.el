@@ -8,11 +8,10 @@
   :config
   (setq gptel-default-mode 'org-mode)
   (setq gptel-model 'test
-        gptel-backend(gptel-make-openai "llama-cpp"
+		gptel-backend(gptel-make-anthropic "Claude"
                        :stream t
-                       :protocol "http"
-                       :host "localhost:8080"
-                       :models '(test))))
+                       :key (lambda () (getenv "ANTHROPIC_API_KEY")))))
+
 
 (provide 'my-llm)
 ;;; my-llm.el ends here

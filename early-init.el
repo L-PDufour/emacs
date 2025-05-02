@@ -35,7 +35,7 @@
 ;; UI preferences (set via default-frame-alist for early application)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-(push '(menu-bar-lines . 0) default-frame-alist) ;; Optional: also disable menu bar
+;; (push '(menu-bar-lines . 0) default-frame-alist) ;; Optional: also disable menu bar
 
 ;; Disable startup screen
 (setq inhibit-startup-screen t

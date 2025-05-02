@@ -166,8 +166,8 @@
 (use-package eglot-booster
   :straight (:type git
 				   :host github
-				   :repo "jdtsmith/eglot-booster"
-				   :branch "master")  ;; equivalent to :rev :newest in your code
+				   :repo "jdtsmith/eglot-booster")
+
   :after eglot
   :config
   (eglot-booster-mode 1))

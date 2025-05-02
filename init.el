@@ -103,24 +103,12 @@
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (global-diff-hl-mode))
 
-(use-package undo-fu
-  :config
-  (global-unset-key (kbd "C-z"))
-  (global-set-key (kbd "C-z") 'undo-fu-only-undo)
-  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
-
-(use-package undo-fu-session
-  :config
-  (undo-fu-session-global-mode)
-  :custom
-  (undo-fu-session-directory "~/.emacs.d/undo-fu-session")
-  (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
-
 (use-package vundo
   :config
   (global-set-key (kbd "C-x u") 'vundo))
 
 (use-package editorconfig
+  :diminish ""
   :ensure t
   :config
   (editorconfig-mode 1))
@@ -147,7 +135,7 @@
 (require 'my-completion)
 (require 'my-elisp)
 (require 'my-go)
-(require 'my-llm)
+;; (require 'my-llm)
 (require 'my-lua)
 (require 'my-magit)
 (require 'my-nix)
@@ -166,22 +154,8 @@
 (require 'my-keybinds)
 
 (use-package dape
-  :config
-  (setq dape-configs
-        '((js-debug-node
-           :type "pwa-node"
-           :request "attach"
-           :port 9229
-           :hostname "localhost"
-           :sourceMaps t
-           :cwd default-directory
-           :program "web/assets/js/main.js")
-          (js-debug-browser
-           :type "pwa-chrome"
-           :request "launch"
-           :url "http://localhost:3000"
-           :webRoot default-directory
-           :sourceMaps t))))
+  :config)
+
 
 (provide 'init)
 ;;; init.el ends here
