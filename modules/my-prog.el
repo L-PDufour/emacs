@@ -3,7 +3,7 @@
 ;;; Core programming configuration with Eglot and completion
 ;;; Code:
 (use-package project
-  :straight (:type built-in)
+  :ensure nil
   :bind ( :map project-prefix-map
           ("e" . project-eshell))
   :custom
@@ -21,7 +21,7 @@
 
 ;; Project management for ibuffer
 (use-package ibuffer-project
-  :straight t
+  :ensure nil
   :hook (ibuffer . (lambda ()
                      (setq ibuffer-filter-groups
                            (ibuffer-project-generate-filter-groups))
@@ -32,7 +32,7 @@
 
 ;;; Xref
 (use-package xref
-  :straight (:type built-in)
+  :ensure nil
   ;; :bind ("C-M-?". xref-find-references-and-replace) ; Emacs 29.1
   :custom
   (xref-show-definitions-function #'xref-show-definitions-completing-read)
@@ -50,9 +50,7 @@
   (add-hook 'xref-backend-functions #'elisp--xref-backend))
   ;;; Consult-xref-stack
 (use-package consult-xref-stack
-  :straight (:host github
-				   :repo "brett-lempereur/consult-xref-stack"
-				   :branch "main")
+  :ensure nil
   :bind (([remap xref-go-back] . krisb-consult-xref-stack-backward)
          ([remap xref-go-forward] . krisb-consult-xref-stack-forward))
   :config
@@ -71,6 +69,7 @@
 ;;; Dumber-jump
 ;; A lean fork of dumb-jump.
 (use-package dumber-jump
+  :ensure nil
   :ensure-system-package (rg . ripgrep)
   :custom
   (dumber-jump-default-project user-emacs-directory)
@@ -85,6 +84,7 @@
 
 ;;; Eldoc
 (use-package eldoc
+  :ensure nil
   :diminish
   :bind ( :map help-map
           ("\." . eldoc-doc-buffer))
@@ -99,7 +99,7 @@
   (eldoc-help-at-pt t))                 ; Emacs 31.
 
 (use-package eglot-signature-eldoc-talkative
-  :straight (:host github :repo "emacsmirror/eglot-signature-eldoc-talkative")
+  :ensure nil
   :after (eglot flymake eldoc)
   :config
   (defun my-eglot-specific-eldoc ()
@@ -124,8 +124,8 @@
 
 ;; Core Eglot configuration - keep this in my-prog.el
 (use-package eglot
-  :straight (:type built-in)
-  :after project
+  :ensure nil
+  :after (project tempel)
   :custom
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
@@ -163,42 +163,51 @@
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
-(use-package eglot-booster
-  :straight (:type git
-				   :host github
-				   :repo "jdtsmith/eglot-booster")
+;; (use-package eglot-booster
+;;   :straight (:type git
+;; 				   :host github
+;; 				   :repo "jdtsmith/eglot-booster")
 
-  :after eglot
-  :config
-  (eglot-booster-mode 1))
+;;   :after eglot
+;;   :config
+;;   (eglot-booster-mode 1))
 
 (use-package tempel
+  :ensure nil
   :bind (:map tempel-map
-			  ("M-+" . tempel-complete)
-			  ("M-*" . tempel-insert)
-			  ("C-k" . tempel-next)
-			  ("C-j" . tempel-previous))
-  :init
-  (defun tempel-setup-capf ()
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-  :hook
-  ((conf-mode. tempel-setup-capf)
-   (prog-mode . tempel-setup-capf)
-   (text-mode . tempel-setup-capf)))
+              ("M-+" . tempel-complete)
+              ("M-*" . tempel-insert)
+              ("C-k" . tempel-next)
+              ("C-j" . tempel-previous))
+  :config
+  ;; Only add tempel to completion-at-point-functions after it's loaded
+  (require 'tempel)
+  (defun tempel-setup-basic ()
+    "Set up tempel for completion."
+    (add-hook 'completion-at-point-functions #'tempel-expand 90 t))
+
+  ;; Add hooks after defining the function
+  (add-hook 'conf-mode-hook #'tempel-setup-basic)
+  (add-hook 'prog-mode-hook #'tempel-setup-basic)
+  (add-hook 'text-mode-hook #'tempel-setup-basic))
 
 (use-package tempel-collection
+  :ensure nil
   :after tempel)
 
 (use-package eglot-tempel
-  :preface (eglot-tempel-mode)
-  :init
-  (eglot-tempel-mode t))
+  :ensure nil
+  :after (eglot tempel)
+  :config
+  ;; Remove this line: (eglot-tempel-mode)
+  ;; Add a conditional check instead:
+  (when (fboundp 'eglot-tempel-mode)
+    (eglot-tempel-mode)))
 
 ;; Flymake for error checking
+
 (use-package flymake
-  :straight (:type built-in)
+  :ensure nil
   :bind (:map flymake-mode-map
               ("C-c e e" . consult-flymake)
               ("C-c e n" . flymake-goto-next-error)

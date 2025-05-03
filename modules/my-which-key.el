@@ -5,6 +5,7 @@
 ;;; Code:
 
 (use-package which-key
+  :ensure nil
   :diminish
   :init (which-key-mode)
   :custom

@@ -46,27 +46,6 @@
 (when (featurep 'native-compile)
   (setq native-comp-async-report-warnings-errors 'silent))
 
-;; Bootstrap straight.el
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-;; Configure straight.el basics (move use-package config to init.el)
-(setq straight-built-in-pseudo-packages
-      '(emacs nadvice python image-mode project flymake xref))
-(setq straight-use-package-by-default t)
-
-;; Load use-package early
-(straight-use-package 'use-package)
 
 (provide 'early-init)
 ;;; early-init.el ends here

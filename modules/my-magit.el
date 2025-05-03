@@ -4,7 +4,8 @@
 
 ;;; Code:
 
-(use-package magit)
+(use-package magit
+  :ensure nil)
 
 (provide 'my-magit)
 ;;; my-magit.el ends here

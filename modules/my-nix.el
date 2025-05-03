@@ -4,6 +4,7 @@
 ;;; Code:
 
 (use-package nix-mode
+  :ensure nil
   :mode "\\.nix\\'")
 
 (provide 'my-nix)

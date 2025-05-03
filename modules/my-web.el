@@ -25,12 +25,13 @@
 
 
 (use-package flymake-eslint
-  :straight '(flymake-eslint :type git :host github :repo "orzechowskid/flymake-eslint")
+  :ensure nil
   :custom
   (flymake-eslint-prefer-json-diagnostics t))
 
 
 (use-package apheleia
+  :ensure nil
   :diminish
   :config
   (apheleia-global-mode +1)

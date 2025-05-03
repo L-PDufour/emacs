@@ -4,13 +4,13 @@
 ;;; Code:
 
 (use-package gptel
-  :straight t
+  :ensure nil
   :config
   (setq gptel-default-mode 'org-mode)
   (setq gptel-model 'test
 		gptel-backend(gptel-make-anthropic "Claude"
-                       :stream t
-                       :key (lambda () (getenv "ANTHROPIC_API_KEY")))))
+										   :stream t
+										   :key (lambda () (getenv "ANTHROPIC_API_KEY")))))
 
 
 (provide 'my-llm)

@@ -4,6 +4,7 @@
 ;;; Code:
 
 (use-package eshell
+  :ensure nil
   :init
   (defun bedrock/setup-eshell ()
     (keymap-set eshell-mode-map "C-r" 'consult-history)
@@ -24,6 +25,7 @@
    (eshell-mode . (lambda () (setenv "TERM" "xterm-256color")))))
 
 (use-package eat
+  :ensure nil
   :custom
   (eat-term-name "xterm-256color")  ; Better color support
   (eat-kill-buffer-on-exit t)       ; Clean up when terminal exits

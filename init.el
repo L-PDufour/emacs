@@ -99,17 +99,19 @@
 
 
 (use-package diff-hl
+  :ensure nil
   :config
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (global-diff-hl-mode))
 
 (use-package vundo
+  :ensure nil
   :config
   (global-set-key (kbd "C-x u") 'vundo))
 
 (use-package editorconfig
   :diminish ""
-  :ensure t
+  :ensure nil
   :config
   (editorconfig-mode 1))
 
@@ -123,7 +125,7 @@
   (after-init . my--server))
 
 (use-package diminish
-  :ensure t
+  :ensure nil
   :config
   (diminish 'line-number-mode))
 
@@ -154,6 +156,7 @@
 (require 'my-keybinds)
 
 (use-package dape
+  :ensure nil
   :config)
 
 

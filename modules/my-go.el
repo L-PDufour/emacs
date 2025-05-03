@@ -4,6 +4,7 @@
 ;;; Code:
 
 (use-package go-mode
+  :ensure nil
   :config
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode)))
 

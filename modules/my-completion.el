@@ -18,6 +18,7 @@
 ;; Enable vertico
 
 (use-package vertico
+  :ensure nil
   :bind (:map vertico-map
               ("M-;" . my/vertico-smart-insert ))
   :config
@@ -40,7 +41,7 @@
 
 ;; Configure directory extension.
 (use-package vertico-directory
-  :straight nil
+  :ensure nil
   :after vertico
   ;; More convenient directory navigation commands
   :bind (:map vertico-map
@@ -51,9 +52,11 @@
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 (use-package marginalia
+  :ensure nil
   :hook (after-init . marginalia-mode))
 
 (use-package consult
+  :ensure nil
   :bind (("C-s" . consult-line)
 		 ([remap goto-line] . consult-goto-line)
          :map minibuffer-local-map
@@ -76,6 +79,7 @@
   (setq completion-in-region-function #'consult-completion-in-region))
 
 (use-package orderless
+  :ensure nil
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
@@ -85,6 +89,7 @@
   (completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package embark
+  :ensure nil
   :bind
   (("C-." . embark-act)
    ([remap describe-bindings] . embark-bindings))
@@ -92,11 +97,13 @@
   (setq prefix-help-command #'embark-prefix-help-command))
 
 (use-package embark-consult
+  :ensure nil
   :after (embark consult)
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package corfu
+  :ensure nil
   :hook ((after-init . global-corfu-mode)
          (eshell-mode . (lambda ()
                           (setq-local corfu-auto nil)
@@ -118,8 +125,8 @@
         corfu-popupinfo-delay '(1.25 . 0.5))
 
   :config
-  (corfu-popupinfo-mode 1)
-  (corfu-history-mode 1)
+  (setq corfu-popupinfo-mode 1)
+  (setq corfu-history-mode 1)
   (setq text-mode-ispell-word-completion nil)
   ;; Enable terminal support
   (unless (display-graphic-p)
@@ -130,6 +137,7 @@
     (add-to-list 'savehist-additional-variables 'corfu-history)))
 ;;; Cape
 (use-package cape
+  :ensure nil
   :init
   :bind ("C-c p" . cape-prefix-map)
   :custom

@@ -4,7 +4,7 @@
 ;;; Code:
 
 (use-package treesit-auto
-  :straight t
+  :ensure nil
   :config
   (setq major-mode-remap-alist
         '((c-mode . c-ts-mode)
@@ -21,7 +21,7 @@
   (treesit-auto-install-all))
 
 (use-package combobulate
-  :straight (:host github :repo "mickeynp/combobulate" :branch "development")
+  :ensure nil
   :config
   ;; Add a function to find-file-hook to clear highlighting in .js files
   (add-hook 'find-file-hook

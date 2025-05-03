@@ -4,7 +4,7 @@
 ;;; Code:
 
 (use-package dired
-  :straight nil
+  :ensure nil
   :commands (dired)
   :hook
   ((dired-mode . dired-hide-details-mode)
@@ -26,6 +26,7 @@
   (setq dired-deletion-confirmer #'y-or-n-p))
 
 (use-package dired-subtree
+  :ensure nil
   :requires dired
   :bind
   ( :map dired-mode-map
@@ -35,6 +36,7 @@
     ("S-TAB" . dired-subtree-remove)))
 
 (use-package trashed
+  :ensure nil
   :commands (trashed)
   :config
   (setq trashed-action-confirmer 'y-or-n-p)
