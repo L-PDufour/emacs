@@ -97,12 +97,28 @@
 		 (org-mode . (lambda () (display-line-numbers-mode -1)))
 		 (before-save . delete-trailing-whitespace)))
 
-
 (use-package diff-hl
   :ensure nil
   :config
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (global-diff-hl-mode))
+
+(use-package undo-fu-session
+  :ensure nil
+  :config
+  ;; Store undo history files in your Emacs directory
+  (setq undo-fu-session-directory (expand-file-name "undo-fu-session" user-emacs-directory))
+
+  ;; Create the directory if it doesn't exist
+  (unless (file-exists-p undo-fu-session-directory)
+    (make-directory undo-fu-session-directory t))
+
+  ;; Configure session settings
+  (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+  (setq undo-fu-session-global-mode t)
+
+  ;; Enable globally
+  (global-undo-fu-session-mode))
 
 (use-package vundo
   :ensure nil
@@ -128,11 +144,10 @@
   :ensure nil
   :config
   (diminish 'line-number-mode))
-
+(require 'my-markdown)
 (require 'my-themes)
 (require 'my-dired)
 (require 'my-editing-utils)
-(require 'my-markdown)
 (require 'my-treesit)
 (require 'my-completion)
 (require 'my-elisp)

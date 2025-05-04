@@ -23,12 +23,21 @@
 ;; JS/TS mode setup
 
 
-
 (use-package flymake-eslint
   :ensure nil
   :custom
-  (flymake-eslint-prefer-json-diagnostics t))
-
+  (flymake-eslint-prefer-json-diagnostics t)
+  :hook
+  ((js-mode js-ts-mode typescript-mode typescript-ts-mode) .
+   (lambda ()
+     ;; Make exec-path local to this buffer
+     (make-local-variable 'exec-path)
+     ;; Try to find eslint_d in the project's node_modules
+     (let ((project-eslint (expand-file-name "node_modules/.bin" (project-root (project-current)))))
+       (when (file-directory-p project-eslint)
+         (add-to-list 'exec-path project-eslint)))
+     ;; Enable eslint checker
+     (flymake-eslint-enable))))
 
 (use-package apheleia
   :ensure nil

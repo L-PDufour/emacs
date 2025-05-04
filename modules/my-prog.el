@@ -134,7 +134,7 @@
   :config
   (add-to-list 'eglot-server-programs
                '((js-mode js-ts-mode typescript-mode typescript-ts-mode)
-                 "typescript-language-server" "--stdio"))
+				 "typescript-language-server" "--stdio"))
   (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (defun my/eglot-capf ()
 	(setq-local completion-at-point-functions
@@ -163,14 +163,11 @@
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
-;; (use-package eglot-booster
-;;   :straight (:type git
-;; 				   :host github
-;; 				   :repo "jdtsmith/eglot-booster")
-
-;;   :after eglot
-;;   :config
-;;   (eglot-booster-mode 1))
+(use-package eglot-booster
+  :ensure nil
+  :after eglot
+  :config
+  (eglot-booster-mode 1))
 
 (use-package tempel
   :ensure nil
@@ -208,12 +205,12 @@
 
 (use-package flymake
   :ensure nil
+  :after consult
   :bind (:map flymake-mode-map
               ("C-c e e" . consult-flymake)
               ("C-c e n" . flymake-goto-next-error)
               ("C-c e p" . flymake-goto-prev-error))
   :hook (prog-mode . flymake-mode))
-
 
 (defun eglot-open-link ()
   "Open markdown link at point in the eldoc buffer."
