@@ -84,7 +84,7 @@
 (define-key my-code-keymap (kbd "f") #'format-buffer)
 (define-key my-code-keymap (kbd "a") #'eglot-code-actions)
 (define-key my-code-keymap (kbd "h") #'display-local-help)
-
+(define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)
 ;; Global keys
 (global-set-key (kbd "<escape>") #'keyboard-escape-quit)
 (global-set-key (kbd "C-g") #'prot/keyboard-quit-dwim)

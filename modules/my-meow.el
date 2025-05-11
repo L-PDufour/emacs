@@ -8,7 +8,7 @@
 
 ;;; Code:
 (use-package meow
-  :ensure t
+  :ensure nil
   :config
   (defun meow-setup ()
 	(setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)

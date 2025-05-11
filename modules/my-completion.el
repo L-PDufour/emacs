@@ -101,7 +101,16 @@
   :after (embark consult)
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
+(defun my/simple-corfu-space ()
+  "Simple space handling in Corfu.
+   Press SPC to insert the current candidate."
+  (interactive)
+  (if (and (boundp 'corfu--frame) (frame-live-p corfu--frame))
+      (corfu-insert)
+    (insert " ")))
 
+(with-eval-after-load 'corfu
+  (define-key corfu-map (kbd "SPC") #'my/simple-corfu-space))
 (use-package corfu
   :ensure nil
   :hook ((after-init . global-corfu-mode)
@@ -116,29 +125,41 @@
   :init
   (setq corfu-auto t
         corfu-cycle t
-        corfu-auto-prefix 1
+        corfu-auto-prefix 2
+        corfu-count 12
+        corfu-auto-delay 0.2
         corfu-preselect 'directory
         corfu-on-exact-match nil
         corfu-preview-current nil
         corfu-min-width 20
         corfu-quit-no-match 'separator
         corfu-popupinfo-delay '(1.25 . 0.5))
-
   :config
-  (setq corfu-popupinfo-mode 1)
-  (setq corfu-history-mode 1)
+  ;; Load extensions
+  (require 'corfu-history)
+  (require 'corfu-popupinfo)
+
+  ;; Properly enable the modes
+  (corfu-popupinfo-mode 1)
+  (corfu-history-mode 1)
+
   (setq text-mode-ispell-word-completion nil)
+
   ;; Enable terminal support
   (unless (display-graphic-p)
     (corfu-terminal-mode 1))
 
-  ;; Add to savehist
+  ;; Add to savehist - do this BEFORE savehist-mode is activated
+  (add-to-list 'savehist-additional-variables 'corfu-history)
+
+  ;; Make sure history is saved
   (with-eval-after-load 'savehist
-    (add-to-list 'savehist-additional-variables 'corfu-history)))
-;;; Cape
+    (unless (member 'corfu-history savehist-additional-variables)
+      (add-to-list 'savehist-additional-variables 'corfu-history))))
+
 (use-package cape
   :ensure nil
-  :init
+  :demand t    ; Load immediately, not lazily
   :bind ("C-c p" . cape-prefix-map)
   :custom
   (text-mode-ispell-word-completion nil)
@@ -148,26 +169,27 @@
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-history)
 
-  ;; Define custom functions
-  (defun my/ignore-elisp-keywords (cand)
-    (or (not (keywordp cand))
-        (eq (char-after (car completion-in-region--data)) ?:)))
-
-  (defun my/setup-elisp ()
-    (setq-local completion-at-point-functions
-                `(,(cape-capf-super
-                    (cape-capf-predicate
-                     #'elisp-completion-at-point
-                     #'my/ignore-elisp-keywords)
-                    #'cape-dabbrev)
-                  cape-file)
-                cape-dabbrev-min-length 5))
-
-  ;; Actually use the setup function by adding it to the appropriate hook
-  (add-hook 'emacs-lisp-mode-hook #'my/setup-elisp)
 
   (setq cape-dabbrev-check-other-buffers t))
 
+(with-eval-after-load 'cape
+
+  (defun my/ignore-elisp-keywords (cand)
+	(or (not (keywordp cand))
+		(eq (char-after (car completion-in-region--data)) ?:)))
+
+  (defun my/setup-elisp ()
+	(interactive)
+    (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       (cape-capf-predicate
+                        #'elisp-completion-at-point
+                        #'my/ignore-elisp-keywords)
+                       #'cape-dabbrev)
+                      #'cape-file))
+    (setq-local cape-dabbrev-min-length 5))
+
+  (add-hook 'emacs-lisp-mode-hook #'my/setup-elisp))
 ;; Set up elisp-specific completion with keyword filtering
 (provide 'my-completion)
 ;;; my-completion.el ends here
