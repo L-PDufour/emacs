@@ -11,11 +11,7 @@
 (setq user-emacs-directory (expand-file-name "~/.emacs.d/"))
 (add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
 
-;; Reset GC after startup
-(add-hook 'after-init-hook
-          #'(lambda () (setq gc-cons-threshold (* 8 1024 1024))))
 
-;; Disable package.el in favor of straight.el
 (setq package-enable-at-startup nil)
 
 ;; Faster startup optimizations

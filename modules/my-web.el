@@ -24,20 +24,12 @@
 
 
 (use-package flymake-eslint
-  :ensure nil
-  :custom
-  (flymake-eslint-prefer-json-diagnostics t)
   :hook
-  ((js-mode js-ts-mode typescript-mode typescript-ts-mode) .
-   (lambda ()
-     ;; Make exec-path local to this buffer
-     (make-local-variable 'exec-path)
-     ;; Try to find eslint_d in the project's node_modules
-     (let ((project-eslint (expand-file-name "node_modules/.bin" (project-root (project-current)))))
-       (when (file-directory-p project-eslint)
-         (add-to-list 'exec-path project-eslint)))
-     ;; Enable eslint checker
-     (flymake-eslint-enable))))
+  (eglot-managed-mode . (lambda ()
+                          (when (derived-mode-p 'typescript-ts-mode 'web-mode 'js-ts-mode)
+                            (flymake-eslint-enable))))
+  :custom
+  (flymake-eslint-executable-name "eslint_d"))
 
 (use-package apheleia
   :ensure nil
@@ -45,7 +37,7 @@
   :config
   (apheleia-global-mode +1)
   (setf (alist-get 'prettier apheleia-formatters)
-        '("prettier" "--stdin-filepath" filepath)))
+        '("prettierd" filepath)))
 
 
 (provide 'my-web)

@@ -145,14 +145,6 @@
   :config
   (diminish 'line-number-mode))
 
-;; Defer garbage collection during rapid interactions
-(defun my/gc-strategy ()
-  "Set GC threshold based on user activity."
-  (setq gc-cons-threshold (if (eq this-command 'self-insert-command)
-                              (* 64 1024 1024)  ;; 64MB during typing
-							(* 16 1024 1024)))) ;; 16MB otherwise
-
-(add-hook 'post-command-hook #'my/gc-strategy)
 
 (setq jit-lock-defer-time 0.05)
 (require 'my-markdown)

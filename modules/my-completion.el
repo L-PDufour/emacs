@@ -101,16 +101,7 @@
   :after (embark consult)
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
-(defun my/simple-corfu-space ()
-  "Simple space handling in Corfu.
-   Press SPC to insert the current candidate."
-  (interactive)
-  (if (and (boundp 'corfu--frame) (frame-live-p corfu--frame))
-      (corfu-insert)
-    (insert " ")))
 
-(with-eval-after-load 'corfu
-  (define-key corfu-map (kbd "SPC") #'my/simple-corfu-space))
 (use-package corfu
   :ensure nil
   :hook ((after-init . global-corfu-mode)
@@ -120,7 +111,7 @@
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
-              ("M-SPC" . corfu-insert-separator)
+              ("C-SPC" . corfu-insert-separator)
               ("M-;" . corfu-complete))
   :init
   (setq corfu-auto t
@@ -167,10 +158,7 @@
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  (add-hook 'completion-at-point-functions #'cape-history)
-
-
-  (setq cape-dabbrev-check-other-buffers t))
+  (add-hook 'completion-at-point-functions #'cape-history))
 
 (with-eval-after-load 'cape
 
@@ -182,11 +170,11 @@
 	(interactive)
     (setq-local completion-at-point-functions
                 (list (cape-capf-super
-                       (cape-capf-predicate
+					   (cape-capf-predicate
                         #'elisp-completion-at-point
                         #'my/ignore-elisp-keywords)
-                       #'cape-dabbrev)
-                      #'cape-file))
+					   #'cape-dabbrev)
+					  #'cape-file))
     (setq-local cape-dabbrev-min-length 5))
 
   (add-hook 'emacs-lisp-mode-hook #'my/setup-elisp))

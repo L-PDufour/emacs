@@ -172,6 +172,7 @@
         (setq-local completion-at-point-functions
                     (list (cape-capf-super
                            #'eglot-completion-at-point
+						   #'cape-dabbrev
                            #'tempel-complete
                            #'cape-file)))
         (message "CAPF set to: %S" completion-at-point-functions))
