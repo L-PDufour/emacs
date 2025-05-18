@@ -84,6 +84,8 @@
 
 (use-package tempel
   :ensure nil
+  :custom
+  (tempel-trigger-prefix "<")
   :bind (:map tempel-map
               ("M-+" . tempel-complete)
               ("M-*" . tempel-insert)
@@ -198,9 +200,7 @@
 										 (typescript-ts-mode :language-id "typescript")
 										 (typescript-mode :language-id "typescript"))
 										"vtsls" "--stdio"))
-
-  (fset #'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
-
+  (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
 
   (setq completion-category-overrides '((eglot (styles orderless))
 										(eglot-capf (styles orderless))))

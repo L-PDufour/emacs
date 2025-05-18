@@ -1,17 +1,5 @@
 ;;; my-keybinds.el --- Custom keybindings -*- lexical-binding: t; -*-
 
-(defun consult-ripgrep-at-point ()
-  "Ripgrep the symbol at point from the project root or current directory."
-  (interactive)
-  (let* ((symbol (thing-at-point 'symbol))
-         (default-directory (if (fboundp 'project-root)
-                                (or (project-root (project-current))
-                                    default-directory)
-                              default-directory)))
-    (if symbol
-        (consult-ripgrep default-directory symbol)
-      (user-error "No symbol at point"))))
-
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for a general `keyboard-quit'."
   (interactive)
@@ -25,7 +13,27 @@
    (t
     (keyboard-quit))))
 
-;; Create keymaps for different categories
+(defun my-project-find-file ()
+  "Find file in current project with fallback to current directory.
+If in a project, use `project-find-file`.
+If not in a project, fallback to `consult-find` in current directory."
+  (interactive)
+  (if (and (fboundp 'project-current) (project-current))
+      (call-interactively #'project-find-file)  ;; Fixed: Now using call-interactively
+    (message "No project detected, falling back to consult-find in current directory")
+    (if (fboundp 'consult-find)
+        (consult-find default-directory)
+      (call-interactively #'find-file))))
+
+
+(defun my-project-buffer ()
+  "Enhanced project-aware buffer management.
+Opens consult-buffer with project filtering if in a project."
+  (interactive)
+  (if (and (fboundp 'project-current) (project-current))
+      (consult-project-buffer)
+    (call-interactively #'consult-buffer)))
+
 (defvar my-file-keymap (make-sparse-keymap) "Keymap for file operations")
 (defvar my-buffer-keymap (make-sparse-keymap) "Keymap for buffer operations")
 (defvar my-window-keymap (make-sparse-keymap) "Keymap for window operations")
@@ -41,23 +49,24 @@
 
 ;; Direct global bindings instead of aliases
 (global-set-key (kbd "C-c f") my-file-keymap)
-(global-set-key (kbd "C-c b") my-buffer-keymap)
+;; (global-set-key (kbd "C-c b") my-buffer-keymap)
 (global-set-key (kbd "C-c w") my-window-keymap)
 (global-set-key (kbd "C-c s") my-search-keymap)
 (global-set-key (kbd "C-c l") my-code-keymap)
 
 ;; File operations (C-c f ...)
-(define-key my-file-keymap (kbd "f") #'find-file)
+(define-key my-file-keymap (kbd "a") #'my-project-find-file)
+(define-key my-file-keymap (kbd "b") #'my-project-find-buffer)
 (define-key my-file-keymap (kbd "r") #'consult-recent-file)
-(define-key my-file-keymap (kbd "s") #'save-buffer)
-(define-key my-file-keymap (kbd "c") #'write-file)
-(define-key my-file-keymap (kbd "p") #'project-find-file)
+;; (define-key my-file-keymap (kbd "s") #'save-buffer)
+;; (define-key my-file-keymap (kbd "c") #'write-file)
+;; (define-key my-file-keymap (kbd "p") #'project-find-file)
 
 ;; Rest of your keybindings...
-(define-key my-buffer-keymap (kbd "b") #'switch-to-buffer)
-(define-key my-buffer-keymap (kbd "k") #'kill-buffer)
-(define-key my-buffer-keymap (kbd "r") #'revert-buffer)
-(define-key my-buffer-keymap (kbd "l") #'list-buffers)
+;; (define-key my-buffer-keymap (kbd "b") #'switch-to-buffer)
+;; (define-key my-buffer-keymap (kbd "k") #'kill-buffer)
+;; (define-key my-buffer-keymap (kbd "r") #'revert-buffer)
+;; (define-key my-buffer-keymap (kbd "l") #'list-buffers)
 
 ;; Window operations
 (define-key my-window-keymap (kbd "v") #'split-window-right)
@@ -72,12 +81,14 @@
 (define-key my-window-keymap (kbd "o") #'delete-other-windows)
 
 ;; Search operations
-(define-key my-search-keymap (kbd "s") #'consult-line)
-(define-key my-search-keymap (kbd "p") #'consult-ripgrep)
-(define-key my-search-keymap (kbd "f") #'consult-find)
+(define-key my-search-keymap (kbd "l") #'consult-line)
+(define-key my-search-keymap (kbd "G") #'consult-ripgrep)
 (define-key my-search-keymap (kbd "g") #'consult-grep)
-;; (define-key my-search-keymap (kbd "w") #'consult-ripgrep-at-point)
-
+(define-key my-search-keymap (kbd "o") #'consult-outline)              ; search headings/functions
+(define-key my-search-keymap (kbd "i") #'consult-imenu)                ; search structure via imenu
+(define-key my-search-keymap (kbd "m") #'consult-mark)                 ; search marks
+(define-key my-search-keymap (kbd "M") #'consult-global-mark)                 ; search marks
+(define-key my-search-keymap (kbd "r") #'consult-history)
 ;; Code operations
 (define-key my-code-keymap (kbd "d") #'xref-find-definitions)
 (define-key my-code-keymap (kbd "r") #'xref-find-references)

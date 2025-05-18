@@ -39,7 +39,7 @@
   (set-mark-command-repeat-pop t)
 
   :config
-  (global-hl-line-mode 1)      ;; Enable highlight of the current line
+  ;; (global-hl-line-mode 1)      ;; Enable highlight of the current line
   (global-auto-revert-mode 1)  ;; Enable global auto-revert mode to keep buffers up to date with their corresponding files.
   (indent-tabs-mode -1)        ;; Disable the use of tabs for indentation (use spaces instead).
   (recentf-mode 1)             ;; Enable tracking of recently opened files.
@@ -47,18 +47,21 @@
   (save-place-mode 1)          ;; Enable saving the place in files for easier return.
   (winner-mode 1)              ;; Enable winner mode to easily undo window configuration changes.
   (file-name-shadow-mode 1)    ;; Enable shadowing of filenames for clarity.
-
+  (setq ring-bell-function 'ignore)
   (modify-coding-system-alist 'file "" 'utf-8)
 
   (repeat-mode 1)
   (auto-save-visited-mode 1)
   (blink-cursor-mode 0)
-
   (let ((mono-font "FiraCode Nerd Font")
-        (sans-font "DejaVu Sans"))
-    (set-face-attribute 'default nil :family mono-font :weight 'medium :height 160)
-    (set-face-attribute 'fixed-pitch nil :family mono-font)
-    (set-face-attribute 'variable-pitch nil :family sans-font))
+		(sans-font "DejaVu Sans"))
+	;; Significantly larger font size for 4K screens
+	;; Values between 180-240 are often good for 4K displays
+	(set-face-attribute 'default nil :family mono-font :weight 'medium :height 170)
+	(set-face-attribute 'fixed-pitch nil :family mono-font :height 1.0)
+	(set-face-attribute 'variable-pitch nil :family sans-font :height 1.1))
+
+  ;; Improve readability with increased line spacing
   (setq-default display-line-numbers-grow-only t
                 display-line-numbers-type t
                 display-line-numbers-width 2

@@ -24,12 +24,16 @@
 
 
 (use-package flymake-eslint
+  :ensure nil
+  :after flymake
+  :custom
+  (flymake-eslint-executable-name "eslint_d")
   :hook
+  ;; Use a more robust hook that ensures proper loading order
   (eglot-managed-mode . (lambda ()
                           (when (derived-mode-p 'typescript-ts-mode 'web-mode 'js-ts-mode)
-                            (flymake-eslint-enable))))
-  :custom
-  (flymake-eslint-executable-name "eslint_d"))
+                            ;; Add a small delay to ensure other modes are fully loaded
+                            (run-with-idle-timer 0.5 nil 'flymake-eslint-enable)))))
 
 (use-package apheleia
   :ensure nil
