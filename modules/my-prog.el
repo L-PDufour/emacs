@@ -33,40 +33,16 @@
 ;;; Xref
 (use-package xref
   :ensure nil
-  ;; :bind ("C-M-?". xref-find-references-and-replace) ; Emacs 29.1
   :custom
-  (xref-show-definitions-function #'xref-show-definitions-completing-read)
-  (xref-show-xrefs-function #'xref-show-definitions-buffer)
   (xref-file-name-display 'project-relative)
-  (xref-search-program 'ripgrep)
-  (xref-history-storage 'xref-window-local-history) ; Per-window history of `xref-go-*'
-  :config
-  ;; We remove the fallback backend, `etags--xref-backend', which prompts the
-  ;; user for an etags table -- this is undesirable for me.
-  (setq-default xref-backend-functions nil)
-  ;; Then add `elisp--xref-backend' as the global value of
-  ;; `xref-backend-functions', which means it is run when the local value ends
-  ;; with `t'. See (info "(elisp) Running Hooks") for an explanation.
-  (add-hook 'xref-backend-functions #'elisp--xref-backend))
-  ;;; Consult-xref-stack
-(use-package consult-xref-stack
-  :ensure nil
-  :bind (([remap xref-go-back] . krisb-consult-xref-stack-backward)
-         ([remap xref-go-forward] . krisb-consult-xref-stack-forward))
-  :config
-  (defun krisb-consult-xref-stack-backward (arg)
-    "Call `xref-go-back' or `consult-xref-stack-backward' when called with ARG."
-    (interactive "p")
-    (call-interactively
-     (if (< 1 arg) 'consult-xref-stack-backward 'xref-go-back)))
+  (xref-search-program 'ripgrep))
 
-  (defun krisb-consult-xref-stack-forward (arg)
-    "Call `xref-go-forward' or `consult-xref-stack-forward' when called with ARG."
-    (interactive "p")
-    (call-interactively
-     (if (< 1 arg) 'consult-xref-stack-forward 'xref-go-forward))))
+;; Separate configuration for consult-xref
+(with-eval-after-load 'consult
+  (with-eval-after-load 'xref
+    (setq xref-show-definitions-function #'consult-xref
+          xref-show-xrefs-function #'consult-xref)))
 
-;;; Dumber-jump
 ;; A lean fork of dumb-jump.
 (use-package dumber-jump
   :ensure nil
@@ -89,8 +65,8 @@
   :bind (:map tempel-map
               ("M-+" . tempel-complete)
               ("M-*" . tempel-insert)
-              ("C-k" . tempel-next)
-              ("C-j" . tempel-previous))
+              ("M-n" . tempel-next)
+              ("M-p" . tempel-previous))
   :config
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
@@ -237,6 +213,14 @@
 	(if url
 		(browse-url url)
 	  (message "No URL found at point"))))
+
+(use-package apheleia
+  :ensure nil
+  :diminish
+  :config
+  (apheleia-global-mode +1)
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("prettierd" filepath)))
 
 (provide 'my-prog)
 ;;; my-prog.el ends here

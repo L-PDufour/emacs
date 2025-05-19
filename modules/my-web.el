@@ -35,13 +35,7 @@
                             ;; Add a small delay to ensure other modes are fully loaded
                             (run-with-idle-timer 0.5 nil 'flymake-eslint-enable)))))
 
-(use-package apheleia
-  :ensure nil
-  :diminish
-  :config
-  (apheleia-global-mode +1)
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("prettierd" filepath)))
+
 
 
 (provide 'my-web)

@@ -28,5 +28,18 @@
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
+(use-package visual-fill-column
+  :ensure nil
+  :custom
+  (visual-fill-column-width 100)
+  (visual-fill-column-center-text t)
+  (visual-fill-column-enable-sensible-window-split t)
+  :bind
+  ("C-c t c" . visual-fill-column-mode)  ;; Toggle centered mode with C-c t c
+  :config
+
+  (global-visual-fill-column-mode 1)
+  )
+
 (provide 'my-themes)
 ;;; my-themes.el ends here
