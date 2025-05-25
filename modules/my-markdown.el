@@ -5,7 +5,6 @@
 
 (use-package markdown-mode
   :ensure nil
-  :demand t
   :mode ("\\.md\\'" . markdown-mode)
   :hook (markdown-mode . visual-line-mode))
 

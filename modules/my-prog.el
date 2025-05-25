@@ -30,18 +30,14 @@
   :config
   (setq ibuffer-project-use-cache t))
 
-;;; Xref
 (use-package xref
   :ensure nil
+  :after consult
   :custom
+  (xref-show-definitions-function #'consult-xref)
+  (xref-show-xrefs-function #'consult-xref)
   (xref-file-name-display 'project-relative)
   (xref-search-program 'ripgrep))
-
-;; Separate configuration for consult-xref
-(with-eval-after-load 'consult
-  (with-eval-after-load 'xref
-    (setq xref-show-definitions-function #'consult-xref
-          xref-show-xrefs-function #'consult-xref)))
 
 ;; A lean fork of dumb-jump.
 (use-package dumber-jump
@@ -195,11 +191,8 @@
   :config
   (eglot-booster-mode 1))
 
-;; Flymake for error checking
-
 (use-package flymake
   :ensure nil
-  :after consult
   :bind (:map flymake-mode-map
 			  ("C-c e e" . consult-flymake)
 			  ("C-c e n" . flymake-goto-next-error)

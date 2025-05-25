@@ -2,7 +2,8 @@
 ;;; Commentary: org
 ;;; Code:
 (use-package org-appear
-  :ensure nil)
+  :ensure nil
+  :hook(org-mode . org-appear-mode))
 
 
 (use-package org

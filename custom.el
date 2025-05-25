@@ -20,7 +20,7 @@
  '(ibuffer-movement-cycle nil)
  '(ibuffer-old-time 24)
  '(kill-do-not-save-duplicates t)
- '(load-prefer-newer t t)
+ '(load-prefer-newer t)
  '(marginalia-annotators
    '(marginalia-annotators-heavy marginalia-annotators-light nil) t)
  '(org-agenda-files
@@ -78,4 +78,5 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(line-number ((t (:background "#292c3c" :foreground "#626880"))))
+ '(line-number-current-line ((t (:background "#292c3c" :foreground "#babbf1")))))

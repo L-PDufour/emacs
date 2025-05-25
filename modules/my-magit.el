@@ -5,7 +5,9 @@
 ;;; Code:
 
 (use-package magit
-  :ensure nil)
+  :ensure nil
+  :bind (("C-x g" . magit-status)))
+
 
 (provide 'my-magit)
 ;;; my-magit.el ends here

@@ -27,11 +27,11 @@
 (use-package eat
   :ensure nil
   :custom
-  (eat-term-name "xterm-256color")  ; Better color support
-  (eat-kill-buffer-on-exit t)       ; Clean up when terminal exits
-  :config
-  (eat-eshell-mode)
-  (eat-eshell-visual-command-mode))
+  (eat-term-name "xterm-256color")
+  (eat-kill-buffer-on-exit t)
+  :hook
+  ((after-init . eat-eshell-mode)
+   (after-init . eat-eshell-visual-command-mode)))
 
 (provide 'my-shell)
 ;;; my-shell.el ends here

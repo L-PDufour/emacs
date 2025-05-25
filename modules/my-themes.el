@@ -3,10 +3,18 @@
 
 ;;; Code:
 
-(use-package base16-theme
+;; (use-package base16-theme
+;;   :ensure nil
+;;   :config
+;;   (load-theme 'base16-catppuccin-frappe t))
+
+(use-package catppuccin-theme
   :ensure nil
-  :config
-  (load-theme 'base16-catppuccin-frappe t))
+  :custom
+  (catppuccin-flavor 'frappe)
+  :hook
+  (after-init . catppuccin-reload))
+
 
 (use-package nerd-icons
   :ensure nil)

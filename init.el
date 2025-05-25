@@ -102,9 +102,9 @@
 
 (use-package diff-hl
   :ensure nil
-  :config
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-  (global-diff-hl-mode))
+  :hook
+  ((after-init . global-diff-hl-mode)
+   (magit-post-refresh . diff-hl-magit-post-refresh)))
 
 (use-package undo-fu-session
   :ensure nil
@@ -134,51 +134,69 @@
   :config
   (editorconfig-mode 1))
 
-(defun my--server ()
-  (unless (server-running-p)
-    (server-start)))
+;; (defun my--server ()
+;;   (unless (server-running-p)
+;;     (server-start)))
 
-(use-package server
-  :ensure nil   ; Good - server is built into Emacs
-  :hook
-  (after-init . my--server))
+;; (use-package server
+;;   :ensure nil   ; Good - server is built into Emacs
+;;   :hook
+;;   (after-init . my--server))
 
 (use-package diminish
   :ensure nil
   :config
   (diminish 'line-number-mode))
 
+(use-package dape
+  :ensure nil
+  :defer t)
 
 (setq jit-lock-defer-time 0.05)
-(require 'my-markdown)
-(require 'my-themes)
-(require 'my-dired)
-(require 'my-editing-utils)
-(require 'my-treesit)
+;; Load completion system first - other modules depend on it
 (require 'my-completion)
-(require 'my-elisp)
-(require 'my-go)
-;; (require 'my-llm)
-(require 'my-lua)
-(require 'my-magit)
-(require 'my-nix)
-(require 'my-shell)
-;; (require 'my-spelling)
+
+;; Load core utilities and themes early
+(require 'my-themes)
+(require 'my-which-key)
 (require 'my-utils)
 
-(require 'my-web)
-(require 'my-which-key)
+;; Load editing enhancements
+(require 'my-editing-utils)
+(require 'my-treesit)
+
+;; Load programming support (depends on completion)
 (require 'my-prog)
+
+;; Load language-specific modes
+(require 'my-elisp)
+(require 'my-go)
+(require 'my-lua)
+(require 'my-nix)
+(require 'my-web)
+(require 'my-markdown)
+
+;; Load version control (can be heavy)
+(require 'my-magit)
+
+;; Load applications
+(require 'my-dired)
+(require 'my-shell)
 (require 'my-org)
+
+;; Load modal editing last (affects all modes)
 (require 'my-meow)
+
+;; Load custom keybindings last
+(require 'my-keybinds)
+
+;; Commented out modules
+;; (require 'my-llm)
+;; (require 'my-spelling)
 ;; (require 'my-evil)
 ;; (require 'my-lsp)
 
-(require 'my-keybinds)
 
-(use-package dape
-  :ensure nil
-  :config)
 
 
 (provide 'init)

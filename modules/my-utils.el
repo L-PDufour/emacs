@@ -4,7 +4,8 @@
 ;;; Code:
 
 (use-package pdf-tools
-  :ensure nil)
+  :ensure nil
+  :mode ("\\.pdf\\'" . pdf-view-mode))
 
 (use-package tramp
   :ensure nil
