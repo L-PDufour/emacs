@@ -211,9 +211,22 @@
   :ensure nil
   :diminish
   :config
-  (apheleia-global-mode +1)
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("prettierd" filepath)))
+  ;; Configure prettierd formatter
+  (setf (alist-get 'prettierd apheleia-formatters)
+        '("prettierd" filepath))
+
+  ;; Update mode associations to use prettierd instead of prettier
+  (setf (alist-get 'js-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'typescript-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'json-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'json-ts-mode aphelias-mode-alist) 'prettierd)
+  (setf (alist-get 'css-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'html-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'web-mode apheleia-mode-alist) 'prettierd))
 
 (provide 'my-prog)
 ;;; my-prog.el ends here

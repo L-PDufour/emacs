@@ -59,7 +59,7 @@
   :ensure nil)
 
 (use-package consult-flymake
-  :ensure nil
+  :ensure nil)
 
   (use-package consult
 	:ensure nil
