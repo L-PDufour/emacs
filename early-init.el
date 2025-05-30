@@ -28,6 +28,9 @@
 			  (lambda ()
 				(setq file-name-handler-alist old-value)))))
 
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 16 1024 1024)))) ; Add GC reset here
 ;; UI preferences (set via default-frame-alist for early application)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
