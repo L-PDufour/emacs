@@ -20,15 +20,16 @@
   (global-treesit-auto-mode)
   (treesit-auto-install-all))
 
-(use-package combobulate
+(use-package
+  combobulate
   :ensure nil
-  :config
-  ;; Add a function to find-file-hook to clear highlighting in .js files
-  (add-hook 'find-file-hook
-            (lambda ()
-              (when (and buffer-file-name
-                         (string-match-p "\\.js\\'" buffer-file-name))
-                (combobulate-highlight-clear))))
+  ;; :config
+  ;; ;; Add a function to find-file-hook to clear highlighting in .js files
+  ;; (add-hook 'find-file-hook
+  ;;           (lambda ()
+  ;;             (when (and buffer-file-name
+  ;;                        (string-match-p "\\.js\\'" buffer-file-name))
+  ;;               (combobulate-highlight-clear))))
   :custom
   ;; You can customize Combobulate's key prefix here.
   ;; Note that you may have to restart Emacs for this to take effect!

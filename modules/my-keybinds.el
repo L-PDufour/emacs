@@ -26,7 +26,7 @@ If not in a project, fallback to `consult-find` in current directory."
       (call-interactively #'find-file))))
 
 
-(defun my-project-buffer ()
+(defun my-project-find-buffer ()
   "Enhanced project-aware buffer management.
 Opens consult-buffer with project filtering if in a project."
   (interactive)
