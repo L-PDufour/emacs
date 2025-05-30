@@ -63,22 +63,22 @@
 
   ;; Improve readability with increased line spacing
   (setq-default display-line-numbers-grow-only t
-                display-line-numbers-type t
-                display-line-numbers-width 2
-                recentf-max-saved-items 50)
+				display-line-numbers-type t
+				display-line-numbers-width 2
+				recentf-max-saved-items 50)
   (defun pulse-line (&rest _)
-    "Pulse the current line."
-    (pulse-momentary-highlight-one-line (point)))
+	"Pulse the current line."
+	(pulse-momentary-highlight-one-line (point)))
 
   (dolist (command '(scroll-up-command
-                     scroll-down-command
-                     recenter-top-bottom
-                     other-window))
-    (advice-add command :after #'pulse-line))
+					 scroll-down-command
+					 recenter-top-bottom
+					 other-window))
+	(advice-add command :after #'pulse-line))
 
   (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
   (when (file-exists-p custom-file)
-    (load custom-file nil :nomessage))
+	(load custom-file nil :nomessage))
 
   :hook ((prog-mode . subword-mode)
 		 (prog-mode . font-lock-fontify-buffer)
@@ -114,7 +114,7 @@
 
   ;; Create the directory if it doesn't exist
   (unless (file-exists-p undo-fu-session-directory)
-    (make-directory undo-fu-session-directory t))
+	(make-directory undo-fu-session-directory t))
 
   ;; Configure session settings
   (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
@@ -123,6 +123,50 @@
   ;; Enable globally
   (global-undo-fu-session-mode))
 
+;; testing
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+(global-eldoc-mode 1) ; eglot uses this too
+
+(electric-pair-mode 1) ; auto parens in pairs
+
+(add-hook 'before-save-hook 'whitespace-cleanup) ; auto strip whitespace
+
+(delete-selection-mode) ; allow highlight and backspace over text like a normal editor
+
+(setq-default
+ frame-resize-pixelwise t ; support better certain window managers like ratpoison
+
+ ;; better security
+ gnutls-verify-error t
+ gnutls-min-prime-bits 2048
+
+ ;; dont expire a passphrase
+ password-cache-expiry nil
+
+ mouse-yank-at-point t
+ save-interprogram-paste-before-kill t
+ apropos-do-all t
+ require-final-newline t
+ ediff-window-setup-function 'ediff-setup-windows-plain
+
+ tramp-default-method "ssh"
+ tramp-copy-size-limit nil
+
+ vc-follow-symlinks t ; open symlinks, don't ask confusing questions
+
+ ring-bell-function 'ignore ; be quiet
+
+ browse-url-browser-function 'eww-browse-url ; use a text browser --great for clicking documentation links
+ )
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-x C-z"))
+
+
+;;; testing stop
 (use-package vundo
   :ensure nil
   :config
@@ -155,7 +199,7 @@
 (setq jit-lock-defer-time 0.05)
 ;; Load completion system first - other modules depend on it
 (require 'my-completion)
-
+(require 'my-markdown)
 ;; Load core utilities and themes early
 (require 'my-themes)
 (require 'my-which-key)
@@ -167,14 +211,14 @@
 
 ;; Load programming support (depends on completion)
 (require 'my-prog)
-
+;; (require 'my-lsp)
 ;; Load language-specific modes
 (require 'my-elisp)
 (require 'my-go)
 (require 'my-lua)
 (require 'my-nix)
 (require 'my-web)
-(require 'my-markdown)
+
 
 ;; Load version control (can be heavy)
 (require 'my-magit)
@@ -191,7 +235,7 @@
 (require 'my-keybinds)
 
 ;; Commented out modules
-;; (require 'my-llm)
+(require 'my-llm)
 ;; (require 'my-spelling)
 ;; (require 'my-evil)
 ;; (require 'my-lsp)

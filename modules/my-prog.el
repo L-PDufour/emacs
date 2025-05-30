@@ -5,28 +5,28 @@
 (use-package project
   :ensure nil
   :bind ( :map project-prefix-map
-          ("e" . project-eshell))
+		  ("e" . project-eshell))
   :custom
   ;; The commands in `project-switch-commands' must be found in
   ;; `project-prefix-map'
   (project-switch-commands
    '((project-find-file "Find file")
-     (project-find-regexp "Find regexp")
-     (project-find-dir "Find directory")
-     (project-vc-dir "VC-Dir")
-     (project-eshell "Eshell")
-     (eat-project "EAT")
-     (project-any-command "Other"))))
+	 (project-find-regexp "Find regexp")
+	 (project-find-dir "Find directory")
+	 (project-vc-dir "VC-Dir")
+	 (project-eshell "Eshell")
+	 (eat-project "EAT")
+	 (project-any-command "Other"))))
 
 
 ;; Project management for ibuffer
 (use-package ibuffer-project
   :ensure nil
   :hook (ibuffer . (lambda ()
-                     (setq ibuffer-filter-groups
-                           (ibuffer-project-generate-filter-groups))
-                     (unless (eq ibuffer-sorting-mode 'project-file-relative)
-                       (ibuffer-do-sort-by-project-file-relative))))
+					 (setq ibuffer-filter-groups
+						   (ibuffer-project-generate-filter-groups))
+					 (unless (eq ibuffer-sorting-mode 'project-file-relative)
+					   (ibuffer-do-sort-by-project-file-relative))))
   :config
   (setq ibuffer-project-use-cache t))
 
@@ -51,30 +51,30 @@
   (add-hook 'xref-backend-functions #'dumber-jump-xref-activate)
   :config
   (setopt dumber-jump-project-denoters
-          (cl-remove-duplicates
-           (append dumber-jump-project-denoters project-vc-extra-root-markers))))
+		  (cl-remove-duplicates
+		   (append dumber-jump-project-denoters project-vc-extra-root-markers))))
 
 (use-package tempel
   :ensure nil
   :custom
   (tempel-trigger-prefix "<")
   :bind (:map tempel-map
-              ("M-+" . tempel-complete)
-              ("M-*" . tempel-insert)
-              ("M-n" . tempel-next)
-              ("M-p" . tempel-previous))
+			  ("M-+" . tempel-complete)
+			  ("M-*" . tempel-insert)
+			  ("M-n" . tempel-next)
+			  ("M-p" . tempel-previous))
   :config
   (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-complete
-                      completion-at-point-functions)))
+	;; Add the Tempel Capf to `completion-at-point-functions'.
+	;; `tempel-expand' only triggers on exact matches. Alternatively use
+	;; `tempel-complete' if you want to see all matches, but then you
+	;; should also configure `tempel-trigger-prefix', such that Tempel
+	;; does not trigger too often when you don't expect it. NOTE: We add
+	;; `tempel-expand' *before* the main programming mode Capf, such
+	;; that it will be tried first.
+	(setq-local completion-at-point-functions
+				(cons #'tempel-complete
+					  completion-at-point-functions)))
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
@@ -90,17 +90,17 @@
   :after (eglot tempel)  ;; Make sure eglot and tempel are loaded first
   :config                ;; Use :config instead of :init
   (when (fboundp 'eglot-tempel-mode)
-    (eglot-tempel-mode 1)))  ;; Use 1 instead of t for the mode
+	(eglot-tempel-mode 1)))  ;; Use 1 instead of t for the mode
 
 ;;; Eldoc
 (use-package eldoc
   :ensure nil
   :diminish
   :bind ( :map help-map
-          ("\." . eldoc-doc-buffer))
+		  ("\." . eldoc-doc-buffer))
   :custom
   (eldoc-print-after-edit nil)
-  (eldoc-idle-delay 1)
+  (eldoc-idle-delay 5)
   (eldoc-documentation-strategy
    'eldoc-documentation-compose-eagerly) ; Mash multiple sources together and display eagerly
   (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit) ; Also respects `max-mini-window-height'
@@ -116,12 +116,13 @@
 
 	;; Use custom documentation-functions (with custom priorities, given
 	;; by order):
-	(setq-local eldoc-documentation-functions
-				(list
-				 #'eglot-signature-eldoc-talkative
-				 #'eglot-hover-eldoc-function
-				 t
-				 #'flymake-eldoc-function))
+	(setq-local
+	 eldoc-documentation-functions
+	 (list
+	  #'eglot-signature-eldoc-talkative
+	  #'eglot-hover-eldoc-function
+	  t
+	  #'flymake-eldoc-function))
 
 	;; Optionally, in echo-area, only show the most important
 	;; documentation:
@@ -141,23 +142,23 @@
 
   ;; Only proceed if all required packages are available
   (if (and (featurep 'eglot) (featurep 'cape) (featurep 'tempel))
-      (progn
-        (message "Setting up Eglot with Tempel integration")
-        (setq-local completion-at-point-functions
-                    (list (cape-capf-super
-                           #'eglot-completion-at-point
+	  (progn
+		(message "Setting up Eglot with Tempel integration")
+		(setq-local completion-at-point-functions
+					(list (cape-capf-super
+						   #'eglot-completion-at-point
 						   #'cape-dabbrev
-                           #'tempel-complete
-                           #'cape-file)))
-        (message "CAPF set to: %S" completion-at-point-functions))
-    ;; Error message if any package is missing
-    (let ((missing (cond
-                    ((not (featurep 'eglot)) "eglot")
-                    ((not (featurep 'cape)) "cape")
-                    ((not (featurep 'tempel)) "tempel")
-                    (t nil))))
-      (when missing
-        (message "Cannot set up eglot-capf: Package %s is not loaded" missing)))))
+						   #'tempel-complete
+						   #'cape-file)))
+		(message "CAPF set to: %S" completion-at-point-functions))
+	;; Error message if any package is missing
+	(let ((missing (cond
+					((not (featurep 'eglot)) "eglot")
+					((not (featurep 'cape)) "cape")
+					((not (featurep 'tempel)) "tempel")
+					(t nil))))
+	  (when missing
+		(message "Cannot set up eglot-capf: Package %s is not loaded" missing)))))
 ;; Core Eglot configuration - keep this in my-prog.el
 (use-package eglot
   :custom
@@ -213,7 +214,7 @@
   :config
   ;; Configure prettierd formatter
   (setf (alist-get 'prettierd apheleia-formatters)
-        '("prettierd" filepath))
+		'("prettierd" filepath))
 
   ;; Update mode associations to use prettierd instead of prettier
   (setf (alist-get 'js-mode apheleia-mode-alist) 'prettierd)
