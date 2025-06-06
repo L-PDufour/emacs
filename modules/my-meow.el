@@ -1,30 +1,29 @@
 ;;; my-meow.el --- Meow configuration  -*- lexical-binding: t; -*-
-
 ;; Copyright (C) 2025  desktop
 
 ;;; Commentary:
-
 ;; Configuration for the Meow modal editing package.
 
 ;;; Code:
-(use-package meow
-  :ensure nil
-  :config
+
+ (use-package meow
+   :init
   (defun meow-setup ()
 	(setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
 	(setq meow-use-clipboard t)
 	(setq meow-selection-command-fallback
-          '((meow-change . meow-change-char)
+		  '((meow-change . meow-change-char)
 			;; (meow-kill . meow-c-k)
 			(meow-kill . meow-delete)
 			;; (meow-cancel-selection . keyboard-quit)
 			(meow-cancel-selection . ignore)
 			(meow-pop-selection . meow-pop-grab)
 			(meow-beacon-change . meow-beacon-change-char)))
-	(meow-motion-define-key
+
+	(meow-motion-overwrite-define-key
 	 '("j" . meow-next)
-	 '("k" . meow-prev)
-	 '("<escape>" . ignore))
+	 '("k" . meow-prev))
+
 	(meow-leader-define-key
 	 ;; Use SPC (0-9) for digit arguments.
 	 '("1" . meow-digit-argument)
@@ -39,6 +38,7 @@
 	 '("0" . meow-digit-argument)
 	 '("/" . meow-keypad-describe-key)
 	 '("?" . meow-cheatsheet))
+
 	(meow-normal-define-key
 	 '("0" . meow-expand-0)
 	 '("9" . meow-expand-9)
@@ -61,8 +61,8 @@
 	 '("b" . meow-back-word)
 	 '("B" . meow-back-symbol)
 	 '("c" . meow-change)
-	 '("d" . meow-kill)
-	 ;; '("D" . meow-backward-delete)
+	 '("d" . meow-delete)
+	 '("D" . meow-backward-delete)
 	 '("e" . meow-next-word)
 	 '("E" . meow-next-symbol)
 	 '("f" . meow-find)
@@ -87,7 +87,7 @@
 	 '("Q" . meow-goto-line)
 	 '("r" . meow-replace)
 	 '("R" . meow-swap-grab)
-	 ;; '("s" . meow-kill)
+	 '("s" . meow-kill)
 	 '("t" . meow-till)
 	 '("u" . meow-undo)
 	 '("U" . meow-undo-in-selection)
@@ -100,9 +100,9 @@
 	 '("Y" . meow-sync-grab)
 	 '("z" . meow-pop-selection)
 	 '("'" . repeat)
-	 '("<escape>" . keyboard-escape-quit)))
+	 '("<escape>" . ignore)))
 
-  (require 'meow)
+  :config
   (meow-setup)
   (meow-setup-indicator)
   (meow-global-mode 1))
@@ -115,6 +115,3 @@
 
 (provide 'my-meow)
 ;;; my-meow.el ends here
-;; Copyright (C) 2025  desktop
-
-;; Author: desktop <desktop@nixos>

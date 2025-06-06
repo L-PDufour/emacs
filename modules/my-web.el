@@ -24,8 +24,8 @@
 
 
 (use-package flymake-eslint
-  :ensure nil
-  :after flymake
+  ; :ensure nil
+  ; :after flymake
   :custom
   (flymake-eslint-executable-name "eslint_d")
   :hook

@@ -10,7 +10,7 @@
  '(completions-detailed t)
  '(dired-auto-revert-buffer t)
  '(dired-dwim-target t)
- '(ediff-window-setup-function 'ediff-setup-windows-plain t)
+ '(ediff-window-setup-function 'ediff-setup-windows-plain)
  '(eglot-autoshutdown t)
  '(eshell-scroll-to-bottom-on-input 'this)
  '(fancy-splash-image
@@ -20,9 +20,9 @@
  '(ibuffer-movement-cycle nil)
  '(ibuffer-old-time 24)
  '(kill-do-not-save-duplicates t)
- '(load-prefer-newer t)
+ '(load-prefer-newer t t)
  '(marginalia-annotators
-   '(marginalia-annotators-heavy marginalia-annotators-light nil) t)
+   '(marginalia-annotators-heavy marginalia-annotators-light nil))
  '(org-agenda-files
    '("/home/desktop/Sync/org/family/recipes/recipes.org"
 	 "/home/desktop/Sync/org/family/shoppingList.org"
@@ -39,8 +39,10 @@
    '(("gnu" . 99) ("nongnu" . 80) ("stable" . 70) ("melpa" . 0)))
  '(package-selected-packages nil)
  '(package-vc-selected-packages
-   '((catppuccin-theme :url "https://github.com/catppuccin/emacs" :branch
-					   "master")))
+   '((eglot-booster :url "https://github.com/jdtsmith/eglot-booster")
+	 (combobulate :url "https://github.com/mickeynp/combobulate")
+	 (catppuccin-theme :url "https://github.com/catppuccin/emacs"
+					   :branch "master")))
  '(safe-local-variable-values
    '((eval setq-local dape-configs
 		   '((js-debug-node :type "pwa-node" :request "attach" :port

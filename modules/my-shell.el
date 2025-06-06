@@ -1,10 +1,9 @@
 ;;; my-shell.el ---  -*- lexical-binding: t -*-
 ;;; Commentary:
-
 ;;; Code:
 
 (use-package eshell
-  :ensure nil
+  :ensure nil  ; eshell is built-in
   :init
   (defun bedrock/setup-eshell ()
     (keymap-set eshell-mode-map "C-r" 'consult-history)
@@ -25,13 +24,13 @@
    (eshell-mode . (lambda () (setenv "TERM" "xterm-256color")))))
 
 (use-package eat
-  :ensure nil
   :custom
   (eat-term-name "xterm-256color")
   (eat-kill-buffer-on-exit t)
   :hook
-  ((after-init . eat-eshell-mode)
-   (after-init . eat-eshell-visual-command-mode)))
+  ;; Set up hooks after package is loaded
+  (eshell-mode . eat-eshell-mode)
+  (eshell-mode . eat-eshell-visual-command-mode))
 
 (provide 'my-shell)
 ;;; my-shell.el ends here

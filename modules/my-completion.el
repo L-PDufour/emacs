@@ -18,14 +18,21 @@
 ;; Enable vertico
 
 (use-package vertico
-  :ensure nil
   :bind (:map vertico-map
-              ("M-;" . my/vertico-smart-insert ))
+              ("M-;" . my/vertico-smart-insert)
+              ;; Add directory navigation bindings directly here
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
   :config
   (fido-mode -1)
   (fido-vertical-mode -1)
   (icomplete-mode -1)
   (icomplete-vertical-mode -1)
+
+  ;; Enable vertico-directory extension
+  (require 'vertico-directory)
+
   (defun my/vertico-smart-insert ()
     "Insert the current candidate and set up a transient keymap
      that will exit the minibuffer if M-; is pressed again."
@@ -37,33 +44,15 @@
   :custom
   (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
   (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
-  :hook (after-init . vertico-mode))
-
-;; Configure directory extension.
-(use-package vertico-directory
-  :ensure nil
-  :after vertico
-  ;; More convenient directory navigation commands
-  :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
-  ;; Tidy shadowed file names
-  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+  :hook ((after-init . vertico-mode)
+         ;; Tidy shadowed file names
+         (rfn-eshadow-update-overlay . vertico-directory-tidy)))
 
 (use-package marginalia
-  :ensure nil
   :hook (after-init . marginalia-mode))
 
-(use-package consult-xref
-  :ensure nil)
-
-(use-package consult-flymake
-  :ensure nil)
 
   (use-package consult
-	:ensure nil
-	:demand t
 	;; Replace bindings. Lazily loaded by `use-package'.
 	:bind (;; C-c bindings in `mode-specific-map'
            ("C-c M-x" . consult-mode-command)
@@ -158,7 +147,6 @@
 	)
 
   (use-package orderless
-	:ensure nil
 	:custom
 	;; Configure a custom style dispatcher (see the Consult wiki)
 	;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
@@ -168,7 +156,6 @@
 	(completion-category-overrides '((file (styles partial-completion)))))
 
   (use-package embark
-	:ensure nil  ;; This is correct for Nix-managed packages
 	:bind
 	(("C-." . embark-act)
 	 ([remap describe-bindings] . embark-bindings))
@@ -179,13 +166,11 @@
       (message "Warning: embark-prefix-help-command not available in this version of Embark")))
 
   (use-package embark-consult
-	:ensure nil
 	:after (embark consult)
 	:hook
 	(embark-collect-mode . consult-preview-at-point-mode))
 
   (use-package corfu
-	:ensure nil
 	:hook ((after-init . global-corfu-mode)
 		   (eshell-mode . (lambda ()
 							(setq-local corfu-auto nil)
@@ -231,8 +216,6 @@
 		(add-to-list 'savehist-additional-variables 'corfu-history))))
 
   (use-package cape
-	:ensure nil
-	:demand t    ; Load immediately, not lazily
 	:bind ("C-c p" . cape-prefix-map)
 	:custom
 	(text-mode-ispell-word-completion nil)

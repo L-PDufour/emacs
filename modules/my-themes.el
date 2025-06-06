@@ -9,35 +9,29 @@
 ;;   (load-theme 'base16-catppuccin-frappe t))
 
 (use-package catppuccin-theme
-  :ensure nil
   :custom
   (catppuccin-flavor 'frappe)
   :hook
   (after-init . catppuccin-reload))
 
 
-(use-package nerd-icons
-  :ensure nil)
+(use-package nerd-icons)
 
 (use-package nerd-icons-completion
-  :ensure nil
   :after marginalia
   :config
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 (use-package nerd-icons-corfu
-  :ensure nil
   :after corfu
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package nerd-icons-dired
-  :ensure nil
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
 (use-package visual-fill-column
-  :ensure nil
   :custom
   (visual-fill-column-width 100)
   (visual-fill-column-center-text t)

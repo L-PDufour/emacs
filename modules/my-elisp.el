@@ -3,15 +3,27 @@
 
 ;;; Code:
 
+(require 'package)
+(unless package-archive-contents
+  (package-refresh-contents))
+
 (use-package aggressive-indent
-  :ensure nil
-  :hook ((emacs-lisp-mode . aggressive-indent-mode)
-         (scheme-mode . aggressive-indent-mode)))
+  :ensure t
+  :hook ((emacs-lisp-mode . (lambda ()
+                              (when (fboundp 'aggressive-indent-mode)
+                                (aggressive-indent-mode))))
+         (scheme-mode . (lambda ()
+                          (when (fboundp 'aggressive-indent-mode)
+                            (aggressive-indent-mode))))))
 
 (use-package rainbow-delimiters
-  :ensure nil
-  :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
-         (scheme-mode . rainbow-delimiters-mode)))
+  :ensure t
+  :hook ((emacs-lisp-mode . (lambda ()
+                              (when (fboundp 'rainbow-delimiters-mode)
+                                (rainbow-delimiters-mode))))
+         (scheme-mode . (lambda ()
+                          (when (fboundp 'rainbow-delimiters-mode)
+                            (rainbow-delimiters-mode))))))
 
 (provide 'my-elisp)
-;;; my-elisp.el ends here
+;;; my-elisp.el ends her

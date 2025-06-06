@@ -15,13 +15,12 @@
 	 (project-find-dir "Find directory")
 	 (project-vc-dir "VC-Dir")
 	 (project-eshell "Eshell")
-	 (eat-project "EAT")
+	 ; (eat-project "EAT")
 	 (project-any-command "Other"))))
 
 
 ;; Project management for ibuffer
 (use-package ibuffer-project
-  :ensure nil
   :hook (ibuffer . (lambda ()
 					 (setq ibuffer-filter-groups
 						   (ibuffer-project-generate-filter-groups))
@@ -32,7 +31,7 @@
 
 (use-package xref
   :ensure nil
-  :after consult
+  ; :after consult
   :custom
   (xref-show-definitions-function #'consult-xref)
   (xref-show-xrefs-function #'consult-xref)
@@ -41,7 +40,6 @@
 
 ;; A lean fork of dumb-jump.
 (use-package dumber-jump
-  :ensure nil
   :ensure-system-package (rg . ripgrep)
   :custom
   (dumber-jump-default-project user-emacs-directory)
@@ -55,7 +53,6 @@
 		   (append dumber-jump-project-denoters project-vc-extra-root-markers))))
 
 (use-package tempel
-  :ensure nil
   :custom
   (tempel-trigger-prefix "<")
   :bind (:map tempel-map
@@ -82,11 +79,9 @@
 
 
 (use-package tempel-collection
-  :ensure nil
   :after tempel)
 
 (use-package eglot-tempel
-  :ensure nil
   :after (eglot tempel)  ;; Make sure eglot and tempel are loaded first
   :config                ;; Use :config instead of :init
   (when (fboundp 'eglot-tempel-mode)
@@ -109,7 +104,6 @@
   (eldoc-help-at-pt t))                 ; Emacs 31.
 
 (use-package eglot-signature-eldoc-talkative
-  :ensure nil
   :after (eglot flymake eldoc)
   :config
   (defun my-eglot-specific-eldoc ()
@@ -161,7 +155,8 @@
 		(message "Cannot set up eglot-capf: Package %s is not loaded" missing)))))
 ;; Core Eglot configuration - keep this in my-prog.el
 (use-package eglot
-  :custom
+:ensure nil
+:custom
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
@@ -187,7 +182,8 @@
   (eglot-managed-mode . my/eglot-capf))
 
 (use-package eglot-booster
-  :ensure nil
+  :vc (:url "https://github.com/jdtsmith/eglot-booster"
+       :rev :newest)
   :after eglot
   :config
   (eglot-booster-mode 1))
@@ -209,9 +205,9 @@
 	  (message "No URL found at point"))))
 
 (use-package apheleia
-  :ensure nil
   :diminish
   :config
+  (apheleia-global-mode 1)
   ;; Configure prettierd formatter
   (setf (alist-get 'prettierd apheleia-formatters)
 		'("prettierd" filepath))
@@ -223,12 +219,11 @@
   (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'json-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'json-ts-mode aphelias-mode-alist) 'prettierd)
+  (setf (alist-get 'json-ts-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'css-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'html-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'web-mode apheleia-mode-alist) 'prettierd)
-  :hook (after-init . apheleia-global-mode))
+  (setf (alist-get 'web-mode apheleia-mode-alist) 'prettierd))
 
 (provide 'my-prog)
 ;;; my-prog.el ends here

@@ -4,7 +4,6 @@
 ;;; Code:
 
 (use-package lua-mode
-  :ensure nil
   :mode "\\.lua\\'"
   :interpreter "lua")
 

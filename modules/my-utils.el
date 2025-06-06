@@ -13,7 +13,6 @@
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 (use-package envrc
-  :ensure nil
   :diminish envrc-mode
   :hook (after-init . envrc-global-mode))
 

@@ -5,12 +5,30 @@
 
 ;;; Code:
 
-;; Load custom modules
+;; Package.el setup - ADD THIS SECTION
+(require 'package)
+(setq package-archives
+	  '(("gnu" . "https://elpa.gnu.org/packages/")
+		("melpa" . "https://melpa.org/packages/")
+		("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 
+(package-initialize)
+
+;; Bootstrap use-package
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t) ; Auto-install packages
+(add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
+;; Load custom modules
 (setq read-process-output-max (* 4 1024 1024))
 ;; Core package configuration
+;; Add this temporarily to your init.el before the module requires
+(setq debug-on-error t)
 (use-package emacs
-  :ensure nil
+  :ensure nil  ; Keep this as nil since emacs is built-in
   :custom
   (column-number-mode t)
   ;; Essential settings only
@@ -100,14 +118,15 @@
 		 (org-mode . (lambda () (display-line-numbers-mode -1)))
 		 (before-save . delete-trailing-whitespace)))
 
+;; CHANGE: Remove :ensure nil from packages you want to install via package.el
 (use-package diff-hl
-  :ensure nil
+  ;; :ensure nil  ; Remove this line to install from MELPA
   :hook
   ((after-init . global-diff-hl-mode)
    (magit-post-refresh . diff-hl-magit-post-refresh)))
 
 (use-package undo-fu-session
-  :ensure nil
+  ;; :ensure nil  ; Remove this line to install from MELPA
   :config
   ;; Store undo history files in your Emacs directory
   (setq undo-fu-session-directory (expand-file-name "undo-fu-session" user-emacs-directory))
@@ -165,35 +184,25 @@
 (global-unset-key (kbd "C-z"))
 (global-unset-key (kbd "C-x C-z"))
 
-
 ;;; testing stop
 (use-package vundo
-  :ensure nil
+  ;; :ensure nil  ; Remove this line to install from MELPA
   :config
   (global-set-key (kbd "C-x u") 'vundo))
 
 (use-package editorconfig
   :diminish ""
-  :ensure nil
+  ;; :ensure nil  ; Remove this line to install from MELPA
   :config
   (editorconfig-mode 1))
 
-;; (defun my--server ()
-;;   (unless (server-running-p)
-;;     (server-start)))
-
-;; (use-package server
-;;   :ensure nil   ; Good - server is built into Emacs
-;;   :hook
-;;   (after-init . my--server))
-
 (use-package diminish
-  :ensure nil
+  ;; :ensure nil  ; Remove this line to install from MELPA
   :config
   (diminish 'line-number-mode))
 
 (use-package dape
-  :ensure nil
+  ;; :ensure nil  ; Remove this line to install from MELPA
   :defer t)
 
 (setq jit-lock-defer-time 0.05)
@@ -209,6 +218,10 @@
 (require 'my-editing-utils)
 (require 'my-treesit)
 
+(require 'my-meow)
+
+;; or
+
 ;; Load programming support (depends on completion)
 (require 'my-prog)
 ;; (require 'my-lsp)
@@ -219,7 +232,6 @@
 (require 'my-nix)
 (require 'my-web)
 
-
 ;; Load version control (can be heavy)
 (require 'my-magit)
 
@@ -229,7 +241,6 @@
 (require 'my-org)
 
 ;; Load modal editing last (affects all modes)
-(require 'my-meow)
 
 ;; Load custom keybindings last
 (require 'my-keybinds)
@@ -239,9 +250,6 @@
 ;; (require 'my-spelling)
 ;; (require 'my-evil)
 ;; (require 'my-lsp)
-
-
-
 
 (provide 'init)
 ;;; init.el ends here

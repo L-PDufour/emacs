@@ -4,7 +4,6 @@
 ;;; Code:
 
 (use-package go-mode
-  :ensure nil
   :mode "\\.go\\'")
 
 

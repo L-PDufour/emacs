@@ -5,7 +5,6 @@
 ;;; Code:
 
 (use-package magit
-  :ensure nil
   :bind (("C-x g" . magit-status)))
 
 

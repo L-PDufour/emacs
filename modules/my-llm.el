@@ -14,14 +14,8 @@
 		  (read-passwd "Enter Anthropic API key: ")))
   my-anthropic-api-key)
 (use-package gptel
-  :ensure nil
   :config
-  (require 'gptel-anthropic)
-  (require 'gptel-transient)  ; For the transient menu interface
-  ;; (require 'gptel-org)        ; For org-mode integration
-  (require 'gptel-context)    ; For context management
-  (require 'gptel-curl)    ; For context management
-  ;; (setq gptel-default-mode 'org-mode)
+  (setq gptel-default-mode 'org-mode)
   (setq gptel-backend (gptel-make-anthropic "Claude"
 						:stream t
 						:key #'my-get-anthropic-key)))

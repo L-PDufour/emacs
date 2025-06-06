@@ -5,13 +5,12 @@
 
 
 (use-package nix-mode
-  :ensure nil
   :mode "\\.nix\\'"
   :hook (nix-mode . eglot-ensure)
   :config
   ;; Add LSP support via nil (Nix Language Server)
   (with-eval-after-load 'eglot
-    (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
+    (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
 
   ;; Configure formatter for Nix files
   (with-eval-after-load 'apheleia
