@@ -6,8 +6,8 @@
 
 ;;; Code:
 
- (use-package meow
-   :init
+(use-package meow
+  :init
   (defun meow-setup ()
 	(setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
 	(setq meow-use-clipboard t)
@@ -22,8 +22,8 @@
 
 	(meow-motion-overwrite-define-key
 	 '("j" . meow-next)
-	 '("k" . meow-prev))
-
+	 '("k" . meow-prev)
+	 '("<escape>" . ignore))
 	(meow-leader-define-key
 	 ;; Use SPC (0-9) for digit arguments.
 	 '("1" . meow-digit-argument)
@@ -61,7 +61,7 @@
 	 '("b" . meow-back-word)
 	 '("B" . meow-back-symbol)
 	 '("c" . meow-change)
-	 '("d" . meow-delete)
+	 '("d" . meow-kill)
 	 '("D" . meow-backward-delete)
 	 '("e" . meow-next-word)
 	 '("E" . meow-next-symbol)
@@ -100,7 +100,7 @@
 	 '("Y" . meow-sync-grab)
 	 '("z" . meow-pop-selection)
 	 '("'" . repeat)
-	 '("<escape>" . ignore)))
+	 '("<escape>" . keyboard-escape-quit)))
 
   :config
   (meow-setup)

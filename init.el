@@ -26,7 +26,7 @@
 (setq read-process-output-max (* 4 1024 1024))
 ;; Core package configuration
 ;; Add this temporarily to your init.el before the module requires
-(setq debug-on-error t)
+;; (setq debug-on-error t)
 (use-package emacs
   :ensure nil  ; Keep this as nil since emacs is built-in
   :custom
@@ -114,7 +114,7 @@
 									 (emacs-init-time)
 									 (number-to-string (length package-activated-list)))))))
 		 (prog-mode . display-line-numbers-mode)
-		 (conf-mode .display-line-numbers-mode)
+		 (conf-mode . display-line-numbers-mode)
 		 (org-mode . (lambda () (display-line-numbers-mode -1)))
 		 (before-save . delete-trailing-whitespace)))
 
@@ -184,6 +184,7 @@
 (global-unset-key (kbd "C-z"))
 (global-unset-key (kbd "C-x C-z"))
 
+(setq jit-lock-defer-time 0.05)
 ;;; testing stop
 (use-package vundo
   ;; :ensure nil  ; Remove this line to install from MELPA
@@ -205,7 +206,6 @@
   ;; :ensure nil  ; Remove this line to install from MELPA
   :defer t)
 
-(setq jit-lock-defer-time 0.05)
 ;; Load completion system first - other modules depend on it
 (require 'my-completion)
 (require 'my-markdown)

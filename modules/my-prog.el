@@ -15,23 +15,13 @@
 	 (project-find-dir "Find directory")
 	 (project-vc-dir "VC-Dir")
 	 (project-eshell "Eshell")
-	 ; (eat-project "EAT")
+										; (eat-project "EAT")
 	 (project-any-command "Other"))))
 
 
-;; Project management for ibuffer
-(use-package ibuffer-project
-  :hook (ibuffer . (lambda ()
-					 (setq ibuffer-filter-groups
-						   (ibuffer-project-generate-filter-groups))
-					 (unless (eq ibuffer-sorting-mode 'project-file-relative)
-					   (ibuffer-do-sort-by-project-file-relative))))
-  :config
-  (setq ibuffer-project-use-cache t))
-
 (use-package xref
   :ensure nil
-  ; :after consult
+										; :after consult
   :custom
   (xref-show-definitions-function #'consult-xref)
   (xref-show-xrefs-function #'consult-xref)
@@ -39,19 +29,6 @@
   (xref-search-program 'ripgrep))
 
 ;; A lean fork of dumb-jump.
-(use-package dumber-jump
-  :ensure-system-package (rg . ripgrep)
-  :custom
-  (dumber-jump-default-project user-emacs-directory)
-  :init
-  ;; Add to global value so it is used as a fallback (when local value ends in
-  ;; t)
-  (add-hook 'xref-backend-functions #'dumber-jump-xref-activate)
-  :config
-  (setopt dumber-jump-project-denoters
-		  (cl-remove-duplicates
-		   (append dumber-jump-project-denoters project-vc-extra-root-markers))))
-
 (use-package tempel
   :custom
   (tempel-trigger-prefix "<")
@@ -84,80 +61,36 @@
 (use-package eglot-tempel
   :after (eglot tempel)  ;; Make sure eglot and tempel are loaded first
   :config                ;; Use :config instead of :init
-  (when (fboundp 'eglot-tempel-mode)
-	(eglot-tempel-mode 1)))  ;; Use 1 instead of t for the mode
+  (eglot-tempel-mode 1))  ;; Use 1 instead of t for the ode
 
 ;;; Eldoc
 (use-package eldoc
   :ensure nil
   :diminish
-  :bind ( :map help-map
-		  ("\." . eldoc-doc-buffer))
   :custom
   (eldoc-print-after-edit nil)
-  (eldoc-idle-delay 5)
-  (eldoc-documentation-strategy
-   'eldoc-documentation-compose-eagerly) ; Mash multiple sources together and display eagerly
-  (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit) ; Also respects `max-mini-window-height'
+  (eldoc-idle-delay 1)
+  (eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
+  (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit)
   (eldoc-echo-area-display-truncation-message t)
   (eldoc-echo-area-prefer-doc-buffer t)
-  (eldoc-help-at-pt t))                 ; Emacs 31.
+  (eldoc-help-at-pt t))
 
-(use-package eglot-signature-eldoc-talkative
-  :after (eglot flymake eldoc)
-  :config
-  (defun my-eglot-specific-eldoc ()
-
-	;; Use custom documentation-functions (with custom priorities, given
-	;; by order):
-	(setq-local
-	 eldoc-documentation-functions
-	 (list
-	  #'eglot-signature-eldoc-talkative
-	  #'eglot-hover-eldoc-function
-	  t
-	  #'flymake-eldoc-function))
-
-	;; Optionally, in echo-area, only show the most important
-	;; documentation:
-	;; (setq-local eldoc-documentation-strategy
-	;;   #'eldoc-documentation-enthusiast)
-	)
-
-  (add-hook 'eglot-managed-mode-hook #'my-eglot-specific-eldoc))
+										; Emacs 31.
 
 (defun my/eglot-capf ()
-  "Set up 'completion-at-point-functions' for eglot with tempel integration."
-  (interactive)
-  ;; Ensure all required packages are loaded
-  (require 'eglot nil t)
-  (require 'cape nil t)
-  (require 'tempel nil t)
-
-  ;; Only proceed if all required packages are available
-  (if (and (featurep 'eglot) (featurep 'cape) (featurep 'tempel))
-	  (progn
-		(message "Setting up Eglot with Tempel integration")
-		(setq-local completion-at-point-functions
-					(list (cape-capf-super
-						   #'eglot-completion-at-point
-						   #'cape-dabbrev
-						   #'tempel-complete
-						   #'cape-file)))
-		(message "CAPF set to: %S" completion-at-point-functions))
-	;; Error message if any package is missing
-	(let ((missing (cond
-					((not (featurep 'eglot)) "eglot")
-					((not (featurep 'cape)) "cape")
-					((not (featurep 'tempel)) "tempel")
-					(t nil))))
-	  (when missing
-		(message "Cannot set up eglot-capf: Package %s is not loaded" missing)))))
-;; Core Eglot configuration - keep this in my-prog.el
+  "Set up completion with buffer validation."
+  (when (and (buffer-live-p (current-buffer))
+			 (bound-and-true-p eglot--managed-mode))
+	(setq-local completion-at-point-functions
+				(list #'eglot-completion-at-point
+					  #'tempel-complete
+					  #'cape-dabbrev
+					  #'cape-file))))
 (use-package eglot
-:ensure nil
-:custom
-  (eglot-send-changes-idle-time 0.1)
+  :ensure nil
+  :custom
+  (eglot-send-changes-idle-time 0.5)
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
@@ -181,12 +114,12 @@
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
-(use-package eglot-booster
-  :vc (:url "https://github.com/jdtsmith/eglot-booster"
-       :rev :newest)
-  :after eglot
-  :config
-  (eglot-booster-mode 1))
+										; (use-package eglot-booster
+										;   :vc (:url "https://github.com/jdtsmith/eglot-booster"
+										;			:rev :newest)
+										;   :after eglot
+										;   :config
+										;   (eglot-booster-mode 1))
 
 (use-package flymake
   :ensure nil
