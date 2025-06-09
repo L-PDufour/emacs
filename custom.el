@@ -10,7 +10,7 @@
  '(completions-detailed t)
  '(dired-auto-revert-buffer t)
  '(dired-dwim-target t)
- '(ediff-window-setup-function 'ediff-setup-windows-plain)
+ '(ediff-window-setup-function 'ediff-setup-windows-plain t)
  '(eglot-autoshutdown t)
  '(eshell-scroll-to-bottom-on-input 'this)
  '(fancy-splash-image
@@ -20,7 +20,7 @@
  '(ibuffer-movement-cycle nil)
  '(ibuffer-old-time 24)
  '(kill-do-not-save-duplicates t)
- '(load-prefer-newer t t)
+ '(load-prefer-newer t)
  '(marginalia-annotators
    '(marginalia-annotators-heavy marginalia-annotators-light nil))
  '(org-agenda-files
@@ -44,7 +44,8 @@
 	 (catppuccin-theme :url "https://github.com/catppuccin/emacs"
 					   :branch "master")))
  '(safe-local-variable-values
-   '((eval setq-local dape-configs
+   '((smie-indent-basic . 2)
+	 (eval setq-local dape-configs
 		   '((js-debug-node :type "pwa-node" :request "attach" :port
 							9229 :hostname "localhost" :sourceMaps t
 							:cwd default-directory :program

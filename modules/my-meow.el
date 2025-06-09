@@ -7,7 +7,7 @@
 ;;; Code:
 
 (use-package meow
-  :init
+  :config
   (defun meow-setup ()
 	(setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
 	(setq meow-use-clipboard t)
@@ -19,11 +19,10 @@
 			(meow-cancel-selection . ignore)
 			(meow-pop-selection . meow-pop-grab)
 			(meow-beacon-change . meow-beacon-change-char)))
-
-	(meow-motion-overwrite-define-key
-	 '("j" . meow-next)
-	 '("k" . meow-prev)
-	 '("<escape>" . ignore))
+	;; (meow-motion-define-key
+	;;  '("j" . meow-next)
+	;;  '("k" . meow-prev)
+	;;  '("<escape>" . ignore))
 	(meow-leader-define-key
 	 ;; Use SPC (0-9) for digit arguments.
 	 '("1" . meow-digit-argument)
@@ -101,8 +100,6 @@
 	 '("z" . meow-pop-selection)
 	 '("'" . repeat)
 	 '("<escape>" . keyboard-escape-quit)))
-
-  :config
   (meow-setup)
   (meow-setup-indicator)
   (meow-global-mode 1))
