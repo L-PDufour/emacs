@@ -100,7 +100,7 @@
 										 (tsx-ts-mode :language-id "typescriptreact")
 										 (typescript-ts-mode :language-id "typescript")
 										 (typescript-mode :language-id "typescript"))
-										"vtsls" "--stdio"))
+										"deno" "lsp"))
   (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
 
   (setq completion-category-overrides '((eglot (styles orderless))
