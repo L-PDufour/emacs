@@ -26,7 +26,7 @@
 (setq read-process-output-max (* 4 1024 1024))
 ;; Core package configuration
 ;; Add this temporarily to your init.el before the module requires
-;; (setq debug-on-error t)
+(setq debug-on-error t)
 (use-package emacs
   :ensure nil  ; Keep this as nil since emacs is built-in
   :custom
