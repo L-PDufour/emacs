@@ -30,8 +30,8 @@
 
 ;; A lean fork of dumb-jump.
 (use-package tempel
-  :custom
-  (tempel-trigger-prefix "<")
+  ;; :custom
+  ;; (tempel-trigger-prefix "<")
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
@@ -95,14 +95,27 @@
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
   :config
-  (add-to-list 'eglot-server-programs '(((js-mode :language-id "javascript")
-										 (js-ts-mode :language-id "javascript")
-										 (tsx-ts-mode :language-id "typescriptreact")
-										 (typescript-ts-mode :language-id "typescript")
-										 (typescript-mode :language-id "typescript"))
-										"vtsls" "--stdio"))
-  (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
+  (add-to-list 'eglot-server-programs
+			   '(templ-ts-mode . ("lspx" "--lsp" "templ lsp" "--lsp" "vscode-html-language-server --stdio")))
 
+  ;; LSP settings.
+  (cons :html (list :includeLanguages (list :templ "html")
+					:format (list :enable t)
+					:suggest (list :html5 t)
+					:embeddedLanguages (list :css t
+											 :javascript t)
+					:validate t))
+  ;; Add TypeScript/JavaScript configuration
+  (add-to-list 'eglot-server-programs
+			   '(((js-mode :language-id "javascript")
+				  (js-ts-mode :language-id "javascript")
+				  (tsx-ts-mode :language-id "typescriptreact")
+				  (typescript-ts-mode :language-id "typescript")
+				  (typescript-mode :language-id "typescript"))
+				 "vtsls" "--stdio"))
+
+  ;; Performance optimizations
+  ;; (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (setq completion-category-overrides '((eglot (styles orderless))
 										(eglot-capf (styles orderless))))
 
@@ -111,15 +124,10 @@
 
   ;; Wrap Eglot completion to prevent caching issues
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
-										; (use-package eglot-booster
-										;   :vc (:url "https://github.com/jdtsmith/eglot-booster"
-										;			:rev :newest)
-										;   :after eglot
-										;   :config
-										;   (eglot-booster-mode 1))
 
 (use-package flymake
   :ensure nil

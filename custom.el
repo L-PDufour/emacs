@@ -37,7 +37,20 @@
  '(org-return-follows-link t)
  '(package-archive-priorities
    '(("gnu" . 99) ("nongnu" . 80) ("stable" . 70) ("melpa" . 0)))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(aggressive-indent apheleia avy cape catppuccin-theme combobulate
+					   corfu dape diff-hl diminish dired-subtree
+					   dumber-jump eat eglot-booster
+					   eglot-signature-eldoc-talkative eglot-tempel
+					   embark-consult envrc flymake-eslint go-mode
+					   gptel ibuffer-project lsp-mode lsp-ui lua-mode
+					   magit marginalia markdown-mode meow-tree-sitter
+					   nerd-icons-completion nerd-icons-corfu
+					   nerd-icons-dired nix-mode orderless org-appear
+					   org-pdftools rainbow-delimiters
+					   tempel-collection templ-ts-mode trashed
+					   treesit-auto undo-fu-session vertico
+					   visual-fill-column vundo))
  '(package-vc-selected-packages
    '((eglot-booster :url "https://github.com/jdtsmith/eglot-booster")
 	 (combobulate :url "https://github.com/mickeynp/combobulate")
