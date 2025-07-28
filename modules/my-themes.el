@@ -1,8 +1,6 @@
 ;;; my-themes.el ---  -*- lexical-binding: t -*-
 ;;; Commentary:
-
 ;;; Code:
-
 ;; (use-package base16-theme
 ;;   :ensure nil
 ;;   :config
@@ -14,20 +12,27 @@
   :hook
   (after-init . catppuccin-reload))
 
-
-(use-package nerd-icons)
+(use-package nerd-icons
+  :ensure t
+  :config
+  ;; Ensure nerd-icons is properly loaded before other packages use it
+  (require 'nerd-icons))
 
 (use-package nerd-icons-completion
-  :after marginalia
+  :ensure t
+  :after (marginalia nerd-icons)
   :config
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 (use-package nerd-icons-corfu
-  :after corfu
+  :ensure t
+  :after (corfu nerd-icons)
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package nerd-icons-dired
+  :ensure t
+  :after (dired nerd-icons)
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
@@ -39,9 +44,7 @@
   :bind
   ("C-c t c" . visual-fill-column-mode)  ;; Toggle centered mode with C-c t c
   :config
-
-  (global-visual-fill-column-mode 1)
-  )
+  (global-visual-fill-column-mode 1))
 
 (provide 'my-themes)
 ;;; my-themes.el ends here

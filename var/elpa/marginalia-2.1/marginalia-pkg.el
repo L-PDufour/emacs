@@ -1,0 +1,2 @@
+;; Generated package description from marginalia.el  -*- mode: lisp-data; no-byte-compile: t -*-
+(define-package "marginalia" "2.1" "Enrich existing commands with completion annotations" '((emacs "28.1") (compat "30")) :commit "151ac0abd70da0fc4cae753e2ac156bbaa10d317" :authors '(("Omar Antolín Camarena" . "omar@matem.unam.mx") ("Daniel Mendler" . "mail@daniel-mendler.de")) :maintainer '(("Omar Antolín Camarena" . "omar@matem.unam.mx") ("Daniel Mendler" . "mail@daniel-mendler.de")) :keywords '("docs" "help" "matching" "completion") :url "https://github.com/minad/marginalia")

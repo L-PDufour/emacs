@@ -1,6 +1,5 @@
-;;; my-dired.el ---  -*- lexical-binding: t -*-
+;;; my-dired.el --- Dired configuration -*- lexical-binding: t -*-
 ;;; Commentary:
-
 ;;; Code:
 
 (use-package dired
@@ -23,18 +22,26 @@
   (setq dired-omit-files "^\\.[^.].*")
   (setq dired-omit-verbose nil)
   ;; Better deletion feedback
-  (setq dired-deletion-confirmer #'y-or-n-p))
+  (setq dired-deletion-confirmer #'y-or-n-p)
+
+  ;; Enable dired-x for additional features like omit mode
+  (require 'dired-x))
 
 (use-package dired-subtree
-  :requires dired
+  :ensure t
+  :after dired
   :bind
-  ( :map dired-mode-map
-    ("<tab>" . dired-subtree-toggle)
-    ("TAB" . dired-subtree-toggle)
-    ("<backtab>" . dired-subtree-remove)
-    ("S-TAB" . dired-subtree-remove)))
+  (:map dired-mode-map
+        ("<tab>" . dired-subtree-toggle)
+        ("TAB" . dired-subtree-toggle)
+        ("<backtab>" . dired-subtree-remove)
+        ("S-TAB" . dired-subtree-remove))
+  :config
+  ;; Optional: customize subtree appearance
+  (setq dired-subtree-use-backgrounds nil))
 
 (use-package trashed
+  :ensure t
   :commands (trashed)
   :config
   (setq trashed-action-confirmer 'y-or-n-p)
@@ -42,6 +49,14 @@
   (setq trashed-sort-key '("Date deleted" . t))
   (setq trashed-date-format "%Y-%m-%d %H:%M:%S"))
 
+;; Optional: Add some useful dired keybindings
+(use-package dired
+  :ensure nil
+  :bind
+  (:map dired-mode-map
+        ("h" . dired-up-directory)
+        ("l" . dired-find-file)
+        ("M-o" . dired-omit-mode)))
 
 (provide 'my-dired)
 ;;; my-dired.el ends here

@@ -64,20 +64,19 @@
   (eglot-tempel-mode 1))  ;; Use 1 instead of t for the ode
 
 ;;; Eldoc
-(use-package eldoc
-  :ensure nil
-  :diminish
-  :custom
-  (eldoc-print-after-edit nil)
-  (eldoc-idle-delay 1)
-  (eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
-  (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit)
-  (eldoc-echo-area-display-truncation-message t)
-  (eldoc-echo-area-prefer-doc-buffer t)
-  (eldoc-help-at-pt t))
-
-										; Emacs 31.
-
+;; (use-package eldoc
+;;   :ensure nil  ; Built-in package
+;;   :diminish
+;;   :bind
+;;   ("C-c h" . eldoc-doc-buffer)
+;;   :config
+;;   ;; Use setq instead of :custom to avoid activation issues
+;;   (setq eldoc-print-after-edit nil)
+;;   (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
+;;   (setq eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit)
+;;   (setq eldoc-echo-area-display-truncation-message t)
+;;   (setq eldoc-echo-area-prefer-doc-buffer t)
+;;   (setq eldoc-help-at-pt t))
 (defun my/eglot-capf ()
   "Set up completion with buffer validation."
   (when (and (buffer-live-p (current-buffer))
@@ -115,7 +114,7 @@
 				 "vtsls" "--stdio"))
 
   ;; Performance optimizations
-  ;; (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
+  (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (setq completion-category-overrides '((eglot (styles orderless))
 										(eglot-capf (styles orderless))))
 

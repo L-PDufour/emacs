@@ -1,0 +1,30 @@
+;;; -*- coding: utf-8; mode: lisp-data -*-
+(("/home/desktop/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/chi.go" . 3423)
+ ("/home/desktop/Documents/amerifor-custom/internal/server/routes.go" . 4380)
+ ("/home/desktop/Documents/amerifor-custom/web/assets/js/app/App.js" . 2609)
+ ("/home/desktop/.emacs.d/post-init.el" . 9470)
+ ("/home/desktop/.emacs.d/modules/my-prog.el" . 2107)
+ ("/home/desktop/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go" . 5165)
+ ("/home/desktop/.emacs.d/var/elpa/eldoc-1.16.0/eldoc.el" . 3946)
+ ("/nix/store/ivzqfrpmb17dic2axvbs3pi1aa965rf7-emacs-igc-pgtk-20250716.0/share/emacs/31.0.50/lisp/help-at-pt.el.gz"
+  . 6197)
+ ("/nix/store/ivzqfrpmb17dic2axvbs3pi1aa965rf7-emacs-igc-pgtk-20250716.0/share/emacs/31.0.50/lisp/emacs-lisp/eldoc.el.gz"
+  . 6045)
+ ("/home/desktop/.emacs.d/modules/" (dired-filename . "/home/desktop/.emacs.d"))
+ ("/home/desktop/.emacs.d/" (dired-filename . "/home/desktop/.emacs.d/autosave"))
+ ("/home/desktop/Documents/amerifor-custom/internal/templates/pages/test.html"
+  . 2)
+ ("/home/desktop/Documents/amerifor-custom/internal/templates/pages/pages.templ"
+  . 507)
+ ("/home/desktop/.emacs.d/modules/my-completion.el" . 5540)
+ ("/home/desktop/.emacs.d/modules/my-dired.el" . 1722)
+ ("/home/desktop/.emacs.d/modules/my-themes.el" . 555)
+ ("/home/desktop/.emacs.d/var/elpa/vertico-2.4/vertico.el" . 5008)
+ ("/home/desktop/.emacs.d/var/elpa/embark-1.1/embark.el" . 81243)
+ ("/home/desktop/.emacs.d/var/elpa/corfu-2.3/corfu.el" . 9334)
+ ("/home/desktop/.emacs.d/modules/my-which-key.el" . 212)
+ ("/nix/store/ivzqfrpmb17dic2axvbs3pi1aa965rf7-emacs-igc-pgtk-20250716.0/share/emacs/31.0.50/src/editfns.c"
+  . 102760)
+ ("/nix/store/ivzqfrpmb17dic2axvbs3pi1aa965rf7-emacs-igc-pgtk-20250716.0/share/emacs/31.0.50/lisp/subr.el.gz"
+  . 99618)
+ ("/home/desktop/.emacs.d/modules/my-markdown.el" . 641))

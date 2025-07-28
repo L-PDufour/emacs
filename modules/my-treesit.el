@@ -16,12 +16,13 @@
           (typescript-mode . typescript-ts-mode)
           ;; Add other mappings as needed
           ))
+  (delete 'janet treesit-auto-langs)
   (global-treesit-auto-mode)
   (treesit-auto-install-all))
 
 (use-package combobulate
   :vc (:url "https://github.com/mickeynp/combobulate"
-       :rev :newest)
+            :rev :newest)
   ;; :config
   ;; ;; Add a function to find-file-hook to clear highlighting in .js files
   ;; (add-hook 'find-file-hook

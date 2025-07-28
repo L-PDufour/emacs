@@ -19,7 +19,7 @@
 
 (use-package vertico
   :bind (:map vertico-map
-			  ("M-;" . my/vertico-smart-insert)
+			  ("M-;" . vertico-insert)
 			  ;; Add directory navigation bindings directly here
 			  ("RET" . vertico-directory-enter)
 			  ("DEL" . vertico-directory-delete-char)
@@ -29,26 +29,13 @@
   (fido-vertical-mode -1)
   (icomplete-mode -1)
   (icomplete-vertical-mode -1)
-
-  ;; Enable vertico-directory extension
-  (require 'vertico-directory)
-
-  (defun my/vertico-smart-insert ()
-	"Insert the current candidate and set up a transient keymap
-	 that will exit the minibuffer if M-; is pressed again."
-	(interactive)
-	(vertico-insert)
-	(let ((map (make-sparse-keymap)))
-	  (define-key map (kbd "M-;") #'exit-minibuffer)
-	  (set-transient-map map t)))
-  :custom
-  (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
-  (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
   :hook ((after-init . vertico-mode)
-		 ;; Tidy shadowed file names
 		 (rfn-eshadow-update-overlay . vertico-directory-tidy)))
 
 (use-package marginalia
+  :hook (after-init . marginalia-mode))(use-package marginalia
+  :ensure t
+  :commands (marginalia-mode marginalia-cycle)
   :hook (after-init . marginalia-mode))
 
 
@@ -111,38 +98,37 @@
 
   ;; The :init configuration is always executed (Not lazy)
   :init
+  ;; Optionally configure the register formatting. This improves the register
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
 
-  ;; Tweak the register preview for `consult-register-load',
-  ;; `consult-register-store' and the built-in commands.  This improves the
-  ;; register formatting, adds thin separator lines, register sorting and hides
-  ;; the window mode line.
+  ;; Optionally tweak the register preview window.
   (advice-add #'register-preview :override #'consult-register-window)
-  (setq register-preview-delay 0.5)
 
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Aggressive asynchronous that yield instantaneous results. (suitable for
+  ;; high-performance systems.) Note: Minad, the author of Consult, does not
+  ;; recommend aggressive values.
+  ;; Read: https://github.com/minad/consult/discussions/951
+  ;;
+  ;; However, the author of minimal-emacs.d uses these parameters to achieve
+  ;; immediate feedback from Consult.
+  (setq consult-async-input-debounce 0.02
+        consult-async-input-throttle 0.05
+        consult-async-refresh-delay 0.02)
   :config
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
   (consult-customize
-   consult-ripgrep consult-git-grep consult-grep consult-man
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
    consult--source-bookmark consult--source-file-register
    consult--source-recent-file consult--source-project-recent-file
-   :preview-key '(:debounce 0.5 any "M-."))
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any)))
 
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-
-  ;; Optionally make narrowing help available in the minibuffer.
-  ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-  )
 
 (use-package orderless
   :custom
@@ -156,64 +142,65 @@
 (use-package embark
   :bind
   (("C-." . embark-act)
+   ("M-." . embark-dwim)
    ([remap describe-bindings] . embark-bindings))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+
   :config
-  ;; Try to configure prefix-help-command only if the function exists
-  (if (fboundp 'embark-prefix-help-command)
-	  (setq prefix-help-command #'embark-prefix-help-command)
-	(message "Warning: embark-prefix-help-command not available in this version of Embark")))
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
 
 (use-package embark-consult
-  :after (embark consult)
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
+;; Corfu enhances in-buffer completion by displaying a compact popup with
+;; current candidates, positioned either below or above the point. Candidates
+;; can be selected by navigating up or down.
+
 (use-package corfu
-  :hook ((after-init . global-corfu-mode)
-		 (eshell-mode . (lambda ()
-						  (setq-local corfu-auto nil)
-						  (corfu-mode))))
+  :ensure t
+  :commands (corfu-mode global-corfu-mode)
   :bind (:map corfu-map
 			  ("M-n" . corfu-popupinfo-scroll-up)
 			  ("M-p" . corfu-popupinfo-scroll-down)
 			  ("C-SPC" . corfu-insert-separator)
 			  ("M-;" . corfu-complete))
+  :hook ((prog-mode . corfu-mode)
+         (shell-mode . corfu-mode)
+         (eshell-mode . corfu-mode))
   :init
   (setq corfu-auto t
 		corfu-cycle t
-		corfu-auto-prefix 2
+		;; corfu-auto-prefix 2
 		corfu-count 12
 		corfu-auto-delay 0.2
-		corfu-preselect 'directory
-		corfu-on-exact-match nil
-		corfu-preview-current nil
+		;; corfu-preselect 'directory
+		;; corfu-on-exact-match nil
+		;; corfu-preview-current nil
 		corfu-min-width 20
 		corfu-quit-no-match 'separator
 		corfu-popupinfo-delay '(1.25 . 0.5))
+
+  :custom
+  ;; Hide commands in M-x which do not apply to the current mode.
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  ;; Disable Ispell completion function. As an alternative try `cape-dict'.
+  (text-mode-ispell-word-completion nil)
+  (tab-always-indent 'complete)
+
+  ;; Enable Corfu
   :config
-  ;; Load extensions
-  (require 'corfu-history)
-  (require 'corfu-popupinfo)
-
-  ;; Properly enable the modes
-  (corfu-popupinfo-mode 1)
   (corfu-history-mode 1)
-
-  (setq text-mode-ispell-word-completion nil)
-
-  ;; Enable terminal support
-  (unless (display-graphic-p)
-	(corfu-terminal-mode 1))
-
-  ;; Add to savehist - do this BEFORE savehist-mode is activated
-  (add-to-list 'savehist-additional-variables 'corfu-history)
-
-  ;; Make sure history is saved
-  (with-eval-after-load 'savehist
-	(unless (member 'corfu-history savehist-additional-variables)
-	  (add-to-list 'savehist-additional-variables 'corfu-history))))
+  (corfu-popupinfo-mode 1)
+  (global-corfu-mode))
 
 (use-package cape
+  :commands (cape-dabbrev cape-file cape-elisp-block)
   :bind ("C-c p" . cape-prefix-map)
   :custom
   (text-mode-ispell-word-completion nil)

@@ -5,11 +5,16 @@
 ;;; Code:
 
 (use-package which-key
-  :ensure nil
+  :ensure nil ; builtin
   :diminish
-  :init (which-key-mode)
+  :commands which-key-mode
+  :hook (after-init . which-key-mode)
   :custom
-  (which-key-idle-delay 0.3))
+  (which-key-idle-delay 1.5)
+  (which-key-idle-secondary-delay 0.25)
+  (which-key-add-column-padding 1)
+  (which-key-max-description-length 40))
+
 
 (provide 'my-which-key)
 ;;; my-which-key.el ends here
