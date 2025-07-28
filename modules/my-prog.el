@@ -86,6 +86,7 @@
 					  #'tempel-complete
 					  #'cape-dabbrev
 					  #'cape-file))))
+
 (use-package eglot
   :ensure nil
   :custom
@@ -95,37 +96,30 @@
   (eglot-code-action-indicator "  α ")
   :config
   (add-to-list 'eglot-server-programs
-			   '(templ-ts-mode . ("lspx" "--lsp" "templ lsp" "--lsp" "vscode-html-language-server --stdio")))
-
-  ;; LSP settings.
-  (cons :html (list :includeLanguages (list :templ "html")
-					:format (list :enable t)
-					:suggest (list :html5 t)
-					:embeddedLanguages (list :css t
-											 :javascript t)
-					:validate t))
-  ;; Add TypeScript/JavaScript configuration
+               '(templ-ts-mode . ("lspx" "--lsp" "vscode-html-language-server --stdio " "--lsp" "templ lsp")))
+  ;; (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
+  (setq-default eglot-workspace-configuration
+                (list
+                 (cons :html  (list :includeLanguages (list :templ "html")
+                                    ))))
+  ;; Rest of your configuration...
   (add-to-list 'eglot-server-programs
-			   '(((js-mode :language-id "javascript")
-				  (js-ts-mode :language-id "javascript")
-				  (tsx-ts-mode :language-id "typescriptreact")
-				  (typescript-ts-mode :language-id "typescript")
-				  (typescript-mode :language-id "typescript"))
-				 "vtsls" "--stdio"))
+               '(((js-mode :language-id "javascript")
+                  (js-ts-mode :language-id "javascript")
+                  (tsx-ts-mode :language-id "typescriptreact")
+                  (typescript-ts-mode :language-id "typescript")
+                  (typescript-mode :language-id "typescript"))
+                 "vtsls" "--stdio"))
 
   ;; Performance optimizations
-  (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (setq completion-category-overrides '((eglot (styles orderless))
-										(eglot-capf (styles orderless))))
-
-  ;; Automatically shut down Eglot servers when no longer needed
+                                        (eglot-capf (styles orderless))))
   (setq eglot-autoshutdown t)
-
-  ;; Wrap Eglot completion to prevent caching issues
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
 
   :hook
   (eglot-managed-mode . my/eglot-capf))
+
 
 
 (use-package flymake

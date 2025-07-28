@@ -295,6 +295,8 @@
   ;; :ensure nil  ; Remove this line to install from MELPA
   :defer t)
 
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
 ;; Load completion system first - other modules depend on it
 (require 'my-completion)
 ;; Load core utilities and themes early

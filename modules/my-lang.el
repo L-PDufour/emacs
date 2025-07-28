@@ -30,6 +30,8 @@
   :mode "\\.go\\'")
 
 (use-package templ-ts-mode
+  :vc (:url "https://github.com/L-PDufour/templ-ts-mode.git" :rev :newest)
+  :mode "\\.templ\\'"
   :mode "\\.templ\\'"
   :config;; Try a specific commit/tag if the latest doesn't work
   (setq treesit-language-source-alist
@@ -44,5 +46,8 @@
          ("\\.md\\'" . markdown-mode)
          ("README\\.md\\'" . gfm-mode)))
 
+
+(unless (package-installed-p 'templ-ts-mode)
+  (package-vc-install "https://github.com/L-PDufour/templ-ts-mode.git"))
 (provide 'my-lang)
 ;;; my-lang.el ends here

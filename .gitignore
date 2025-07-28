@@ -1,20 +1,63 @@
-/.cache/
-/eln-cache/
-/elpa/
-/history
-/transient/
-/auto-save-list/
-/eshell/
-/undo-fu-session/
-/projects
-recentf**
-places**
-places
+# Emacs runtime files and caches
+var/
+elpa/
+eln-cache/
+auto-save-list/
+backup/
+autosave/
+history/
 recentf
+saveplace
+projects.eld
+tramp
+transient/
+tree-sitter/
+url/
+
+# Emacs temporary files
+*~
+\#*\#
+.\#*
+*.elc
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Package manager files (if using straight.el)
+straight/
+
+# Custom file (contains machine-specific settings)
+custom.el
+
+# Session files
+session.*
+.session
+
+# Other common Emacs generated files
 bookmarks
-straight/**
-tramp
-tramp
-/url/
+abbrev_defs
+ido.last
+smex-items
+helm-adaptive-history
+projectile-bookmarks.eld
+projectile.cache
+
+# Language server and development tools
+.lsp-session-*
+flycheck_*.el
+
+# Network security manager
+network-security.data
+undo-fu-session
+var
+history
+places
+projects
 .env
-/modules/#%2AClaude%2A#dT8h9p#
+custom.el

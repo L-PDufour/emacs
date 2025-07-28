@@ -164,7 +164,6 @@
 
 (use-package corfu
   :ensure t
-  :commands (corfu-mode global-corfu-mode)
   :bind (:map corfu-map
 			  ("M-n" . corfu-popupinfo-scroll-up)
 			  ("M-p" . corfu-popupinfo-scroll-down)
@@ -174,30 +173,28 @@
          (shell-mode . corfu-mode)
          (eshell-mode . corfu-mode))
   :init
-  (setq corfu-auto t
-		corfu-cycle t
-		;; corfu-auto-prefix 2
-		corfu-count 12
-		corfu-auto-delay 0.2
-		;; corfu-preselect 'directory
-		;; corfu-on-exact-match nil
-		;; corfu-preview-current nil
-		corfu-min-width 20
-		corfu-quit-no-match 'separator
-		corfu-popupinfo-delay '(1.25 . 0.5))
-
+  (corfu-history-mode 1)
+  (corfu-popupinfo-mode 1)
+  (global-corfu-mode)
   :custom
+  (corfu-auto t)
+  (corfu-cycle t)
+  (corfu-auto-prefix 1)
+  (corfu-count 12)
+  (corfu-auto-delay 0.2)
+  ;; corfu-preselect 'directory
+  ;; corfu-on-exact-match nil
+  ;; corfu-preview-current nil
+  (corfu-min-width 20)
+  (corfu-quit-no-match t)
+  (corfu-popupinfo-delay 0.5)
   ;; Hide commands in M-x which do not apply to the current mode.
   (read-extended-command-predicate #'command-completion-default-include-p)
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
-  (tab-always-indent 'complete)
+  (tab-always-indent 'complete))
 
-  ;; Enable Corfu
-  :config
-  (corfu-history-mode 1)
-  (corfu-popupinfo-mode 1)
-  (global-corfu-mode))
+
 
 (use-package cape
   :commands (cape-dabbrev cape-file cape-elisp-block)
