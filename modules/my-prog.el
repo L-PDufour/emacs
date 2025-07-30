@@ -102,6 +102,7 @@
                 (list
                  (cons :html  (list :includeLanguages (list :templ "html")
                                     ))))
+
   ;; Rest of your configuration...
   (add-to-list 'eglot-server-programs
                '(((js-mode :language-id "javascript")
@@ -124,8 +125,14 @@
 
 (use-package flymake
   :ensure nil
+  :config
+  (defun consult-flymake-project ()
+    "Jump to Flymake diagnostic in project."
+    (interactive)
+    (consult-flymake t))
   :bind (:map flymake-mode-map
 			  ("C-c e e" . consult-flymake)
+			  ("C-c e l" . consult-flymake-project)
 			  ("C-c e n" . flymake-goto-next-error)
 			  ("C-c e p" . flymake-goto-prev-error))
   :hook (prog-mode . flymake-mode))

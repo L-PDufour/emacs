@@ -1,5 +1,6 @@
 ;;; my-keybinds.el --- Custom keybindings -*- lexical-binding: t; -*-
 
+
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for a general `keyboard-quit'."
   (interactive)
