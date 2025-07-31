@@ -54,6 +54,7 @@ Opens consult-buffer with project filtering if in a project."
 (global-set-key (kbd "C-c w") my-window-keymap)
 (global-set-key (kbd "C-c s") my-search-keymap)
 (global-set-key (kbd "C-c l") my-code-keymap)
+(global-set-key (kbd "C-c ' ' ' '") consult-buffer)
 
 ;; File operations (C-c f ...)
 (define-key my-file-keymap (kbd "a") #'my-project-find-file)

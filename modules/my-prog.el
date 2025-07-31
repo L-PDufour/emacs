@@ -100,6 +100,10 @@
   ;; (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (setq-default eglot-workspace-configuration
                 (list
+                 (cons :deno  (list
+                               :enable t
+                               :lint t
+                               :unstable t))
                  (cons :html  (list :includeLanguages (list :templ "html")
                                     ))))
 
@@ -110,7 +114,7 @@
                   (tsx-ts-mode :language-id "typescriptreact")
                   (typescript-ts-mode :language-id "typescript")
                   (typescript-mode :language-id "typescript"))
-                 "vtsls" "--stdio"))
+                 "deno" "lsp"))
 
   ;; Performance optimizations
   (setq completion-category-overrides '((eglot (styles orderless))
@@ -149,13 +153,21 @@
   :diminish
   :config
   (apheleia-global-mode 1)
+  (add-to-list 'apheleia-mode-alist
+               '(templ-ts-mode . templ-format))
+  (add-to-list 'apheleia-formatters
+               '(templ-format "templ" "fmt" filepath))
+  (add-to-list 'apheleia-mode-alist
+               '(js-ts-mode . deno-format))
+  (add-to-list 'apheleia-formatters
+               '(deno-format "deno" "fmt" filepath))                                      ;
+
   ;; Configure prettierd formatter
   (setf (alist-get 'prettierd apheleia-formatters)
 		'("prettierd" filepath))
-
   ;; Update mode associations to use prettierd instead of prettier
   (setf (alist-get 'js-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'prettierd)
+  (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'deno-format)
   (setf (alist-get 'typescript-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'prettierd)
