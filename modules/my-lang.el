@@ -29,6 +29,10 @@
 (use-package go-mode
   :mode "\\.go\\'")
 
+(use-package go-eldoc
+  :ensure t
+  :hook (go-mode . go-eldoc-setup))
+
 (use-package templ-ts-mode
   :vc (:url "https://github.com/L-PDufour/templ-ts-mode.git" :rev :newest)
   :mode "\\.templ\\'"

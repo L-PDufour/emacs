@@ -166,46 +166,47 @@
   ;; editing experience without affecting cursor placement.
   (stripspace-restore-column t))
 
-;; This automates the process of updating installed packages
-(use-package auto-package-update
-  :ensure t
-  :custom
-  ;; Set the number of days between automatic updates.
-  ;; Here, packages will only be updated if at least 7 days have passed
-  ;; since the last successful update.
-  (auto-package-update-interval 7)
-
-  ;; Suppress display of the *auto-package-update results* buffer after updates.
-  ;; This keeps the user interface clean and avoids unnecessary interruptions.
-  (auto-package-update-hide-results t)
-
-  ;; Automatically delete old package versions after updates to reduce disk
-  ;; usage and keep the package directory clean. This prevents the accumulation
-  ;; of outdated files in Emacs’s package directory, which consume
-  ;; unnecessary disk space over time.
-  (auto-package-update-delete-old-versions t)
-
-  ;; Uncomment the following line to enable a confirmation prompt
-  ;; before applying updates. This can be useful if you want manual control.
-  ;; (auto-package-update-prompt-before-update t)
-
-  :config
-  ;; Run package updates automatically at startup, but only if the configured
-  ;; interval has elapsed.
-  (auto-package-update-maybe)
-
-  ;; Schedule a background update attempt daily at 10:00 AM.
-  ;; This uses Emacs' internal timer system. If Emacs is running at that time,
-  ;; the update will be triggered. Otherwise, the update is skipped for that
-  ;; day. Note that this scheduled update is independent of
-  ;; `auto-package-update-maybe` and can be used as a complementary or
-  ;; alternative mechanism.
-  (auto-package-update-at-time "10:00"))
+;; ;; This automates the process of updating installed packages
+;; (use-package auto-package-update
+;;   :ensure t
+;;   :custom
+;;   ;; Set the number of days between automatic updates.
+;;   ;; Here, packages will only be updated if at least 7 days have passed
+;;   ;; since the last successful update.
+;;   (auto-package-update-interval 7)
+;;
+;;   ;; Suppress display of the *auto-package-update results* buffer after updates.
+;;   ;; This keeps the user interface clean and avoids unnecessary interruptions.
+;;   (auto-package-update-hide-results t)
+;;
+;;   ;; Automatically delete old package versions after updates to reduce disk
+;;   ;; usage and keep the package directory clean. This prevents the accumulation
+;;   ;; of outdated files in Emacs’s package directory, which consume
+;;   ;; unnecessary disk space over time.
+;;   (auto-package-update-delete-old-versions t)
+;;
+;;   ;; Uncomment the following line to enable a confirmation prompt
+;;   ;; before applying updates. This can be useful if you want manual control.
+;;   ;; (auto-package-update-prompt-before-update t)
+;;
+;;   :config
+;;   ;; Run package updates automatically at startup, but only if the configured
+;;   ;; interval has elapsed.
+;;   (auto-package-update-maybe)
+;;
+;;   ;; Schedule a background update attempt daily at 10:00 AM.
+;;   ;; This uses Emacs' internal timer system. If Emacs is running at that time,
+;;   ;; the update will be triggered. Otherwise, the update is skipped for that
+;;   ;; day. Note that this scheduled update is independent of
+;;   ;; `auto-package-update-maybe` and can be used as a complementary or
+;;   ;; alternative mechanism.
+;;   (auto-package-update-at-time "10:00"))
 ;; Helpful is an alternative to the built-in Emacs help that provides much more
 ;; contextual information.
 (use-package helpful
   :ensure t
   :commands (helpful-callable
+
              helpful-variable
              helpful-key
              helpful-command
@@ -290,13 +291,48 @@
   ;; :ensure nil  ; Remove this line to install from MELPA
   :config
   (diminish 'line-number-mode))
+(use-package window
+  :ensure nil       ;; This is built-in, no need to fetch it.
+  :custom
+  (display-buffer-alist
+   '(
+     ("\\*.*e?shell\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . -1))
 
+     ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 0))
+
+     ;; Example configuration for the LSP help buffer,
+     ;; keeps it always on bottom using 25% of the available space:
+     ("\\*\\(lsp-help\\)\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 0))
+
+     ;; Configuration for displaying various diagnostic buffers on
+     ;; bottom 25%:
+     ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 1))
+     )))
 (use-package dape
   ;; :ensure nil  ; Remove this line to install from MELPA
   :defer t)
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-
+(delete-selection-mode 1)
+(setq compilation-scroll-output t)
+(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+(setq compilation-auto-jump-to-first-error t)
 ;; Load completion system first - other modules depend on it
 (require 'my-completion)
 ;; Load core utilities and themes early
