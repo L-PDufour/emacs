@@ -5,16 +5,10 @@
 ;;; Code:
 
 (use-package which-key
-  :ensure nil ; builtin
-  :diminish
-  :commands which-key-mode
-  :hook (after-init . which-key-mode)
-  :custom
-  (which-key-idle-delay 1.5)
-  (which-key-idle-secondary-delay 0.25)
-  (which-key-add-column-padding 1)
-  (which-key-max-description-length 40))
-
+  :ensure nil     ;; This is built-in, no need to fetch it.
+  :defer t        ;; Defer loading Which-Key until after init.
+  :hook
+  (after-init . which-key-mode)) ;; Enable which-key mode after initialization.
 
 (provide 'my-which-key)
 ;;; my-which-key.el ends here

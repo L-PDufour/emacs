@@ -64,19 +64,15 @@
   (eglot-tempel-mode 1))  ;; Use 1 instead of t for the ode
 
 ;;; Eldoc
-;; (use-package eldoc
-;;   :ensure nil  ; Built-in package
-;;   :diminish
-;;   :bind
-;;   ("C-c h" . eldoc-doc-buffer)
-;;   :config
-;;   ;; Use setq instead of :custom to avoid activation issues
-;;   (setq eldoc-print-after-edit nil)
-;;   (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
-;;   (setq eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit)
-;;   (setq eldoc-echo-area-display-truncation-message t)
-;;   (setq eldoc-echo-area-prefer-doc-buffer t)
-;;   (setq eldoc-help-at-pt t))
+(use-package eldoc
+  :ensure t
+  :defer t
+  :config
+  (setq eldoc-idle-delay 0)                  ;; Automatically fetch doc help
+  (setq eldoc-echo-area-display-truncation-message nil)
+  :init
+  (global-eldoc-mode))
+
 (defun my/eglot-capf ()
   "Set up completion with buffer validation."
   (when (and (buffer-live-p (current-buffer))
@@ -125,10 +121,27 @@
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
-
+;;; INDENT-GUIDE
+;; The `indent-guide' package provides visual indicators for indentation levels
+;; in programming modes, making it easier to see code structure at a glance.
+;; It draws vertical lines (by default, a character of your choice) at each
+;; level of indentation, helping to improve readability and navigation within
+;; the code.
+(use-package indent-guide
+  :defer t
+  :ensure t
+  :hook
+  (prog-mode . indent-guide-mode)  ;; Activate indent-guide in programming modes.
+  :config
+  (setq indent-guide-char "│"))
 
 (use-package flymake
   :ensure nil
+  :defer t
+  :custom
+  (flymake-margin-indicators-string
+   '((error "!»" compilation-error) (warning "»" compilation-warning)
+     (note "»" compilation-info)))
   :config
   (defun consult-flymake-project ()
     "Jump to Flymake diagnostic in project."

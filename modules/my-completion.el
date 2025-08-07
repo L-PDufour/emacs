@@ -177,24 +177,17 @@
   (corfu-popupinfo-mode 1)
   (global-corfu-mode)
   :custom
-  (corfu-auto t)
-  (corfu-cycle t)
+  (corfu-auto nil)
   (corfu-auto-prefix 1)
   (corfu-count 12)
   (corfu-auto-delay 0.2)
-  ;; corfu-preselect 'directory
-  ;; corfu-on-exact-match nil
-  ;; corfu-preview-current nil
   (corfu-min-width 20)
   (corfu-quit-no-match t)
   (corfu-popupinfo-delay 0.5)
   ;; Hide commands in M-x which do not apply to the current mode.
   (read-extended-command-predicate #'command-completion-default-include-p)
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
-  (text-mode-ispell-word-completion nil)
-  (tab-always-indent 'complete))
-
-
+  (text-mode-ispell-word-completion nil))
 
 (use-package cape
   :commands (cape-dabbrev cape-file cape-elisp-block)

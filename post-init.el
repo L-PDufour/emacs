@@ -291,6 +291,7 @@
   ;; :ensure nil  ; Remove this line to install from MELPA
   :config
   (diminish 'line-number-mode))
+
 (use-package window
   :ensure nil       ;; This is built-in, no need to fetch it.
   :custom
@@ -333,6 +334,8 @@
 (setq compilation-scroll-output t)
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 (setq compilation-auto-jump-to-first-error t)
+(setq treesit-font-lock-level 4)                     ;; Use advanced font locking for Treesit mode.
+
 ;; Load completion system first - other modules depend on it
 (require 'my-completion)
 ;; Load core utilities and themes early
@@ -345,8 +348,6 @@
 (require 'my-treesit)
 
 (require 'my-meow)
-
-
 ;; Load programming support (depends on completion)
 (require 'my-prog)
 (require 'my-elisp)
