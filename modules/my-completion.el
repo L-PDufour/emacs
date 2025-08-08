@@ -177,10 +177,10 @@
   (corfu-popupinfo-mode 1)
   (global-corfu-mode)
   :custom
-  (corfu-auto nil)
+  (corfu-auto t)
   (corfu-auto-prefix 1)
-  (corfu-count 12)
-  (corfu-auto-delay 0.2)
+  (corfu-count 10)
+  (corfu-auto-delay 0.1)
   (corfu-min-width 20)
   (corfu-quit-no-match t)
   (corfu-popupinfo-delay 0.5)

@@ -36,7 +36,7 @@
 	 '("9" . meow-digit-argument)
 	 '("0" . meow-digit-argument)
      '("SPC" . consult-buffer)
-	 '("/" . meow-keypad-describe-key)
+	 '("/" . consult-line)
 	 '("?" . meow-cheatsheet))
 
     (meow-normal-define-key
@@ -87,7 +87,7 @@
      '("Q" . meow-goto-line)
      '("r" . meow-replace)
      '("R" . meow-swap-grab)
-     '("s" . meow-kill)
+     ;; '("s" . meow-kill)
      '("t" . meow-till)
      '("u" . meow-undo)
      '("U" . meow-undo-in-selection)

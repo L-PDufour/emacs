@@ -334,8 +334,12 @@
 (setq compilation-scroll-output t)
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 (setq compilation-auto-jump-to-first-error t)
-(setq treesit-font-lock-level 4)                     ;; Use advanced font locking for Treesit mode.
-
+;; (setq treesit-font-lock-level 4) ;; Use advanced font locking for Treesit mode.
+(global-so-long-mode 1)
+(setq history-length t)                    ; No limit on history length
+(setq history-delete-duplicates nil)       ; Keep duplicates for recency-based sorting
+(setq savehist-save-minibuffer-history 1)  ; Save minibuffer history
+(require 'my-test)
 ;; Load completion system first - other modules depend on it
 (require 'my-completion)
 ;; Load core utilities and themes early

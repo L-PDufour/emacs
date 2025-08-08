@@ -6,12 +6,12 @@
 ;;   :config
 ;;   (load-theme 'base16-catppuccin-frappe t))
 
-(use-package catppuccin-theme
-  :custom
-  (catppuccin-flavor 'frappe)
-  :hook
-  (after-init . catppuccin-reload))
-
+;; (use-package catppuccin-theme
+;;   :custom
+;;   (catppuccin-flavor 'frappe)
+;;   :hook
+;;   (after-init . catppuccin-reload))
+(load-theme 'modus-vivendi-tinted)
 (use-package nerd-icons
   :ensure t
   :config
