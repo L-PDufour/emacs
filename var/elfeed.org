@@ -1,0 +1,48 @@
+* Blogs                                                              :elfeed:
+** http://git-annex.branchable.com/design/assistant/blog/index.rss :mustread:
+** http://feeds.feedburner.com/InformationIsBeautiful
+** [[http://orgmode.org][Org Mode Links supported as well]]
+
+** Linux & Unix                                                       :linux:
+*** COMMENT https://lwn.net/headlines/rss
+*** COMMENT https://linuxcommand.org/index.xml
+
+** Software Development                                                 :dev:
+*** Emacs                                                    :emacs:mustread:
+**** http://www.terminally-incoherent.com/blog/feed
+**** http://nullprogram.com/feed
+**** https://planet.emacslife.com/atom.xml
+**** [[toobnix:154][EmacsConf]]
+**** https://emacsredux.com/atom.xml
+**** https://sachachua.com/blog/category/emacs/feed/
+**** https://karthinks.com/index.xml
+**** https://blog.tecosaur.com/tmio/rss.xml
+**** https://protesilaos.com/master.xml
+**** https://irreal.org/blog/?feed=rss2
+**** https://www.masteringemacs.org/feed
+**** https://whatacoldwinter.com/feed.xml
+**** https://www.rahuljuliato.com/rss.xml
+
+*** C Programming                                                        :c:
+**** https://blog.regehr.org/feed
+**** https://gustedt.wordpress.com/feed/
+**** https://blog.erratasec.com/feeds/posts/default?alt=rss
+**** https://kernelnewbies.org/RecentChanges?action=rss_rc&ddiffs=1
+
+*** Systems Programming                                              :systems:
+**** https://blog.rust-lang.org/feed.xml
+**** https://without.boats/index.xml
+**** https://fasterthanli.me/index.xml
+**** https://danluu.com/atom.xml
+**** https://jvns.ca/atom.xml
+
+*** Programming Theory                                                :theory:
+**** https://lambda-the-ultimate.org/rss.xml
+**** https://blog.sigplan.org/feed/
+**** https://johnregehr.com/feed/
+**** https://buttondown.email/hillelwayne/rss
+
+*** Web Development                                                     :web:
+**** http://planet.phpunit.de/atom.xml
+**** http://feeds.feedburner.com/symfony/blog
+**** http://feeds.feedburner.com/qooxdoo/blog/content

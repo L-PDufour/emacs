@@ -102,6 +102,7 @@
      '("'" . repeat)
      '("<escape>" . keyboard-escape-quit)))
   (meow-setup)
+  (add-to-list 'meow-mode-state-list '(eat-mode . insert))
   (meow-setup-indicator)
   (meow-global-mode 1))
 
