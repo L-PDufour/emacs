@@ -10,8 +10,8 @@
   ;; Significantly larger font size for 4K screens
   ;; Values between 180-240 are often good for 4K displays
   (set-face-attribute 'default nil :family mono-font :weight 'medium :height 170)
-  (set-face-attribute 'fixed-pitch nil :family mono-font :height 1.0)
-  (set-face-attribute 'variable-pitch nil :family sans-font :height 1.1))
+  (set-face-attribute 'fixed-pitch nil :family mono-font :height 170)
+  (set-face-attribute 'variable-pitch nil :family sans-font :height 170))
 ;; Auto-revert in Emacs is a feature that automatically updates the
 ;; contents of a buffer to reflect changes made to the underlying file
 ;; on disk.

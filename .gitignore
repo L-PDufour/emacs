@@ -1,5 +1,5 @@
 # Emacs runtime files and caches
-var/
+var/*
 elpa/
 eln-cache/
 auto-save-list/
@@ -55,9 +55,9 @@ flycheck_*.el
 # Network security manager
 network-security.data
 undo-fu-session
-var
 history
 places
 projects
 .env
 custom.el
+!var/*.org
