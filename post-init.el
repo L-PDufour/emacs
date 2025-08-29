@@ -100,6 +100,7 @@
 ;; based on headings or indentation levels. This feature enhances navigation and
 ;; improves the management of large files with hierarchical structures.
 (use-package outline
+  :diminish
   :ensure nil
   :commands outline-minor-mode
   :hook
@@ -143,6 +144,7 @@
 ;; that automatically removes trailing whitespace and blank lines at the end of
 ;; the buffer when saving.
 (use-package stripspace
+  :diminish
   :ensure t
   :commands stripspace-local-mode
 
@@ -221,22 +223,22 @@
   :custom
   (helpful-max-buffers 7))
 
-(use-package buffer-terminator
-  :ensure t
-  :custom
-  ;; Enable/Disable verbose mode to log buffer cleanup events
-  (buffer-terminator-verbose nil)
-
-  ;; Set the inactivity timeout (in seconds) after which buffers are considered
-  ;; inactive (default is 30 minutes):
-  (buffer-terminator-inactivity-timeout (* 30 60)) ; 30 minutes
-
-  ;; Define how frequently the cleanup process should run (default is every 10
-  ;; minutes):
-  (buffer-terminator-interval (* 10 60)) ; 10 minutes
-
-  :config
-  (buffer-terminator-mode 1))
+;; (use-package buffer-terminator
+;;   :ensure t
+;;   :custom
+;;   ;; Enable/Disable verbose mode to log buffer cleanup events
+;;   (buffer-terminator-verbose nil)
+;;
+;;   ;; Set the inactivity timeout (in seconds) after which buffers are considered
+;;   ;; inactive (default is 30 minutes):
+;;   (buffer-terminator-inactivity-timeout (* 30 60)) ; 30 minutes
+;;
+;;   ;; Define how frequently the cleanup process should run (default is every 10
+;;   ;; minutes):
+;;   (buffer-terminator-interval (* 10 60)) ; 10 minutes
+;;
+;;   :config
+;;   (buffer-terminator-mode 1))
 
 (winner-mode 1)
 (repeat-mode 1)

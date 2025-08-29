@@ -65,6 +65,7 @@
 
 ;;; Eldoc
 (use-package eldoc
+  :diminish
   :ensure t
   :defer t
   :config
