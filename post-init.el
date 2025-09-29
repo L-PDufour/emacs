@@ -21,10 +21,10 @@
   :hook
   (after-init . global-auto-revert-mode)
   :custom
-  (auto-revert-interval 3)
+  (auto-revert-interval 5)
   (auto-revert-remote-files nil)
   (auto-revert-use-notify t)
-  (auto-revert-avoid-polling nil)
+  (auto-revert-avoid-polling t)
   (auto-revert-verbose t))
 
 ;; Recentf is an Emacs package that maintains a list of recently
@@ -81,7 +81,7 @@
 (setq auto-save-default t)
 
 (setq auto-save-interval 300)
-(setq auto-save-timeout 30)
+(setq auto-save-timeout 60)
 
 ;; When auto-save-visited-mode is enabled, Emacs will auto-save file-visiting
 ;; buffers after a certain amount of idle time if the user forgets to save it
@@ -92,7 +92,7 @@
 ;; with a file, while auto-save-visited-mode only saves file-visiting buffers
 ;; after a period of idle time, directly saving to the file itself without
 ;; creating backup files.
-(setq auto-save-visited-interval 5)   ; Save after 5 seconds if inactivity
+(setq auto-save-visited-interval 30)   ; Save after 5 seconds if inactivity
 (auto-save-visited-mode 1)
 
 ;; The built-in outline-minor-mode provides structured code folding in modes
@@ -143,68 +143,68 @@
 ;; The stripspace Emacs package provides stripspace-local-mode, a minor mode
 ;; that automatically removes trailing whitespace and blank lines at the end of
 ;; the buffer when saving.
-(use-package stripspace
-  :diminish
-  :ensure t
-  :commands stripspace-local-mode
-
-  ;; Enable for prog-mode-hook, text-mode-hook, conf-mode-hook
-  :hook ((prog-mode . stripspace-local-mode)
-         (text-mode . stripspace-local-mode)
-         (conf-mode . stripspace-local-mode))
-
-  :custom
-  ;; The `stripspace-only-if-initially-clean' option:
-  ;; - nil to always delete trailing whitespace.
-  ;; - Non-nil to only delete whitespace when the buffer is clean initially.
-  ;; (The initial cleanliness check is performed when `stripspace-local-mode'
-  ;; is enabled.)
-  (stripspace-only-if-initially-clean nil)
-
-  ;; Enabling `stripspace-restore-column' preserves the cursor's column position
-  ;; even after stripping spaces. This is useful in scenarios where you add
-  ;; extra spaces and then save the file. Although the spaces are removed in the
-  ;; saved file, the cursor remains in the same position, ensuring a consistent
-  ;; editing experience without affecting cursor placement.
-  (stripspace-restore-column t))
-
-;; ;; This automates the process of updating installed packages
-;; (use-package auto-package-update
-;;   :ensure t
+                                        ; (use-package stripspace
+;;   :diminish
+;;   :ensure nil
+;;   :commands stripspace-local-mode
+;;
+;;   ;; Enable for prog-mode-hook, text-mode-hook, conf-mode-hook
+;;   :hook ((prog-mode . stripspace-local-mode)
+;;          (text-mode . stripspace-local-mode)
+;;          (conf-mode . stripspace-local-mode))
+;;
 ;;   :custom
-;;   ;; Set the number of days between automatic updates.
-;;   ;; Here, packages will only be updated if at least 7 days have passed
-;;   ;; since the last successful update.
-;;   (auto-package-update-interval 7)
+;;   ;; The `stripspace-only-if-initially-clean' option:
+;;   ;; - nil to always delete trailing whitespace.
+;;   ;; - Non-nil to only delete whitespace when the buffer is clean initially.
+;;   ;; (The initial cleanliness check is performed when `stripspace-local-mode'
+;;   ;; is enabled.)
+;;   (stripspace-only-if-initially-clean nil)
 ;;
-;;   ;; Suppress display of the *auto-package-update results* buffer after updates.
-;;   ;; This keeps the user interface clean and avoids unnecessary interruptions.
-;;   (auto-package-update-hide-results t)
+;;   ;; Enabling `stripspace-restore-column' preserves the cursor's column position
+;;   ;; even after stripping spaces. This is useful in scenarios where you add
+;;   ;; extra spaces and then save the file. Although the spaces are removed in the
+;;   ;; saved file, the cursor remains in the same position, ensuring a consistent
+;;   ;; editing experience without affecting cursor placement.
+;;   (stripspace-restore-column t))
 ;;
-;;   ;; Automatically delete old package versions after updates to reduce disk
-;;   ;; usage and keep the package directory clean. This prevents the accumulation
-;;   ;; of outdated files in Emacs’s package directory, which consume
-;;   ;; unnecessary disk space over time.
-;;   (auto-package-update-delete-old-versions t)
-;;
-;;   ;; Uncomment the following line to enable a confirmation prompt
-;;   ;; before applying updates. This can be useful if you want manual control.
-;;   ;; (auto-package-update-prompt-before-update t)
-;;
-;;   :config
-;;   ;; Run package updates automatically at startup, but only if the configured
-;;   ;; interval has elapsed.
-;;   (auto-package-update-maybe)
-;;
-;;   ;; Schedule a background update attempt daily at 10:00 AM.
-;;   ;; This uses Emacs' internal timer system. If Emacs is running at that time,
-;;   ;; the update will be triggered. Otherwise, the update is skipped for that
-;;   ;; day. Note that this scheduled update is independent of
-;;   ;; `auto-package-update-maybe` and can be used as a complementary or
-;;   ;; alternative mechanism.
-;;   (auto-package-update-at-time "10:00"))
-;; Helpful is an alternative to the built-in Emacs help that provides much more
-;; contextual information.
+;; ;; ;; This automates the process of updating installed packages
+;; ;; (use-package auto-package-update
+;; ;;   :ensure t
+;; ;;   :custom
+;; ;;   ;; Set the number of days between automatic updates.
+;; ;;   ;; Here, packages will only be updated if at least 7 days have passed
+;; ;;   ;; since the last successful update.
+;; ;;   (auto-package-update-interval 7)
+;; ;;
+;; ;;   ;; Suppress display of the *auto-package-update results* buffer after updates.
+;; ;;   ;; This keeps the user interface clean and avoids unnecessary interruptions.
+;; ;;   (auto-package-update-hide-results t)
+;; ;;
+;; ;;   ;; Automatically delete old package versions after updates to reduce disk
+;; ;;   ;; usage and keep the package directory clean. This prevents the accumulation
+;; ;;   ;; of outdated files in Emacs’s package directory, which consume
+;; ;;   ;; unnecessary disk space over time.
+;; ;;   (auto-package-update-delete-old-versions t)
+;; ;;
+;; ;;   ;; Uncomment the following line to enable a confirmation prompt
+;; ;;   ;; before applying updates. This can be useful if you want manual control.
+;; ;;   ;; (auto-package-update-prompt-before-update t)
+;; ;;
+;; ;;   :config
+;; ;;   ;; Run package updates automatically at startup, but only if the configured
+;; ;;   ;; interval has elapsed.
+;; ;;   (auto-package-update-maybe)
+;; ;;
+;; ;;   ;; Schedule a background update attempt daily at 10:00 AM.
+;; ;;   ;; This uses Emacs' internal timer system. If Emacs is running at that time,
+;; ;;   ;; the update will be triggered. Otherwise, the update is skipped for that
+;; ;;   ;; day. Note that this scheduled update is independent of
+;; ;;   ;; `auto-package-update-maybe` and can be used as a complementary or
+;; ;;   ;; alternative mechanism.
+;; ;;   (auto-package-update-at-time "10:00"))
+;; ;; Helpful is an alternative to the built-in Emacs help that provides much more
+;; ;; contextual information.
 (use-package helpful
   :ensure t
   :commands (helpful-callable
@@ -243,10 +243,10 @@
 (winner-mode 1)
 (repeat-mode 1)
 ;; CHANGE: Remove :ensure nil from packages you want to install via package.el
-(use-package diff-hl
-  :hook
-  ((after-init . global-diff-hl-mode)
-   (magit-post-refresh . diff-hl-magit-post-refresh)))
+                                        ; (use-package diff-hl
+                                        ;   :hook
+                                        ;   ((after-init . global-diff-hl-mode)
+                                        ;    (magit-post-refresh . diff-hl-magit-post-refresh)))
 (use-package undo-fu
   :ensure t
 

@@ -91,9 +91,12 @@
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
+  (eglot-ignored-server-capabilities '(:documentFormattingProvider :documentRangeFormattingProvider))
   :config
+  ;; (add-to-list 'eglot-server-programs
+  ;;              '(templ-ts-mode . ("lspx" "--lsp" "vscode-html-language-server --stdio " "--lsp" "templ lsp")))
   (add-to-list 'eglot-server-programs
-               '(templ-ts-mode . ("lspx" "--lsp" "vscode-html-language-server --stdio " "--lsp" "templ lsp")))
+               '(templ-ts-mode . ("templ" "lsp")))
   ;; (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
   (setq-default eglot-workspace-configuration
                 (list
@@ -117,6 +120,10 @@
   (setq completion-category-overrides '((eglot (styles orderless))
                                         (eglot-capf (styles orderless))))
   (setq eglot-autoshutdown t)
+  (setq eglot-events-buffer-size 0) ; Disable event logging
+  (setq eglot-sync-connect nil)     ; Async connection
+
+  ;; Reduce file watching
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
 
   :hook
@@ -167,18 +174,22 @@
   :diminish
   :config
   (apheleia-global-mode 1)
-  (add-to-list 'apheleia-mode-alist
-               '(templ-ts-mode . templ-format))
+
+  ;; Add custom formatters
   (add-to-list 'apheleia-formatters
                '(templ-format "templ" "fmt" filepath))
-  (add-to-list 'apheleia-mode-alist
-               '(js-ts-mode . deno-format))
   (add-to-list 'apheleia-formatters
-               '(deno-format "deno" "fmt" filepath))                                      ;
+               '(deno-format "deno" "fmt" filepath))
 
   ;; Configure prettierd formatter
   (setf (alist-get 'prettierd apheleia-formatters)
 		'("prettierd" filepath))
+  (add-to-list 'apheleia-formatters
+               '(gofmt "gofmt"))
+  (add-to-list 'apheleia-mode-alist
+               '(go-mode . gofmt))
+  (add-to-list 'apheleia-mode-alist
+               '(go-ts-mode . gofmt))
   ;; Update mode associations to use prettierd instead of prettier
   (setf (alist-get 'js-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'deno-format)
@@ -191,6 +202,5 @@
   (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'html-mode apheleia-mode-alist) 'prettierd)
   (setf (alist-get 'web-mode apheleia-mode-alist) 'prettierd))
-
 (provide 'my-prog)
 ;;; my-prog.el ends here

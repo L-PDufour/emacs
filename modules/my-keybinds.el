@@ -93,7 +93,7 @@ Opens consult-buffer with project filtering if in a project."
 ;; Code operations
 (define-key my-code-keymap (kbd "d") #'xref-find-definitions)
 (define-key my-code-keymap (kbd "r") #'xref-find-references)
-(define-key my-code-keymap (kbd "f") #'format-buffer)
+(define-key my-code-keymap (kbd "f") #'apheleia-format-buffer)
 (define-key my-code-keymap (kbd "a") #'eglot-code-actions)
 (define-key my-code-keymap (kbd "h") #'display-local-help)
 (define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)

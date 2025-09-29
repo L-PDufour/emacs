@@ -26,9 +26,6 @@
   :mode "\\.lua\\'"
   :interpreter "lua")
 
-(use-package go-mode
-  :mode "\\.go\\'")
-
 (use-package go-eldoc
   :ensure t
   :hook (go-mode . go-eldoc-setup))
@@ -63,8 +60,6 @@
 
   ;; Use after-hook to ensure our settings apply AFTER the mode's setup
   (add-hook 'templ-ts-mode-hook #'my-templ-mode-setup 90))
-
-
 
 (use-package markdown-mode
   :commands (gfm-mode

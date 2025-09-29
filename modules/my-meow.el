@@ -5,6 +5,20 @@
 ;; Configuration for the Meow modal editing package.
 
 ;;; Code:
+(use-package repeat-fu
+  :commands (repeat-fu-mode repeat-fu-execute)
+
+  :config
+  (setq repeat-fu-preset 'meow)
+
+  :hook
+  ((meow-mode)
+   .
+   (lambda ()
+     (when (and (not (minibufferp)) (not (derived-mode-p 'special-mode)))
+       (repeat-fu-mode)
+       (define-key meow-normal-state-keymap (kbd "C-'") 'repeat-fu-execute)
+       (define-key meow-insert-state-keymap (kbd "C-'") 'repeat-fu-execute)))))
 
 (use-package meow
   :config
