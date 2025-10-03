@@ -327,9 +327,26 @@
       (side . bottom)
       (slot . 1))
      )))
+
+
 (use-package dape
-  ;; :ensure nil  ; Remove this line to install from MELPA
-  :defer t)
+  :config
+  (setq dape-configs
+        '((js-debug-node
+           :type "pwa-node"
+           :request "attach"
+           :port 9229
+           :hostname "localhost"
+           :sourceMaps t
+           :cwd default-directory
+           :program "web/assets/js/main.js")
+          (js-debug-browser
+           :type "pwa-chrome"
+           :request "launch"
+           :url "http://localhost:3000"
+           :program "web/assets/js/main.js"
+           :webRoot default-directory
+           :sourceMaps t))))
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (delete-selection-mode 1)

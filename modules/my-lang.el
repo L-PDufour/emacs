@@ -31,7 +31,7 @@
   :hook (go-mode . go-eldoc-setup))
 
 (use-package templ-ts-mode
-  :vc (:url "https://github.com/L-PDufour/templ-ts-mode.git" :rev :newest)
+  :load-path "~/.emacs.d/site-lisp/templ-ts-mode"  ; Clone your fork here
   :mode "\\.templ\\'"
   :config
   ;; Add this to your config to check current settings
