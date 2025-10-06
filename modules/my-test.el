@@ -81,6 +81,11 @@ Uses position instead of index field."
 ;; Easy insertion of weblinks
 (use-package org-web-tools)
 
+(use-package elfeed-tube
+  :ensure t
+  :after elfeed
+  :config
+  (elfeed-tube-setup))
 
 (use-package project
   :ensure nil

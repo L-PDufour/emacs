@@ -348,6 +348,40 @@
            :webRoot default-directory
            :sourceMaps t))))
 
+
+;; Personal info
+(setq user-mail-address "leonpierre.dufour@gmail.com"
+      user-full-name "Leon-Pierre Dufour")
+
+;; IMAP settings for reading mail
+(setq gnus-select-method
+      '(nnimap "gmail"
+               (nnimap-address "imap.gmail.com")
+               (nnimap-server-port 993)
+               (nnimap-stream ssl)
+               (nnir-search-engine imap)
+               (nnmail-expiry-target "nnimap+gmail:[Gmail]/Trash")
+               (nnmail-expiry-wait 90)))
+
+;; SMTP settings for sending mail
+(setq message-send-mail-function 'smtpmail-send-it
+      smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587
+      smtpmail-stream-type 'starttls)
+
+;; Store passwords securely
+(setq auth-sources '("~/.authinfo.gpg" "~/.authinfo"))
+
+;; Make Gnus NOT ignore [Gmail] mailboxes
+(setq gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")
+
+;; Store sent mail on Gmail's servers
+(setq gnus-message-archive-group "nnimap+gmail:[Gmail]/Sent Mail")
+
+;; Don't keep message buffers around
+(setq message-kill-buffer-on-exit t)
+
+
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (delete-selection-mode 1)
 (setq compilation-scroll-output t)

@@ -164,11 +164,13 @@
 
 (use-package corfu
   :ensure t
+  :ensure t
   :bind (:map corfu-map
-			  ("M-n" . corfu-popupinfo-scroll-up)
-			  ("M-p" . corfu-popupinfo-scroll-down)
-			  ("C-SPC" . corfu-insert-separator)
-			  ("M-;" . corfu-complete))
+              ("M-n" . corfu-popupinfo-scroll-up)
+              ("M-p" . corfu-popupinfo-scroll-down)
+              ("C-SPC" . corfu-insert-separator)
+              ("M-;" . corfu-complete)
+              ("RET" . nil))
   :hook ((prog-mode . corfu-mode)
          (shell-mode . corfu-mode)
          (eshell-mode . corfu-mode))
@@ -183,6 +185,9 @@
   (corfu-auto-delay 0.1)
   (corfu-min-width 20)
   (corfu-quit-no-match t)
+  (corfu-quit-at-boundary t)        ; ADD: Quit at word boundary
+  (corfu-preselect 'prompt)          ; ADD: Don't preselect first item
+  (corfu-on-exact-match nil)
   (corfu-popupinfo-delay 0.5)
   ;; Hide commands in M-x which do not apply to the current mode.
   (read-extended-command-predicate #'command-completion-default-include-p)

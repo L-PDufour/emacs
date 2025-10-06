@@ -46,3 +46,20 @@
 **** http://planet.phpunit.de/atom.xml
 **** http://feeds.feedburner.com/symfony/blog
 **** http://feeds.feedburner.com/qooxdoo/blog/content
+** YouTube                                                          :youtube:
+*** Programming                                                        :tech:
+**** https://www.youtube.com/feeds/videos.xml?channel_id=UCUyeluBRhGPCW4rPe_UvBZQ
+**** https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA
+     ThePrimeagen
+**** https://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA
+     Fireship
+
+*** Emacs                                                             :emacs:
+**** https://www.youtube.com/feeds/videos.xml?channel_id=UCAiiOTio8Yu69c3XnR7nQBQ
+     System Crafters
+**** https://www.youtube.com/feeds/videos.xml?channel_id=UC0uTPqBCFIpZxlz_Lv1tk_g
+     Protesilaos Stavrou
+
+*** Education                                                           :edu:
+**** https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
+     3Blue1Brown
