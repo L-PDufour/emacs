@@ -186,7 +186,7 @@
   (corfu-min-width 20)
   (corfu-quit-no-match t)
   (corfu-quit-at-boundary t)        ; ADD: Quit at word boundary
-  (corfu-preselect 'prompt)          ; ADD: Don't preselect first item
+  (corfu-preselect 'directory)      ;; Preselect the prompt
   (corfu-on-exact-match nil)
   (corfu-popupinfo-delay 0.5)
   ;; Hide commands in M-x which do not apply to the current mode.

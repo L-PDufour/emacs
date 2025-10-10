@@ -4,6 +4,8 @@
 ;;; Code:
 (use-package project
   :ensure nil
+  :config
+  (setq project-vc-extra-root-markers '(".project"))
   :bind ( :map project-prefix-map
 		  ("e" . project-eshell))
   :custom
