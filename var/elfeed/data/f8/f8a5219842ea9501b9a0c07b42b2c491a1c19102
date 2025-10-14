@@ -1,0 +1,287 @@
+<html><head></head><body><p>As I wrote in a recent entry, the forthcoming version <code class="language-plaintext highlighter-rouge">4.1.0</code> of
+<a href="https://protesilaos.com/codelog/2025-09-20-emacs-denote-custom-identifiers/">Denote will provide the option to define custom identifier schemes</a>.
+Here I explain one of the examples I have included in the manual,
+specifically, the idea of recording the day of the week as part of the
+date+time stamp. Monday is <code class="language-plaintext highlighter-rouge">A</code>, Tuesday is <code class="language-plaintext highlighter-rouge">B</code>, and so on.</p>
+
+<p>The default Denote identifier is a compact representation of the date
+and time, with the letter <code class="language-plaintext highlighter-rouge">T</code> in between. For example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre><code>20250924T190920
+</code></pre></div></div>
+
+<p>The letter <code class="language-plaintext highlighter-rouge">T</code> does not have any special meaning. It simply delimits
+the two constituents of the identifier. Users who want to record the
+day of the week can ultimately derive identifiers that look like these:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre><code>20250922A082941
+20250923B140652
+20250924C191038
+</code></pre></div></div>
+
+<p>And with some spaces for didactic purposes:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre><code>2025 09 22   A   08 29 41
+2025 09 23   B   14 06 52
+2025 09 24   C   19 10 38
+</code></pre></div></div>
+
+<p>[ Actually, users can produce identifiers with such spaces, but I will
+  leave this as an exercise for interested parties. ]</p>
+
+<h2>Get the day of the week as a capital letter</h2>
+
+<p>To get the day of the week as a string that holds a number, we use the
+<code class="language-plaintext highlighter-rouge">%u</code> format specifier of the function <code class="language-plaintext highlighter-rouge">format-time-string</code>. Today is
+Wednesday, thus:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">format-time-string</span> <span class="s">"%u"</span><span class="p">)</span>
+<span class="c1">;; =&gt; "3"</span>
+</code></pre></div></div>
+
+<p>Based on this, we know that we need a function that takes such a
+string and returns the corresponding capital letter. Here is one way
+of achieving as much:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="p">(</span><span class="nv">day</span><span class="p">)</span>
+  <span class="s">"Return the corresponding capital letter for DAY.
+DAY is a string holding a number, as the return value of the %u
+specifier in `format-time-string'.
+
+If DAY is a number, convert it to a string and then return its
+corresponding letter."</span>
+  <span class="p">(</span><span class="nv">pcase</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">numberp</span> <span class="nv">day</span><span class="p">)</span> <span class="p">(</span><span class="nv">number-to-string</span> <span class="nv">day</span><span class="p">)</span> <span class="nv">day</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"1"</span> <span class="s">"A"</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"2"</span> <span class="s">"B"</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"3"</span> <span class="s">"C"</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"4"</span> <span class="s">"D"</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"5"</span> <span class="s">"E"</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"6"</span> <span class="s">"F"</span><span class="p">)</span>
+    <span class="p">(</span><span class="s">"7"</span> <span class="s">"G"</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">_</span> <span class="p">(</span><span class="nb">error</span> <span class="s">"The day `%S' is not among 1-7"</span> <span class="nv">day</span><span class="p">))))</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">pcase</code> macro does the heavy lifting here. We basically test for
+string equality and return a new string or throw an error. Testing the
+code, I get these results:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="s">"3"</span><span class="p">)</span>
+<span class="c1">;; =&gt; "C"</span>
+
+<span class="p">(</span><span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="mi">3</span><span class="p">)</span>
+<span class="c1">;; =&gt; "C"</span>
+
+<span class="p">(</span><span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="s">"10"</span><span class="p">)</span>
+<span class="c1">;; =&gt; ERROR</span>
+
+<span class="p">(</span><span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="mi">10</span><span class="p">)</span>
+<span class="c1">;; =&gt; ERROR</span>
+</code></pre></div></div>
+
+<h2>Tweak the Denote identifier format to pass the <code class="language-plaintext highlighter-rouge">%u</code> specifier</h2>
+
+<p>Denote stores the <code class="language-plaintext highlighter-rouge">format-time-string</code> specifiers for its default
+identifier in the variable <code class="language-plaintext highlighter-rouge">denote-date-identifier-format</code>. The value
+is <code class="language-plaintext highlighter-rouge">"%Y%m%dT%H%M%S"</code>, which is what derives the aforementioned
+standard identifier.</p>
+
+<p>We already noted that we do not want that literal <code class="language-plaintext highlighter-rouge">T</code> over there. So
+let us make our format the same as the original one except that we
+include <code class="language-plaintext highlighter-rouge">%u</code> in place of <code class="language-plaintext highlighter-rouge">T</code>. A function call that would yield the
+desired result is this:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">replace-regexp-in-string</span> <span class="s">"T"</span> <span class="s">" %u "</span> <span class="nv">denote-date-identifier-format</span> <span class="no">t</span><span class="p">)</span>
+<span class="c1">;; =&gt; "%Y%m%d %u %H%M%S"</span>
+</code></pre></div></div>
+
+<p>Notice that I add a space before and after the <code class="language-plaintext highlighter-rouge">%u</code>. These are
+delimiters that we will use to split the string more easily into its
+<code class="language-plaintext highlighter-rouge">DATE</code>, <code class="language-plaintext highlighter-rouge">DAY</code>, <code class="language-plaintext highlighter-rouge">TIME</code> components. But one step at a time. We first
+need to define this as a variable:</p>
+
+<p>[ Technically, this is not a normal variable because of <code class="language-plaintext highlighter-rouge">defconst</code>
+  instead of the more common <code class="language-plaintext highlighter-rouge">defvar</code>, but we do not need to consider
+  such details. ]</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">defconst</span> <span class="nv">my-denote-date-identifier-format</span>
+  <span class="p">(</span><span class="nv">replace-regexp-in-string</span> <span class="s">"T"</span> <span class="s">" %u "</span> <span class="nv">denote-date-identifier-format</span> <span class="no">t</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2>Format a date using the new identifier scheme</h2>
+
+<p>Our next task is to write a small function that takes a date argument
+and returns a string whose pattern follows what we did in the previous
+section. For example, if the current date is <code class="language-plaintext highlighter-rouge">2025-09-24</code>, the day is
+Wednesday, and the time is <code class="language-plaintext highlighter-rouge">19:30:00</code>, we expect an identifier like
+<code class="language-plaintext highlighter-rouge">20250924C193000</code>.</p>
+
+<p>To keep things simple, we will not go into how Emacs represents dates
+internally. It does not matter, anyway, because Denote handles that
+part internally. All we need to test our function is to use the return
+value of the function <code class="language-plaintext highlighter-rouge">current-time</code>. Actually, even that is optional
+because <code class="language-plaintext highlighter-rouge">format-time-string</code> defaults to that if it is not given an
+explicit date as an argument.</p>
+
+<p>As such, here is how we get the string <code class="language-plaintext highlighter-rouge">"DATE DAY TIME"</code>, based on
+what we have:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">format-time-string</span> <span class="nv">my-denote-date-identifier-format</span><span class="p">)</span>
+<span class="c1">;; =&gt; "20250924 3 193347"</span>
+</code></pre></div></div>
+
+<p>Remember those spaces from earlier? We need them now to split this
+string into a list of three strings, so that we can isolate the day in
+the middle. Once we have just the day, we can pass it to the function
+we wrote earlier that gives us the corresponding capital letter.</p>
+
+<p>To split a string at the spaces, we do this (read the <code class="language-plaintext highlighter-rouge">split-string</code>
+doc string for further details):</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">split-string</span> <span class="nv">STRING</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Which means:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">split-string</span> <span class="p">(</span><span class="nv">format-time-string</span> <span class="nv">my-denote-date-identifier-format</span><span class="p">))</span>
+<span class="c1">;; =&gt; ("20250924" "3" "193626")</span>
+</code></pre></div></div>
+
+<p>We get back a list of strings, so the day is retrieved thus:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nb">nth</span> <span class="mi">1</span> <span class="o">'</span><span class="p">(</span><span class="s">"20250924"</span> <span class="s">"3"</span> <span class="s">"193626"</span><span class="p">))</span>
+<span class="c1">;; =&gt; "3"</span>
+</code></pre></div></div>
+
+<p>Use <code class="language-plaintext highlighter-rouge">(nth 0 ...)</code> for the date and <code class="language-plaintext highlighter-rouge">(nth 2 ...)</code> for the time.</p>
+
+<p>Now that we know all this, we can piece it together into a single
+function. Here is what we will do, which I shall explain in further
+detail below:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">my-denote-format-date</span> <span class="p">(</span><span class="nv">date</span><span class="p">)</span>
+  <span class="s">"Format DATE using `my-denote-date-identifier-format'.
+Represent the day of the week with `my-denote-get-day-of-week-as-alpha'."</span>
+  <span class="p">(</span><span class="nv">pcase-let*</span> <span class="p">((</span><span class="nv">identifier-string</span> <span class="p">(</span><span class="nv">format-time-string</span> <span class="nv">my-denote-date-identifier-format</span> <span class="nv">date</span><span class="p">))</span>
+               <span class="p">(</span><span class="o">`</span><span class="p">(</span><span class="o">,</span><span class="nv">date</span> <span class="o">,</span><span class="nv">day</span> <span class="o">,</span><span class="nb">time</span><span class="p">)</span> <span class="p">(</span><span class="nv">split-string</span> <span class="nv">identifier-string</span><span class="p">))</span>
+               <span class="p">(</span><span class="nv">day-as-letter</span> <span class="p">(</span><span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="nv">day</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nv">concat</span> <span class="nv">date</span> <span class="nv">day-as-letter</span> <span class="nb">time</span><span class="p">)))</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">pcase-let*</code> macro uses “destructuring” to pattern match the return
+value and bind it to the variables we name (also see my free (gratis and
+libre) book: <a href="https://protesilaos.com/emacs/emacs-lisp-elements">Emacs Lisp Elements</a>).
+This is the short way of doing the following:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">my-denote-format-date</span> <span class="p">(</span><span class="nv">date</span><span class="p">)</span>
+  <span class="s">"Format DATE using `my-denote-date-identifier-format'."</span>
+  <span class="p">(</span><span class="k">let*</span> <span class="p">((</span><span class="nv">identifier-string</span> <span class="p">(</span><span class="nv">format-time-string</span> <span class="nv">my-denote-date-identifier-format</span> <span class="nv">date</span><span class="p">))</span>
+         <span class="p">(</span><span class="nv">strings</span> <span class="p">(</span><span class="nv">split-string</span> <span class="nv">identifier-string</span><span class="p">))</span>
+         <span class="p">(</span><span class="nv">date</span> <span class="p">(</span><span class="nb">nth</span> <span class="mi">0</span> <span class="nv">strings</span><span class="p">))</span>
+         <span class="p">(</span><span class="nv">day</span> <span class="p">(</span><span class="nb">nth</span> <span class="mi">1</span> <span class="nv">strings</span><span class="p">))</span>
+         <span class="p">(</span><span class="nb">time</span> <span class="p">(</span><span class="nb">nth</span> <span class="mi">2</span> <span class="nv">strings</span><span class="p">))</span>
+         <span class="p">(</span><span class="nv">day-as-letter</span> <span class="p">(</span><span class="nv">my-denote-get-day-of-week-as-alpha</span> <span class="nv">day</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nv">concat</span> <span class="nv">date</span> <span class="nv">day-as-letter</span> <span class="nb">time</span><span class="p">)))</span>
+</code></pre></div></div>
+
+<p>Use whichever style you prefer.</p>
+
+<p>The point is that we (i) take the return value of <code class="language-plaintext highlighter-rouge">format-time-string</code>
+with the spaces, as I showed above, (ii) split it at the spaces into
+three strings, (iii) assign each of those strings to a variable local
+to this function, (iv) convert the day from a number to a capital
+letter, and (v) put it all back together without those spaces. The
+result is this:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nv">my-denote-format-date</span> <span class="p">(</span><span class="nv">current-time</span><span class="p">))</span>
+<span class="c1">;; =&gt; "20250924C194219"</span>
+</code></pre></div></div>
+
+<h2>Write and then use the custom <code class="language-plaintext highlighter-rouge">denote-get-identifier-function</code></h2>
+
+<p>The variable <code class="language-plaintext highlighter-rouge">denote-get-identifier-function</code> has the symbol of a
+function as its value. Its documentation describes the technicalities.
+Though, again, we do not need to understand the finer points to
+achieve our goal. Since our custom identifier is almost the same as
+the default, we can copy the original function that Denote relies on
+and make a small change to it so that it uses the <code class="language-plaintext highlighter-rouge">my-denote-format-date</code>
+we just wrote. Behold:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">my-denote-generate-identifier-as-date</span> <span class="p">(</span><span class="nv">initial-identifier</span> <span class="nv">date</span><span class="p">)</span>
+  <span class="s">"Generate an identifier based on DATE.
+
+If INITIAL-IDENTIFIER is not already used, return it.  Else, if it is
+possible to derive an identifier from it, return this identifier.
+
+Else, use the DATE.  If it is nil, use `current-time'.
+
+Slightly modified version of `denote-generate-identifier-as-date'."</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">denote-used-identifiers</span> <span class="p">(</span><span class="nb">or</span> <span class="nv">denote-used-identifiers</span> <span class="p">(</span><span class="nv">denote--get-all-used-ids</span><span class="p">))))</span>
+    <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nb">and</span> <span class="nv">initial-identifier</span>
+                <span class="p">(</span><span class="nb">not</span> <span class="p">(</span><span class="nb">gethash</span> <span class="nv">initial-identifier</span> <span class="nv">denote-used-identifiers</span><span class="p">)))</span>
+           <span class="nv">initial-identifier</span><span class="p">)</span>
+          <span class="p">((</span><span class="nb">and</span> <span class="nv">initial-identifier</span>
+                <span class="p">(</span><span class="nv">string-match-p</span> <span class="nv">denote-date-identifier-regexp</span> <span class="nv">initial-identifier</span><span class="p">)</span>
+                <span class="p">(</span><span class="nv">date-to-time</span> <span class="nv">initial-identifier</span><span class="p">))</span>
+           <span class="p">(</span><span class="nv">denote--find-first-unused-id-as-date</span> <span class="nv">initial-identifier</span><span class="p">))</span>
+          <span class="p">(</span><span class="no">t</span>
+           <span class="p">(</span><span class="nv">denote--find-first-unused-id-as-date</span>
+            <span class="p">(</span><span class="nv">my-denote-format-date</span> <span class="p">(</span><span class="nb">or</span> <span class="nv">date</span> <span class="p">(</span><span class="nv">current-time</span><span class="p">))))))))</span>
+</code></pre></div></div>
+
+<p>The internal workings do not matter right now, though I am happy to
+explain them elsewhere. Our priority is to find where <code class="language-plaintext highlighter-rouge">my-denote-format-date</code>
+is used. The only difference between what we have here and the
+original is that our final line uses <code class="language-plaintext highlighter-rouge">my-denote-format-date</code>, while
+the original does a <code class="language-plaintext highlighter-rouge">format-time-string</code> with the <code class="language-plaintext highlighter-rouge">denote-date-identifier-format</code>
+(which we saw further above when we replaced <code class="language-plaintext highlighter-rouge">T</code> with <code class="language-plaintext highlighter-rouge">%u</code>).</p>
+
+<p>Finally, bind <code class="language-plaintext highlighter-rouge">denote-get-identifier-function</code> to the symbol of the
+custom function to start using it:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre><code><span class="p">(</span><span class="k">setq</span> <span class="nv">denote-get-identifier-function</span> <span class="nf">#'</span><span class="nv">my-denote-generate-identifier-as-date</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>All Denote files will henceforth look like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre><code>@@20250924C190301--this-is-a-test__denote_testing.txt
+</code></pre></div></div>
+
+<p>Remember that the <code class="language-plaintext highlighter-rouge">@@</code> exists for custom identifiers and that all the
+components of the file name can be reordered.</p>
+
+<p>This covers it! The manual has more examples and I always am eager to
+help anyone who needs to do something a little bit differently.</p>
+
+<h2>About Denote</h2>
+
+<p>Denote is a simple note-taking tool for Emacs. It is based on the idea
+that notes should follow a predictable and descriptive file-naming
+scheme. The file name must offer a clear indication of what the note
+is about, without reference to any other metadata. Denote basically
+streamlines the creation of such files while providing facilities to
+link between them.</p>
+
+<p>Denote’s file-naming scheme is not limited to “notes”. It can be used
+for all types of file, including those that are not editable in Emacs,
+such as videos. Naming files in a consistent way makes their filtering
+and retrieval considerably easier. Denote provides relevant facilities
+to rename files, regardless of file type.</p>
+
+<p>[ I have a page with all my Emacs packages, which includes all the
+  Denote extensions I maintain: <a href="https://protesilaos.com/emacs">https://protesilaos.com/emacs</a>. ]</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">denote</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/denote">https://protesilaos.com/emacs/denote</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/denote-changelog">https://protesilaos.com/emacs/denote-changelog</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/denote">https://github.com/protesilaos/denote</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/denote">https://gitlab.com/protesilaos/denote</a></li>
+    </ul>
+  </li>
+  <li>Video demo: <a href="https://protesilaos.com/codelog/2022-06-18-denote-demo/">https://protesilaos.com/codelog/2022-06-18-denote-demo/</a></li>
+  <li>Backronyms: Denote Everything Neatly; Omit The Excesses.  Don’t Ever
+Note Only The Epiphenomenal.</li>
+</ul>
+        </body></html>

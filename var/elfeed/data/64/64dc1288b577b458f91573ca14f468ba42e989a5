@@ -1,0 +1,48 @@
+<html><head></head><body><p>James Dyer and I both ran into the same <a href="https://emacs.dyerdwelling.family/emacs/20250826095622-emacs--a-better-way-to-indent-your-entire-buffer-in-emacs/">workflow snag when fixing source indentation</a>. He explains it best:</p>
+<blockquote>
+<ol>
+<li>You’re working in a file with inconsistent indentation</li>
+<li>You want to fix the entire buffer’s formatting</li>
+<li>You run C-x h (select all) followed by M-x indent-region</li>
+<li>Your mark is now at the beginning of the buffer, disrupting your workflow</li>
+</ol>
+</blockquote>
+<p>Naturally, this is Emacs and were both able to patch our editor to smoothen things out.</p>
+<p>While I ran into the same <code>indent-region</code> snag after selecting an entire buffer (via <code>mark-whole-buffer</code>), I also faced it with <code>mark-defun</code> and er/expand-region (awesome <a href="https://github.com/magnars/expand-region.el">package</a> btw).</p>
+<p>With three cases in mind, I wanted a somewhat generic solution, so I <a href="https://xenodium.com/mark-region-indent-restore-location">built diverted.el</a>, a little minor mode to identify these momentary diversions and try to bring the point back to the original location. Mind you, this was back in 2019 and until James's post, I hadn't heard of anyone else running into a similar snag. Since then, I kept the package as part of my config. James's post gave me the nudge I needed to move <code>diverted.el</code> out of my config and into <a href="https://github.com/xenodium/diverted">its own GitHub repo</a>.</p>
+<p>By default, <code>diverted.el</code> recognizes both <code>mark-defun</code> and <code>mark-whole-buffer</code> as diversions, but you can also recognize the likes of <code>er/expand-region</code> via <code>diverted-events</code>. I'm hoping configuring is fairly self-explanatory. To date, I only have <code>mark-whole-buffer</code>, <code>mark-defun</code>, and <code>er/expand-region</code> as recognized diversions.</p>
+<pre><code class="language-{.commonlisp">(defcustom diverted-events
+  (list
+   (make-diverted-event :from 'mark-defun
+                        :to 'indent-for-tab-command
+                        :breadcrumb (lambda ()
+                                      (diverted--pop-to-mark-command 2)))
+   (make-diverted-event :from 'mark-whole-buffer
+                        :to 'indent-for-tab-command
+                        :breadcrumb (lambda ()
+                                      (diverted--pop-to-mark-command 2))))
+  "Diversion events to look for.
+
+For example:
+
+  (add-to-list 'diverted-events
+    (make-diverted-event
+      :from 'er/expand-region
+      :to 'indent-for-tab-command
+      :breadcrumb (lambda ()
+                    (diverted--pop-to-mark-command 2))))"
+  :type '(repeat sexp)
+  :group 'diverted)
+</code></pre>
+<p>Read on for a little demo…</p>
+<h2>Without diverted-mode</h2>
+<p>Notice how point is left at the top of the screen after pressing TAB to indent region.</p>
+<img src="https://raw.githubusercontent.com/xenodium/diverted/main/demo/before.gif">
+<h2>With diverted-mode</h2>
+<p>Notice how point is left where it was prior to selecting the function and pressing TAB to indent region.</p>
+<img src="https://raw.githubusercontent.com/xenodium/diverted/main/demo/after.gif">
+<p>That's it for today. If you want to give <code>diverted.el</code> a try, head over to <a href="https://github.com/xenodium/diverted">GitHub</a>.</p>
+<h2>Make it all sustainable</h2>
+<p>Reckon <code>diverted-mode</code> will be useful to you? Enjoying this <a href="https://xenodium.com">blog</a> or <a href="https://github.com/xenodium">my projects</a>? I am an 👉 indie dev 👈. Help make it sustainable by ✨<a href="https://github.com/sponsors/xenodium">sponsoring</a>✨</p>
+<p>Need a blog? <a href="https://lmno.lol">I can help with that</a>. Maybe buy my <a href="https://apps.apple.com/us/developer/xenodium-ltd/id304568690">iOS apps</a> too ;)</p>
+</body></html>

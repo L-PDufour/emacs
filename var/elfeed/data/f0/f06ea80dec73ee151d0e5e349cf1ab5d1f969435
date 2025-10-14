@@ -1,0 +1,21 @@
+<a
+href="https://radicle.xyz/2025/09/30/radicle-1.5.0">Version 1.5.0</a>
+of the Radicle peer-to-peer Git collaboration platform has been
+released. This release includes better support for bare repositories,
+structured logging, and improvements in the output of <tt>rad patch
+show</tt>:</p>
+
+<blockquote class="bq">
+The previous output would differentiate "updates", where the original
+author creates a new revision, and "revisions", where another author
+creates a revision. This could be confusing since updates are also
+revisions. Instead, the output shows a timeline of the root of the
+patch and each new revision, without any differentiation. The revision
+identifiers, head commit of the revision, and author are still printed
+as per usual.
+</blockquote>
+
+<p>LWN <a href="https://lwn.net/Articles/966869/">covered</a> Radicle
+in March 2024.</p>
+
+<p></p>

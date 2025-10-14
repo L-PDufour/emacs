@@ -1,0 +1,11 @@
+<p>
+Vishnu Haridas has a nice post <a href="https://iamvishnu.com/posts/utf8-is-brilliant-design">on UTF-8 and how it works</a>. He&rsquo;s impressed with the brilliance of its design. And why not? It provides code points for virtually every written language in the world while maintaining compatibility with ASCII. Among other things, &ldquo;compatibility&rdquo; means that any ASCII character is represented the same way in UTF-8 and that every file containing only ASCII characters is a valid UTF-8 file and that every UTF-8 file containing only ASCII characters is a valid ASCII file.
+</p>
+<p>
+It almost seems like magic and Haridas is right to be impressed. He doesn&rsquo;t mention the back story and if he&rsquo;s unfamiliar with it, he&rsquo;d be even more impressed. As I&rsquo;ve written before, <a href="https://irreal.org/blog/?p=102">UTF-8 was designed over dinner on a paper placemat</a> by the legendary Ken Thompson and Rob Pike. But wait. There&rsquo;s more. After dinner Pike and Thompson returned to Bell Labs and while Thompson implemented the packing and unpacking code, Pike dug into the Plan 9 graphics library and began changing it to use UTF-8. By the end of the night they were done and by the end of the next day, Plan 9 was running UTF-8 and only UTF-8.
+</p>
+<p>
+These days it seems we can&rsquo;t even get a vacation request accomplished that quickly but Thompson and Pike designed, implemented, and ported into Plan 9 a world changing character encoding that revolutionized digital typography in the space of a couple of days.
+</p>
+<p>
+Another part of the back story is that Pike and Thompson didn&rsquo;t just decide to invent UTF-8 on a whim. They were motivated by what they considered the inadequate, committee designed proposals floating around and, in particular, one from IBM that they were asked to review. You can read the whole story <a href="https://doc.cat-v.org/bell_labs/utf-8_history?2">as told by Rob Pike</a> if you want to know all the details and get a peek at Thompson&rsquo;s original code.</p>

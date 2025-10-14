@@ -1,0 +1,5 @@
+After marking bcachefs "externally maintained" in 6.17, Linus Torvalds has
+<a
+href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f2c61db29f27">removed
+it entirely</a> for 6.18.  "<q>It's now a DKMS module, making the in-kernel
+code stale, so remove it to avoid any version confusion.</q>"

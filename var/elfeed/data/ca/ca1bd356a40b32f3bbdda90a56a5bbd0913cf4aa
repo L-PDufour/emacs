@@ -1,0 +1,20 @@
+<html><head></head><body><blockquote><p><strong>Update</strong>: Emacs 31 will ship with a similar feature to the one described below called <code>minibuffer-nonselected-mode</code>.</p></blockquote><p>I can easily tell if an <a href="https://stebalien.com/tags/emacs">Emacs</a> buffer is focused by looking at the buffer’s mode-line. On the other hand, the only indicator that the minibuffer is focused or not is the cursor, and that’s pretty easy to miss.</p><p>I wanted to avoid making any intrusive changes to the minibuffer, so I decided to style the prompt based on whether the minibuffer is focused. When <em>not</em> focused, I remap the minibuffer prompt face to <code>shadow</code>.</p><p>Focused:
+<img src="https://stebalien.com/blog/dim-minibuffer-prompt-when-unfocused/static/focused.png" alt="focused minibuffer"></p><p>Unfocused:
+<img src="https://stebalien.com/blog/dim-minibuffer-prompt-when-unfocused/static/unfocused.png" alt="unfocused minibuffer"></p><p>The code is pretty simple:</p><pre><code class="lang-elisp">(defvar-local steb/focused-minibuffer-face-remap nil
+  "Face-remapping for a dimmed-minibuffer prompt.")
+
+(defun steb/focused-minibuffer-update (w)
+  (when (eq w (minibuffer-window))
+    (when steb/focused-minibuffer-face-remap
+      (face-remap-remove-relative steb/focused-minibuffer-face-remap)
+      (setq steb/focused-minibuffer-face-remap nil))
+    (unless (eq w (selected-window))
+      (with-selected-window (minibuffer-window)
+        (setq steb/focused-minibuffer-face-remap
+              (face-remap-add-relative 'minibuffer-prompt 'shadow))))))
+
+(defun steb/minibuffer-setup-focus-indicator ()
+  (add-hook 'window-state-change-functions 'steb/focused-minibuffer-update nil t))
+
+(add-hook 'minibuffer-setup-hook #'steb/minibuffer-setup-focus-indicator)
+</code></pre><hr><p>My approach was heavily inspired by <a href="https://emacs.stackexchange.com/questions/73783/change-minibuffer-color-when-not-in-minibuffer-and-minibuffer-active/73785#73785">this Emacs Stack Exchange answer</a>, but I tried to simplify the implementation and make the styling a bit less intrusive.</p></body></html>

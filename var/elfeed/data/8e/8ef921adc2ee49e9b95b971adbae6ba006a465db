@@ -1,0 +1,493 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>A practical quick-reference for the JJ (Jujutsu) version control
+system: not a tutorial, but a ready-to-use guide with the most
+essential commands and workflows.</p>
+<h2>🧠 Heads-Up: This Is <em>Not</em> a Tutorial!</h2>
+<p>If you're expecting a walkthrough on how to use <a href="https://github.com/jj-vcs/jj">Jujutsu
+(JJ)</a> from scratch, this post probably
+isn't what you're looking for.</p>
+<p>There are already some great tutorials
+out there, including the excelent <a href="https://jj-vcs.github.io/jj/latest/tutorial/">official one</a>.</p>
+<p>While this post serves as a <strong>cheat sheet</strong> and not a beginner
+tutorial, if you're looking for a video walkthrough to complement it,
+check out <code>DevOps Toolbox</code> awesome video:</p>
+<iframe width="100%"
+		height="100%"
+		style="aspect-ratio: 16 / 9;"
+		src="https://www.youtube.com/embed/cZqFaMlufDY?si=mxihKYoz4LTr0NnX"
+		title="YouTube video player"
+		frameborder="0"
+		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+		referrerpolicy="strict-origin-when-cross-origin"
+		allowfullscreen>
+</iframe>
+<p><a href="https://www.youtube.com/watch?v=cZqFaMlufDY">» Also available here</a></p>
+<hr>
+<h2>🐦 Why JJ?</h2>
+<p>Jujutsu is a powerful version control system for software
+projects. You use it to get a copy of your code, track changes to the
+code, and finally publish those changes for others to see and use. It
+is designed from the ground up to be easy to use, whether you're new or
+experienced, working on brand new projects alone, or large scale
+software projects with large histories and teams.</p>
+<p>What sets JJ apart is its focus on <strong>automatic working commits</strong>,
+which track your changes continuously without the usual manual commit
+overhead. This design makes JJ extremely fast, highly scriptable, and
+encourages maintaining a cleaner, more intuitive project history.</p>
+<p>That said, JJ introduces new workflows and concepts that may feel
+unfamiliar at first. Common operations like <code>merge</code> or <code>rebase</code> behave
+differently, so keeping a quick reference or cheat sheet handy can
+make your transition smoother and more productive.</p>
+<hr>
+<h2>📎 The cheat sheet!</h2>
+<h2>Basic Commands</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6">
+<tbody>
+<tr>
+<td scope="col" class="org-left">jj git init</td>
+<td scope="col" class="org-left">Inits jj with git backend</td>
+</tr>
+<tr>
+<td class="org-left">jj st</td>
+<td class="org-left">prints status</td>
+</tr>
+<tr>
+<td class="org-left">jj status</td>
+<td class="org-left">same as above</td>
+</tr>
+<tr>
+<td class="org-left">jj</td>
+<td class="org-left">prints log</td>
+</tr>
+<tr>
+<td class="org-left">jj log</td>
+<td class="org-left">same as above</td>
+</tr>
+<tr>
+<td class="org-left">jj diff</td>
+<td class="org-left">diffs current change</td>
+</tr>
+<tr>
+<td class="org-left">jj diff --git</td>
+<td class="org-left">diffs current change in git style</td>
+</tr>
+<tr>
+<td class="org-left">jj desc</td>
+<td class="org-left">adds a description to the current change</td>
+</tr>
+<tr>
+<td class="org-left">jj describe</td>
+<td class="org-left">same as above</td>
+</tr>
+<tr>
+<td class="org-left">jj describe -m "..."</td>
+<td class="org-left">same as above, but inline</td>
+</tr>
+<tr>
+<td class="org-left">jj new</td>
+<td class="org-left">ends a change and inits a new one</td>
+</tr>
+<tr>
+<td class="org-left">jj new -m</td>
+<td class="org-left">ends a change and inits a new one</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">setting a description</td>
+</tr>
+<tr>
+<td class="org-left">jj file annotate filename</td>
+<td class="org-left">annotates filename, similar to</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">git blame or hg annotate</td>
+</tr>
+<tr>
+<td class="org-left">jj undo</td>
+<td class="org-left">undoes last jj command</td>
+</tr>
+<tr>
+<td class="org-left">jj squash</td>
+<td class="org-left">combines changes and descriptions</td>
+</tr>
+<tr>
+<td class="org-left">jj squash file</td>
+<td class="org-left">instantly squashes file down to</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">last change</td>
+</tr>
+<tr>
+<td class="org-left">jj squash -i</td>
+<td class="org-left">opens an ui to select</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">what to squash</td>
+</tr>
+<tr>
+<td class="org-left">jj abandon</td>
+<td class="org-left">drops everything on current change</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">and starts a new one in place.</td>
+</tr>
+<tr>
+<td class="org-left">jj split</td>
+<td class="org-left">splits current change creating a new change with the selected content on @-</td>
+</tr>
+<tr>
+<td class="org-left">jj commit -m "..."</td>
+<td class="org-left">adds a description for current change and starts a new one (equivalent to <code>jj desc -m "..." && jj new</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Time Traveling</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td scope="col" class="org-left">jj new -B @ -m "msg"</td>
+<td scope="col" class="org-left">Creates a new change <code>B</code>efore current (@)</td>
+</tr>
+<tr>
+<td scope="col" class="org-left">&#xa0;</td>
+<td scope="col" class="org-left">setting a description</td>
+</tr>
+<tr>
+<td class="org-left">jj edit change-id</td>
+<td class="org-left">Moves to whathever change-id</td>
+</tr>
+<tr>
+<td class="org-left">jj next --edit</td>
+<td class="org-left">Jumps to next change</td>
+</tr>
+<tr>
+<td class="org-left">jj edit @+</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+<tr>
+<td class="org-left">jj edit @-</td>
+<td class="org-left">Jumps to prev change</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Branchless Workflow</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td class="org-left">jj new change-id</td>
+<td class="org-left">Creates a new change before a</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">given change-id</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>More on log</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td scope="col" class="org-left">jj log -r revsets</td>
+<td scope="col" class="org-left">Applies a revset to log, similar</td>
+</tr>
+<tr>
+<td scope="col" class="org-left">&#xa0;</td>
+<td scope="col" class="org-left">to hg(1) (Mercurial)</td>
+</tr>
+<tr>
+<td class="org-left">jj --limit number</td>
+<td class="org-left">Limits log lines</td>
+</tr>
+<tr>
+<td class="org-left">jj log -r 'heads(all())'</td>
+<td class="org-left">Shows all 'heads' or 'forked'</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">changes top change</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Merging</h2>
+<p>Note: there's no <code>jj checkout</code> nor <code>jj merge</code>, those used to exist but are
+now <strong>deprecated</strong>. We use <code>jj new ...</code> for everything.</p>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td class="org-left">jj new x yz -m "message"</td>
+<td class="org-left">Creates a new change by merging</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">x and yz change ids defining</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">a message "merge". User can</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">merge as many change-ids as</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">they wish.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Rebasing</h2>
+<p>Notice: rebase <code>always</code> succeeds even with conflicts <strong>pending</strong>.</p>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td class="org-left">jj rebase -s o -d x</td>
+<td class="org-left">Rebases change with id o (source)</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">to change with id x (destination)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Merge Conflicts</h2>
+<p>If a conflict is present, <code>jj st</code> will tell you on which files
+you need to look for conflicts and solve.</p>
+<p>Just save your file after solving and nothing else, no need
+to <strong>continue</strong> anything.</p>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td class="org-left">jj resolve</td>
+<td class="org-left">Opens an ui to choose how to solve conflicts</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">(plus: mouse is supported)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Log - Template Language</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td scope="col" class="org-left">jj log -T 'TEMPLATE'</td>
+<td scope="col" class="org-left">Applies a template to jj log</td>
+</tr>
+<tr>
+<td class="org-left">jj help -k templates</td>
+<td class="org-left">Print the help doc with all template</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">language options</td>
+</tr>
+</tbody>
+</table>
+<p>A bunch of options are provided to go with templates, some
+examples:</p>
+<p>Format log to have commit-id, new line, description and <code>----</code> before
+next log entry.</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-T</span> <span class="token string">'commit-id ++ "\n" ++ description ++ "\n------\n"'</span>
+</code></pre></div>
+<p>Get short commit IDs of the working-copy parents:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log --no-graph <span class="token parameter variable">-r</span> @ <span class="token parameter variable">-T</span> <span class="token string">'parents.map(|c| c.commit_id().short()).join(",")'</span>
+</code></pre></div>
+<p>Show machine-readable list of full commit and change IDs:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log --no-graph <span class="token parameter variable">-T</span> <span class="token string">'commit_id ++ " " ++ change_id ++ "\n"'</span>
+</code></pre></div>
+<hr>
+<h2>Log - Revset Language</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td scope="col" class="org-left">jj log -r 'REVSET'</td>
+<td scope="col" class="org-left">Applies a revset to jj log</td>
+</tr>
+<tr>
+<td class="org-left">jj help -k revsets</td>
+<td class="org-left">Prints the help doc with all revsets</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">language options</td>
+</tr>
+</tbody>
+</table>
+<p>A bunch of options are provided to go with templates, some
+examples:</p>
+<p>Show the parent(s) of the working-copy commit (like <code>git log -1 HEAD</code>):</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> @-
+</code></pre></div>
+<p>Show all ancestors of the working copy (like plain <code>git log</code>):</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> ::@
+</code></pre></div>
+<p>Show commits not on any remote bookmark:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> <span class="token string">'remote_bookmarks()..'</span>
+</code></pre></div>
+<p>Show commits not on `origin` (if you have other remotes like `fork`):</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> <span class="token string">'remote_bookmarks(remote=origin)..'</span>
+</code></pre></div>
+<p>Show the initial commits in the repo (the ones Git calls "root commits"):</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> <span class="token string">'root()+'</span>
+</code></pre></div>
+<p>Show some important commits (like <code>git --simplify-by-decoration</code>):</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> <span class="token string">'tags() | bookmarks()'</span>
+</code></pre></div>
+<p>Show local commits leading up to the working copy, as well as descendants of
+those commits:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> <span class="token string">'(remote_bookmarks()..@)::'</span>
+</code></pre></div>
+<p>Show commits authored by "martinvonz" and containing the word "reset" in the
+description:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log <span class="token parameter variable">-r</span> <span class="token string">'author(martinvonz) & description(reset)'</span>
+</code></pre></div>
+<hr>
+<h2>Diff - Fileset Language</h2>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td class="org-left">jj help -k filesets</td>
+<td class="org-left">Prints the help doc with all filesets</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">language options</td>
+</tr>
+</tbody>
+</table>
+<p>A bunch of options are provided to go with templates, some
+examples:</p>
+<p>Show diff excluding <code>Cargo.lock</code>.</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token function">diff</span> <span class="token string">'~Cargo.lock'</span>
+</code></pre></div>
+<p>List files in <code>src</code> excluding Rust sources.</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token function">file</span> list <span class="token string">'src ~ glob:"**/*.rs"'</span>
+</code></pre></div>
+<p>Split a revision in two, putting `foo` into the second commit.</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token function">split</span> <span class="token string">'~foo'</span>
+</code></pre></div>
+<hr>
+<h2>JJ & Git - Co-locate</h2>
+<p>This means jj side by side with git.</p>
+<p>Your project will have on its root, both a <code>.jj</code> and a <code>.git</code> directory.</p>
+<table class="org-table-2-columns" border="2" cellspacing="0" cellpadding="6" >
+<tbody>
+<tr>
+<td class="org-left">jj git init --colocate .</td>
+<td class="org-left">Set a new version control</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">with both jj and git, or if</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">git is present, make arrangements</td>
+</tr>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">so both can be colocated.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3>Simple workflow to main branch:</h3>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj log
+jj commit <span class="token parameter variable">-m</span> <span class="token string">"msg"</span>
+jj bookmark <span class="token builtin class-name">set</span> <span class="token parameter variable">--revision</span> @- main
+jj <span class="token function">git</span> push <span class="token parameter variable">-r</span> @-
+jj <span class="token function">op</span> log
+</code></pre></div>
+<hr>
+<h3>Workflow to push to a 'new git branch'</h3>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj
+jj bookmark <span class="token builtin class-name">set</span> <span class="token parameter variable">-r</span> @ <span class="token string">'feat/blahk'</span>
+jj <span class="token function">git</span> push <span class="token parameter variable">-r</span> @ --allow-new <span class="token parameter variable">--remote</span> origin
+</code></pre></div>
+<p>To the next pushes, simply:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token function">git</span> push <span class="token parameter variable">-r</span> @
+</code></pre></div>
+<p>Some other useful commands since jj/git colocated relies
+heavily on bookmarks:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj bookmark move <span class="token parameter variable">--from</span><span class="token operator">=</span>@- <span class="token parameter variable">--to</span><span class="token operator">=</span>@
+jj bokmark delete <span class="token string">'...'</span>
+jj bookmark track main@origin
+jj <span class="token function">git</span> push <span class="token parameter variable">--all</span> <span class="token parameter variable">--deleted</span>
+</code></pre></div>
+<p>A complete set and more examples with:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token builtin class-name">help</span> <span class="token parameter variable">-k</span> bookmarks
+</code></pre></div>
+<p>Note, after performing jj motions, probably the git part of the thing
+will be HEADLESS or in a detached state.</p>
+<p>If you wish to perform "regular" git operations, most probably you
+need to first "git checkout" to a branch.</p>
+<hr>
+<h2>Stageless Workflow</h2>
+<p>Jujutsu has no traditional <em>staging area</em> like Git. This means changes
+you make in your working copy are immediately part of your current
+change (also called a <em>working commit</em>). So what if you’ve modified 10
+files but only want to “commit” 2 of them?</p>
+<p>💡 You can <strong>mimic partial commits</strong> with a few simple commands.</p>
+<p>Special thanks to <a href="https://github.com/cassiano">@Cassiano</a> for for
+pointing this out to me!</p>
+<h3>🪄 The trick: <code>jj split</code></h3>
+<p>Use <code>jj split</code> to break your current change into two:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token function">split</span>
+</code></pre></div>
+<p>This opens a TUI (Text User Interface) where you can <strong>select which
+files or even hunks</strong> to split into a new change.</p>
+<p>What happens:</p>
+<ul>
+<li>
+<p>The selected changes go into a <strong>new change</strong> (on top of your current one)</p>
+</li>
+<li>
+<p>The rest stay in the <strong>original change</strong></p>
+</li>
+</ul>
+<p>💬 Think of it like “staging” part of your work and “committing” it,
+without ever touching an index.</p>
+<h3>🧪 Example Workflow</h3>
+<ol>
+<li>You edit <code>fileA.ts</code>, <code>fileB.ts</code>, and <code>fileC.ts</code>.</li>
+<li>But you only want to commit the changes to <code>fileA.ts</code>.</li>
+<li>Run:</li>
+</ol>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj <span class="token function">split</span>
+</code></pre></div>
+<ol start="4">
+<li>Select only <code>fileA.ts</code> in the UI.</li>
+<li>Give the new change a description with:</li>
+</ol>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">jj describe <span class="token parameter variable">-m</span> <span class="token string">"Refactor fileA logic"</span>
+</code></pre></div>
+<p>Now your <code>fileA.ts</code> changes are safely committed. You're still on the
+remaining changes for <code>fileB.ts</code> and <code>fileC.ts</code>.</p>
+<p>🔄 You can repeat the process to incrementally split off changes until
+you're happy.</p>
+<h2>🏁 Wrapping Up</h2>
+<p>This cheat sheet is not a comprehensive tutorial, as said before, it’s
+a <strong>quick reference</strong>, a <strong>jumping-off point</strong>, and a <strong>distilled
+guide</strong> for navigating <code>jj</code>. Whether you're exploring <code>jj</code> out of
+curiosity or looking to speed up your workflow without staging
+overhead, I hope this post gave you enough to get started with
+confidence.</p>
+<p>Remember: tools don’t define your flow, <strong>your habits and clarity
+do</strong>. If <code>jj</code> helps you think more clearly about your changes, then
+it’s doing its job. And if not? That’s fine too, there’s always <code>git</code>
+or even <code>hg</code> right around the corner.</p>
+<p>If you have tweaks, corrections, or your own tricks, I’d love to hear
+them!</p>
+<p>Thanks for reading! 🧠💻🔥</p>

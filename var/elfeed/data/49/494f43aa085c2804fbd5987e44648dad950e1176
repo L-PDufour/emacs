@@ -1,0 +1,26 @@
+<p>
+In the developer world, we often talk about two types of bankruptcy:
+</p>
+<dl class="org-dl">
+<dt>Email Bankruptcy</dt>
+<dd>This is when we have so many unread emails that we simply give up, delete them all, and start over.</dd>
+<dt>Emacs Bankruptcy</dt>
+<dd>This is when our Emacs configuration becomes so big and complicated that we no longer understand it and start over by deleting our configuration and beginning again with a blank slate.</dd>
+</dl>
+<p>
+My Anglo-Saxon upbringing pretty much guaranteed that I&rsquo;d be resistant to either of these. I&rsquo;m far too anal to leave any email unread or at least scanned. It&rsquo;s not really much of an issue today since, unlike the old days, I can access and read my email from wherever I am. That and my <a href="https://irreal.org/blog/?p=11092">zero inbox policy</a> ensure that I never get behind with Email.
+</p>
+<p>
+As for my Emacs configuration, it&rsquo;s almost 20 years old and while it has grown and had some minor changes, I&rsquo;ve never felt the need—or even the urge—to quit and start over. It is, in short, an organic entity that grows and changes in step with my needs. Why would I want to abandon it and start over?
+</p>
+<p>
+All this discussion is in reaction to a video by TrepidTurtle on the Emacs subreddit about <a href="https://www.reddit.com/r/emacs/comments/1n4zn15/emacs_bankruptcy_thoughtshowtodiscussion/">Emacs bankruptcy</a>. TrepidTurtle views Emacs bankruptcy as a natural and common process in our Emacs life. He says, for example, that he was aghast to discover that his Emacs configuration was over 2000 lines long and remedied that by deleting his entire Emacs environment—packages and all—and starting over from scratch. Implicit in his argument is the belief that a minimalist configuration is better.
+</p>
+<p>
+I don&rsquo;t understand that. My configuration is 2055 lines and while there may be some cruft most of it is carefully curated packages, settings, and bespoke functions that I&rsquo;ve developed over my Emacs career. Why would I want to delete all that work?
+</p>
+<p>
+As for having a minimalist configuration, I add things as I need them or think they will enhance my workflow. I see nothing <i>ipso facto</i> virtuous about having a minimal configuration.
+</p>
+<p>
+Still, people&rsquo;s opinions differ and you may be sympathetic to the idea of starting over. If so, take a look at TrepidTurtle&rsquo;s video for some ideas as to how to do that.</p>

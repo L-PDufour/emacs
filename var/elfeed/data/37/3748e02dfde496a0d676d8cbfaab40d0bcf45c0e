@@ -1,0 +1,11 @@
+<p>
+It&rsquo;s a matter of faith here at Irreal, and in many other places, that any function that <i>can</i> be brought into Emacs <i>should</i> be brought into Emacs. Oddly, to us true believers, there are those who disagree.
+</p>
+<p>
+One such person is Michał M. Sapka who argues that <a href="https://michal.sapka.pl/2025/software-philosophy/">editors are for editing text not flying spaceships</a>. Sapka is not the usual know-nothing who&rsquo;s never gotten within six feet of Emacs. He has, in fact, been using Emacs for a number of years. Recently, he&rsquo;s returned to Vim specifically because he thinks that editors should edit text and not do things like read email or handle version control. He says that if he wants <i>X/—where /X</i> is not an editing function—he&rsquo;ll use  a dedicated <i>X</i> application. He wants small, dedicated, programs that do one thing well. That is, of course, the Unix Philosophy that almost everyone claims allegiance to.
+</p>
+<p>
+Despite claiming otherwise, it seems to me that Sapka doesn&rsquo;t really understand Emacs&rsquo; point of view. As I&rsquo;ve said many times, I think that point of view is best expressed as saying that Emacs is today&rsquo;s version of a Lisp Machine. Viewed that way, Emacs is not an editor. It <i>does</i> have an editor function but as with the original Lisp Machines, that&rsquo;s just one of many functions. As much as I hate trotting out the tired old meme, Emacs really is more like an operating system that thinks of the underlying operating system as a device driver.
+</p>
+<p>
+Emacs has modes and packages that act like Sapka&rsquo;s dedicated apps and as Àlvaro Ramírez <a href="https://irreal.org/blog/?p=12315">has shown</a> you can even glue them together so that the output of one is the input of another. In short, you don&rsquo;t have to give up the Unix Philosophy to use Emacs. You can have it while at the same time enjoying the many advantages of using Emacs.</p>

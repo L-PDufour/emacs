@@ -1,0 +1,17 @@
+<p>
+The Emacs Cat has an informative post on his <a href="https://olddeuteronomy.github.io/post/emacs-ibuffer-config/">Ibuffer Configuration</a>. Although it&rsquo;s built in, <a href="https://www.emacswiki.org/emacs/IbufferMode#Ibuffer">ibuffer</a> isn&rsquo;t enabled by default so you have to load it with <code>require</code>, <code>use-package</code>, or whatever you use for such things. It&rsquo;s a nice replacement for the default <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/List-Buffers.html">list-buffers</a>.
+</p>
+<p>
+The Emacs Cat uses ibuffer to group his buffers logically. For example, all his C/C++ buffers, all his Python buffers, and so on are grouped together. That makes it easy to locate relevant buffers and keep things organized if you have a lot of buffers open. He also integrates icons (via <a href="https://github.com/seagle0128/all-the-icons-ibuffer">all-the-icons-ibuffer</a>) to make it easy to distinguish buffers. See his <a href="https://olddeuteronomy.github.io/img/ibuffer.png">screenshot</a> to get an idea of what it looks like.
+</p>
+<p>
+I do something similar.  I don&rsquo;t care for icons in my listings so I skipped that step and I use the <a href="https://github.com/purcell/ibuffer-vc">ibuffer-vc</a> package, which also groups packages but collects them according to their version control (magit, in my case) category.
+</p>
+<p>
+All-in-all it makes looking for buffers easier and helps you stay organized. The Emacs Cat uses the buffer listing a lot more than I do so he has <kbd>F5</kbd> as a shortcut for it.
+</p>
+<p>
+He also mentions Charles Choi&rsquo;s Casual Ibuffer that he uses to provide a transient menu for the ibuffer listing. If your buffer listings are long, this can be a big help in adjusting the listing dynamically for your current needs.
+</p>
+<p>
+If you use buffer listings, you should definitely take a look at the Emacs Cat&rsquo;s post. He&rsquo;s got a lot of good ideas.</p>

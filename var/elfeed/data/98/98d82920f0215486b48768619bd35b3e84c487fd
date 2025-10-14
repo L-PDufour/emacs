@@ -1,0 +1,207 @@
+<p>
+While collecting posts for Emacs News, I came
+across this question about <a href="https://lemmy.ml/post/36200781">adding up Org Mode
+table data by tag hierarchy</a>, which might be
+interesting if you want to add things up in
+different combinations. I haven't needed to do
+something like that myself, but I got curious
+about it. It turns out that you can define a tag
+hierarchy like this:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-org"><code><span class="org-org-meta-line">#+STARTUP: noptag</span>
+<span class="org-org-meta-line">#+TAGS:</span>
+<span class="org-org-meta-line">#+TAGS: [ GT1 : tagA tagC tagD ]</span>
+<span class="org-org-meta-line">#+TAGS: [ GT2 : tagB tagE ]</span>
+<span class="org-org-meta-line">#+TAGS: [ GT3 : tagB tagC tagD ]</span>
+</code></pre>
+</div>
+
+
+<p>
+The first two lines remove any other tags you've
+defined in your config aside from those in
+<code>org-tag-persistent-alist</code>, but can be omitted if
+you want to also include other tags you've defined
+in <code>org-tag-alist</code>. Note that it doesn't have to
+be a strict tree. Tags can belong to more than one
+tag group.
+</p>
+
+<p>
+EduMerco wanted to know how to use those tag
+groups to sum up rows in a table. I added a
+<code>#+NAME</code> header to the table so that I could refer
+to it with <code>:var source=source</code> later on.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-org"><code><span class="org-org-meta-line">#+NAME: source</span>
+<span class="org-org-table">| tag  | Q1 | Q2 |</span>
+<span class="org-org-table">|&#45;&#45;&#45;&#45;&#45;&#45;+&#45;&#45;&#45;&#45;+&#45;&#45;&#45;&#45;|</span>
+<span class="org-org-table">| tagA |  9 |    |</span>
+<span class="org-org-table">| tagB |  4 |  2 |</span>
+<span class="org-org-table">| tagC |  1 |  4 |</span>
+<span class="org-org-table">| tagD |    |  5 |</span>
+<span class="org-org-table">| tagE |    |  6 |</span>
+</code></pre>
+</div>
+
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-sum-tag-groups</span> (source <span class="org-type">&amp;optional</span> groups)
+  <span class="org-doc">"Sum up the rows in SOURCE by GROUPS.</span>
+<span class="org-doc">If GROUPS is nil, use `</span><span class="org-doc"><span class="org-constant">org-tag-groups-alist</span></span><span class="org-doc">'."</span>
+  (<span class="org-keyword">setq</span> groups (<span class="org-keyword">or</span> groups org-tag-groups-alist))
+  (cons
+   (car source)
+   (mapcar
+    (<span class="org-keyword">lambda</span> (tag-group)
+      (<span class="org-keyword">let</span> ((tags (org&#45;&#45;tags-expand-group (list (car tag-group))
+                                          groups nil)))
+        (cons (car tag-group)
+              (seq-map-indexed
+               (<span class="org-keyword">lambda</span> (colname i)
+                 (apply <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">+</span>
+                        (mapcar (<span class="org-keyword">lambda</span> (tag)
+                                  (<span class="org-keyword">let</span> ((val (<span class="org-keyword">or</span> (elt (assoc-default tag source) i) <span class="org-string">"0"</span>)))
+                                    (<span class="org-keyword">if</span> (stringp val)
+                                        (string-to-number val)
+                                      (<span class="org-keyword">or</span> val 0))))
+                                tags)))
+               (cdr (car source))))))
+    groups)))
+</code></pre>
+</div>
+
+
+<p>
+Then that can be used with the following code:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-org"><code><span class="org-org-block-begin-line">#+begin_src emacs-lisp :var source=source :colnames no :results table</span>
+<span class="org-org-block">(my-sum-tag-groups source)</span>
+<span class="org-org-block-end-line">#+end_src</span>
+</code></pre>
+</div>
+
+
+<p>
+to result in:
+</p>
+
+<table>
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-right">
+
+<col class="org-right">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">tag</td>
+<td class="org-right">Q1</td>
+<td class="org-right">Q2</td>
+</tr>
+
+<tr>
+<td class="org-left">GT1</td>
+<td class="org-right">10</td>
+<td class="org-right">9</td>
+</tr>
+
+<tr>
+<td class="org-left">GT2</td>
+<td class="org-right">4</td>
+<td class="org-right">8</td>
+</tr>
+
+<tr>
+<td class="org-left">GT3</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Because <code>org&#45;&#45;tags-expand-group</code> takes the groups
+as a parameter, you could use it to sum things by
+different groups. The <code>#+TAGS:</code> directives above set
+<code>org-tag-groups-alist</code> to:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>((<span class="org-string">"GT1"</span> <span class="org-string">"tagA"</span> <span class="org-string">"tagC"</span> <span class="org-string">"tagD"</span>)
+ (<span class="org-string">"GT2"</span> <span class="org-string">"tagB"</span> <span class="org-string">"tagE"</span>)
+ (<span class="org-string">"GT3"</span> <span class="org-string">"tagB"</span> <span class="org-string">"tagC"</span> <span class="org-string">"tagD"</span>))
+</code></pre>
+</div>
+
+
+<p>
+Following the same format, we could do something like this:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(my-sum-tag-groups source <span class="org-highlight-quoted-quote">'</span>((<span class="org-string">"Main"</span> <span class="org-string">"- Subgroup 1"</span> <span class="org-string">"- Subgroup 2"</span>)
+                            (<span class="org-string">"- Subgroup 1"</span> <span class="org-string">"tagA"</span> <span class="org-string">"tagB"</span>)
+                            (<span class="org-string">"- Subgroup 2"</span> <span class="org-string">"tagC"</span> <span class="org-string">"tagD"</span>)
+                            ))
+</code></pre>
+</div>
+
+
+<table>
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-right">
+
+<col class="org-right">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">tag</td>
+<td class="org-right">Q1</td>
+<td class="org-right">Q2</td>
+</tr>
+
+<tr>
+<td class="org-left">Main</td>
+<td class="org-right">14</td>
+<td class="org-right">11</td>
+</tr>
+
+<tr>
+<td class="org-left">- Subgroup 1</td>
+<td class="org-right">13</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-left">- Subgroup 2</td>
+<td class="org-right">1</td>
+<td class="org-right">9</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+I haven't specifically needed to add tag groups in tables myself, but I suspect the recursive expansion in <code>org&#45;&#45;tags-expand-group</code> might come in handy even in a non-Org context. Hmm&hellip;
+</p>
+<div><a href="https://sachachua.com/blog/2025/09/org-mode-calculating-table-sums-using-tag-hierarchies/index.org">View org source for this post</a></div>
+<p>You can <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F09%2Forg-mode-calculating-table-sums-using-tag-hierarchies%2F&body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p>

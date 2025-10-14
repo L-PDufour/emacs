@@ -1,0 +1,115 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Discover the Beauty of Catppuccin Themes in Emacs, Coupled with
+Auto-Dark, Crafting a Perfectly Tailored and Eye-Pleasing Coding
+Experience. We hope you found this guide enjoyable and useful. If you
+have any questions or need help, please don't hesitate to reach out by
+opening an issue on the Auto-Dark-Emacs repository.</p>
+<h2>What is auto-dark ?</h2>
+<p>In today's digital world, the interface of your preferred text editor
+plays a crucial role in your productivity. As developers and writers,
+we often spend long hours staring at our screens, and it's essential
+that our tools are easy on the eyes. One vital aspect of this is
+choosing the right color scheme, or theme, for your text
+editor. However, we all know that our surroundings change throughout
+the day, and we want our tools to adapt to those changes as well. This
+is where Auto-Dark for Emacs comes into play.</p>
+<p>Auto-Dark is a nifty Emacs package available via MELPA that ensures
+your Emacs environment changes its theme based on your operating
+system's dark-mode settings. Whether you're using macOS, Linux, or
+Windows, this tool seamlessly integrates with your system's
+preferences.</p>
+<h3>How Does Auto-Dark Work?</h3>
+<p><img src="https://raw.githubusercontent.com/LionyxML/auto-dark-emacs/master/images/demo_gnome.gif" alt="auto-dark-demo"></p>
+<p>Auto-Dark simplifies the process of switching between two user-defined
+themes that automatically change when your system's dark mode is
+toggled on or off. It currently supports Linux through Gnome and
+Termux for Android users, with more platforms potentially being added
+in the future. The default themes are 'wombat' and 'leuven,' as these
+are bundled with Emacs.</p>
+<p>Installing Auto-Dark is straightforward. You can easily grab it from
+MELPA and add the following lines to your <code>.emacs</code> or
+<code>~/.emacs.d/init.el</code> file:</p>
+<div class="remark-highlight"><pre class="language-lisp"><code class="language-lisp"><span class="token punctuation">(</span><span class="token keyword">require</span> <span class="token quoted-symbol variable symbol">'auto-dark</span><span class="token punctuation">)</span>
+<span class="token punctuation">(</span><span class="token car">auto-dark-mode</span> <span class="token boolean">t</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>For more detailed guides, tips, and tricks on setting up Auto-Dark
+with <code>Spacemacs</code> and <code>DoomEmacs</code>, you can explore the official Auto-Dark
+Emacs repository on GitHub. Here, you'll find comprehensive
+documentation and resources to help you get the most out of this handy
+package. The repository can be found at <a href="https://github.com/LionyxML/auto-dark-emacs">Auto-Dark on
+GitHub</a>.</p>
+<p>The light/dark themes can be customized using the Emacs customization
+system: <code>M-x customize-group auto-dark</code>.</p>
+<p>Or set directly with:</p>
+<div class="remark-highlight"><pre class="language-lisp"><code class="language-lisp"><span class="token punctuation">(</span><span class="token keyword">setq</span> auto-dark-themes <span class="token punctuation">'(</span><span class="token punctuation">(</span><span class="token car">doom-one</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">doom-one-light</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>Why Catppuccin?</h2>
+<p>In the colorful world of code theming, Catppuccin stands as a
+testament to the perfect balance between visual aesthetics and
+functionality. This community-driven pastel theme is meticulously
+crafted to be the sweet spot between low and high contrast
+themes. With four soothing "flavors," each offering a palette of 26
+eye-catching colors, Catppuccin isn't just for coding—it's a
+delightful experience that enhances your designing and much more.</p>
+<p>Within the Catppuccin package, you'll discover four distinct
+"flavors": Latte, Frappe, Macchiato, and Mocha. Each variant presents
+a unique shade, allowing you to choose your preferred level of
+contrast, whether you're inclined towards a darker or lighter theme.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fauto-dark-cat-colors.png&w=3840&q=75" alt="catppuccin"></p>
+<p>Catppuccin isn't just a theme; it's become a substantial project in
+its own right. You can explore the expansive world of Catppuccin on
+<a href="https://github.com/catppuccin">Catppuccin Repo</a>, where it has left its mark on various
+platforms. You might have already encountered Catppuccin on your
+terminal emulator, in your tmux configuration, on your Chrome browser,
+within your Discord server, and across several code editors. And, of
+course, it's made its way into the heart of one of the most beloved
+text editors—Emacs.</p>
+<h3>Catppuccin and Emacs: A Perfect Blend</h3>
+<p>The Emacs variation of Catppuccin has found a special place in the
+hearts of many, including myself. I've had the privilege of
+contributing to this project by theming bits of various packages,
+such as: Ivy, Popup, Swiper, Counsel, LSP-Mode, Indent-Guide, and
+Treemacs. It's a testament to the open-source spirit, where
+collaboration and creativity come together to create something truly
+exceptional.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fauto-dark-catppuccin.webp&w=3840&q=75" alt="emacs-catppuccin"></p>
+<p>Before we wrap up, I'd like to give a shout-out to the fantastic
+contributors who have made Catppuccin what it is today. Special thanks
+to <a href="https://github.com/NamesCode">@Name</a> and
+<a href="https://github.com/nyxkrage">@Nyx</a> for your patience, guidance, and
+the joy of collaboration. 😄</p>
+<h2>Bringing Catppuccin and Auto-Dark Together</h2>
+<p>Catppuccin, with its unique theme and variations, uses variable
+settings for its flavors. However, these settings don't align
+perfectly with Auto-Dark, which expects separate dark and light
+themes. To make them work harmoniously, we can leverage the
+flexibility of Auto-Dark's hook system.</p>
+<p>Here's a snippet to configure the integration:</p>
+<div class="remark-highlight"><pre class="language-lisp"><code class="language-lisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> auto-dark
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token punctuation">(</span><span class="token car">ignore-errors</span>
+    <span class="token punctuation">(</span><span class="token keyword">setq</span> auto-dark-themes <span class="token punctuation">'(</span><span class="token punctuation">(</span><span class="token car">catppuccin</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">catppuccin</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token punctuation">(</span><span class="token car">add-hook</span> <span class="token quoted-symbol variable symbol">'auto-dark-dark-mode-hook</span>
+              <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+                <span class="token punctuation">(</span><span class="token keyword">setq</span> catppuccin-flavor <span class="token quoted-symbol variable symbol">'mocha</span><span class="token punctuation">)</span>
+                <span class="token punctuation">(</span><span class="token car">catppuccin-reload</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token punctuation">(</span><span class="token car">add-hook</span> <span class="token quoted-symbol variable symbol">'auto-dark-light-mode-hook</span>
+              <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+                <span class="token punctuation">(</span><span class="token keyword">setq</span> catppuccin-flavor <span class="token quoted-symbol variable symbol">'frappe</span><span class="token punctuation">)</span>
+                <span class="token punctuation">(</span><span class="token car">catppuccin-reload</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token punctuation">(</span><span class="token car">auto-dark-mode</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>With this setup, Catppuccin seamlessly adapts to your system's dark
+and light modes, ensuring a smooth and visually pleasing coding
+experience.</p>
+<p>Explore this dynamic duo, make your Emacs environment uniquely yours,
+and I hope you found this guide enjoyable and useful. Happy theming!</p>
+<p>If you have any questions or doubts, please feel free to open an issue
+on the <a href="https://github.com/LionyxML/auto-dark-emacs">Auto-Dark
+Repository</a>. Your
+feedback and inquiries are always welcome!</p>

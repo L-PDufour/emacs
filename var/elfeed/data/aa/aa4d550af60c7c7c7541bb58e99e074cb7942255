@@ -1,0 +1,14 @@
+<p>
+It&rsquo;s September so there&rsquo;s a new Emacs Carnival. This month the topic is <a href="https://goritskov.com/posts/obscure_packages.html">Obscure Emacs Packages</a>. I have to admit that when I first saw the topic I wasn&rsquo;t too hopeful that it would be interesting but, of course, I felt the same about the &ldquo;Elevator Pitch&rdquo; topic and we all know how obsessed I ended up being with that.
+</p>
+<p>
+Now that I&rsquo;ve read my first post for the new topic, tusharhero&rsquo;s <a href="https://tusharhero.codeberg.page/obscure-emacs-packages.html">Obscure Emacs Packages</a>, I guessing that I&rsquo;m going to end up loving this topic too. Tusharhero&rsquo;s post actually lists 4 obscure packages—none of which I was familiar with—that many Irreal readers might find useful.
+</p>
+<p>
+By all means, take a look at his post for all the details but I want to mention two of them that I think could be particularly useful. The first is <a href="https://codeberg.org/tusharhero/tinee">Tinee</a> that is an implementation of <a href="https://github.com/tecosaur/emacs-everywhere">Emacs Everywhere</a> specifically for Wayland, <a href="https://irreal.org/blog/?p=13135">which isn&rsquo;t supported by Emacs Everywhere</a>. The package was written by Tusharhero himself who says it&rsquo;s not as full featured as Emacs Everywhere but if you&rsquo;re an Emacs user on a Wayland system, it seems definitely worth taking a look at.
+</p>
+<p>
+The other package is <a href="https://codeberg.org/divyaranjan/emacs-reader">Emacs Reader</a> by Divya Ranjan. It aims to be a complete replacement for PDF-tools and DocView. It&rsquo;s still in the early stages but Tusharhero says it has &ldquo;RIDICULOUSLY better performance and smoothness and responsiveness in comparison to both PDF tools and DocView.&rdquo; It&rsquo;s still early days for this package but if it lives up to its promise, it will be a package that almost everyone will want.
+</p>
+<p>
+Take a look at Tusharhero&rsquo;s post and see if there&rsquo;s anything there for you.</p>

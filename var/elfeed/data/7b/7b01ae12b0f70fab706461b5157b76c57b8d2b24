@@ -1,0 +1,156 @@
+<html><head></head><body><p><em>Note: This article series was written by me, with LLMs helping to refine the style and structure.</em></p>
+<p><a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part1-pain-points">Part 1</a> described the problems of managing multiple LLM sessions. This article shows the ergonomic layer that solves them: visual indicators, session recording, logging, and telemetry.</p>
+<p><strong>Series Navigation:</strong> <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part1-pain-points">← Part 1: Pain Points</a> | <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part3-abstractions">Part 3: Abstractions →</a></p>
+<h2>
+  The Complete Picture
+  <a href="#the-complete-picture">
+    <i></i>
+  </a>
+</h2>
+<p>Here’s my workflow using <a href="https://github.com/tmux/tmux/wiki">tmux</a> to manage multiple LLM sessions.</p>
+<p>Tmux is a terminal multiplexer—it lets you run multiple terminal sessions inside a single window and switch between them quickly. Think of it like having tabs in a browser, but for your terminal. You can have one tmux session with 10 different windows, each running a different LLM conversation, and easily switch between them with keyboard shortcuts.</p>
+<p>Here’s how it works in practice:</p>
+<p>I open a new tmux window (like opening a new tab) and start an LLM session—maybe Claude Code working on a bug fix. Metrics tracking begins automatically in the background. As the LLM works, my tmux status bar (the line at the bottom of the terminal) shows a 🤖 emoji next to that window’s name. I can glance at the status bar and instantly see that window 3 is busy with an LLM.</p>
+<p>When the LLM finishes and waits for my input, the emoji changes to 💬. If I’m currently in a different window (say, window 5 where I’m reviewing code), I just press <code> ` n</code> (backtick followed by n) to jump directly to the waiting session. No manually cycling through windows, no remembering which number it was.</p>
+<p>Every context switch gets recorded with a timestamp. A week later, when I need to understand what happened in that session—what prompts I gave, what the LLM suggested, what decisions were made—I can query the session history and replay the logs.</p>
+<h2>
+  The Visual Layer: Terminal Session Management
+  <a href="#the-visual-layer-terminal-session-management">
+    <i></i>
+  </a>
+</h2>
+<p>Problem: 10 terminal windows (or in tmux terminology, 10 windows within one tmux session), each running a different LLM conversation. No visibility into which LLM needs attention.</p>
+<p>Solution: emoji indicators showing window state in the tmux status bar.</p>
+<div class="highlight"><pre><code class="language-bash"><span><span>💬 memento        <span># LLM waiting for input</span>
+</span></span><span><span>🤖 appdaemon      <span># LLM actively working</span>
+</span></span><span><span>📝 config         <span># Editor open</span>
+</span></span><span><span>🐍 analyzer       <span># Python script running</span>
+</span></span><span><span>⌨️ bash           <span># Shell waiting for command</span>
+</span></span></code></pre></div><h3>
+  Window Status Script
+  <a href="#window-status-script">
+    <i></i>
+  </a>
+</h3>
+<p>The <code>tmux-window-status</code> script analyzes each tmux pane (a pane is like a split section within a window) and adds contextual emojis. Here’s how it works:</p>
+<ol>
+<li><strong>Capture recent output</strong>: Grab the last 100 lines of text from the pane</li>
+<li><strong>Detect LLM patterns</strong>: Look for LLM-specific text like <code>&gt;</code> prompts or dialog boxes asking “Do you want to…”</li>
+<li><strong>Check the process</strong>: See what command is actually running in that pane</li>
+<li><strong>Return the right emoji</strong>: Based on what we found, add the appropriate emoji to the window name</li>
+</ol>
+<p>Here’s the key detection logic:</p>
+<div class="highlight"><pre><code class="language-bash"><span><span>check_llm_waiting<span>()</span> <span>{</span>
+</span></span><span><span>    <span>local</span> <span>pane_content</span><span>=</span><span>"</span><span>$2</span><span>"</span>
+</span></span><span><span>    <span>local</span> <span>last_lines</span><span>=</span><span>$(</span><span>echo</span> <span>"</span><span>$pane_content</span><span>"</span> | tail -5<span>)</span>
+</span></span><span><span>
+</span></span><span><span>    <span># Check for common LLM prompts</span>
+</span></span><span><span>    <span>if</span> <span>echo</span> <span>"</span><span>$last_lines</span><span>"</span> | grep -qE <span>"^&gt;\s*</span>$<span>|^&gt; "</span>; <span>then</span>
+</span></span><span><span>        <span>return</span> <span>0</span>  <span># LLM is waiting</span>
+</span></span><span><span>    <span>fi</span>
+</span></span><span><span>
+</span></span><span><span>    <span># Check for dialog boxes</span>
+</span></span><span><span>    <span>if</span> <span>echo</span> <span>"</span><span>$last_lines</span><span>"</span> | grep -qE <span>"Do you want to|❯.*Yes"</span>; <span>then</span>
+</span></span><span><span>        <span>return</span> <span>0</span>  <span># Waiting for decision</span>
+</span></span><span><span>    <span>fi</span>
+</span></span><span><span>
+</span></span><span><span>    <span>return</span> <span>1</span>  <span># Not waiting</span>
+</span></span><span><span><span>}</span>
+</span></span></code></pre></div><h3>
+  Jump to Next Waiting Window
+  <a href="#jump-to-next-waiting-window">
+    <i></i>
+  </a>
+</h3>
+<p>The <code>tmux-next-waiting</code> script cycles through windows where an LLM is waiting. It loops through all your tmux windows, checks which ones have the 💬 emoji (meaning an LLM is waiting for input), and jumps to the next one after your current window:</p>
+<div class="highlight"><pre><code class="language-bash"><span><span><span>#!/bin/bash
+</span></span></span><span><span><span></span><span># Find all windows with 💬 emoji (LLM waiting)</span>
+</span></span><span><span><span>windows_waiting</span><span>=</span><span>""</span>
+</span></span><span><span><span>for</span> window in <span>$(</span>tmux list-windows -F <span>"#{window_index}"</span><span>)</span>; <span>do</span>
+</span></span><span><span>    <span>formatted_name</span><span>=</span><span>$(</span>~/bin/tmux-window-status <span>"</span><span>$window_name</span><span>"</span> <span>"</span><span>$pane_id</span><span>"</span><span>)</span>
+</span></span><span><span>    <span>if</span> <span>echo</span> <span>"</span><span>$formatted_name</span><span>"</span> | grep -q <span>"💬"</span>; <span>then</span>
+</span></span><span><span>        <span>windows_waiting</span><span>=</span><span>"</span><span>$windows_waiting</span><span> </span><span>$window</span><span>"</span>
+</span></span><span><span>    <span>fi</span>
+</span></span><span><span><span>done</span>
+</span></span><span><span>
+</span></span><span><span><span># Jump to next waiting window after current</span>
+</span></span><span><span><span># (wraps around to first if at end)</span>
+</span></span></code></pre></div><p>To use this, bind it to a tmux key in your tmux configuration (<code>~/.tmux.conf</code>):</p>
+<pre><code class="language-tmux">bind-key n run-shell "~/bin/tmux-next-waiting"
+</code></pre><p>Now pressing <code> ` n</code> (assuming you’ve set <code>`</code> as your tmux prefix key) jumps to the next LLM session that needs attention. The prefix key is like a “modifier” that tells tmux “the next key is a command for you.” With this setup, switching is fast: <code> ` 1</code> goes to window 1, <code> ` TAB</code> toggles to your last window, <code> ` n</code> finds the next waiting LLM.</p>
+<h2>
+  The Logging Layer: Complete Auditability
+  <a href="#the-logging-layer-complete-auditability">
+    <i></i>
+  </a>
+</h2>
+<p>Remember the problem from Part 1? Code written last week is unrecognizable without session history. You need to understand what the LLM did, what decisions were made, and why certain approaches were taken.</p>
+<p>The solution: record everything. I use <a href="https://asciinema.org/">asciinema</a>, a terminal session recorder, to capture complete LLM sessions. Unlike text logs (which just save the text), asciinema records the actual terminal output with timing information—think of it like a video recording of your terminal session. You can replay sessions later and see exactly what appeared on screen, when it appeared, and in what order.</p>
+<p>For complex refactoring sessions or experiments, I use this wrapper script:</p>
+<div class="highlight"><pre><code class="language-bash"><span><span><span>#!/usr/bin/env bash
+</span></span></span><span><span><span></span><span># llm-record - Record LLM sessions with asciinema</span>
+</span></span><span><span>
+</span></span><span><span><span>RECORDING_NAME</span><span>=</span><span>"</span><span>${</span><span>1</span><span>:-</span><span>llm</span>-<span>$(</span>date <span>'+%Y%m%d-%H%M%S'</span><span>)</span><span>}</span><span>"</span>
+</span></span><span><span><span>RECORDINGS_DIR</span><span>=</span><span>"</span><span>${</span><span>HOME</span><span>}</span><span>/llm-recordings"</span>
+</span></span><span><span><span>RECORDING_FILE</span><span>=</span><span>"</span><span>${</span><span>RECORDINGS_DIR</span><span>}</span><span>/</span><span>${</span><span>RECORDING_NAME</span><span>}</span><span>.cast"</span>
+</span></span><span><span>
+</span></span><span><span>asciinema rec <span>\
+</span></span></span><span><span><span></span>    --title <span>"LLM Session: </span><span>${</span><span>RECORDING_NAME</span><span>}</span><span>"</span> <span>\
+</span></span></span><span><span><span></span>    --idle-time-limit <span>10</span> <span>\
+</span></span></span><span><span><span></span>    <span>"</span><span>${</span><span>RECORDING_FILE</span><span>}</span><span>"</span>
+</span></span></code></pre></div><p>The <code>--idle-time-limit 10</code> flag compresses long waits (like when the LLM is thinking or making API calls) to 10 seconds in playback. This makes replaying sessions much faster—you’re not sitting through minutes of “Processing…” messages.</p>
+<p>When Claude Code encounters bugs or issues, I can extract the exact terminal transcript with <code>asciinema cat</code> and share it. This works around a limitation in current LLM tools: they don’t have built-in access to session history, so providing a complete transcript helps them understand what went wrong.</p>
+<h2>
+  The Telemetry Layer: Metrics and Patterns
+  <a href="#the-telemetry-layer-metrics-and-patterns">
+    <i></i>
+  </a>
+</h2>
+<p>Visual indicators solve the immediate “which window needs attention?” problem. But I wanted to understand deeper patterns: how many parallel sessions do I actually run? When am I most productive? Which projects consume the most time?</p>
+<p>To answer these questions, I built a telemetry system using <a href="https://prometheus.io/">Prometheus</a>—an open-source monitoring system originally built at SoundCloud. Prometheus collects metrics (numerical measurements) over time and lets you query them later. A background script runs every 15 seconds, collecting metrics about my tmux environment and LLM sessions.</p>
+<p>The script tracks session-level metrics like total tmux sessions, windows per session, and which sessions are actively attached. It also captures LLM-specific data: the number of active LLM processes, memory usage per session, CPU usage, session duration, and the working directory for each session.</p>
+<h3>
+  What This Reveals
+  <a href="#what-this-reveals">
+    <i></i>
+  </a>
+</h3>
+<p>With proper dashboarding, the metrics answer practical questions:</p>
+<p><img src="https://blog.laurentcharignon.com/images/metrics.png" alt="LLM workflow metrics dashboard"></p>
+<p>When are you most productive? You can see which times of day correlate with longer, more focused sessions. Which projects consume the most time? Resource usage aggregated by working directory shows exactly where hours go. Do you context-switch too much? Tracking window switches per hour reveals patterns you might not consciously notice.</p>
+<p>The data also catches problems early. If session memory usage steadily climbs over time, you know something’s leaking. If you’re consistently running 8+ parallel sessions, maybe your workflow needs simplification.</p>
+<p>Prometheus makes it easy to query historical patterns and correlate them with specific projects or time periods. The metrics themselves don’t make you productive, but they reveal patterns that inform better workflow decisions.</p>
+<h2>
+  Key Learnings
+  <a href="#key-learnings">
+    <i></i>
+  </a>
+</h2>
+<ul>
+<li>Visual indicators eliminate the “which window?” hunt</li>
+<li>Complete session history invaluable for debugging</li>
+<li>Metrics reveal workflow patterns you don’t consciously notice</li>
+<li>Record complex sessions, not everything</li>
+<li>Automation essential—manual logging fails</li>
+</ul>
+<h2>
+  Are LLMs Making Us More Productive?
+  <a href="#are-llms-making-us-more-productive">
+    <i></i>
+  </a>
+</h2>
+<p>The tools in this article—tmux integration, session recording, telemetry—exist because I’m managing 10 parallel LLM coding sessions. But that raises the obvious question: are LLMs actually making me more productive at writing code?</p>
+<p>I don’t believe that’s the case for everyone using them. Handing an LLM to a developer without workflow engineering is like giving someone a race car without teaching them to drive. They might go faster on straightaways, but they’ll crash on the first turn.</p>
+<p>But if you know how to use them—if you build the right workflows, enforce quality with tests, coordinate multiple sessions, and maintain proper oversight—they’re a game changer. The productivity gains are real, but they’re not automatic. They come from deliberate workflow design.</p>
+<p>The ergonomic layer in this article is what makes those gains possible. Without visibility into session state, without audit trails, without metrics to understand patterns, you’re flying blind. The tools don’t make LLMs productive—they make <em>you</em> productive when using LLMs.</p>
+<h2>
+  What’s Next
+  <a href="#whats-next">
+    <i></i>
+  </a>
+</h2>
+<p>The ergonomics layer makes individual sessions manageable. But coordinating multiple LLM sessions to work together without conflicts requires higher-level abstractions.</p>
+<p><strong><a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part3-abstractions/">Part 3: Higher-Level Abstractions</a></strong> covers shared context systems for long-term memory, the smoke test paradigm for quality, and patterns for running a “team” of LLM instances on a single project.</p>
+<hr>
+<p><strong>Continue Reading:</strong> <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part3-abstractions">Part 3: Higher-Level Abstractions →</a></p>
+</body></html>

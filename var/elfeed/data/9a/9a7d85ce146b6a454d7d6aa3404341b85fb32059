@@ -1,0 +1,12 @@
+<p>
+Jakub Nowak has entered the <a href="https://goritskov.com/posts/obscure_packages.html">Emacs Carnival: Obscure Packages</a> sweepstakes. His <a href="https://www.cyan.sh/blog/posts/obscure-package-tmr.html">entry is about tmr</a>. For those of you who don&rsquo;t know, <a href="https://protesilaos.com/emacs/tmr">tmr</a> is a packages that allows you to set timers from within Emacs.
+</p>
+<p>
+Until I got my iWatch last April, I never cared much about timers. I&rsquo;d just look at the clock and wing it. My iPhone, of course, has a timer but I didn&rsquo;t use it a lot. With the iWatch, setting a timer and having it with you all the time is easy and I got in the habit of using timers more than I had.
+</p>
+<p>
+Still, if you&rsquo;re working on your computer and need to set a timer for something you&rsquo;re doing on that computer, it&rsquo;s natural to have the timer running on the computer itself. The tmr package from Protesilaos Stavrou (Prot) is just what you need. You can set multiple timers in various ways and display a list of active and expired timers from within Emacs.
+</p>
+<p>
+Take a look at the manual at the above &ldquo;tmr&rdquo; link to see the capabilities and how to access them.<br />
+Prot, of course, has contributed many packages and in the scheme of things this may seem like a small one but when you want to time something, it&rsquo;s just what you need. Take a look and see if you don&rsquo;t agree.</p>

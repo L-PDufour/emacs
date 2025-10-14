@@ -1,0 +1,22 @@
+<p>
+James Dyer has another in his series of posts describing the sanding down of his workflow. This time he troubleshoots and resolves a problem with <a href="https://emacs.dyerdwelling.family/emacs/20250905100614-emacs--customizing-emacs-completion-from-fidos-fuzzy-matching-to-literal-substring-search/">minibuffer file completion</a>. His specific problem was that he didn&rsquo;t like the way fuzzy file completion was working.
+</p>
+<p>
+The default behavior was to have  whatever he entered  match any file name that had the same letters in the same order even if they weren&rsquo;t consecutive. What he wanted was to match any files whose name had a substring that matched his input.
+</p>
+<p>
+As usual, Emacs has you covered. There&rsquo;s a <code>completion-styles</code> parameter that you can set to get the exact behavior he wanted. Except it didn&rsquo;t work. It turned out that another function in the call path was resetting <code>completion-styles</code> to the behavior he was trying to avoid.
+</p>
+<p>
+It wasn&rsquo;t too hard to fix this and you see how he did it in his post. There was another small issue that he also fixed. Again, see Dyer&rsquo;s post.
+</p>
+<p>
+The meat of his post for me was his three conclusions at the end:
+</p>
+<ol class="org-ol">
+<li>The source code is always easily available and you can solve most problems by looking to see what is actually happening.</li>
+<li>Be wary of local versus global settings.</li>
+<li>With Emacs, there&rsquo;s always another way. If you don&rsquo;t like the way something works, Emacs probably provides another way of achieving the same end.</li>
+</ol>
+<p>
+Most people probably aren&rsquo;t going to care about the issue Dyer was fixing—at least <i>I</i> don&rsquo;t care about it—but the point is that whatever Emacs is doing that&rsquo;s not quite right for you, it&rsquo;s almost always pretty easy to fix it.</p>

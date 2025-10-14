@@ -1,0 +1,8 @@
+<html><head></head><body><p>A little while ago, I added an info header to <a href="https://github.com/xenodium/chatgpt-shell">chatgpt-shell</a>'s compose buffer. It displays the current model's icon, using the lovely <a href="https://github.com/lobehub/lobe-icons">Lobe Icons 🥨</a>.</p>
+<p>With that in place, it was only a matter of time until <code>M-x chatgpt-shell-swap-model</code> got a similar upgrade in my Emacs package. As of chatgpt-shell v2.30.1, you can get the upgrade too.</p>
+<p>If you prefer to keep graphics out of model-picking, I got you covered. Set <code>chatgpt-shell-show-model-icons</code> to <code>nil</code>.</p>
+<p><img src="https://xenodium.github.io/images/a-tiny-upgrade-to-the-llm-model-picker/model-picker.png" alt=""></p>
+<h2>Make it all sustainable</h2>
+<p>Is <a href="https://github.com/xenodium/chatgpt-shell">chatgpt-shell</a> useful to you? Enjoying this <a href="https://xenodium.com">blog</a> or <a href="https://github.com/xenodium">my projects</a>? I am an 👉 indie dev 👈. Help make my work sustainable by ✨<a href="https://github.com/sponsors/xenodium">sponsoring</a>✨</p>
+<p>Need a blog? <a href="https://lmno.lol">I can help with that</a>. Maybe buy my <a href="https://apps.apple.com/us/developer/xenodium-ltd/id304568690">macOS/iOS apps</a> too ;)</p>
+</body></html>

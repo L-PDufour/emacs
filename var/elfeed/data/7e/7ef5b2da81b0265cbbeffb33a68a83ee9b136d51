@@ -1,0 +1,138 @@
+<div class="update" id="org62f20af">
+<p>
+<span class="timestamp-wrapper"><time class="timestamp" datetime="2025-09-30">[2025-09-30 Tue]</time></span>: Add <code>move-to-left-margin</code> to work around bug when using <code>fill-paragraph-semlf</code> at the end of a paragraph.
+</p>
+
+</div>
+
+<p>
+I came across <a href="https://schauderbasis.de/posts/reformat_paragraph/">Schauderbasis - reformat paragraph</a> via <a href="https://mastodon.social/@EFLS/115213084454613209">@EFLS@mastodon.social</a>. Now I want <code>M-q</code> to cycle through different ways of wrapping text:
+</p>
+<ul class="org-ul">
+<li>all on one line</li>
+<li>according to <code>fill-column</code></li>
+<li>at most one sentence per line (although still wrapping at <code>fill-column</code>)</li>
+<li>at most one sentence per line (don't even try to keep it within <code>fill-column</code>).</li>
+</ul>
+
+<p>
+</p><figure><video controls="1" src="https://sachachua.com/blog/2025/09/emacs-cycle-through-different-paragraph-formats-all-on-one-line-wrapped-max-one-sentence-per-line-one-sentence-per-line/my-reformat-paragraph-or-region.webm" type="video/webm"><a href="https://sachachua.com/blog/2025/09/emacs-cycle-through-different-paragraph-formats-all-on-one-line-wrapped-max-one-sentence-per-line-one-sentence-per-line/my-reformat-paragraph-or-region.webm">Download the video</a></video><figcaption><div>Screencast cycling through different paragraph formats</div></figcaption></figure>
+<p></p>
+
+<p>
+Now that <a href="https://cgit.git.savannah.gnu.org/cgit/emacs.git/commit?id=1682a6b606097d24050efc318f74d738c3881fb4">semantic linefeeds are part of core Emacs</a> (as of 2025-06-14), the code for cycling through different paragraph formats can be pretty short. Most of it is actually just the logic for cycling through different commands. That might come in handy elsewhere. There's an <a target="_blank" href="https://melpa.org/#/unfill">unfill</a> package as well, but since the code for unfilling a paragraph is very simple, I'll just include that part.
+</p>
+
+<p>
+Note that <code>fill-paragraph-semlf</code> pays attention to <code>sentence-end-double-space</code>, and it doesn't handle comments yet. I also have some code to check if I'm in a comment and skip those filling methods if needed.
+</p>
+
+<p>
+This might encourage me to write shorter sentences.
+I can move sentences around with <code>M-Shift-up</code> and <code>M-Shift-down</code> in Org Mode, which is pretty handy.
+Also, one sentence per line makes diffs easier to read.
+But wrapped text is annoying to edit in Orgzly Revived on my phone, because the wrapping makes a very ragged edge on a narrow screen.
+I might unwrap things that I want to edit there.
+With a little bit of tweaking to skip source blocks, I can narrow to the subtree, select my whole buffer, and cycle the formatting however I like.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defvar</span> <span class="org-variable-name">my-repeat-counter</span> <span class="org-highlight-quoted-quote">'</span>()
+  <span class="org-doc">"How often `</span><span class="org-doc"><span class="org-constant">my-repeat-next</span></span><span class="org-doc">' was called in a row using the same command.</span>
+<span class="org-doc">This is an alist of (cat count list) so we can use it for different functions."</span>)
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-unfill-paragraph</span> ()
+  <span class="org-doc">"Replace newline chars in current paragraph by single spaces.</span>
+<span class="org-doc">This command does the inverse of `</span><span class="org-doc"><span class="org-constant">fill-paragraph</span></span><span class="org-doc">'."</span>
+  (<span class="org-keyword">interactive</span>)
+  (<span class="org-keyword">let</span> ((fill-column most-positive-fixnum))
+    (fill-paragraph)))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-fill-paragraph-semlf-long</span> ()
+  (<span class="org-keyword">interactive</span>)
+  (<span class="org-keyword">let</span> ((fill-column most-positive-fixnum))
+    (fill-paragraph-semlf)))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-repeat-next</span> (category <span class="org-type">&amp;optional</span> element-list reset)
+  <span class="org-doc">"Return the next element for CATEGORY.</span>
+<span class="org-doc">Initialize with ELEMENT-LIST if this is the first time."</span>
+  (<span class="org-keyword">let*</span> ((counter
+          (<span class="org-keyword">or</span> (assoc category my-repeat-counter)
+              (<span class="org-keyword">progn</span>
+                (<span class="org-keyword">push</span> (list category -1 element-list)
+                      my-repeat-counter)
+                (assoc category my-repeat-counter)))))
+    (<span class="org-keyword">setf</span> (elt (cdr counter) 0)
+          (mod
+           (<span class="org-keyword">if</span> reset 0 (1+ (elt (cdr counter) 0)))
+           (length (elt (cdr counter) 1))))
+    (elt (elt (cdr counter) 1) (elt (cdr counter) 0))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-in-prefixed-comment-p</span> ()
+  (<span class="org-keyword">or</span> (member <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">font-lock-comment-delimiter-face</span> (face-at-point nil t))
+      (member <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">font-lock-comment-face</span> (face-at-point nil t))
+      (<span class="org-keyword">save-excursion</span>
+        (beginning-of-line)
+        (comment-search-forward (line-end-position) t))))
+
+<span class="org-comment-delimiter">;; </span><span class="org-comment">It might be nice to figure out what state we're</span>
+<span class="org-comment-delimiter">;; </span><span class="org-comment">in and then cycle to the next one if we're just</span>
+<span class="org-comment-delimiter">;; </span><span class="org-comment">working with a single paragraph. In the</span>
+<span class="org-comment-delimiter">;; </span><span class="org-comment">meantime, just going by repeats is fine.</span>
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-reformat-paragraph-or-region</span> ()
+  <span class="org-doc">"Cycles the paragraph between three states: filled/unfilled/fill-sentences.</span>
+<span class="org-doc">If a region is selected, handle all paragraphs within that region."</span>
+  (<span class="org-keyword">interactive</span>)
+  (<span class="org-keyword">let</span> ((func (my-repeat-next <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">my-reformat-paragraph</span>
+                              <span class="org-highlight-quoted-quote">'</span>(fill-paragraph my-unfill-paragraph fill-paragraph-semlf
+                                               my-fill-paragraph-semlf-long)
+                              (not (eq this-command last-command))))
+        (deactivate-mark nil))
+    (<span class="org-keyword">if</span> (region-active-p)
+        (<span class="org-keyword">save-restriction</span>
+          (<span class="org-keyword">save-excursion</span>
+            (narrow-to-region (region-beginning) (region-end))
+            (goto-char (point-min))
+            (<span class="org-keyword">while</span> (not (eobp))
+              (skip-syntax-forward <span class="org-string">" "</span>)
+              (<span class="org-keyword">let</span> ((elem (<span class="org-keyword">and</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>)
+                               (org-element-context))))
+                (<span class="org-keyword">cond</span>
+                 ((eq (org-element-type elem) <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">headline</span>)
+                  (org-forward-paragraph))
+                 ((member (org-element-type elem)
+                          <span class="org-highlight-quoted-quote">'</span>(src-block export-block headline property-drawer))
+                  (goto-char
+                   (org-element-end (org-element-context))))
+                 (t
+                  (funcall func)
+                  (<span class="org-keyword">if</span> fill-forward-paragraph-function
+                      (funcall fill-forward-paragraph-function)
+                    (forward-paragraph))))))))
+      (<span class="org-keyword">save-excursion</span>
+        (move-to-left-margin)
+        (funcall func)))))
+
+(keymap-global-set <span class="org-string">"M-q"</span> <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">my-reformat-paragraph-or-region</span>)
+</code></pre>
+</div>
+
+
+<p>
+Sometimes I use <a href="https://github.com/joostkremers/writeroom-mode">writeroom-mode</a> to make the lines look even narrower, with lots of margin on the side.
+</p>
+
+<p>
+Related:
+</p>
+
+<ul class="org-ul">
+<li><a href="https://chrismaiorana.com/one-sentence-per-line/">Text Editor Judo: One Sentence Per Line - The Daily Macro</a> - in Org Mode, one sentence pe line lets you drag sentences around with M-Shift-up and M-Shift-down</li>
+<li><a href="https://sive.rs/1s">Writing one sentence per line | Derek Sivers</a> (<a href="https://news.ycombinator.com/item?id=31808093">HN</a>)</li>
+<li><a href="https://rhodesmill.org/brandon/2012/one-sentence-per-line/">Semantic Linefeeds</a></li>
+<li><a href="https://lists.gnu.org/archive/html/emacs-devel/2025-03/msg00035.html">Fill paragraph using semantic linefeeds</a></li>
+</ul>
+
+<div class="note">This is part of my <a href="https://sachachua.com/dotemacs#unfill-paragraph">Emacs configuration.</a></div><div><a href="https://sachachua.com/blog/2025/09/emacs-cycle-through-different-paragraph-formats-all-on-one-line-wrapped-max-one-sentence-per-line-one-sentence-per-line/index.org">View org source for this post</a></div>
+<p>You can <a href="https://social.sachachua.com/@sacha/statuses/01K5S0MCXC3084BA8TF56JSAAY" target="_blank" rel="noopener noreferrer">comment on Mastodon</a> or <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F09%2Femacs-cycle-through-different-paragraph-formats-all-on-one-line-wrapped-max-one-sentence-per-line-one-sentence-per-line%2F&body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p>

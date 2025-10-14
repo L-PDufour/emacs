@@ -1,0 +1,14 @@
+<p>
+As many of you know, I&rsquo;m a big fan of RSS and use it everyday to scour the Internet for potential Irreal topics and also just for topics that I find interesting or useful. I was there at the beginning—although I wasn&rsquo;t an early adopter—but I&rsquo;d never heard of its erstwhile big company competitor <i>Information and Content Exchange</i> (ICE). Big name companies like Microsoft, Adobe, CNET, and others early on smelt the potential for monetizing content syndication and financed the development of ICE.
+</p>
+<p>
+It was the typical big company fever dream:  large, complicated, expensive, and with a protocol that had lots of fields that worried about things like licensing the content. A year later, RSS hit the scene and was an immediate success with &ldquo;small&rdquo; publishers like bloggers. Unlike ICE, it was small, easy to implement, and open. Anyone could, and did, make their own implementation.
+</p>
+<p>
+This interesting, but little known, story is told in <a href="https://buttondown.com/blog/rss-vs-ice">a blog post over at Buttondown.com</a>. The post makes the comparison of RSS versus ICE to that of VHS versus Betamax. Although there are all sorts of theories as to why VHS won that particular battle, the Buttondown post claims that it was because VHS was cheaper, simpler and open. Just like RSS.
+</p>
+<p>
+It&rsquo;s a story that we see repeated often in our field: some basically freelance guys for their own reasons and often on their own time put together an ad hoc solution to some problem and their solution takes over the world. Even the OSI-TCP/IP wars can be squeezed into this paradigm. The large, complex, government committee designed OSI protocols were expected by many to swamp the TCP/IP upstarts and yet many of today&rsquo;s younger engineers have probably never heard of OSI and certainly don&rsquo;t know any of its details except, perhaps, for its famous 7 layer model.
+</p>
+<p>
+The ICE-RSS wars is an interesting story that I haven&rsquo;t come across before. It&rsquo;s definitely worth a couple of minutes of your time if only to see Microsoft and other big companies taking their lumps.</p>

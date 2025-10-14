@@ -1,0 +1,25 @@
+<div id="outline-container-org9de63fb" class="outline-2">
+<h2 id="org9de63fb">Note</h2>
+<div class="outline-text-2" id="text-org9de63fb">
+<p>
+Sorry this is late. The Internet has been out all day here.
+</p>
+</div>
+</div>
+<div id="outline-container-org00aead0" class="outline-2">
+<h2 id="org00aead0">Post</h2>
+<div class="outline-text-2" id="text-org00aead0">
+<p>
+James Cherti, the author of <a href="https://github.com/jamescherti/inhibit-mouse.el">inhibit-mouse</a>, has a <a href="https://www.jamescherti.com/emacs-inhibit-mouse-disable-mouse/">blog post that talks about the package</a>. Irreal <a href="https://irreal.org/blog/?p=13286">wrote about the package last week</a> but you may enjoy learning a little bit more about it first hand from its author.
+</p>
+<p>
+Cherti discusses why you might want to disable the mouse and why he believes that inhibit-mouse is a better solution than the <a href="https://github.com/purcell/disable-mouse">disable-mouse package</a>. The majority of his post explains how to configure the package: it turns out that it&rsquo;s <i>very</i> configurable. The information in Cherti&rsquo;s blog post is much the same as the README on his <a href="https://github.com/jamescherti/inhibit-mouse.el">GitHub respository for the package</a> so you can read either one.
+</p>
+<p>
+As I said last week, it&rsquo;s <i>really</i> easy to generate unintended mouse actions especially if you&rsquo;re working on a laptop with a trackpad. Inhibit-mouse is an easy way of preventing that and helping you wean yourself from Emacs mouse usage.
+</p>
+<p>
+Despite what you read here on Irreal and elsewhere, there isn&rsquo;t really anything wrong with using a mouse with Emacs or any other app but if you prefer not to or, if like me, you find yourself making inadvertent mouse clicks, inhibit-mouse or disable-mouse are fairly easy ways to solve the problem.
+</p>
+</div>
+</div>

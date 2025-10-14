@@ -1,0 +1,5 @@
+The openSUSE project has <a
+href="https://lwn.net/ml/all/9032de2a-03a7-4f9e-9c8a-8bd81c5d1fc5@suse.cz">announced</a>
+that the bcachefs filesystem will be disabled in its kernel builds starting
+with 6.17; bcachefs users will have to make other arrangements.  "<q>The
+current 6.16.* is NOT affected. Neither is Slowroll (for now).</q>"

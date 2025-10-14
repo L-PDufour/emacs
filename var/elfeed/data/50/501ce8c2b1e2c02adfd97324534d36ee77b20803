@@ -1,0 +1,6 @@
+<a
+href="https://www.home-assistant.io/blog/2025/09/03/release-20259/">Version
+2025.9</a> of the Home Assistant home automation system has been released.
+Changes include a new experimental dashboard that is eventually meant to
+become the default, a number of tile-card improvements, a reworked
+automation editor, several new integrations, and more.

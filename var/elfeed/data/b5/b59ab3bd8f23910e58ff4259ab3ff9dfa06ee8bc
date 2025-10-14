@@ -1,0 +1,18 @@
+<html><head></head><body><p>
+This is how I currently set up Emacs for C++, as an update to <a href="emacs-cpp-notes.html">Trying to set up Emacs for C++ (2022)</a>.</p>
+<div class="outline-2">
+<h2>
+Goals
+</h2>
+<div class="outline-text-2">
+<p>
+I'm using Emacs to code for KDE projects, mostly written in C++/Qt.</p>
+</div>
+</div>
+<div class="outline-2">
+<h2>
+Dependencies
+</h2>
+<div class="outline-text-2">
+<p>
+Clangd as the language server, and lsp-mode as the LSP implementation in Emacs. I don't use Eglot because last time I used it it didn't support multiple language servers in one buffer, which is a thing I need.</p></div></div></body></html>

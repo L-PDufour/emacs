@@ -1,0 +1,99 @@
+<html><head></head><body><p>
+<a href="https://github.com/minad/vertico"><code>vertico</code></a> is a powerful completion framework for Emacs that helps, for example, to find files using partial matches.
+</p>
+
+<p>
+By default, it sorts all matches alphabetically and even offers some alternative
+sorting mechanisms; but none matched my unpleasantly frequent use case: opening
+<i>whatever-that-file-I-just-downloaded-is-called</i> or
+<i>just-give-me-whatever-that-command-just-produced</i>. So sorting by modification
+time was desperately needed!
+</p>
+
+<p>
+While that seems like a humble enough desire, it turned out to be more
+complicated then I thought. My searches online yielded few hits and no working
+solution. But luckily my slowly evolving ELISP skills seem to have just passed
+the threshold necessary to come up with a working solution – and here it is in
+all its hacky glory:
+</p>
+
+<div class="org-src-container">
+<pre><code>(after! vertico
+  (<span class="org-keyword">defun</span> <span class="org-function-name">hanno/vertico-sort-by-mtime</span> (files)
+    <span class="org-doc">"Sort FILES by modification time (newest first)."</span>
+    (<span class="org-keyword">let</span> ((dir nil))
+      (<span class="org-keyword">when</span> (&lt; (minibuffer-prompt-end) (point))
+        (<span class="org-keyword">setq</span> dir (buffer-substring (minibuffer-prompt-end) (point-max))))
+      (sort files
+            (<span class="org-keyword">lambda</span> (a b)
+              (<span class="org-keyword">let*</span> (
+                     (fa (expand-file-name a dir))
+                     (fb (expand-file-name b dir))
+                     (ta (file-attribute-modification-time (file-attributes fa)))
+                     (tb (file-attribute-modification-time (file-attributes fb))))
+                (time-less-p tb ta))))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">vertico-toggle-sort</span> ()
+  (<span class="org-keyword">interactive</span>)
+  (<span class="org-keyword">setq-local</span> vertico-sort-override-function
+              (<span class="org-keyword">and</span> (not vertico-sort-override-function)
+                   (<span class="org-keyword">lambda</span> (files)
+                     (<span class="org-keyword">if</span> (<span class="org-keyword">and</span> (eq minibuffer-history-variable 'file-name-history)
+                              (not (eq (car-safe minibuffer-completion-table) 'boundaries)))
+                         (hanno/vertico-sort-by-mtime files)
+                       (vertico-sort-history-length-alpha files))))
+              vertico--input t))
+
+(keymap-set vertico-map <span class="org-string">"M-S"</span> #'vertico-toggle-sort))
+</code></pre>
+</div>
+
+<p>
+After running the above code, open the <code>find-file</code> dialog by pressing <code>C-x C-f</code>
+and then press <code>M-S s</code> (meta + shift + <code>s</code>) to toggle the sorting.
+</p>
+<section>
+<h2>How this works</h2>
+<div class="outline-text-2">
+<p>
+This uses the foreseen mechanism in <code>vertico</code> to modify the sorting of matches,
+<code>vertico-sort-override-function</code>. Unfortunately, the function called by this
+hook is only provided with a list of file names without any absolute path needed
+to actually locate them. Retrieving the modification times is therefore not
+straightforward.
+</p>
+
+<p>
+<code>hanno/vertico-sort-by-mtime</code> therefore starts by deriving the current path from
+the minibuffer prompt which (of course) displays it for the user. Using this, it
+gets the modification timestamp for each of the candidates displayed and returns
+a sorted list.
+</p>
+
+<p>
+This certainly feels a little hacky even though it works fine and is probably
+robust enough. Still, as the <code>marginalia</code> annotations displayed besides the
+files already have the modification times, I am sure there is a more elegant way
+to get to this information. One drawback is that it is fairly slow when there
+are <i>lots</i> of files; in that case, using <code>dired</code> and its built-in sorting might
+be quicker and more comfortable.
+</p>
+
+<p>
+If you have a clever idea how to improve this or should you have encounted any
+issues, get in touch and let me know!
+</p>
+
+<p>
+This code is loosely based on the very helpful <a href="https://github.com/minad/vertico/wiki#customize-sorting-based-on-completion-category">examples in the <code>vertico</code> wiki</a>
+and took inspiration from this <a href="https://www.reddit.com/r/emacs/comments/1g8yccr/sorting_file_date_using_vertico/">post addressing the same problem</a> (but missing the
+issue with the current directory path).
+</p>
+
+
+<p>
+Tags: <a href="https://www.hoowl.se/../tags/emacs.html">emacs</a>, <a href="https://www.hoowl.se/../tags/lisp.html">lisp</a></p>
+</div>
+</section>
+</body></html>

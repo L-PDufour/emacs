@@ -1,0 +1,14 @@
+<p>
+Roman Numerals. On the one hand, it&rsquo;s hard to understand why anyone cares anymore. Some, like the late Rich Stevens considered them an anachronistic barbarism and labeled his books &ldquo;Volume 1, 2, &#x2026;&rdquo; rather than the more conventional &ldquo;Volume I, II, &#x2026;&rdquo;. Others continue to label volumes with the conventional Roman numerals and, of course, there&rsquo;s all those buildings with their erection date labeled, of course, with Roman numerals on their facade.
+</p>
+<p>
+It used to be that everyone learned how to read and write Roman numerals in School but, according to a teenager of my acquaintance, that&rsquo;s no longer the case. Were it not for their ubiquitousness on the front of buildings and multivolume books, I&rsquo;d be happy so see them disappear from our milieu but for the time being, it seems useful to be able to at least read them.
+</p>
+<p>
+Really, it&rsquo;s not much of an effort. There are only 7 symbols and they are combined in a regular way to form all the numbers that we&rsquo;re apt to see today. It&rsquo;s true that there&rsquo;s more than one way to form some numbers but all of them are easy to decipher. It&rsquo;s hard to see how anyone with more than a couple of brain cells to rub together would take more than 15 minutes to completely master the system.
+</p>
+<p>
+Still, Common Lisp is famous for having functions to convert between Arabic and Roman numerals. That&rsquo;s less true for Emacs Lisp but there are, apparently, some functions spread across a couple of packages to do the job. Charles Choi doesn&rsquo;t like that so he <a href="http://yummymelon.com/devnull/announcing-numeri-an-emacs-package-for-roman-number-translation.html">wrote a package to provide the capability in a single package</a>.
+</p>
+<p>
+I suppose, if you squint hard enough, you can imagine cases where you might want to do this sort of thing programmatically but, really, it&rsquo;s mostly too easy to do manually to need a function. Still, if you <i>do</i> have a need to do this programmatically, Choi has got you covered.</p>

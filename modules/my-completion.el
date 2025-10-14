@@ -129,7 +129,6 @@
    :preview-key "M-."))
 
 
-
 (use-package orderless
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
@@ -161,6 +160,22 @@
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
 ;; current candidates, positioned either below or above the point. Candidates
 ;; can be selected by navigating up or down.
+(defun corfu-separate-or-insert ()
+  "Command which acts first as a separator and but if inserted twice will insert"
+  (interactive)
+  (if current-prefix-arg
+      ;;we suppose that we want leave the word like that, so do a space
+      (progn (corfu-quit) (insert " "))
+    (if (and (= (char-before) corfu-separator)
+             (or
+              ;; check if space, return or nothing after
+              (not (char-after))
+              (= (char-after) ?\s)
+              (= (char-after) ?\n)))
+        (progn
+          (corfu-insert)
+          (insert " "))
+      (corfu-insert-separator))))
 
 (use-package corfu
   :ensure t
@@ -168,26 +183,21 @@
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
-              ("C-SPC" . corfu-insert-separator)
+              ("SPC" . corfu-separate-or-insert)
               ("M-;" . corfu-complete)
               ("RET" . nil))
-  :hook ((prog-mode . corfu-mode)
-         (shell-mode . corfu-mode)
-         (eshell-mode . corfu-mode))
   :init
   (corfu-history-mode 1)
   (corfu-popupinfo-mode 1)
   (global-corfu-mode)
+  :config
+  (setq corfu-separator 32)
   :custom
   (corfu-auto t)
   (corfu-auto-prefix 1)
-  (corfu-count 10)
-  (corfu-auto-delay 0.1)
-  (corfu-min-width 20)
-  (corfu-quit-no-match t)
-  (corfu-quit-at-boundary t)        ; ADD: Quit at word boundary
+  (corfu-quit-no-match nil)
+  (corfu-quit-at-boundary nil)        ; ADD: Quit at word boundary
   (corfu-preselect 'directory)      ;; Preselect the prompt
-  (corfu-on-exact-match nil)
   (corfu-popupinfo-delay 0.5)
   ;; Hide commands in M-x which do not apply to the current mode.
   (read-extended-command-predicate #'command-completion-default-include-p)

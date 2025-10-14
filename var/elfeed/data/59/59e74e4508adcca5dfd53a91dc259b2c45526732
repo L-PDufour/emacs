@@ -1,0 +1,69 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Reclaiming Your Windows Boot Option: A Comprehensive Step-by-Step
+Solution for GRUB Dual-Booters to Restore the Windows Entry and
+Achieve Seamless System Switching.</p>
+<h2>Problem Statement</h2>
+<p>After significant updates, it is not uncommon to encounter an issue
+where the "Windows" entry is missing from the GRUB bootloader
+menu. Technically, this issue arises when the os-probe utility fails
+to run, preventing the automatic addition of extra Operating Systems,
+especially in cases of dual-boot configurations.</p>
+<h2>Solution</h2>
+<p>To resolve this issue and restore the "Windows" entry in the GRUB
+bootloader menu, follow these steps:</p>
+<ol>
+<li>
+<p>Open the <code>/etc/default/grub</code> file with root privileges. You can do
+this using a text editor like nano or vim.</p>
+</li>
+<li>
+<p>Locate the following line in the file and uncomment it by removing
+the # symbol at the beginning of the line:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown"># If your computer has multiple operating systems installed, then you
+# probably want to run os-prober. However, if your computer is a host
+# for guest OSes installed via LVM or raw disk devices, running
+# os-prober can cause damage to those guest OSes as it mounts
+# filesystems to look for things.
+GRUB_DISABLE_OS_PROBER=false</code></pre></div>
+<ol start="3">
+<li>
+<p>Save the changes to the file and close the text editor.</p>
+</li>
+<li>
+<p>Run the following command to update the GRUB configuration:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">sudo update-grub</code></pre></div>
+<p>This command will regenerate the GRUB configuration file with the
+necessary changes.</p>
+<ol start="5">
+<li>After running the update-grub command, you will see output similar
+to the following:</li>
+</ol>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">Generating grub configuration file ...
+Found background image: /usr/share/images/desktop-base/desktop-grub.png
+Found linux image: /boot/vmlinuz-6.1.0-13-amd64
+Found initrd image: /boot/initrd.img-6.1.0-13-amd64
+Found linux image: /boot/vmlinuz-6.1.0-12-amd64
+Found initrd image: /boot/initrd.img-6.1.0-12-amd64
+Found linux image: /boot/vmlinuz-6.1.0-11-amd64
+Found initrd image: /boot/initrd.img-6.1.0-11-amd64
+Warning: os-prober will be executed to detect other bootable partitions.
+Its output will be used to detect bootable binaries on them and create new boot entries.
+Found Windows Boot Manager on /dev/nvme0n1p1@/EFI/Microsoft/Boot/bootmgfw.efi
+Adding boot menu entry for UEFI Firmware Settings ...
+done</code></pre></div>
+<p>This indicates that the Windows partition has been detected, and a new
+entry for it has been added to GRUB.</p>
+<ol start="6">
+<li>Finally, reboot your system using the following command:</li>
+</ol>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">sudo reboot</code></pre></div>
+<p>After rebooting, you should see the "Windows" option restored to your
+GRUB bootloader menu.</p>
+<p>By following these steps, you can efficiently address the issue of the
+missing "Windows" entry in GRUB and ensure a smooth dual-boot
+experience on your system.</p>

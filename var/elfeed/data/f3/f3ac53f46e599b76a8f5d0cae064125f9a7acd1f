@@ -1,0 +1,92 @@
+<p>I just made it possible for users of my <code class="language-plaintext highlighter-rouge">denote-journal</code> package to
+interact with the <code class="language-plaintext highlighter-rouge">M-x calendar</code> as part of their journaling workflow.</p>
+
+<h2>Highlight dates with a Denote journal entry</h2>
+
+<p>The new minor mode <code class="language-plaintext highlighter-rouge">denote-journal-calendar-mode</code> highlights dates in
+the <code class="language-plaintext highlighter-rouge">M-x calendar</code> which have a corresponding Denote journal entry.
+The applied face is called <code class="language-plaintext highlighter-rouge">denote-journal-calendar</code>: I made it draw
+only a box around the date, thus respecting existing colouration. Here
+is a demonstration, which also includes red-coloured dates for holidays:</p>
+
+<p><a href="https://protesilaos.com/assets/images/attachments/2025-03-31-emacs-denote-journal-calendar.png"><img alt="Generic Emacs calendar" src="https://protesilaos.com/assets/images/attachments/2025-03-31-emacs-denote-journal-calendar.png" /></a></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">denote-journal-calendar-mode</code> is buffer-local and meant to be
+activated inside the <code class="language-plaintext highlighter-rouge">M-x calendar</code> buffer, thus:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nv">add-hook</span> <span class="ss">'calendar-mode-hook</span> <span class="nf">#'</span><span class="nv">denote-journal-calendar-mode</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2>View the journal entry for the current date</h2>
+
+<p>While navigating the <code class="language-plaintext highlighter-rouge">calendar</code> buffer, use the command
+<code class="language-plaintext highlighter-rouge">denote-journal-calendar-find-file</code> to visit the Denote journal entry
+corresponding to the date at point. If there are multiple journal
+entries, the command will prompt you to select one among them.</p>
+
+<h2>Create or view journal entry for the current date</h2>
+
+<p>The command <code class="language-plaintext highlighter-rouge">denote-journal-calendar-new-or-existing</code> creates a new
+journal entry for the date at point or visits any existing one. This is
+like <code class="language-plaintext highlighter-rouge">denote-journal-new-or-existing-entry</code> but for the given <code class="language-plaintext highlighter-rouge">M-x
+calendar</code> date.</p>
+
+<h2>Part of development</h2>
+
+<p>Remember that I have split <code class="language-plaintext highlighter-rouge">denote</code> into several packages, one of
+which is <code class="language-plaintext highlighter-rouge">denote-journal</code>. I plan to coordinate the release of new
+versions across all Denote-related packages, so expect the
+aforementioned to be available at around the same time as <code class="language-plaintext highlighter-rouge">denote</code>
+version <code class="language-plaintext highlighter-rouge">4.0.0</code> (which is going to be massive, by the way).</p>
+
+<h3>About Denote journal</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">denote-journal</code> package makes it easier to use Denote for
+journaling. While it is possible to use the generic <code class="language-plaintext highlighter-rouge">denote</code> command
+(and related) to maintain a journal, this package defines extra
+functionality to streamline the journaling workflow.</p>
+
+<p>The code of <code class="language-plaintext highlighter-rouge">denote-journal</code> used to be bundled up with the <code class="language-plaintext highlighter-rouge">denote</code>
+package before version <code class="language-plaintext highlighter-rouge">4.0.0</code> of the latter and was available in the
+file <code class="language-plaintext highlighter-rouge">denote-journal-extras.el</code>. Users of the old code will need to
+adapt their setup to use the <code class="language-plaintext highlighter-rouge">denote-journal</code> package. This can be
+done by replacing all instances of <code class="language-plaintext highlighter-rouge">denote-journal-extras</code> with
+<code class="language-plaintext highlighter-rouge">denote-journal</code> across their configuration.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">denote-journal</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/denote-journal">https://protesilaos.com/emacs/denote-journal</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/denote-journal">https://github.com/protesilaos/denote-journal</a></li>
+  <li>Backronym: Denote… Journaling Obviously Utilises Reasonableness
+Notwithstanding Affectionate Longing.</li>
+</ul>
+
+<h3>About Denote</h3>
+
+<p>Denote is a simple note-taking tool for Emacs.  It is based on the idea
+that notes should follow a predictable and descriptive file-naming
+scheme.  The file name must offer a clear indication of what the note is
+about, without reference to any other metadata.  Denote basically
+streamlines the creation of such files while providing facilities to
+link between them.</p>
+
+<p>Denote’s file-naming scheme is not limited to “notes”.  It can be used
+for all types of file, including those that are not editable in Emacs,
+such as videos.  Naming files in a consistent way makes their
+filtering and retrieval considerably easier.  Denote provides relevant
+facilities to rename files, regardless of file type.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">denote</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/denote">https://protesilaos.com/emacs/denote</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/denote-changelog">https://protesilaos.com/emacs/denote-changelog</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/denote">https://github.com/protesilaos/denote</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/denote">https://gitlab.com/protesilaos/denote</a></li>
+    </ul>
+  </li>
+  <li>Video demo: <a href="https://protesilaos.com/codelog/2022-06-18-denote-demo/">https://protesilaos.com/codelog/2022-06-18-denote-demo/</a></li>
+  <li>Backronyms: Denote Everything Neatly; Omit The Excesses.  Don’t Ever
+Note Only The Epiphenomenal.</li>
+</ul>

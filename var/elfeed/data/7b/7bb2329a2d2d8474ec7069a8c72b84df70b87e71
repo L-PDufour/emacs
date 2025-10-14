@@ -1,0 +1,29 @@
+<p>In Rust 1.90.0, the target <code>x86_64-apple-darwin</code> will be demoted to Tier 2 with host tools.
+The standard library and the compiler will continue to be built and distributed,
+but automated tests of these components are no longer guaranteed to be run.</p>
+<h2 id="background"><a class="anchor" href="#background" aria-hidden="true"></a>
+Background</h2>
+<p>Rust has supported macOS for a long time,
+with some amount of support dating back to Rust 0.1 and likely before that.
+During that time period,
+Apple has changed CPU architectures from x86 to x86_64 and now to Apple silicon,
+ultimately announcing the <a href="https://en.wikipedia.org/wiki/Mac_transition_to_Apple_silicon#Timeline">end of support</a> for the x86_64 architecture.</p>
+<p>Similarly,
+<a href="https://github.blog/changelog/2025-07-11-upcoming-changes-to-macos-hosted-runners-macos-latest-migration-and-xcode-support-policy-updates/#macos-13-is-closing-down">GitHub has announced</a> that they will no longer provide free macOS x86_64 runners for public repositories.
+The Rust Project uses these runners to execute automated tests for the <code>x86_64-apple-darwin</code> target.
+Since the <a href="https://doc.rust-lang.org/stable/rustc/target-tier-policy.html">target tier policy</a> requires that Tier 1 platforms must run tests in CI,
+the <code>x86_64-apple-darwin</code> target must be demoted to Tier 2.</p>
+<h2 id="what-changes"><a class="anchor" href="#what-changes" aria-hidden="true"></a>
+What changes?</h2>
+<p>Starting with Rust 1.90.0, <code>x86_64-apple-darwin</code> will be Tier 2 with host tools.
+For users,
+nothing will change immediately;
+builds of both the standard library and the compiler will still be distributed by the Rust Project for use via <code>rustup</code> or alternative installation methods.</p>
+<p>Over time,
+this target will likely accumulate bugs faster due to reduced testing.</p>
+<h2 id="future"><a class="anchor" href="#future" aria-hidden="true"></a>
+Future</h2>
+<p>If the <code>x86_64-apple-darwin</code> target causes concrete problems,
+it may be demoted further.
+No plans for further demotion have been made yet.</p>
+<p>For more details on the motivation of the demotion, see <a href="https://rust-lang.github.io/rfcs/3841-demote-x86_64-apple-darwin.html">RFC 3841</a>.</p>

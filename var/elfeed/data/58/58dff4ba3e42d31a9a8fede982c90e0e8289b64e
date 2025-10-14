@@ -1,0 +1,97 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>When I'm deep into developing a feature, I don't want to think about
+whether a file is already open in a buffer, or if I need to search the
+whole project to find it.</p>
+<p>I just want to jump straight to the files I'm actively working on,
+the ones that Git tells me are <strong>modified</strong>, <strong>untracked</strong>, or even
+<strong>renamed</strong>.</p>
+<p>Emacs already gives us great defaults for different contexts:</p>
+<p>➡ <code>C-x b</code> (<code>switch-to-buffer</code>) → jump between open buffers.</p>
+<p>➡ <code>C-x p b</code> (<code>project-switch-to-buffer</code>) → jump between buffers in the
+current project.</p>
+<p>➡ <code>C-x p f</code> (<code>project-find-file</code>) → find any file inside the project.</p>
+<p>Each of these has its value and time. But in the middle of a coding
+session, when iterating fast on a feature, none of them give me what I
+want: a list of just the files I've touched.</p>
+<p>That's the itch that led me to write this command.</p>
+<h2>The Function and Binding</h2>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/switch-git-status-buffer</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Parse git status from an expanded path and switch to a file.</span>
+<span class="token string">The completion candidates include the Git status of each file."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">require</span> <span class="token quoted-symbol variable symbol">'vc-git</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">repo-root</span> <span class="token punctuation">(</span><span class="token car">vc-git-root</span> default-directory<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">not</span> repo-root<span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Not inside a Git repository."</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">expanded-root</span> <span class="token punctuation">(</span><span class="token car">expand-file-name</span> repo-root<span class="token punctuation">)</span><span class="token punctuation">)</span>
+			 <span class="token punctuation">(</span><span class="token car">command-to-run</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"git <span class="token argument">-C</span> %s status --porcelain=v1"</span>
+									 <span class="token punctuation">(</span><span class="token car">shell-quote-argument</span> expanded-root<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			 <span class="token punctuation">(</span><span class="token car">cmd-output</span> <span class="token punctuation">(</span><span class="token car">shell-command-to-string</span> command-to-run<span class="token punctuation">)</span><span class="token punctuation">)</span>
+			 <span class="token punctuation">(</span><span class="token car">target-files</span>
+			  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token car">files</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">dolist</span> <span class="token punctuation">(</span><span class="token car">line</span> <span class="token punctuation">(</span><span class="token car">split-string</span> cmd-output <span class="token string">"\n"</span> <span class="token boolean">t</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">nreverse</span> files<span class="token punctuation">)</span><span class="token punctuation">)</span>
+				  <span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token car">></span> <span class="token punctuation">(</span><span class="token car">length</span> line<span class="token punctuation">)</span> <span class="token number">3</span><span class="token punctuation">)</span>
+					<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">status</span> <span class="token punctuation">(</span><span class="token car">substring</span> line <span class="token number">0</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+						  <span class="token punctuation">(</span><span class="token car">path-info</span> <span class="token punctuation">(</span><span class="token car">substring</span> line <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+					  <span class="token comment">;; Handle rename specially</span>
+					  <span class="token punctuation">(</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token car">string-match</span> <span class="token string">"^R"</span> status<span class="token punctuation">)</span>
+						  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">paths</span> <span class="token punctuation">(</span><span class="token car">split-string</span> path-info <span class="token string">" -> "</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+								 <span class="token punctuation">(</span><span class="token car">new-path</span> <span class="token punctuation">(</span><span class="token car">cadr</span> paths<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+							<span class="token punctuation">(</span><span class="token keyword">when</span> new-path
+							  <span class="token punctuation">(</span><span class="token car">push</span> <span class="token punctuation">(</span><span class="token keyword">cons</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"<span class="token argument">R</span> %s"</span> new-path<span class="token punctuation">)</span> new-path<span class="token punctuation">)</span> files<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+						<span class="token comment">;; Modified or untracked</span>
+						<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">or</span> <span class="token punctuation">(</span><span class="token car">string-match</span> <span class="token string">"M"</span> status<span class="token punctuation">)</span>
+								  <span class="token punctuation">(</span><span class="token car">string-match</span> <span class="token string">"\?\?"</span> status<span class="token punctuation">)</span><span class="token punctuation">)</span>
+						  <span class="token punctuation">(</span><span class="token car">push</span> <span class="token punctuation">(</span><span class="token keyword">cons</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"%s %s"</span> status path-info<span class="token punctuation">)</span> path-info<span class="token punctuation">)</span> files<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">not</span> target-files<span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"No modified or renamed files found."</span><span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">candidates</span> target-files<span class="token punctuation">)</span>
+				 <span class="token punctuation">(</span><span class="token car">selection</span> <span class="token punctuation">(</span><span class="token car">completing-read</span> <span class="token string">"Switch to buffer (Git modified): "</span>
+											 <span class="token punctuation">(</span><span class="token car">mapcar</span> <span class="token quoted-symbol variable symbol">#'car</span> candidates<span class="token punctuation">)</span> <span class="token boolean">nil</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">when</span> selection
+			  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">file-path</span> <span class="token punctuation">(</span><span class="token car">cdr</span> <span class="token punctuation">(</span><span class="token car">assoc</span> selection candidates<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token keyword">when</span> file-path
+				  <span class="token punctuation">(</span><span class="token car">find-file</span> <span class="token punctuation">(</span><span class="token car">expand-file-name</span> file-path expanded-root<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x C-g"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">'emacs-solo/switch-git-status-buffer</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>The command parses <code>git status --porcelain=v1</code>, collects the
+interesting files, and offers them through <code>completing-read</code>. This
+means it works with whichever completion frontend you already use, and
+it switches to the selected file's buffer (opening it first if it
+isn't already open).</p>
+<h2>Completion in Action</h2>
+<p>Here's how it looks in different completion UIs:</p>
+<p>➡ <strong>Plain completion buffer</strong>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fswitch-git-status-buffer-completion.png&w=3840&q=75" alt="completion-example"></p>
+<p>➡ <strong>Fido</strong>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fswitch-git-status-buffer-fido.png&w=3840&q=75" alt="completion-example"></p>
+<p>➡ <strong>Fido vertical</strong>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fswitch-git-status-buffer-fido-vertical.png&w=3840&q=75" alt="completion-example"></p>
+<p>➡ <strong>Icomplete vertical</strong>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fswitch-git-status-buffer-solo-icomplete.png&w=3840&q=75" alt="completion-example"></p>
+<p>➡ <strong>Vertico</strong>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fswitch-git-status-buffer-vertico.png&w=3840&q=75" alt="completion-example"></p>
+<p>No matter which you prefer, you get a filtered list of just the files that matter right now.</p>
+<h2>Why emacs-solo?</h2>
+<p>This command is part of my
+<a href="https://github.com/LionyxML/emacs-solo"><strong>emacs-solo</strong></a> project, a
+collection of Emacs enhancements that stick to built-in tools and
+minimal glue code.</p>
+<p>The goal is to show how far we can go without depending on a huge
+package ecosystem, while still making day-to-day workflows smoother.</p>
+<h2>Conclusion</h2>
+<p>When I'm developing a feature, I care about the files I've just
+modified, created, or moved.</p>
+<p>This command scratches exactly that itch: fast navigation to
+Git-relevant files, without worrying if they're open or buried
+somewhere in the project tree.</p>
+<p>Give it a try, and check out
+<a href="https://github.com/LionyxML/emacs-solo"><strong>emacs-solo</strong></a> for more
+small, practical commands like this one. 🚀</p>
+<h3>Edit:</h3>
+<p><strong>2025-09-04:</strong> Fixed the global binding to
+<code>emacs-solo/switch-git-status-buffer</code>, as pointed by <code>u/jplindstrom</code>
+on <a href="https://www.reddit.com/r/emacs/comments/1n7vl8j/quickly_switching_between_git_status_files/">r/emacs
+(reddit)</a>.</p>

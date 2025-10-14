@@ -1,0 +1,182 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <h2>Setting up Go Lang on Debian</h2>
+<p>So you need Go in your Debian, and apt gives something, but not the version you need? Or worst, you need several versions of Go, one for each project you're working on?</p>
+<p>Fear no more!</p>
+<p>If you’re looking for a way to manage multiple language runtimes on your Debian system, <code>asdf</code> is an exceptional tool to consider. Not only does it allow you to manage versions of languages like Python, Ruby, Node.js, and many others, but with the <code>asdf-golang</code> plugin, it also offers an easy way to install and manage different versions of Go (Golang). This guide will walk you through setting up Go on a Debian system using <code>asdf</code>.</p>
+<h2>Why Use asdf?</h2>
+<p><code>asdf</code> is a versatile CLI tool designed to manage multiple language runtimes on a per-project basis. It simplifies the process of switching between different versions of languages, offering a single interface for various runtime environments. Here's why you should consider using <code>asdf</code>:</p>
+<ul>
+<li>
+<p><strong>Single CLI for Multiple Languages</strong>: <code>asdf</code> eliminates the need for separate version managers like <code>nvm</code>, <code>rbenv</code>, or <code>pyenv</code> by combining them into one tool.</p>
+</li>
+<li>
+<p><strong>Consistent Commands</strong>: It provides a uniform set of commands to manage all your language versions.</p>
+</li>
+<li>
+<p><strong>Global and Per-Project Configurations</strong>: With <code>asdf</code>, you can maintain a single global configuration file, as well as per-project <code>.tool-versions</code> files.</p>
+</li>
+<li>
+<p><strong>Automatic Version Switching</strong>: <code>asdf</code> automatically switches runtime versions as you navigate through different directories.</p>
+</li>
+<li>
+<p><strong>Shell Completion</strong>: It offers shell completion for common shells like Bash, Zsh, Fish, and more.</p>
+</li>
+</ul>
+<h2>Installing asdf on Debian</h2>
+<p>Before you start, make sure you have the necessary dependencies installed on your system. Here’s how you can get started:</p>
+<ol>
+<li>
+<p><strong>Install Dependencies</strong>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> update
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> <span class="token function">curl</span> <span class="token function">git</span> coreutils
+</code></pre></div>
+</li>
+<li>
+<p><strong>Clone the asdf Repository</strong>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">git</span> clone https://github.com/asdf-vm/asdf.git ~/.asdf <span class="token parameter variable">--branch</span> v0.12.0
+</code></pre></div>
+</li>
+<li>
+<p><strong>Add asdf to Your Shell</strong>:
+Add the following lines to your <code>.bashrc</code> or <code>.zshrc</code> file:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token string">"<span class="token environment constant">$HOME</span>/.asdf/shims/:<span class="token environment constant">$PATH</span>"</span>
+<span class="token builtin class-name">.</span> <span class="token environment constant">$HOME</span>/.asdf/asdf.sh
+<span class="token builtin class-name">.</span> <span class="token environment constant">$HOME</span>/.asdf/completions/asdf.bash
+</code></pre></div>
+</li>
+<li>
+<p><strong>Reload Your Shell</strong>:
+After editing the file, reload your shell:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">source</span> ~/.bashrc
+</code></pre></div>
+</li>
+</ol>
+<h2>Installing the asdf-golang Plugin</h2>
+<p>With <code>asdf</code> installed, you can now add the <code>golang</code> plugin:</p>
+<ol>
+<li>
+<p><strong>Add the golang Plugin</strong>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf plugin <span class="token function">add</span> golang https://github.com/asdf-community/asdf-golang.git
+</code></pre></div>
+</li>
+<li>
+<p><strong>Install a Version of Go</strong>:
+To install a specific version of Go, use:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf <span class="token function">install</span> golang <span class="token number">1.22</span>.6
+</code></pre></div>
+<p>Replace <code>1.22.6</code> with the version you wish to install.</p>
+</li>
+<li>
+<p><strong>Set a Global or Local Version</strong>:
+To set the global version of Go (the default for all projects):</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf global golang <span class="token number">1.22</span>.6
+</code></pre></div>
+<p>Or, set a local version for a specific project:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf <span class="token builtin class-name">local</span> golang <span class="token number">1.22</span>.6
+</code></pre></div>
+</li>
+</ol>
+<h2>Configuring Go Environment Variables</h2>
+<p>To properly set up Go's environment variables, you need to add a function to your <code>.bashrc</code> file. This ensures that the <code>GOROOT</code>, <code>GOPATH</code>, and <code>GOBIN</code> variables are correctly set each time you start a new shell session.</p>
+<p>Add the following to your <code>.bashrc</code> file:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token comment"># GOLANG</span>
+<span class="token function-name function">asdf_update_golang_env</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token builtin class-name">local</span> go_bin_path
+  <span class="token assign-left variable">go_bin_path</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>asdf <span class="token function">which</span> go <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null<span class="token variable">)</span></span>"</span>
+  <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token parameter variable">-n</span> <span class="token string">"<span class="token variable">${go_bin_path}</span>"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token assign-left variable">abs_go_bin_path</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>readlink <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${go_bin_path}</span>"</span><span class="token variable">)</span></span>"</span>
+
+    <span class="token builtin class-name">export</span> GOROOT
+    <span class="token assign-left variable">GOROOT</span><span class="token operator">=</span><span class="token string">"$(dirname "<span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token string">"<span class="token variable">${abs_go_bin_path}</span>"</span><span class="token variable">)</span></span>"</span><span class="token punctuation">)</span><span class="token string">"</span>
+<span class="token string"></span>
+<span class="token string">    export GOPATH</span>
+<span class="token string">    GOPATH="</span><span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token string">"<span class="token variable">${GOROOT}</span>"</span><span class="token variable">)</span></span>/packages<span class="token string">"</span>
+<span class="token string"></span>
+<span class="token string">    export GOBIN</span>
+<span class="token string">    GOBIN="</span><span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token string">"<span class="token variable">${GOROOT}</span>"</span><span class="token variable">)</span></span>/bin<span class="token string">"</span>
+<span class="token string">    </span>
+<span class="token string">    export PATH="</span><span class="token variable">$GOBIN</span><span class="token builtin class-name">:</span><span class="token environment constant">$PATH</span>"
+  <span class="token keyword">fi</span>
+<span class="token punctuation">}</span>
+asdf_update_golang_env
+</code></pre></div>
+<p>After adding this, reload your shell:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">source</span> ~/.bashrc
+</code></pre></div>
+<h2>How <code>.tool-versions</code> File Works with <code>asdf local</code></h2>
+<p>When you use the <code>asdf local</code> command in a project directory, <code>asdf</code> creates a file named <code>.tool-versions</code> in that directory. This file stores the language versions that <code>asdf</code> should use when you are within that specific directory.</p>
+<h3>Example of <code>.tool-versions</code>:</h3>
+<p>If you run the following command in your project directory:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf <span class="token builtin class-name">local</span> golang <span class="token number">1.22</span>.6
+</code></pre></div>
+<p>It will create a <code>.tool-versions</code> file in that directory with the following content:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">golang <span class="token number">1.22</span>.6
+</code></pre></div>
+<p>This file tells <code>asdf</code> to use Go version <code>1.22.6</code> whenever you are in that project directory. If you have other languages managed by <code>asdf</code> (e.g., Node.js, Python), their versions would also be listed in this file.</p>
+<h3>How <code>.tool-versions</code> Affects Version Selection</h3>
+<ul>
+<li>
+<p><strong>Local Version</strong>: When you navigate to the directory containing the <code>.tool-versions</code> file, <code>asdf</code> automatically switches to the specified version of Go (or other languages) for that project.</p>
+</li>
+<li>
+<p><strong>Global Version Override</strong>: The versions specified in the <code>.tool-versions</code> file take precedence over any global versions you have set with <code>asdf global</code>. This allows you to customize the language environment for each project without affecting others.</p>
+</li>
+<li>
+<p><strong>Project-Specific Setup</strong>: This is particularly useful when working on multiple projects that require different versions of the same language. The <code>.tool-versions</code> file ensures that you are always using the correct version for the project at hand.</p>
+</li>
+</ul>
+<h2>Checking Installation of Global Go Packages</h2>
+<p>After installing Go, you can install global Go packages using <code>go install</code>. Here’s how you can check that a package is installed globally:</p>
+<ol>
+<li>
+<p><strong>Install a Package Globally</strong>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">go <span class="token function">install</span> github.com/air-verse/air@latest
+</code></pre></div>
+</li>
+<li>
+<p><strong>Check Installation</strong>:
+After installation, verify that the package was installed globally by running:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">air <span class="token parameter variable">-v</span>
+</code></pre></div>
+<p>This command should display the version of <code>air</code>, confirming that the installation was successful.</p>
+</li>
+</ol>
+<h2>Managing Go Versions with <code>asdf</code></h2>
+<p><code>asdf</code> makes it easy to switch between different versions of Go, whether globally or locally for a specific project.</p>
+<h3>Installing Multiple Versions of Go</h3>
+<ul>
+<li>
+<p><strong>Install a New Version</strong>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf <span class="token function">install</span> golang <span class="token number">1.18</span>.3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Set a Global Version</strong>:
+To set <code>1.18.3</code> as the global version:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf global golang <span class="token number">1.18</span>.3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Set a Local Version</strong>:
+If you want to use a different version for a specific project, navigate to the project directory and run:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf <span class="token builtin class-name">local</span> golang <span class="token number">1.22</span>.6
+</code></pre></div>
+</li>
+</ul>
+<h3>Switching Between Versions</h3>
+<p>You can easily switch between different Go versions using <code>asdf</code>. For example:</p>
+<ul>
+<li>
+<p>To switch to a globally installed version:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf global golang <span class="token number">1.22</span>.6
+</code></pre></div>
+</li>
+<li>
+<p>To switch to a version for a specific project:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">asdf <span class="token builtin class-name">local</span> golang <span class="token number">1.18</span>.3
+</code></pre></div>
+</li>
+</ul>
+<h2>Conclusion</h2>
+<p>With <code>asdf</code> and the <code>asdf-golang</code> plugin, managing multiple versions of Go on Debian becomes effortless. By following the steps outlined in this guide, you’ll have a robust setup that allows you to switch between Go versions seamlessly, manage your Go environment variables efficiently, and ensure your projects are always using the correct Go version. Happy coding!</p>

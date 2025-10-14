@@ -1,0 +1,14 @@
+<p>
+Álvaro Ramírez and James Dyer have a problem. The same problem. They sometimes need to reindent a region or the entire buffer. That&rsquo;s easy enough to do. You can select the entire buffer with <kbd>Ctrl</kbd>+<kbd>x</kbd> <kbd>h</kbd> or select the region you want to indent if it&rsquo;s not the entire buffer and then call <code>indent-region</code>, bound to <kbd>Ctrl</kbd>+<kbd>Meta</kbd>+<kbd>\</kbd> by default.
+</p>
+<p>
+The problem is the current mark and point are destroyed. It would be better to have them restored after the reindent operation. Dyer has <a href="https://emacs.dyerdwelling.family/emacs/20250826095622-emacs--a-better-way-to-indent-your-entire-buffer-in-emacs/">an easy solution</a> for the case where you want to reindent the whole buffer. It&rsquo;s just a few lines of Elisp that you can add to your <code>init.el</code> and bind to a convenient key.
+</p>
+<p>
+Ramírez took <a href="https://xenodium.com/diverted-mode">a more general approach</a>. He, too, had the problem when indenting the entire buffer but also when reindenting a function or the result of <a href="https://irreal.org/blog/?p=925">expand-region</a>. His idea was to implement <code>diverted-mode</code> that recognizes <code>mark-defun</code>, <code>mark-whole-buffer</code>, and <code>er/expand-region</code> and restore the point and mark afterwards.
+</p>
+<p>
+Both solutions are nice. If you mostly just want to reindent the entire buffer, copy Dyer&rsquo;s code into your <code>init.el</code> and be done with it. If your reindentation needs are more complex, take a look at Ramírez&rsquo;s solution. It&rsquo;s easy to specify additional conditions for <code>diverted-mode</code> as your needs grow.
+</p>
+<p>
+Maybe this never seemed like a problem to you but if it did, these two solutions are good ways of dealing with it.</p>

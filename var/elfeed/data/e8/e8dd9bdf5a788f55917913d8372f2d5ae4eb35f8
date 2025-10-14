@@ -1,0 +1,19 @@
+<html><head></head><body><p>
+I really like Gnuplot. It can take a bit of raw data and produce a first class graph in many different formats. There are two problems:
+</p>
+<ol>
+<li>It’s command set is truly baroque and hard to learn</li>
+<li>I don’t use it often enough to learn that baroque command language</li>
+</ol>
+<p>
+That second problem means that whenever I want to use Gnuplot I have to spend time with its, admittedly excellent, manual. So it’s a two edged sword. On the one hand I don’t use it enough to learn the command set and on the other hand it’s so painful to figure out how to do things that I avoid using it if I can.
+</p>
+<p>
+Charles Choi feels my—or more likely his own—pain and has <a href="http://yummymelon.com/devnull/a-proof-of-concept-to-put-a-better-emacs-ui-on-top-of-gnuplot.html">put together a prototype Casual app for Gnuplot</a>. He has a video of it in action and it seems really nice. Choi says, though, that it’s far from complete and that it would probably take three or four months of full time effort to get it up to production level. That’s a large commitment and he wonders if it would be worth the effort. In particular, he wants to hear from prospective users if it’s something they’d want and use.
+</p>
+<p>
+So far, the <a href="https://www.reddit.com/r/emacs/comments/1mzdibe/a_proof_of_concept_to_put_a_better_emacs_ui_on/">comments to his post</a> seem overwhelmingly positive. It appears that there’s a real desire for something like this. You can make it happen in two ways. First leave a comment to his post or one of the places he’s linked to expressing your interest in such an app. Second, consider supporting Choi’s work. It can be as easy as simply <a href="https://buymeacoffee.com/kickingvegas">buying him a cup of coffee</a>.
+</p>
+<p>
+<b>Update</b> <span class="timestamp-wrapper"><span class="timestamp">[2025-08-28 Thu 12:01]</span></span>: Causal → Casual in Title. Thanks to Andreas Elder for the heads up.</p>
+</body></html>

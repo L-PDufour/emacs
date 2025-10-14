@@ -1,0 +1,14 @@
+<p>
+Álvaro Ramírez <a href="https://xenodium.com/who-moved-my-text">had a problem</a>. The SVG header in the buffer of  one of his apps was occasionally disappearing. The problem was that he didn&rsquo;t know where to look for the bug. Then it occurred to him that he could use the <code>after-change-functions</code> hook to catch when the header was deleted. The problem with that plan was that he&rsquo;d only get the changed text and he needed to see which of his functions was causing the change.
+</p>
+<p>
+He solved that problem with a brilliant bit of Elisp that prints the first few entries of the stack frame whenever a change is detected. The whole thing is only 7 lines of code plus an additional line to install it in the list of functions to be called by the <code>after-change-functions</code> hook.
+</p>
+<p>
+Half the function is involved with printing the results. the other half captures the data. The code is easy to read and understand. The only thing you need to know is that the <code>backtrace-frames</code> function returns a list of frames from the current backtrace and that each of those frames has the format <code>(flag function arguments...)</code>. Ramírez uses only the function part (hence <code>(car (cdr frame))</code>) in his function.
+</p>
+<p>
+After increasing the number of frames printed, he began to see his own code in the backtrace and soon located the offending code. This was an excellent hack and one that Ramírez says he&rsquo;s gong to keep in his toolbox.
+</p>
+<p>
+It&rsquo;s a nice example of how you can get access to the backtrace in your own executing code. It&rsquo;s a good trick and one that can be easily adapted to fit your particular needs. If you write Elisp, you should read and understand Ramírez&rsquo;s function. It is, as he says, a handy thing to have in your toolbox.</p>

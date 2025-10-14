@@ -1,0 +1,20 @@
+<html><head></head><body><p>
+Claude Code provides a CLI interface to Claude that maintains full
+project context and can execute commands directly. The claude-code.el
+package integrates this into Emacs, giving you access to Claude's
+capabilities without leaving your editor.</p>
+<div class="outline-2">
+<h2>
+Key Integration Points
+</h2>
+<div class="outline-text-2">
+<div class="outline-3">
+<h3>
+Project Scope Management
+</h3>
+<div class="outline-text-3">
+<p>Claude Code operates on entire directory trees rather than individual
+files. When you start a session from your project root, Claude has
+read access to all files in that directory and can understand
+relationships between components, build configurations, and test
+files.</p></div></div></div></div></body></html>

@@ -1,0 +1,183 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>When people hear "tabs" in an editor, they usually imagine something
+like browser tabs in Chrome, Firefox, or even VSCode. But Neovim's
+tabs are quite different, they are <strong>workspaces</strong>, each containing
+its own set of windows and splits. Think of them more like tmux's
+sessions or Emacs' <code>tab-bar</code>, rather than VSCode's tab-line that just
+lists files.</p>
+<p>By default, Neovim’s tabline shows placeholders like <code>[No Name]</code> or full
+buffer names, but I find this neither attractive nor particularly
+useful. I prefer something more minimal, closer to how tmux presents
+workspaces: numbered slots with just enough styling to highlight the
+active one. This way, I avoid the distraction of long file names and
+can stay focused on the workspace itself.</p>
+<p>In the screenshot below, at the top left, you can see three tabs: the
+first has three splits (indicated by the blue “3” along with the
+filename of the selected split), the second is empty, and the third
+contains another open file.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fneovim-tabline-demo-01.png&w=3840&q=75" alt="neovim-custom-tabline-demo-01"></p>
+<p>In this post, I’ll walk you through how I built a <code>pill-style tabline</code>
+in Lua, explain some of the design decisions, and show how it fits
+neatly into my tmux workflow.</p>
+<p>Here’s a preview of the final result: three tabs, numbered, formatted,
+and highlighted for clarity.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fneovim-tabline-demo-02.png&w=3840&q=75" alt="neovim-custom-tabline-demo-02"></p>
+<hr>
+<h2>Part 1: Why Customize the Tabline?</h2>
+<p>Here's the situation:</p>
+<p>➖ <strong>Default Neovim tabs</strong> → Show file names and placeholders, often cluttering the screen.</p>
+<p>➖ <strong>tmux tabs/panes</strong> → Show numbered workspaces, clean and efficient.</p>
+<p>➖ <strong>Emacs</strong> → Has two modes: <code>tab-bar</code> (like Neovim's tabs) and <code>tab-line</code> (like VSCode's file tabs).</p>
+<p>I wanted my Neovim tabline to look and feel closer to tmux and Emacs'
+tab-bar. Just numbered "workspaces," styled as pills for clarity.</p>
+<p>Here's a preview:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fneovim-tabline-demo-03.png&w=3840&q=75" alt="neovim-custom-tabline-demo-03"></p>
+<hr>
+<h2>Part 2: Keymaps for Managing Tabs</h2>
+<p>First, I set up a few keymaps to create, toggle, and navigate tabs:</p>
+<div class="remark-highlight"><pre class="language-lua"><code class="language-lua"><span class="token comment">-- Create a new tab</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"&#x3C;leader>tn"</span><span class="token punctuation">,</span> <span class="token string">":tabnew&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"New [t]ab"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">-- Exclude current tab</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"&#x3C;leader>tx"</span><span class="token punctuation">,</span> <span class="token string">":tabclose&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"E[x]clude tab"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">-- Toggle showing the tabline</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"&#x3C;leader>tt"</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">if</span> vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>showtabline <span class="token operator">==</span> <span class="token number">2</span> <span class="token keyword">then</span>
+	vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>showtabline <span class="token operator">=</span> <span class="token number">0</span>
+  <span class="token keyword">else</span>
+	vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>showtabline <span class="token operator">=</span> <span class="token number">2</span>
+  <span class="token keyword">end</span>
+<span class="token keyword">end</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Toggle [t]abs"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">-- Navigate tabs</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"]t"</span><span class="token punctuation">,</span> <span class="token string">":tabnext&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Next tab"</span><span class="token punctuation">,</span> silent <span class="token operator">=</span> <span class="token keyword">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"[t"</span><span class="token punctuation">,</span> <span class="token string">":tabprevious&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Previous tab"</span><span class="token punctuation">,</span> silent <span class="token operator">=</span> <span class="token keyword">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>This gives me a lightweight tmux-like navigation inside Neovim.</p>
+<hr>
+<h2>Part 3: Styling with Highlight Groups</h2>
+<p>I use custom Catppuccin highlight groups to create the "pill" effect
+(to match my Neovim, terminal, and tmux Catppuccin theme):</p>
+<div class="remark-highlight"><pre class="language-lua"><code class="language-lua">vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLine"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> bg <span class="token operator">=</span> <span class="token string">"NONE"</span><span class="token punctuation">,</span> fg <span class="token operator">=</span> <span class="token string">"#666666"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLineFill"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> bg <span class="token operator">=</span> <span class="token string">"NONE"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillActiveLeft"</span><span class="token punctuation">,</span>   <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#8aadf4"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillActiveText"</span><span class="token punctuation">,</span>   <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#8aadf4"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillActiveRight"</span><span class="token punctuation">,</span>  <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#8aadf4"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillInactiveLeft"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#737994"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillInactiveText"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#737994"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillInactiveRight"</span><span class="token punctuation">,</span><span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#737994"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>Each tab is enclosed by decorative glyphs (<code></code> on the left and <code></code> on
+the right). Inside, it shows a number, with styling that changes
+depending on whether the tab is active or inactive.</p>
+<p><strong>Note:</strong> your terminal font must support these glyphs. The screenshots
+use <strong>JetBrains Mono Nerd Font</strong>.</p>
+<hr>
+<h2>Part 4: The Lua Function for the Tabline</h2>
+<p>Finally, I define the tabline function:</p>
+<div class="remark-highlight"><pre class="language-lua"><code class="language-lua">vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>tabline <span class="token operator">=</span> <span class="token string">"%!v:lua.PillTabline()"</span>
+
+<span class="token keyword">function</span> _G<span class="token punctuation">.</span><span class="token function">PillTabline</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">local</span> s <span class="token operator">=</span> <span class="token string">""</span>
+  <span class="token keyword">local</span> tabs <span class="token operator">=</span> vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_list_tabpages</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">local</span> current <span class="token operator">=</span> vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_get_current_tabpage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">for</span> i<span class="token punctuation">,</span> tab <span class="token keyword">in</span> <span class="token function">ipairs</span><span class="token punctuation">(</span>tabs<span class="token punctuation">)</span> <span class="token keyword">do</span>
+	<span class="token keyword">local</span> is_active <span class="token operator">=</span> <span class="token punctuation">(</span>tab <span class="token operator">==</span> current<span class="token punctuation">)</span>
+
+	<span class="token keyword">local</span> hl_left  <span class="token operator">=</span> is_active <span class="token keyword">and</span> <span class="token string">"%#TabLinePillActiveLeft#"</span>   <span class="token keyword">or</span> <span class="token string">"%#TabLinePillInactiveLeft#"</span>
+	<span class="token keyword">local</span> hl_text  <span class="token operator">=</span> is_active <span class="token keyword">and</span> <span class="token string">"%#TabLinePillActiveText#"</span>   <span class="token keyword">or</span> <span class="token string">"%#TabLinePillInactiveText#"</span>
+	<span class="token keyword">local</span> hl_right <span class="token operator">=</span> is_active <span class="token keyword">and</span> <span class="token string">"%#TabLinePillActiveRight#"</span>  <span class="token keyword">or</span> <span class="token string">"%#TabLinePillInactiveRight#"</span>
+
+	s <span class="token operator">=</span> s <span class="token operator">..</span> hl_left <span class="token operator">..</span> <span class="token string">""</span>
+	s <span class="token operator">=</span> s <span class="token operator">..</span> hl_text <span class="token operator">..</span> <span class="token string">" "</span> <span class="token operator">..</span> i <span class="token operator">..</span> <span class="token string">" "</span>
+	s <span class="token operator">=</span> s <span class="token operator">..</span> hl_right <span class="token operator">..</span> <span class="token string">""</span>
+	s <span class="token operator">=</span> s <span class="token operator">..</span> <span class="token string">"%#TabLine# "</span>
+  <span class="token keyword">end</span>
+
+  <span class="token keyword">return</span> s
+<span class="token keyword">end</span>
+</code></pre></div>
+<p>Each tab gets a pill-shaped segment, numbered sequentially. No
+clutter, just a clear workspace indicator.</p>
+<hr>
+<h2>Part 5: Testing It</h2>
+<p>For your convinience, here is the full <code>tabline.lua</code> file:</p>
+<div class="remark-highlight"><pre class="language-lua"><code class="language-lua"><span class="token comment">-- Create a new tab</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"&#x3C;leader>tn"</span><span class="token punctuation">,</span> <span class="token string">":tabnew&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"New [t]ab"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">-- Exclude current tab</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"&#x3C;leader>tx"</span><span class="token punctuation">,</span> <span class="token string">":tabclose&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"E[x]clude tab"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">-- Toggle showing the tabline</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"&#x3C;leader>tt"</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">if</span> vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>showtabline <span class="token operator">==</span> <span class="token number">2</span> <span class="token keyword">then</span>
+	vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>showtabline <span class="token operator">=</span> <span class="token number">0</span>
+  <span class="token keyword">else</span>
+	vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>showtabline <span class="token operator">=</span> <span class="token number">2</span>
+  <span class="token keyword">end</span>
+<span class="token keyword">end</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Toggle [t]abs"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">-- Navigate tabs</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"]t"</span><span class="token punctuation">,</span> <span class="token string">":tabnext&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Next tab"</span><span class="token punctuation">,</span> silent <span class="token operator">=</span> <span class="token keyword">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"n"</span><span class="token punctuation">,</span> <span class="token string">"[t"</span><span class="token punctuation">,</span> <span class="token string">":tabprevious&#x3C;CR>"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Previous tab"</span><span class="token punctuation">,</span> silent <span class="token operator">=</span> <span class="token keyword">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLine"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> bg <span class="token operator">=</span> <span class="token string">"NONE"</span><span class="token punctuation">,</span> fg <span class="token operator">=</span> <span class="token string">"#666666"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLineFill"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> bg <span class="token operator">=</span> <span class="token string">"NONE"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillActiveLeft"</span><span class="token punctuation">,</span>   <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#8aadf4"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillActiveText"</span><span class="token punctuation">,</span>   <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#8aadf4"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillActiveRight"</span><span class="token punctuation">,</span>  <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#8aadf4"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillInactiveLeft"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#737994"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillInactiveText"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#737994"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_set_hl</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"TabLinePillInactiveRight"</span><span class="token punctuation">,</span><span class="token punctuation">{</span> fg <span class="token operator">=</span> <span class="token string">"#737994"</span><span class="token punctuation">,</span> bg <span class="token operator">=</span> <span class="token string">"#1e1e2e"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+
+vim<span class="token punctuation">.</span>o<span class="token punctuation">.</span>tabline <span class="token operator">=</span> <span class="token string">"%!v:lua.PillTabline()"</span>
+
+<span class="token keyword">function</span> _G<span class="token punctuation">.</span><span class="token function">PillTabline</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">local</span> s <span class="token operator">=</span> <span class="token string">""</span>
+  <span class="token keyword">local</span> tabs <span class="token operator">=</span> vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_list_tabpages</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">local</span> current <span class="token operator">=</span> vim<span class="token punctuation">.</span>api<span class="token punctuation">.</span><span class="token function">nvim_get_current_tabpage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">for</span> i<span class="token punctuation">,</span> tab <span class="token keyword">in</span> <span class="token function">ipairs</span><span class="token punctuation">(</span>tabs<span class="token punctuation">)</span> <span class="token keyword">do</span>
+	<span class="token keyword">local</span> is_active <span class="token operator">=</span> <span class="token punctuation">(</span>tab <span class="token operator">==</span> current<span class="token punctuation">)</span>
+
+	<span class="token keyword">local</span> hl_left  <span class="token operator">=</span> is_active <span class="token keyword">and</span> <span class="token string">"%#TabLinePillActiveLeft#"</span>   <span class="token keyword">or</span> <span class="token string">"%#TabLinePillInactiveLeft#"</span>
+	<span class="token keyword">local</span> hl_text  <span class="token operator">=</span> is_active <span class="token keyword">and</span> <span class="token string">"%#TabLinePillActiveText#"</span>   <span class="token keyword">or</span> <span class="token string">"%#TabLinePillInactiveText#"</span>
+	<span class="token keyword">local</span> hl_right <span class="token operator">=</span> is_active <span class="token keyword">and</span> <span class="token string">"%#TabLinePillActiveRight#"</span>  <span class="token keyword">or</span> <span class="token string">"%#TabLinePillInactiveRight#"</span>
+
+	s <span class="token operator">=</span> s <span class="token operator">..</span> hl_left <span class="token operator">..</span> <span class="token string">""</span>
+	s <span class="token operator">=</span> s <span class="token operator">..</span> hl_text <span class="token operator">..</span> <span class="token string">" "</span> <span class="token operator">..</span> i <span class="token operator">..</span> <span class="token string">" "</span>
+	s <span class="token operator">=</span> s <span class="token operator">..</span> hl_right <span class="token operator">..</span> <span class="token string">""</span>
+	s <span class="token operator">=</span> s <span class="token operator">..</span> <span class="token string">"%#TabLine# "</span>
+  <span class="token keyword">end</span>
+
+  <span class="token keyword">return</span> s
+<span class="token keyword">end</span>
+</code></pre></div>
+<p>You can test this file standalone without touching your main config
+with:</p>
+<div class="remark-highlight"><pre class="language-sh"><code class="language-sh">nvim <span class="token parameter variable">--clean</span> <span class="token parameter variable">-u</span> NONE <span class="token parameter variable">-c</span> <span class="token string">'luafile tabline.lua'</span> <span class="token parameter variable">-c</span> <span class="token string">'tabnew'</span> <span class="token parameter variable">-c</span> <span class="token string">'tabnew'</span>
+</code></pre></div>
+<p>This opens Neovim clean, loads your tabline, and creates a couple of
+tabs so you can see the style right away. <code>\</code> is the default leader key btw.</p>
+<hr>
+<h2>Conclusion</h2>
+<p>I like to think of this as <strong>a complement to tmux</strong>. tmux manages
+workspaces across the system, and inside each tmux pane, Neovim
+provides its own tabbed workspaces. By stripping away file names and
+fancy descriptions, I keep the focus on structure instead of
+distractions.</p>
+<p>➖ Neovim tabs ≠ browser tabs. They're more like <strong>workspaces</strong>.</p>
+<p>➖ My custom tabline ≈ tmux sessions, but inside Neovim.</p>
+<p>➖ The pill design gives enough visual separation without being noisy.</p>
+<p>I'll probably refine this over time (maybe adding icons or buffer
+names when I really need them), but for now this simple approach keeps
+my Neovim and tmux environments consistent and distraction-free.</p>

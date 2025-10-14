@@ -1,0 +1,8 @@
+Deadlocks are a constant threat in concurrent settings with shared
+data; it is thus not surprising that the kernel project has long since
+developed tools to detect potential deadlocks so they can be fixed before
+they affect production users.  Byungchul Park thinks that he has developed
+a better tool that can detect more deadlock-prone situations.  At the 2025 <a
+href="https://events.linuxfoundation.org/open-source-summit-europe/">Open
+Source Summit Europe</a>, he presented an introduction to his dependency
+tracker (or "DEPT") tool and the kinds of problems it can detect.

@@ -1,0 +1,8 @@
+<p>
+A few years ago, starting in 2016, I wrote a series of articles (<a href="https://irreal.org/blog/?p=5095">1</a>, <a href="https://irreal.org/blog/?p=6419">2</a>, <a href="https://irreal.org/blog/?p=6422">3</a>) about my favorite Emacs packages and tips. Reading them now, almost ten years later, I find they&rsquo;ve aged well. I still use everything on the list and my &ldquo;can&rsquo;t live without&rdquo; packages are pretty much the same. I didn&rsquo;t include Org mode or Magit because, even then, they were given must haves.
+</p>
+<p>
+I was reminded of all this when I saw a post on the Emacs subreddit from macro_. The post asked <a href="https://www.reddit.com/r/emacs/comments/1n2z9ki/what_are_the_must_have_emacs_packages_in_august/">what are the must have Emacs packages in August 2025</a>? Once you get past the usual ankle biting, the answers are revealing. Although <a href="https://github.com/minad/consult/tree/main">consult</a> and <a href="https://github.com/abo-abo/swiper">Ivy</a> were mentioned frequently there seemed to me be less emphasis on actual editing and more on things like LLM and LSP. For example, no one mentioned Steve Purcell&rsquo;s indispensable <a href="https://github.com/purcell/whole-line-or-region">whole-line-or-region</a>. I use it many, many times everyday—probably more than any other package.
+</p>
+<p>
+Still there are plenty of good suggestions in the comments and they are well worth taking a look at. Everybody&rsquo;s opinion will differ, of course, but I find it really useful to see what others think and why they think it. Sometimes they even convince me to try out one of their favorites. Take a look at the comments and see if there&rsquo;s anything there that might improve your workflow.</p>

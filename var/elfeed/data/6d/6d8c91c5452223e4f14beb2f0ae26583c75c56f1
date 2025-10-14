@@ -1,0 +1,33 @@
+
+<h3>Logic for Programmers v0.8 now out!</h3>
+<p>The new release has minor changes: new formatting for notes and a better introduction to predicates. I would have rolled it all into v0.9 next month but I like the monthly cadence. <a href="https://leanpub.com/logic/" target="_blank">Get it here!</a></p>
+<h1>Betteridge's Law of Software Engineering Specialness</h1>
+<p>In <a href="https://agileotter.blogspot.com/2025/03/there-is-no-automatic-reset-in.html" target="_blank">There is No Automatic Reset in Engineering</a>, Tim Ottinger asks:</p>
+<blockquote>
+<p>Do the other people have to live with January 2013 for the rest of their lives? Or is it only engineering that has to deal with every dirty hack since the beginning of the organization?</p>
+</blockquote>
+<p><strong>Betteridge's Law of Headlines</strong> says that if a journalism headline ends with a question mark, the answer is probably "no". I propose a similar law relating to software engineering specialness:<sup id="fnref:ottinger"><a class="footnote-ref" href="#fn:ottinger">1</a></sup></p>
+<blockquote>
+<p>If someone asks if some aspect of software development is truly unique to just software development, the answer is probably "no".</p>
+</blockquote>
+<p>Take the idea that "in software, hacks are forever." My favorite example of this comes from a different profession. The <a href="https://en.wikipedia.org/wiki/Dewey_Decimal_Classification" target="_blank">Dewey Decimal System</a> hierarchically categorizes books by discipline. For example, <em><a href="https://www.librarything.com/work/10143437/t/Covered-Bridges-of-Pennsylvania" target="_blank">Covered Bridges of Pennsylvania</a></em> has Dewey number <code>624.37</code>. <code>6--</code> is the technology discipline, <code>62-</code> is engineering, <code>624</code> is civil engineering, and <code>624.3</code> is "special types of bridges". I have no idea what the last <code>0.07</code> means, but you get the picture.</p>
+<p>Now if you look at the <a href="https://www.librarything.com/mds/6" target="_blank">6-- "technology" breakdown</a>, you'll see that there's no "software" subdiscipline. This is because when Dewey preallocated the whole technology block in 1876. New topics were instead to be added to the <code>00-</code> "general-knowledge" catch-all. Eventually <code>005</code> was assigned to "software development", meaning <em>The C Programming Language</em> lives at <code>005.133</code>. </p>
+<p>Incidentally, another late addition to the general knowledge block is <code>001.9</code>: "controversial knowledge". </p>
+<p>And that's why my hometown library shelved the C++ books right next to <em>The Mothman Prophecies</em>.</p>
+<p>How's <em>that</em> for technical debt?</p>
+<p>If anything, fixing hacks in software is significantly <em>easier</em> than in other fields. This came up when I was <a href="https://www.hillelwayne.com/post/we-are-not-special/" target="_blank">interviewing classic engineers</a>. Kludges happened all the time, but "refactoring" them out is <em>expensive</em>. Need to house a machine that's just two inches taller than the room? Guess what, you're cutting a hole in the ceiling.</p>
+<p>(Even if we restrict the question to other departments in a <em>software company</em>, we can find kludges that are horrible to undo. I once worked for a company which landed an early contract by adding a bespoke support agreement for that one customer. That plagued them for years afterward.)</p>
+<p>That's not to say that there aren't things that are different about software vs other fields!<sup id="fnref:example"><a class="footnote-ref" href="#fn:example">2</a></sup>  But I think that <em>most</em> of the time, when we say "software development is the only profession that deals with XYZ", it's only because we're ignorant of how those other professions work.</p>
+<hr/>
+<p>Short newsletter because I'm way behind on writing my <a href="https://www.aprilcools.club/" target="_blank">April Cools</a>. If you're interested in April Cools, you should try it out! I make it <em>way</em> harder on myself than it actually needs to be— everybody else who participates finds it pretty chill.</p>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:ottinger">
+<p>Ottinger caveats it with "engineering, software or otherwise", so I think he knows that other branches of <em>engineering</em>, at least, have kludges. <a class="footnote-backref" href="#fnref:ottinger" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:example">
+<p>The "software is different" idea that I'm most sympathetic to is that in software, the tools we use and the products we create are made from the same material. That's unusual at least in classic engineering. Then again, plenty of machinists have made their own lathes and mills! <a class="footnote-backref" href="#fnref:example" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+</ol>
+</div>

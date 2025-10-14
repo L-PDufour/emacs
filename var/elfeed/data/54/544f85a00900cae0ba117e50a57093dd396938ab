@@ -1,0 +1,22 @@
+<html><head></head><body><p>I had an annoying <a href="https://github.com/xenodium/chatgpt-shell">chatgpt-shell</a> bug where sometimes the compose buffer's svg header would disappear while text was streaming into the Emacs buffer. There are a number of things that could have gone rogue when streaming and post-processing buffer text, so I wasn't quite sure where to start narrowing things down.</p>
+<p>I had a feeling I could maybe use something like <code>after-change-functions</code> hook to monitor changes, but that only tells me about the text modified. I wanted to know which of my functions triggered the change, so maybe I could print a few frames from the stack? So that's what I did…</p>
+<pre><code class="language-{.commonlisp">(defun my-change-tracker (beg end len)
+  (let ((stack (mapcar (lambda (frame)
+                         (car (cdr frame)))
+                       (backtrace-frames))))
+    (message "Buffer %s changed: %d-%d | Stack: %s"
+             (buffer-name) beg end
+             (take 15 stack)))) ;; Adjust as needed
+
+(add-hook 'after-change-functions 'my-change-tracker nil t)
+</code></pre>
+<p>Here's an extract from the logs:</p>
+<blockquote>
+<p>Buffer <strong>claude llm (sonnet-4/Programming)&gt; compose</strong> changed: 496-498 | Stack: (backtrace-frames mapcar let my-change-tracker insert save-excursion let save-current-buffer progn if #[(output) ((setq output (or output )) (if (buffer-live-p buffer) (progn (save-current-buffer (set-buffer buffer) (let ((inhibit-read-only t)) (save-excursion (if orig-region-active (progn (delete-region region-beginning region-end) (setq orig-region-active nil))) (goto-char marker) (insert output) (set-marker marker (+ (length output) (marker-position marker))))))))) ((region-end) (region-beginning) (orig-region-active) (marker . #&lt;marker at 496 in *claude llm (sonnet-4/Programming)&gt; compose*&gt;) (buffer . <strong>claude llm (sonnet-4/Programming)&gt; compose</strong>))] shell-maker–write-reply…</p>
+</blockquote>
+<p>After increasing the number of logged frames, I started seeing bits of my code and… bingo! I found a very suspicious <code>delete-region</code>. After spotting this, fixing the bug was trivial.</p>
+<p>While the bug was annoying, I had been procrastinating on fixing as it could have been a number of things. In this case, printing frames from <code>after-change-functions</code> turned out perfect for narrowing things down. I'll be keeping this in the toolbox. Maybe it can help you too.</p>
+<h2>Make it all sustainable</h2>
+<p>Learned something new? Enjoying this <a href="https://xenodium.com">blog</a> or <a href="https://github.com/xenodium">my projects</a>? I am an 👉 indie dev 👈. Help make it sustainable by ✨<a href="https://github.com/sponsors/xenodium">sponsoring</a>✨</p>
+<p>Need a blog? <a href="https://lmno.lol">I can help with that</a>. Maybe buy my <a href="https://apps.apple.com/us/developer/xenodium-ltd/id304568690">iOS apps</a> too ;)</p>
+</body></html>

@@ -1,0 +1,56 @@
+<p>Customised build of the Iosevka typeface, with a consistent rounded
+style and overrides for almost all individual glyphs in both upright
+(roman) and slanted (italic) variants. This is the successor to my
+now-discontinued “Iosevka Comfy” fonts.</p>
+
+<ul>
+  <li>Git repository: <a href="https://github.com/protesilaos/aporetic">https://github.com/protesilaos/aporetic</a>.</li>
+  <li>Sample pictures: <a href="https://protesilaos.com/emacs/aporetic-fonts-pictures">https://protesilaos.com/emacs/aporetic-fonts-pictures</a></li>
+  <li>Backronym: Aporetic’s Predecessor Objects’ Reserved Eponym Truly Included “Comfy”.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<p>The major change for this release is that Aporetic Sans Mono and
+Aporetic Serif Mono are rendered in a strictly monospaced width. This
+means that characters such as the em dash (<code class="language-plaintext highlighter-rouge">—</code>) occupy the same space
+as the regular dash.</p>
+
+<p>Before, Aporetic Sans Mono and Aporetic Serif Mono had some characters
+that were proportionately spaced. This would upset the expectations of
+terminal emulators and thus break the display, sometimes with
+characters overlapping when they should not.</p>
+
+<p>Other changes are more subtle. They pertain to the style of individual
+characters, namely:</p>
+
+<ul>
+  <li>
+    <p>The Greek lower case lambda (<code class="language-plaintext highlighter-rouge">λ</code>) has a flat top instead of a straight
+one. The legs remain straight. This makes it consistent with the
+design of the Greek lower case delta (<code class="language-plaintext highlighter-rouge">δ</code>), among others.</p>
+  </li>
+  <li>
+    <p>The Greek lower case mee (<code class="language-plaintext highlighter-rouge">μ</code>) has a rounder right corner, which is
+in line with a whole range of characters.</p>
+  </li>
+  <li>
+    <p>The micro sign is the same design as the Greek lower case mee, even
+though these are technically two distinct code points.</p>
+  </li>
+  <li>
+    <p>The at sign (<code class="language-plaintext highlighter-rouge">@</code>) of Aporetic Sans and Aporetic Serif (i.e. the
+ proportionately spaced fonts I provide) is a bit taller than it was
+ before. This makes it look more related to its monospaced
+ counterpart, which is also relatively tall.</p>
+  </li>
+</ul>
+
+<p>I also added support for some more Greek characters, as well as the
+Latin eth (<code class="language-plaintext highlighter-rouge">ð</code>), thorn (<code class="language-plaintext highlighter-rouge">þ</code>), and thorn capital (<code class="language-plaintext highlighter-rouge">Þ</code>).</p>
+
+<p>All other changes are done to retain the aesthetic of the fonts while
+dealing with the breaking changes introduced by the upstream Iosevka
+project.</p>

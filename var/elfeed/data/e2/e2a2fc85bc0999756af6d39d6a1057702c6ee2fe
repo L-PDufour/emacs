@@ -1,0 +1,363 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>In my previous post, I shared how I improved the usability of
+<code>icomplete-vertical-mode</code> by customizing its rendering to make
+completions more visually accessible. Since then, I’ve taken things a
+step further by generalizing the solution into a reusable function and
+introducing a range of customization options, including prefix markers
+and alignment controls. In this follow-up, I’ll walk you through these
+updates and show you how to get even more out of
+<code>icomplete-vertical-mode</code>.</p>
+<p>In order to understand the Emacs original behavior and the history
+behind this, please take a look at my previous post before continue
+reading: <a href="in-buffer-icomplete/">Enhancing icomplete-vertical-mode in Emacs</a></p>
+<p>Let's start with a little show and tell. The default config with this patch:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Ficomplete-2-01.gif&w=3840&q=75" alt="icomplete with custom prefix"></p>
+<p>Some customizations:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Ficomplete-2-02.gif&w=3840&q=75" alt="icomplete with another custom prefix"></p>
+<h2>Key Features of the New Implementation</h2>
+<h3>1. Prefix Markers for Selected and Unselected Candidates</h3>
+<p>To enhance visual clarity, I added customizable prefix markers for
+selected and unselected candidates. These markers make it easy to
+identify the current selection at a glance.</p>
+<h3>Customization Variables:</h3>
+<ul>
+<li>
+<p><code>icomplete-vertical-selected-prefix-marker</code>: A string used as the
+prefix for the currently selected completion candidate.</p>
+<p>Default: "» "</p>
+</li>
+<li>
+<p><code>icomplete-vertical-unselected-prefix-marker</code>: A string used as the
+prefix for unselected completion candidates.</p>
+<p>Default: "  " (two spaces).</p>
+</li>
+<li>
+<p><code>icomplete-vertical-selected-prefix-face</code>: Controls the appearance
+of the selected prefix marker. Default: cyan text with bold weight.</p>
+</li>
+<li>
+<p><code>icomplete-vertical-unselected-prefix-face</code>: Controls the appearance
+of the unselected prefix marker. Default: gray text with normal
+weight.</p>
+</li>
+</ul>
+<h3>2.  Alignment for In-Buffer Completions</h3>
+<p>The alignment of in-buffer completions has been improved with the
+introduction of <code>icomplete-vertical-in-buffer-adjust-list</code>. When
+enabled, it aligns completions with the cursor position where the
+completion started, instead of defaulting to the first column. This
+makes the completions feel more natural and connected to the context.</p>
+<ul>
+<li>
+<p><code>icomplete-vertical-in-buffer-adjust-list</code>:</p>
+<p>Default: t (enabled).</p>
+<p>If nil, completions will align to the first column as usual.</p>
+</li>
+</ul>
+<h3>3.  Toggleable Prefix Marker Rendering</h3>
+<p>The entire prefix marker functionality can be toggled on or off using
+<code>icomplete-vertical-render-prefix-marker</code>. If you prefer a cleaner list
+without markers, simply set this to nil.</p>
+<h3>4.  Overridable Functions</h3>
+<p>Both new functions <code>icomplete-vertical--adjust-lines-for-column</code> and
+<code>icomplete-vertical--add-marker-to-selected</code>, can be overridden to
+implement new features. This is a little bit easier than re-write the
+entire <code>icomplete--render-vertical</code> function.</p>
+<h2>How do I get it?</h2>
+<p>We're going to explore two ways of applying this patch:</p>
+<ol>
+<li><strong>Applying the patch to your Emacs source or package directory</strong></li>
+<li><strong>Overwriting the setup directly in your <code>init.el</code></strong></li>
+</ol>
+<p>Let’s dive into both methods.</p>
+<h3>Method 1: Applying the Patch</h3>
+<p>You’ll need to locate the <code>lisp/icomplete.el</code> file in your system or
+in the Emacs source directory if you compile Emacs yourself. Follow
+these steps to apply the patch:</p>
+<p>1.) <strong>Locate the File</strong></p>
+<p>Identify the location of <code>icomplete.el</code> on your system. If you're
+using a precompiled version of Emacs, you can find it under the
+<code>lisp/</code> directory of your Emacs installation. For users compiling
+Emacs from source, look for the file in the Emacs source tree.</p>
+<p>2.) <strong>Download the Patch</strong></p>
+<p>Download the patch file from
+<a href="/assets/blog/posts/icomplete-2-patch.patch">here</a>. Save it somewhere
+easily accessible.</p>
+<p>3.) <strong>Apply the Patch with Git</strong></p>
+<p>Navigate to the directory containing <code>icomplete.el</code> and run the
+following command:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">git</span> apply path-to-patch-file.patch
+</code></pre></div>
+<p>Replace <code>path-to-patch-file.patch</code> with the actual file path to the
+downloaded patch.</p>
+<p>4.) <strong>Load the Updated Version in Your <code>init.el</code></strong>
+After applying the patch, use the following <code>use-package</code>
+configuration to load the updated version. The gif demo above uses the
+following configuration:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> icomplete
+  <span class="token lisp-property property">:bind</span> <span class="token punctuation">(</span><span class="token lisp-property property">:map</span> icomplete-minibuffer-map
+              <span class="token punctuation">(</span><span class="token string">"C-n"</span> <span class="token punctuation">.</span> icomplete-forward-completions<span class="token punctuation">)</span>
+              <span class="token punctuation">(</span><span class="token string">"C-p"</span> <span class="token punctuation">.</span> icomplete-backward-completions<span class="token punctuation">)</span>
+              <span class="token punctuation">(</span><span class="token string">"C-v"</span> <span class="token punctuation">.</span> icomplete-vertical-toggle<span class="token punctuation">)</span>
+              <span class="token punctuation">(</span><span class="token string">"RET"</span> <span class="token punctuation">.</span> icomplete-force-complete-and-exit<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:hook</span>
+  <span class="token punctuation">(</span><span class="token car">after-init</span> <span class="token punctuation">.</span> <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+                  <span class="token punctuation">(</span><span class="token car">fido-mode</span> <span class="token number">-1</span><span class="token punctuation">)</span>
+                  <span class="token punctuation">(</span><span class="token car">icomplete-vertical-mode</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-delay-completions-threshold <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-compute-delay <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-show-matches-on-no-input <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-hide-common-prefix <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-prospects-height <span class="token number">10</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-separator <span class="token string">" . "</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-with-completion-tables <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-in-buffer <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-max-delay-chars <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-scroll <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">advice-add</span> <span class="token quoted-symbol variable symbol">'completion-at-point</span>
+              <span class="token lisp-property property">:after</span> <span class="token quoted-symbol variable symbol">#'minibuffer-hide-completions</span><span class="token punctuation">)</span>
+              
+  <span class="token comment">;; These are our new post-patch options</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-vertical-selected-prefix-marker <span class="token string">"» "</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-vertical-unselected-prefix-marker <span class="token string">"  "</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-vertical-in-buffer-adjust-list <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-vertical-render-prefix-marker <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h3>Method 2: Overriding in <code>init.el</code></h3>
+<p>This method involves directly overriding the necessary options in your
+<code>init.el</code> without applying the patch. While this is not the
+recommended approach, it can be used as a quick way to try out the
+changes.</p>
+<ol>
+<li>
+<p><strong>Add the Custom Code</strong></p>
+<p>You can directly customize <code>icomplete-vertical-mode</code> with the following code in your <code>init.el</code>:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token heading comment title">;;; ICOMPLETE</span>
+<span class="token punctuation">(</span><span class="token keyword">use-package</span> icomplete
+  <span class="token lisp-property property">:bind</span> <span class="token punctuation">(</span><span class="token lisp-property property">:map</span> icomplete-minibuffer-map
+              <span class="token punctuation">(</span><span class="token string">"C-n"</span> <span class="token punctuation">.</span> icomplete-forward-completions<span class="token punctuation">)</span>
+              <span class="token punctuation">(</span><span class="token string">"C-p"</span> <span class="token punctuation">.</span> icomplete-backward-completions<span class="token punctuation">)</span>
+              <span class="token punctuation">(</span><span class="token string">"C-v"</span> <span class="token punctuation">.</span> icomplete-vertical-toggle<span class="token punctuation">)</span>
+              <span class="token punctuation">(</span><span class="token string">"RET"</span> <span class="token punctuation">.</span> icomplete-force-complete-and-exit<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:hook</span>
+  <span class="token punctuation">(</span><span class="token car">after-init</span> <span class="token punctuation">.</span> <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+                  <span class="token punctuation">(</span><span class="token car">fido-mode</span> <span class="token number">-1</span><span class="token punctuation">)</span>
+                  <span class="token punctuation">(</span><span class="token car">icomplete-vertical-mode</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-delay-completions-threshold <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-compute-delay <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-show-matches-on-no-input <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-hide-common-prefix <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-prospects-height <span class="token number">10</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-separator <span class="token string">" . "</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-with-completion-tables <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-in-buffer <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-max-delay-chars <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete-scroll <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">advice-add</span> <span class="token quoted-symbol variable symbol">'completion-at-point</span>
+              <span class="token lisp-property property">:after</span> <span class="token quoted-symbol variable symbol">#'minibuffer-hide-completions</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">icomplete-vertical-selected-prefix-marker</span></span> <span class="token string">"» "</span>
+    <span class="token string">"Prefix string used to mark the selected completion candidate.
+If <span class="token symbol">`icomplete-vertical-render-prefix-marker'</span> is t, the string
+setted here is used as a prefix of the currently selected entry in the
+list.  It can be further customized by the face
+<span class="token symbol">`icomplete-vertical-selected-prefix-face'</span>."</span>
+    <span class="token lisp-property property">:type</span> <span class="token quoted-symbol variable symbol">'string</span>
+    <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'icomplete</span>
+    <span class="token lisp-property property">:version</span> <span class="token string">"31"</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">icomplete-vertical-unselected-prefix-marker</span></span> <span class="token string">"  "</span>
+    <span class="token string">"Prefix string used on the unselected completion candidates.
+If <span class="token symbol">`icomplete-vertical-render-prefix-marker'</span> is t, the string
+setted here is used as a prefix for all unselected entries in the list.
+list.  It can be further customized by the face
+<span class="token symbol">`icomplete-vertical-unselected-prefix-face'</span>."</span>
+    <span class="token lisp-property property">:type</span> <span class="token quoted-symbol variable symbol">'string</span>
+    <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'icomplete</span>
+    <span class="token lisp-property property">:version</span> <span class="token string">"31"</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">icomplete-vertical-in-buffer-adjust-list</span></span> <span class="token boolean">t</span>
+    <span class="token string">"Control whether in-buffer completion should align the cursor position.
+If this is t and <span class="token symbol">`icomplete-in-buffer'</span> is t, and <span class="token symbol">`icomplete-vertical-mode'</span>
+is activated, the in-buffer vertical completions are shown aligned to the
+cursor position when the completion started, not on the first column, as
+the default behaviour."</span>
+    <span class="token lisp-property property">:type</span> <span class="token quoted-symbol variable symbol">'boolean</span>
+    <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'icomplete</span>
+    <span class="token lisp-property property">:version</span> <span class="token string">"31"</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">icomplete-vertical-render-prefix-marker</span></span> <span class="token boolean">t</span>
+    <span class="token string">"Control whether a marker is added as a prefix to each candidate.
+If this is t and <span class="token symbol">`icomplete-vertical-mode'</span> is activated, a marker,
+controlled by <span class="token symbol">`icomplete-vertical-selected-prefix-marker'</span> is shown
+as a prefix to the current under selection candidate, while the
+remaining of the candidates will receive the marker controlled
+by <span class="token symbol">`icomplete-vertical-unselected-prefix-marker'</span>."</span>
+    <span class="token lisp-property property">:type</span> <span class="token quoted-symbol variable symbol">'boolean</span>
+    <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'icomplete</span>
+    <span class="token lisp-property property">:version</span> <span class="token string">"31"</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token car">defface</span> icomplete-vertical-selected-prefix-face
+    <span class="token punctuation">'(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token lisp-property property">:inherit</span> font-lock-keyword-face <span class="token lisp-property property">:weight</span> bold <span class="token lisp-property property">:foreground</span> <span class="token string">"cyan"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token string">"Face used for the prefix set by <span class="token symbol">`icomplete-vertical-selected-prefix-marker'</span>."</span>
+    <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'icomplete</span>
+    <span class="token lisp-property property">:version</span> <span class="token string">"31"</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token car">defface</span> icomplete-vertical-unselected-prefix-face
+    <span class="token punctuation">'(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token lisp-property property">:inherit</span> font-lock-keyword-face <span class="token lisp-property property">:weight</span> normal <span class="token lisp-property property">:foreground</span> <span class="token string">"gray"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token string">"Face used for the prefix set by <span class="token symbol">`icomplete-vertical-unselected-prefix-marker'</span>."</span>
+    <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'icomplete</span>
+    <span class="token lisp-property property">:version</span> <span class="token string">"31"</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">icomplete-vertical--adjust-lines-for-column</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">lines</span> <span class="token argument variable">buffer</span> <span class="token argument variable">data</span></span><span class="token punctuation">)</span></span>
+    <span class="token string">"Adjust the <span class="token argument">LINES</span> to align with the column in <span class="token argument">BUFFER</span> based on <span class="token argument">DATA</span>."</span>
+    <span class="token punctuation">(</span><span class="token keyword">if</span> icomplete-vertical-in-buffer-adjust-list
+        <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">column</span>
+               <span class="token punctuation">(</span><span class="token car">with-current-buffer</span> buffer
+                 <span class="token punctuation">(</span><span class="token car">save-excursion</span>
+                   <span class="token punctuation">(</span><span class="token car">goto-char</span> <span class="token punctuation">(</span><span class="token car">car</span> data<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                   <span class="token punctuation">(</span><span class="token car">current-column</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token punctuation">(</span><span class="token car">dolist</span> <span class="token punctuation">(</span><span class="token car">l</span> lines<span class="token punctuation">)</span>
+            <span class="token punctuation">(</span><span class="token car">add-text-properties</span>
+             <span class="token number">0</span> <span class="token number">1</span> <span class="token punctuation">`(</span><span class="token car">display</span> <span class="token punctuation">,(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">make-string</span> column ?\s<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">substring</span> l <span class="token number">0</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+             l<span class="token punctuation">)</span><span class="token punctuation">)</span>
+          lines<span class="token punctuation">)</span>
+      lines<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">icomplete-vertical--add-marker-to-selected</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">comp</span></span><span class="token punctuation">)</span></span>
+    <span class="token string">"Add markers to the selected/unselected <span class="token argument">COMP</span> completions."</span>
+    <span class="token punctuation">(</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">and</span> icomplete-vertical-render-prefix-marker
+             <span class="token punctuation">(</span><span class="token car">get-text-property</span> <span class="token number">0</span> <span class="token quoted-symbol variable symbol">'icomplete-selected</span> comp<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">propertize</span> icomplete-vertical-selected-prefix-marker
+                            <span class="token quoted-symbol variable symbol">'face</span> <span class="token quoted-symbol variable symbol">'icomplete-vertical-selected-prefix-face</span><span class="token punctuation">)</span>
+                comp<span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">propertize</span> icomplete-vertical-unselected-prefix-marker
+                          <span class="token quoted-symbol variable symbol">'face</span> <span class="token quoted-symbol variable symbol">'icomplete-vertical-unselected-prefix-face</span><span class="token punctuation">)</span>
+              comp<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">cl-defun</span> <span class="token function">icomplete--render-vertical</span>
+      <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">comps</span> <span class="token argument variable">md</span> <span class="token other-marker-vars"><span class="token lisp-marker">&aux</span> <span class="token argument variable">scroll-above</span> <span class="token argument variable">scroll-below</span>
+             <span class="token varform"><span class="token punctuation">(</span><span class="token car">total-space</span> <span class="token comment">; number of mini-window lines available</span>
+              <span class="token punctuation">(</span>1- <span class="token punctuation">(</span><span class="token car">min</span>
+                   icomplete-prospects-height
+                   <span class="token punctuation">(</span><span class="token car">truncate</span> <span class="token punctuation">(</span><span class="token car">max-mini-window-lines</span><span class="token punctuation">)</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span></span><span class="token punctuation">)</span></span>
+    <span class="token comment">;; Welcome to loopapalooza!</span>
+    <span class="token comment">;;</span>
+    <span class="token comment">;; First, be mindful of `icomplete-scroll' and manual scrolls.  If</span>
+    <span class="token comment">;; `icomplete--scrolled-completions' and `icomplete--scrolled-past'</span>
+    <span class="token comment">;; are:</span>
+    <span class="token comment">;;</span>
+    <span class="token comment">;; - both nil, there is no manual scroll;</span>
+    <span class="token comment">;; - both non-nil, there is a healthy manual scroll that doesn't need</span>
+    <span class="token comment">;;   to be readjusted (user just moved around the minibuffer, for</span>
+    <span class="token comment">;;   example);</span>
+    <span class="token comment">;; - non-nil and nil, respectively, a refiltering took place and we</span>
+    <span class="token comment">;;   may need to readjust them to the new filtered `comps'.</span>
+    <span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">and</span> icomplete-scroll
+               icomplete--scrolled-completions
+               <span class="token punctuation">(</span><span class="token keyword">null</span> icomplete--scrolled-past<span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token keyword">cl-loop</span> with preds
+               for <span class="token punctuation">(</span><span class="token car">comp</span> <span class="token punctuation">.</span> rest<span class="token punctuation">)</span> on comps
+               when <span class="token punctuation">(</span><span class="token car">equal</span> comp <span class="token punctuation">(</span><span class="token car">car</span> icomplete--scrolled-completions<span class="token punctuation">)</span><span class="token punctuation">)</span>
+               do
+               <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete--scrolled-past preds
+                     comps <span class="token punctuation">(</span><span class="token keyword">cons</span> comp rest<span class="token punctuation">)</span><span class="token punctuation">)</span>
+               <span class="token punctuation">(</span><span class="token car">completion--cache-all-sorted-completions</span>
+                <span class="token punctuation">(</span><span class="token car">icomplete--field-beg</span><span class="token punctuation">)</span>
+                <span class="token punctuation">(</span><span class="token car">icomplete--field-end</span><span class="token punctuation">)</span>
+                comps<span class="token punctuation">)</span>
+               and return <span class="token boolean">nil</span>
+               do <span class="token punctuation">(</span><span class="token car">push</span> comp preds<span class="token punctuation">)</span>
+               finally <span class="token punctuation">(</span><span class="token keyword">setq</span> icomplete--scrolled-completions <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token comment">;; Then, in this pretty ugly loop, collect completions to display</span>
+    <span class="token comment">;; above and below the selected one, considering scrolling</span>
+    <span class="token comment">;; positions.</span>
+    <span class="token punctuation">(</span><span class="token keyword">cl-loop</span> with preds = icomplete--scrolled-past
+             with succs = <span class="token punctuation">(</span><span class="token car">cdr</span> comps<span class="token punctuation">)</span>
+             with space-above = <span class="token punctuation">(</span><span class="token car">-</span> total-space
+                                   <span class="token number">1</span>
+                                   <span class="token punctuation">(</span><span class="token keyword">cl-loop</span> for <span class="token punctuation">(</span><span class="token car">_</span> <span class="token punctuation">.</span> r<span class="token punctuation">)</span> on comps
+                                            repeat <span class="token punctuation">(</span><span class="token car">truncate</span> total-space <span class="token number">2</span><span class="token punctuation">)</span>
+                                            while <span class="token punctuation">(</span><span class="token car">listp</span> r<span class="token punctuation">)</span>
+                                            count <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+             repeat total-space
+             for neighbor = <span class="token boolean">nil</span>
+             if <span class="token punctuation">(</span><span class="token keyword">and</span> preds <span class="token punctuation">(</span><span class="token car">></span> space-above <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span> do
+             <span class="token punctuation">(</span><span class="token car">push</span> <span class="token punctuation">(</span><span class="token keyword">setq</span> neighbor <span class="token punctuation">(</span><span class="token car">pop</span> preds<span class="token punctuation">)</span><span class="token punctuation">)</span> scroll-above<span class="token punctuation">)</span>
+             <span class="token punctuation">(</span><span class="token car">cl-decf</span> space-above<span class="token punctuation">)</span>
+             else if <span class="token punctuation">(</span><span class="token car">consp</span> succs<span class="token punctuation">)</span> collect
+             <span class="token punctuation">(</span><span class="token keyword">setq</span> neighbor <span class="token punctuation">(</span><span class="token car">pop</span> succs<span class="token punctuation">)</span><span class="token punctuation">)</span> into scroll-below-aux
+             while neighbor
+             finally <span class="token punctuation">(</span><span class="token keyword">setq</span> scroll-below scroll-below-aux<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token comment">;; Halfway there...</span>
+    <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">selected</span> <span class="token punctuation">(</span><span class="token car">propertize</span> <span class="token punctuation">(</span><span class="token car">car</span> comps<span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">'icomplete-selected</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+           <span class="token punctuation">(</span><span class="token car">chosen</span> <span class="token punctuation">(</span><span class="token keyword">append</span> scroll-above <span class="token punctuation">(</span><span class="token car">list</span> selected<span class="token punctuation">)</span> scroll-below<span class="token punctuation">)</span><span class="token punctuation">)</span>
+           <span class="token punctuation">(</span><span class="token car">tuples</span> <span class="token punctuation">(</span><span class="token car">icomplete--augment</span> md chosen<span class="token punctuation">)</span><span class="token punctuation">)</span>
+           max-prefix-len max-comp-len lines nsections<span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token car">add-face-text-property</span> <span class="token number">0</span> <span class="token punctuation">(</span><span class="token car">length</span> selected<span class="token punctuation">)</span>
+                              <span class="token quoted-symbol variable symbol">'icomplete-selected-match</span> <span class="token quoted-symbol variable symbol">'append</span> selected<span class="token punctuation">)</span>
+      <span class="token comment">;; Figure out parameters for horizontal spacing</span>
+      <span class="token punctuation">(</span><span class="token keyword">cl-loop</span>
+       for <span class="token punctuation">(</span><span class="token car">comp</span> prefix<span class="token punctuation">)</span> in tuples
+       maximizing <span class="token punctuation">(</span><span class="token car">length</span> prefix<span class="token punctuation">)</span> into max-prefix-len-aux
+       maximizing <span class="token punctuation">(</span><span class="token car">length</span> comp<span class="token punctuation">)</span> into max-comp-len-aux
+       finally <span class="token punctuation">(</span><span class="token keyword">setq</span> max-prefix-len max-prefix-len-aux
+                     max-comp-len max-comp-len-aux<span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token comment">;; Serialize completions and section titles into a list</span>
+      <span class="token comment">;; of lines to render</span>
+      <span class="token punctuation">(</span><span class="token keyword">cl-loop</span>
+       for <span class="token punctuation">(</span><span class="token car">comp</span> prefix suffix section<span class="token punctuation">)</span> in tuples
+       when section
+       collect <span class="token punctuation">(</span><span class="token car">propertize</span> section <span class="token quoted-symbol variable symbol">'face</span> <span class="token quoted-symbol variable symbol">'icomplete-section</span><span class="token punctuation">)</span> into lines-aux
+       and count <span class="token number">1</span> into nsections-aux
+       for comp = <span class="token punctuation">(</span><span class="token car">icomplete-vertical--add-marker-to-selected</span> comp<span class="token punctuation">)</span>
+       when <span class="token punctuation">(</span><span class="token car">get-text-property</span> <span class="token number">0</span> <span class="token quoted-symbol variable symbol">'icomplete-selected</span> comp<span class="token punctuation">)</span>
+       do <span class="token punctuation">(</span><span class="token car">add-face-text-property</span> <span class="token number">0</span> <span class="token punctuation">(</span><span class="token car">length</span> comp<span class="token punctuation">)</span>
+                                  <span class="token quoted-symbol variable symbol">'icomplete-selected-match</span> <span class="token quoted-symbol variable symbol">'append</span> comp<span class="token punctuation">)</span>
+       collect <span class="token punctuation">(</span><span class="token keyword">concat</span> prefix
+                       <span class="token punctuation">(</span><span class="token car">make-string</span> <span class="token punctuation">(</span><span class="token car">max</span> <span class="token number">0</span> <span class="token punctuation">(</span><span class="token car">-</span> max-prefix-len <span class="token punctuation">(</span><span class="token car">length</span> prefix<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> ? <span class="token punctuation">)</span>
+                       <span class="token punctuation">(</span><span class="token car">completion-lazy-hilit</span> comp<span class="token punctuation">)</span>
+                       <span class="token punctuation">(</span><span class="token car">make-string</span> <span class="token punctuation">(</span><span class="token car">max</span> <span class="token number">0</span> <span class="token punctuation">(</span><span class="token car">-</span> max-comp-len <span class="token punctuation">(</span><span class="token car">length</span> comp<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> ? <span class="token punctuation">)</span>
+                       suffix<span class="token punctuation">)</span>
+       into lines-aux
+       finally <span class="token punctuation">(</span><span class="token keyword">setq</span> lines lines-aux
+                     nsections nsections-aux<span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token comment">;; Kick out some lines from the beginning due to extra sections.</span>
+      <span class="token comment">;; This hopes to keep the selected entry more or less in the</span>
+      <span class="token comment">;; middle of the dropdown-like widget when `icomplete-scroll' is</span>
+      <span class="token comment">;; t.  Funky, but at least I didn't use `cl-loop'</span>
+      <span class="token punctuation">(</span><span class="token keyword">setq</span> lines
+            <span class="token punctuation">(</span><span class="token car">nthcdr</span>
+             <span class="token punctuation">(</span><span class="token keyword">cond</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">&#x3C;=</span> <span class="token punctuation">(</span><span class="token car">length</span> lines<span class="token punctuation">)</span> total-space<span class="token punctuation">)</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                   <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">></span> <span class="token punctuation">(</span><span class="token car">length</span> scroll-above<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">length</span> scroll-below<span class="token punctuation">)</span><span class="token punctuation">)</span> nsections<span class="token punctuation">)</span>
+                   <span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token car">min</span> <span class="token punctuation">(</span><span class="token car">ceiling</span> nsections <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">length</span> scroll-above<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+             lines<span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token keyword">when</span> icomplete--in-region-buffer
+        <span class="token punctuation">(</span><span class="token keyword">setq</span> lines <span class="token punctuation">(</span><span class="token car">icomplete-vertical--adjust-lines-for-column</span>
+                     lines icomplete--in-region-buffer completion-in-region--data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token comment">;; At long last, render final string return value.  This may still</span>
+      <span class="token comment">;; kick out lines at the end.</span>
+      <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token string">" \n"</span>
+              <span class="token punctuation">(</span><span class="token keyword">cl-loop</span> for l in lines repeat total-space concat l concat <span class="token string">"\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+</code></pre></div>
+<h2>Conclusion</h2>
+<p>With the patch applied or the custom configuration set in your
+<code>init.el</code>, you've successfully enhanced your <code>icomplete-vertical-mode</code> to
+support vertical alignment and customizable markers. These
+improvements offer a cleaner and more user-friendly completion
+interface in Emacs, making it easier to navigate long lists of
+completions.</p>
+<p>Whether you prefer applying the patch directly to the source code or
+overriding settings in your <code>init.el</code>, both methods offer a flexible way
+to tailor <code>icomplete-vertical-mode</code> to your workflow. Experiment with
+the options that best suit your needs, and feel free to tweak the
+configuration further to make it even more personalized.</p>
+<p>If you encounter any issues or have suggestions for further
+improvements, don't hesitate to reach out. Emacs is all about
+customization, and the possibilities are endless!</p>

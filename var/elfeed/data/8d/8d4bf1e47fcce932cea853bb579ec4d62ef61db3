@@ -1,0 +1,141 @@
+<p>Opinionated changes and enhancements to the default minibuffer
+completion UI of Emacs:</p>
+
+<ul>
+  <li>
+    <p>Live completions to update the results as you type.</p>
+  </li>
+  <li>
+    <p>Passlist and blocklist of commands or completion categories to
+control whether the <code class="language-plaintext highlighter-rouge">*Completions*</code> buffer shows up eagerly.</p>
+  </li>
+  <li>
+    <p>Other relevant options to control when the <code class="language-plaintext highlighter-rouge">*Completions*</code> are
+displayed.</p>
+  </li>
+  <li>
+    <p>Per command or completion category sorting methods.</p>
+  </li>
+  <li>
+    <p>A cleaner <code class="language-plaintext highlighter-rouge">*Completions*</code> buffer, optionally without a mode line.</p>
+  </li>
+  <li>
+    <p>Commands to cycle from the minibuffer to the <code class="language-plaintext highlighter-rouge">*Completions*</code> and
+vice versa.</p>
+  </li>
+</ul>
+
+<p>In essence, MCT is (i) a layer of interactivity on top of the
+out-of-the-box completion experience, and (ii) glue code that
+combines built-in functionalities to make the default completion
+framework work like that of more featureful third-party options.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">mct</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/mct">https://protesilaos.com/emacs/mct</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/mct-changelog">https://protesilaos.com/emacs/mct-changelog</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/mct">https://github.com/protesilaos/mct</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/mct">https://gitlab.com/protesilaos/mct</a></li>
+    </ul>
+  </li>
+  <li>Video demo: <a href="https://protesilaos.com/codelog/2021-10-22-emacs-mct-demo/">https://protesilaos.com/codelog/2021-10-22-emacs-mct-demo/</a></li>
+  <li>Backronym: Minibuffer Confines Transcended; Minibuffer and
+Completions in Tandem.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<h2>Version 1.1.0 on 2025-07-07</h2>
+
+<p>This version contains several refinements to an already stable package.</p>
+
+<h3>Sort by command or completion category</h3>
+
+<p>The new user option <code class="language-plaintext highlighter-rouge">mct-sort-by-command-or-category</code> determines how
+completion candidates are sorted.</p>
+
+<p>This is an alist where each element is of the form <code class="language-plaintext highlighter-rouge">(SYMBOLS . SORT-FUNCTION)</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">SYMBOLS</code> is either a symbol or a list of symbols. <code class="language-plaintext highlighter-rouge">SYMBOLS</code> can refer
+to the symbol of a function or completion category. It can also be <code class="language-plaintext highlighter-rouge">t</code>,
+which refers to the fallback value.</p>
+
+<p><code class="language-plaintext highlighter-rouge">SORT-FUNCTION</code> is a function that takes a list of strings and returns a
+list of strings, sorting them accordingly.  Examples of a <code class="language-plaintext highlighter-rouge">SORT-FUNCTION</code>
+are:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">mct-sort-by-alpha</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mct-sort-by-alpha-then-by-length</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mct-sort-by-history</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mct-sort-by-directory-then-by-file</code></li>
+</ul>
+
+<p>To not perform any sorting on the completion candidates that match
+<code class="language-plaintext highlighter-rouge">SYMBOLS</code> set <code class="language-plaintext highlighter-rouge">SORT-FUNCTION</code> to nil.</p>
+
+<p>If there are conflicting configurations between a <code class="language-plaintext highlighter-rouge">SYMBOLS</code> function and
+completion category, then the function takes precedence (for example
+<code class="language-plaintext highlighter-rouge">find-file</code> is set to sort directories first whereas the <code class="language-plaintext highlighter-rouge">file</code>
+completion category is set to sort by history).</p>
+
+<h3>Optional indicator for <code class="language-plaintext highlighter-rouge">completing-read-multiple</code></h3>
+
+<p>Users of Emacs prior to version 31 do not have a built-in way to
+inform them when they are dealing with a <code class="language-plaintext highlighter-rouge">completing-read-multiple</code>
+minibuffer prompt. Emacs 31 introduces the user option <code class="language-plaintext highlighter-rouge">crm-prompt</code>
+and its related functionality to tell the user what they need to know.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">mct-completing-read-multiple-indicator</code> can be used in the
+meantime to achieve the same results. It is set to a non-nil value by
+default. Opt out by changing it to nil.</p>
+
+<h3>The <code class="language-plaintext highlighter-rouge">*Completions*</code> are persistent when needed</h3>
+
+<p>This concerns the case where a command or completion category is part
+of the <code class="language-plaintext highlighter-rouge">mct-completion-passlist</code> or when the user option
+<code class="language-plaintext highlighter-rouge">mct-live-completion</code> is set to non-nil or <code class="language-plaintext highlighter-rouge">visible</code>. In such cases,
+the completion candidates are on display and we want to keep them
+there while performing a dynamic completion, such as with the
+<code class="language-plaintext highlighter-rouge">find-file</code> command (“dynamic” in the sense that it returns a new list
+of candidates to match the current path).</p>
+
+<p>Persisting the <code class="language-plaintext highlighter-rouge">*Completions*</code> means that as we narrow the list, we
+still see all the matching results.</p>
+
+<p>In the past, we provided the option <code class="language-plaintext highlighter-rouge">mct-persist-dynamic-completion</code>
+though we do not need it anymore.</p>
+
+<p>I was inspired to make this change in response to a question posed by
+Ryan Davis regarding the behaviour of <code class="language-plaintext highlighter-rouge">mct-persist-dynamic-completion</code>.
+This was done in issue 7: <a href="https://github.com/protesilaos/mct/issues/7">https://github.com/protesilaos/mct/issues/7</a>.</p>
+
+<h3>Miscellaneous</h3>
+
+<ul>
+  <li>
+    <p>Vertical alignment of the <code class="language-plaintext highlighter-rouge">*Completions*</code> buffer is more precise.
+Thanks to Jessie Hu for the contribution in pull request 6:
+<a href="https://github.com/protesilaos/mct/pull/6">https://github.com/protesilaos/mct/pull/6</a>.</p>
+  </li>
+  <li>
+    <p>The command <code class="language-plaintext highlighter-rouge">mct-choose-completion-exit</code> no longer tries to expand
+further. In the previous implementation it would try to match the
+last known selection from the history when using a file prompt. For
+example we have this workflow:</p>
+
+    <ul>
+      <li>In the previous prompt we type <code class="language-plaintext highlighter-rouge">/path/to/file/</code> and exit.</li>
+      <li>Now we type <code class="language-plaintext highlighter-rouge">/pa</code>, the completions pop up, we select <code class="language-plaintext highlighter-rouge">/path</code> and
+invoke <code class="language-plaintext highlighter-rouge">mct-choose-completion-exit</code>. This wrongly expands into
+<code class="language-plaintext highlighter-rouge">/path/foo/</code> instead of taking just <code class="language-plaintext highlighter-rouge">/path</code> (given that it has no
+further input to determine an extension of that string).</li>
+    </ul>
+
+    <p>Now the command will do the right thing based on the user’s input.</p>
+  </li>
+</ul>

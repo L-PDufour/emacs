@@ -1,0 +1,11 @@
+<p>
+In a nice followup <a href="https://irreal.org/blog/?p=13296">to yesterday&rsquo;s post on Casual BibTeX</a>, Charles Choi has another post on easily capturing a Web link to your BibTeX file. The idea is that you&rsquo;re looking at some paper or other information in your Web browser and want to capture the reference to your BibTeX file.
+</p>
+<p>
+The method works by abusing the Org protocol mechanism to deliver capture template information to a BibTeX file rather than an Org file. It&rsquo;s really simple to set up. You merely add the capture template that Choi provides to your list of capture templates and you&rsquo;re good to go.
+</p>
+<p>
+It&rsquo;s not completely automatic. You still have to specify the Author and Organization when prompted in the minibuffer but it&rsquo;s <i>much</i> easier than entering all the information by hand and you have the advantage the the BibTeX schema will be respected.
+</p>
+<p>
+If, like a lot of people, you locate your references on the Web, Choi&rsquo;s trick will save you some time and effort. To be sure, it&rsquo;s not as powerful as John Kitchin&rsquo;s <a href="https://irreal.org/blog/?p=4818">Org-Ref</a> but as a simple method of capturing a BibTeX entry from the current Web site, it&rsquo;s perfect. If you need more, take a look at the Org-Ref video linked above to get an idea of how far you can push the Web site to BibTeX idea.</p>

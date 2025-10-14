@@ -1,0 +1,11 @@
+<p>
+Chris over at Entropic Thoughts has some thoughts on <a href="https://entropicthoughts.com/why-stick-to-emacs-blog">blogging and Emacs</a>. He&rsquo;s conflicted. On the one hand, he yearns for a simple, static blog generator that he can understand. On the other hand, he uses Org Babel a lot and it&rsquo;s an important part of his blogging workflow, which involves generating graphs in R for a lot of his posts.
+</p>
+<p>
+He&rsquo;d like to write a simple blog exporter that he understands and can modify but feels that it&rsquo;s too hard to include the Org Babel functionality. I feel his pain. I use WordPress for Irreal and although it mostly works well, I sometimes wish I had a simple static generator that didn&rsquo;t depend on a complicated infrastructure like WordPress. But every time I look into it, the effort doesn&rsquo;t seem worth the gain and, as I say, WordPress mostly does a good job of meeting Irreal&rsquo;s needs.
+</p>
+<p>
+On the positive side, I <i>do</i> write my blogs in Org mode and have access to all its tools. Before my provider started blocking the XML-RPC protocol, I simply used <a href="https://github.com/org2blog/org2blog?tab=readme-ov-file#requirements-and-compatibility">Org2blog</a>, which took an Org buffer and took care to exporting it directly to WordPress. These days I have a slightly more complicated process. I have a command that converts my Org buffer to HTML and saves it to the clipboard. Then I invoke WordPress and paste the HTML into its HTML input buffer. That&rsquo;s not ideal but it&rsquo;s pretty simple and I certainly understand it, at least until I push the WordPress publish button. Every once in while I try publishing with Org2blog because that is truly easiest way to go from Org to WordPress. Maybe I try that with this post.
+</p>
+<p>
+In any event, it <i>is</i> possible to publish directly from Org even to a static blog fairly easily simply by converting the buffer to HTML and then doing whatever yo need to do to push it to your site.</p>

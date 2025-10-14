@@ -1,5 +1,8 @@
 # Emacs runtime files and caches
 var/*
+!var/devdocs/
+!var/elfeed/
+!var/templates
 elpa/
 eln-cache/
 auto-save-list/

@@ -1,0 +1,116 @@
+<p>This package lets you preview a font inside of Emacs. It does so in
+three ways:</p>
+
+<ul>
+  <li>Prompt for a font on the system and display it in a buffer.</li>
+  <li>List all known fonts in a buffer, with a short preview for each.</li>
+  <li>Provide a major mode to preview a font whose file is among the
+installed ones.</li>
+</ul>
+
+<p>Sources:</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">show-font</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/show-font">https://protesilaos.com/emacs/show-font</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/show-font-changelog">https://protesilaos.com/emacs/show-font-changelog</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/show-font">https://github.com/protesilaos/show-font</a></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/codelog/2024-09-10-emacs-show-font-0-1-0/">https://protesilaos.com/codelog/2024-09-10-emacs-show-font-0-1-0/</a></li>
+  <li>Backronym: Should Highlight Only With the Family Of the Named Typeface.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<h2>Version 1.0.0 on 2025-09-07</h2>
+
+<p>This major update introduces support for fonts that cover more than
+the Latin script. It also expands the available functionality with
+quality-of-life refinements.</p>
+
+<h3>Support for Arabic, Chinese, Greek, Japanese, Korean, Russian</h3>
+
+<p>The commands <code class="language-plaintext highlighter-rouge">show-font-tabulated</code> (alias <code class="language-plaintext highlighter-rouge">show-font-list</code>) and
+<code class="language-plaintext highlighter-rouge">show-font-select-preview</code> can now generate a preview for fonts that
+are optimised to display the aforementioned languages. Each language
+provides its own user option to control the sample text it displays.
+The naming pattern <code class="language-plaintext highlighter-rouge">show-font-LANGUAGE-sample</code>.</p>
+
+<p>Of those, I only know Greek and thus wrote the value of
+<code class="language-plaintext highlighter-rouge">show-font-greek-sample</code>, namely: <code class="language-plaintext highlighter-rouge">"Πρωτεσίλαος ο φιλόσοφος του οποίου
+τα έργα βρίθουν αστειισμών"</code>. For the others I used translation
+software to get the equivalent of <code class="language-plaintext highlighter-rouge">"Protesilaos does not read
+LANGUAGE"</code>. Please let me know if there are any mistakes in this
+regard. I was thinking of writing something a bit more funny, but was
+concerned the joke may not translate well.</p>
+
+<h3>Checking for language support among known families</h3>
+
+<p>While I have written functions that test if a given font can display a
+range of characters, this approach is computationally intensive if we
+need to check for many code points across multiple fonts.</p>
+
+<p>The alternative is to maintain lists of known font families that are
+meant to work with the given language. Those generally support Latin
+as well, but the idea is to let them shine in the language they are
+meant to be used for.</p>
+
+<p>For example, here is how we know that a font family is meant to
+display Arabic script:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nv">defconst</span> <span class="nv">show-font-arabic-families</span>
+  <span class="o">'</span><span class="p">(</span><span class="s">"AlArabiya"</span> <span class="s">"AlBattar"</span> <span class="s">"AlHor"</span> <span class="s">"AlManzomah"</span> <span class="s">"AlYarmook"</span>
+    <span class="s">"Dimnah"</span> <span class="s">"Hani"</span> <span class="s">"Haramain"</span> <span class="s">"Hor"</span> <span class="s">"Kayrawan"</span> <span class="s">"Khalid"</span> <span class="s">"Mashq"</span>
+    <span class="s">"Nagham"</span> <span class="s">"Noto Kufi Arabic"</span> <span class="s">"Noto Naskh Arabic"</span> <span class="s">"Noto Sans Arabic"</span>
+    <span class="s">"Rehan"</span> <span class="s">"Sharjah"</span> <span class="s">"Sindbad"</span><span class="p">)</span>
+  <span class="s">"List of families that specialise in Arabic.
+Also see `show-font-greek-families' for the rationale of grouping font
+families in distinct variables."</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The list is not exhaustive and I am always eager to expand it. Just
+let me know.</p>
+
+<p>I learnt about these font families through trial and error by (i)
+installing them on my Debian system and (ii) searching online for
+common samples of them. Do <code class="language-plaintext highlighter-rouge">apt search -n fonts-</code> to check the
+relevant packages.</p>
+
+<h3>Support for music notation, mathematics, and other symbols</h3>
+
+<p>As with the natural languages, there are some fonts that specialise in
+displaying symbols. For example, MathJax has a bunch of fonts for
+showing those fancy formulas in the processed output of LaTeX
+documents. Again, there is a <code class="language-plaintext highlighter-rouge">defconst</code> for each of those types of
+font listing the known families. The concomitant user options are:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">show-font-mathematics-sample</code></li>
+  <li><code class="language-plaintext highlighter-rouge">show-font-music-sample</code></li>
+  <li><code class="language-plaintext highlighter-rouge">show-font-symbols-sample</code></li>
+</ul>
+
+<h3>Problematic fonts are hidden from the list view</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">show-font-hidden-families</code> lists the fonts that are not known to
+cause problems. They do not render properly any of the supported
+samples and I am not sure even when they claim to support a certain
+set of characters (e.g. <code class="language-plaintext highlighter-rouge">show-font--displays-latin-p</code> returns
+non-<code class="language-plaintext highlighter-rouge">nil</code>). If you think there is a mistake here, please contact me.</p>
+
+<h3>Show a full preview from the list view</h3>
+
+<p>While in the buffer produced by <code class="language-plaintext highlighter-rouge">show-font-tabulated</code> (alias
+<code class="language-plaintext highlighter-rouge">show-font-list</code>), type <code class="language-plaintext highlighter-rouge">RET</code> to get a complete preview of the font
+family of the current line. This is the same as invoking the command
+<code class="language-plaintext highlighter-rouge">show-font-select-preview</code> and then selecting the given family.</p>
+
+<p>The command called by that key binding is <code class="language-plaintext highlighter-rouge">show-font-tabulated-select-preview</code>.
+A hint of it is also shown in the tabulated list header.</p>
+
+<h3>Quickly copy the name of the font in the list view</h3>
+
+<p>As above, type <code class="language-plaintext highlighter-rouge">w</code> in the tabulated view to copy the name of the font
+family to the <code class="language-plaintext highlighter-rouge">kill-ring</code>. The command is <code class="language-plaintext highlighter-rouge">show-font-tabulated-copy-name</code>
+and there is also a hint of it in the tabulated list header.</p>

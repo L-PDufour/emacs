@@ -1,0 +1,293 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Explore how to turn Emacs' native <code>tab-bar</code> and <code>tab-bar-groups</code> into
+a powerful, tmux-like window and session management experience—no
+external packages needed. Organize your workflows with tabs, group
+them by project or context, and navigate with ease inside your Emacs
+session, all while keeping tmux nearby for when it still shines.</p>
+<p>Here I'm traversing an open session using this concept of organization
+by simply issuing <code>C-TAB</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Femacs-tab-bar-03.gif&w=3840&q=75" alt="tab-bar-config-demo"></p>
+<p>If you prefer not to show the group name, want to display buffer
+names, use other custom decorations, jump right into your group, don’t
+worry, we’ll explore all these possibilities step by step.</p>
+<p>Now, how do we achieve this! 🤩</p>
+<hr>
+<h2>Motivation</h2>
+<p>It’s no secret that many Emacs users take advantage of its excellent
+window management capabilities, like: splitting windows, saving layouts,
+undoing and redoing them and even use <code>tab-bar</code> as a sort of
+<code>tmux-like</code> workflow.</p>
+<p>What I’m presenting here takes it a step further: bringing in a
+<em>"split by session"</em> feature, just like tmux UI. In other words, we’re
+expanding our window management arsenal with:</p>
+<p>➖ Tabs, as in Emacs we call it <code>tab-bar</code> (not to be confused with the
+<code>VSCode</code>-like <code>tab-line</code> mode): which can hold splits of different
+buffers, either in the same file, different files, terminals, and
+everything else Emacs can print in a buffer.</p>
+<p>➖ Tab Groups, which can hold groups of tabs, mimicking <code>sessions</code> as
+we call them in <code>tmux</code>, or <code>perspectives</code> if you know this concept
+from <code>persp-mode</code> or <code>perspective-el</code>, or even <code>activities</code> if you
+use <code>Doom Emacs</code>.</p>
+<p>Also, did I mention we're going to do it without any external package
+dependencies?</p>
+<p>With the provided configuration, we're going to organize our current
+running Emacs session in "two levels":</p>
+<h2>The 'tab-bar-groups'</h2>
+<p>This level holds the <code>tab-group</code>. This might contain a "topic" like
+"Chat", "Mail" or "News", or simply your project name like "My
+Project", or if you're working with multiple projects at the same
+time, one level that might be organized by "Your Workflow". And of
+course, you can have all of this at the same time, like:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Femacs-tab-bar-01.png&w=3840&q=75" alt="tab-bar-groups"></p>
+<h2>The 'tab-bars'</h2>
+<p>This level contains your <code>tabs</code>, which can hold all sorts of window
+arrangements (for the uninitiated, from Emacs's point of view, the OS-
+level 'window' that holds the Emacs application is called a 'frame',
+while 'windows' are the inner splits that hold our buffers).</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Femacs-tab-bar-02.png&w=3840&q=75" alt="tab-bar-groups-group"></p>
+<hr>
+<p>So, first things first. I'm reproducing here the steps to the final
+form I just showed. But of course, it is all customizable. Want to do
+another sort of decorations? Want to hide the group name? Want to show
+filenames? Want to navigate differently? Go for it! It is all
+transparent to you!</p>
+<h2>Variables configurations</h2>
+<p>This is personal taste, take a look at each variable's documentation and
+tweak it yourself, basically:</p>
+<p>➖ I do not want the close button, nor the new button, as I seldom use
+mouse navigation.</p>
+<p>➖ I do want tab-hints, which are numbers on each tab-name for better
+navigation. I do override the internal function, though, to get it
+"decorated" my way.</p>
+<p>➖ I want a clean separator, so, a single space.</p>
+<p>➖ We want the tab-group name shown, hence we add to <code>tab-bar-format</code>
+the <code>tab-bar-format-tabs-groups</code> option.</p>
+<p>All of this can be defined with:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token keyword">setq</span> tab-bar-close-button-show <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> tab-bar-new-button-show <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> tab-bar-tab-hints <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> tab-bar-auto-width <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> tab-bar-separator <span class="token string">" "</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> tab-bar-format <span class="token punctuation">'(</span><span class="token car">tab-bar-format-tabs-groups</span>
+					tab-bar-format-tabs tab-bar-separator
+					tab-bar-format-add-tab<span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>A few (IMHO justified) overrides</h2>
+<p>Tab bar doesn't allow us many customizations. Fortunately, we can
+override a couple of functions as they're small and easy to keep up
+with. Of course, this is totally optional; I'm just trying to mimic a
+more <code>tmux-like</code> UI feel.</p>
+<p>First, <code>tab-bar-tab-name-format-hints</code>: I want to put some arrows
+around the hints number, and <em>NOT</em> show the buffer name.</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">tab-bar-tab-name-format-hints</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">name</span> <span class="token argument variable">_tab</span> <span class="token argument variable">i</span></span><span class="token punctuation">)</span></span>
+	  <span class="token punctuation">(</span><span class="token keyword">if</span> tab-bar-tab-hints <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"»%d«"</span> i<span class="token punctuation">)</span> <span class="token string">""</span><span class="token punctuation">)</span> name<span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>Second, <code>tab-bar-tab-group-format-default</code>: By default, groups
+show the hint of the first tab under it. I want a clean group name, so:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">tab-bar-tab-group-format-default</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">tab</span> <span class="token argument variable">_i</span> <span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">current-p</span></span></span><span class="token punctuation">)</span></span>
+	<span class="token punctuation">(</span><span class="token car">propertize</span>
+	 <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tab-group-function tab<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	 <span class="token quoted-symbol variable symbol">'face</span> <span class="token punctuation">(</span><span class="token keyword">if</span> current-p <span class="token quoted-symbol variable symbol">'tab-bar-tab-group-current</span> <span class="token quoted-symbol variable symbol">'tab-bar-tab-group-inactive</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>Nice QoL Utility functions</h2>
+<p>With the above config, we can already do something like <code>C-x t G</code>,
+setting a group name for your current tab and start organizing your
+life!</p>
+<p>You could also have automatically groups created by setting tab-group
+in your <code>display-buffer-alist</code>, like:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token car">add-to-list</span> <span class="token quoted-symbol variable symbol">'display-buffer-alist</span>
+			   <span class="token punctuation">'(</span><span class="token string">"\\*scratch\\*"</span>
+				 <span class="token punctuation">(</span><span class="token car">display-buffer-in-tab</span> display-buffer-full-frame<span class="token punctuation">)</span>
+				 <span class="token punctuation">(</span><span class="token car">tab-group</span> <span class="token punctuation">.</span> <span class="token string">"[EMACS]"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>We're not focusing on automatically tab-grouping stuff in this post
+though.</p>
+<p>Truth is, yes, I want groups for my News, Mail, Chat, but most of
+my work is done in the form of <em>Projects</em>.</p>
+<p>And yes, I want these settings to be manually issued. I can recall the
+pain of having to sneak-peak another project utility function or doc,
+just to have my crazy custom <code>persp-mode</code> pulling a new persp and
+messing with everything.</p>
+<h3>Function to set tab to group based on project</h3>
+<p>So, I want a function that can "promote" my current tab to the group
+<code>[ProjectName]</code>, creating it if there are none. Of course, if the current
+buffer is part of a project. This allows me to switch projects, open
+new splits, without automagic jumps.</p>
+<p>Here we have a function to do so, and a suggested bind:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/tab-group-from-project</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+	<span class="token string">"Call `tab-group` with the current project name as the group."</span>
+	<span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token car">when-let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">proj</span> <span class="token punctuation">(</span><span class="token car">project-current</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">name</span> <span class="token punctuation">(</span><span class="token car">file-name-nondirectory</span>
+					   <span class="token punctuation">(</span><span class="token car">directory-file-name</span> <span class="token punctuation">(</span><span class="token car">project-root</span> proj<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">tab-group</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"[%s]"</span> name<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x t P"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'emacs-solo/tab-group-from-project</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>So, recap: I can <code>C-x t G</code> and "add" my tab to a group, and now I can
+also simply <code>C-x t P</code> and "add" my tab to the project group.</p>
+<p>😎 Workflow?</p>
+<p>➖ <code>C-x t p p</code>: starts a new tab selecting a project</p>
+<p>➖ Select a file, dired or shell...</p>
+<p>➖ <code>C-x t P</code>: add your new tab to the project group, creating it</p>
+<p>Want some more tabs?</p>
+<p><code>C-x t 2</code> will automatically add tabs to your current group.</p>
+<p>Isn't it nice? Now, you can feel the power in your hands, you open 10
+projects, you create a bunch of groups for your inner <code>Emacs is my OS</code>
+workflow, how do you traverse all this madness?</p>
+<h3>Function to jump to group</h3>
+<p>I found my self abusing of the default <code>C-TAB</code> and <code>C-S-TAB</code> to
+quickly "jump" between closer tabs. Now, I wanna quickly check my
+Mail, I'd like something more "precise" jumping than eye balling
+everything.</p>
+<p>This is were our second utility function comes to hand:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/tab-switch-to-group</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Prompt for a tab group and switch to its first tab.</span>
+<span class="token string">Uses position instead of index field."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">tabs</span> <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tabs-function<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">groups</span> <span class="token punctuation">(</span><span class="token car">delete-dups</span> <span class="token punctuation">(</span><span class="token car">mapcar</span> <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">tab</span></span><span class="token punctuation">)</span></span>
+										  <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tab-group-function tab<span class="token punctuation">)</span><span class="token punctuation">)</span>
+										tabs<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		   <span class="token punctuation">(</span><span class="token car">group</span> <span class="token punctuation">(</span><span class="token car">completing-read</span> <span class="token string">"Switch to group: "</span> groups <span class="token boolean">nil</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">i</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">found</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token car">dolist</span> <span class="token punctuation">(</span><span class="token car">tab</span> tabs<span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">tab-group</span> <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tab-group-function tab<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token keyword">not</span> found<span class="token punctuation">)</span>
+					   <span class="token punctuation">(</span><span class="token car">string=</span> tab-group group<span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">setq</span> found <span class="token boolean">t</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">tab-bar-select-tab</span> i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">setq</span> i <span class="token punctuation">(</span>1+ i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x t g"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'emacs-solo/tab-switch-to-group</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>This allows us to "list all available groups", select and switch to
+the first tab of that group.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Femacs-tab-bar-04.png&w=3840&q=75" alt="tab-bar-group-change"></p>
+<h2>Packing the entire config</h2>
+<p>The code here presented by parts is now part of my <code>emacs-solo</code> config
+(hence the prefix on the function names), I usually keep my
+configuration somewhat organized by <code>use-package</code> blocks, they keep
+everything in the right place and I suggest you do the same. Also it
+is a lot faster to grab this code, copy and paste to your config and
+make it work!</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> tab-bar
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">nil</span>
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:custom</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-close-button-show</span> <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-new-button-show</span> <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-tab-hints</span> <span class="token boolean">t</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-auto-width</span> <span class="token boolean">nil</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-separator</span> <span class="token string">" "</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-format</span> <span class="token punctuation">'(</span><span class="token car">tab-bar-format-tabs-groups</span>
+					Tab-bar-format-tabs tab-bar-separator
+					tab-bar-format-add-tab<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:init</span>
+  <span class="token heading comment title">;;; --- OPTIONAL INTERNAL FN OVERRIDES TO DECORATE NAMES</span>
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">tab-bar-tab-name-format-hints</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">name</span> <span class="token argument variable">_tab</span> <span class="token argument variable">i</span></span><span class="token punctuation">)</span></span>
+	  <span class="token punctuation">(</span><span class="token keyword">if</span> tab-bar-tab-hints <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"»%d«"</span> i<span class="token punctuation">)</span> <span class="token string">""</span><span class="token punctuation">)</span> name<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">tab-bar-tab-group-format-default</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">tab</span> <span class="token argument variable">_i</span> <span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">current-p</span></span></span><span class="token punctuation">)</span></span>
+	<span class="token punctuation">(</span><span class="token car">propertize</span>
+	 <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tab-group-function tab<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	 <span class="token quoted-symbol variable symbol">'face</span> <span class="token punctuation">(</span><span class="token keyword">if</span> current-p <span class="token quoted-symbol variable symbol">'tab-bar-tab-group-current</span> <span class="token quoted-symbol variable symbol">'tab-bar-tab-group-inactive</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+
+  <span class="token heading comment title">;;; --- UTILITIES FUNCTIONS</span>
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/tab-group-from-project</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+	<span class="token string">"Call `tab-group` with the current project name as the group."</span>
+	<span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token car">when-let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">proj</span> <span class="token punctuation">(</span><span class="token car">project-current</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">name</span> <span class="token punctuation">(</span><span class="token car">file-name-nondirectory</span>
+					   <span class="token punctuation">(</span><span class="token car">directory-file-name</span> <span class="token punctuation">(</span><span class="token car">project-root</span> proj<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">tab-group</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"[%s]"</span> name<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/tab-switch-to-group</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Prompt for a tab group and switch to its first tab.</span>
+<span class="token string">Uses position instead of index field."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">tabs</span> <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tabs-function<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">groups</span> <span class="token punctuation">(</span><span class="token car">delete-dups</span> <span class="token punctuation">(</span><span class="token car">mapcar</span> <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">tab</span></span><span class="token punctuation">)</span></span>
+										  <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tab-group-function tab<span class="token punctuation">)</span><span class="token punctuation">)</span>
+										tabs<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		   <span class="token punctuation">(</span><span class="token car">group</span> <span class="token punctuation">(</span><span class="token car">completing-read</span> <span class="token string">"Switch to group: "</span> groups <span class="token boolean">nil</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">i</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">found</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token car">dolist</span> <span class="token punctuation">(</span><span class="token car">tab</span> tabs<span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">tab-group</span> <span class="token punctuation">(</span><span class="token car">funcall</span> tab-bar-tab-group-function tab<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token keyword">not</span> found<span class="token punctuation">)</span>
+					   <span class="token punctuation">(</span><span class="token car">string=</span> tab-group group<span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">setq</span> found <span class="token boolean">t</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">tab-bar-select-tab</span> i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">setq</span> i <span class="token punctuation">(</span>1+ i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token heading comment title">;;; --- EXTRA KEYBINDINGS</span>
+  <span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x t P"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'emacs-solo/tab-group-from-project</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x t g"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'emacs-solo/tab-switch-to-group</span><span class="token punctuation">)</span>
+
+  <span class="token heading comment title">;;; --- TURNS ON BY DEFAULT</span>
+  <span class="token punctuation">(</span><span class="token car">tab-bar-mode</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>Customizations on tab-bar-properties</h2>
+<p>You might want to customize the <code>tab-bar</code> line, what I am using in
+these screenshots is:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token car">custom-set-faces</span>
+  <span class="token punctuation">'(</span><span class="token car">tab-bar</span>
+	<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token lisp-property property">:background</span> <span class="token string">"#232635"</span> <span class="token lisp-property property">:foreground</span> <span class="token string">"#A6Accd"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">'(</span><span class="token car">tab-bar-tab</span>
+	<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token lisp-property property">:background</span> <span class="token string">"#232635"</span> <span class="token lisp-property property">:underline</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">'(</span><span class="token car">tab-bar-tab-inactive</span>
+	<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span> <span class="token comment">;; :background "#232635" ;; uncomment to use this</span>
+		  <span class="token comment">;; :box (:line-width 1 :color "#676E95")</span>
+		  <span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">'(</span><span class="token car">tab-bar-tab-group-current</span>
+	<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token lisp-property property">:background</span> <span class="token string">"#232635"</span> <span class="token lisp-property property">:foreground</span> <span class="token string">"#A6Accd"</span> <span class="token lisp-property property">:underline</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">'(</span><span class="token car">tab-bar-tab-group-inactive</span>
+	<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token lisp-property property">:background</span> <span class="token string">"#232635"</span> <span class="token lisp-property property">:foreground</span> <span class="token string">"#777"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>So, time to ditch tmux?</h2>
+<p>I wish...</p>
+<p>This functionality is indeed very useful, the UI mimics <code>tmux-like</code>
+power. And if this is enough for you, go for it! Ditch tmux!</p>
+<p>For my use cases, the sheer possibility of any of my <code>emacs-lisp</code> code
+locking the one and only Emacs process means my beautifully designed
+and crafted <em>Emacs session</em> is going bye-bye with it. And yes, while
+<code>emacs --daemon</code> and restarting clients helps a lot here, let’s not
+pretend Emacs never goes sideways.</p>
+<p>There are still solid reasons to keep <code>tmux</code> around:</p>
+<p>➖ <strong>Fault tolerance</strong>. When you’re SSH’d into a remote machine and
+something crashes, <code>tmux</code> is still there, your shell lives on. Emacs
+tabs don’t protect you from network drops or X11/Wayland hiccups.</p>
+<p>➖ <strong>Shell multiplexing</strong>. Sometimes you just want 3 quick shells,
+nothing fancy, don’t even want to boot up Emacs. <code>tmux</code> wins
+here. Fast, lightweight, and scriptable. You just install tmux, no
+fancy config needed to 'just use it'.</p>
+<p>➖ <strong>System-level process separation</strong>. I like to keep long-running
+REPLs, tailing logs, or even a docker attach session in <code>tmux</code>. If
+Emacs dies, they don’t.</p>
+<p>➖ <strong>Startup time</strong>. Emacs with heavy configuration can still take a
+second to feel "fully alive". When I want to attach to a ready-to-go
+shell session instantly, <code>tmux a</code> is just faster.</p>
+<p>➖ <strong>Better separation</strong>. While the whole tab-bar and tab-group
+approach is super flexible, sometimes you just need the hard boundary
+of a terminal session completely isolated from the rest. There are
+things you do <em>outside Emacs</em> for good reason.</p>
+<p>And let’s be honest, you don’t need to <em>choose</em>. These tools
+<em>complement</em> each other. What this configuration gives you is a
+powerful <code>Emacs-as-an-OS</code> experience, with clarity, agility, and a
+clean mental model. Use Emacs for your inner workflows, and <code>tmux</code> as
+your outer shell guardian.</p>
+<hr>
+<h2>Wrapping Up</h2>
+<p>With just a few lines of Elisp, no external packages, and some clever
+overriding, Emacs’ <code>tab-bar</code> and <code>tab-bar-groups</code> become serious
+productivity tools. If you’re someone juggling multiple projects,
+workflows, or simply enjoy clean organization inside your Emacs
+session, this setup gives you control and clarity.</p>
+<p>While we might not throw <code>tmux</code> out of the toolbox just yet, we now
+have a native Emacs experience that feels modern, fast, and
+surprisingly intuitive. Use what’s best for <em>your</em> workflow, but know
+that Emacs is more than capable of stepping up its game.</p>
+<p>So go ahead, give it a try, tweak it, theme it, and make Emacs your
+tmux... and more.</p>
+<p>Happy hacking. ✨💻🤓🚀</p>

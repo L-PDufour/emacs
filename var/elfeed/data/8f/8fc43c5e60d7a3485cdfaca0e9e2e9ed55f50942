@@ -1,0 +1,18 @@
+<p>The Alpine Linux project has <a
+href="https://alpinelinux.org/posts/2025-10-01-usr-merge.html">announced</a>
+plans to change its base filesystem hierarchy:</p>
+
+<blockquote class="bq">
+<p>In the future, <tt>/lib</tt>, <tt>/bin</tt>, and <tt>/sbin</tt>
+will be symbolic links to their <tt>/usr</tt> counterparts, and every package
+shall be installed under the <tt>/usr</tt> paths. For now,
+<tt>/usr/bin</tt> and <tt>/usr/sbin</tt> will continue to be independent paths,
+but that might change if the Filesystem Hierarchy Standard (FHS) gets
+updated.
+</blockquote>
+
+<p>The merge will take place in the upcoming Alpine&#160;3.23 release
+planned for November; non-merged systems will be considered
+unsupported when 3.22 is at its end of life in May 2027.</p>
+
+<p></p>

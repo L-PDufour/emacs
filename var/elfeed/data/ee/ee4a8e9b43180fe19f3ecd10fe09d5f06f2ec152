@@ -1,0 +1,14 @@
+<p>
+Randy Ridenour has risen to the challenge from the <a href="https://goritskov.com/posts/obscure_packages.html">latest Emacs Carnival</a> on obscure Emacs packages. <a href="https://randyridenour.net/posts/2025-09-21-obscure-emacs-package-yankpad.html">His candidate is the Yankpad package</a>. I vaguely remember hearing about Yankpad (<b>edit</b>: I mentioned it <a href="https://irreal.org/blog/?p=5800">here</a>) but didn&rsquo;t remember anything about it so I&rsquo;m glad Ridenour mentioned it.
+</p>
+<p>
+The TL;DR is that <a href="https://github.com/Kungsgeten/yankpad?tab=readme-ov-file">Yankpad</a> is a sort of reimagined <a href="https://github.com/joaotavora/yasnippet">YASnippet</a> by Erik Sjöstrand. It&rsquo;s like YASnippet but different. One difference that I really like is that all the snippets are kept in a single Org file. That makes it easy to add, delete, and edit snippets.
+</p>
+<p>
+Another difference is that instead of being organized by major mode as YASnippet is, Yankpad is organized by &ldquo;categories&rdquo;, which are groupings that you define. Those categories can be things like projects, classes, email, or whatever makes sense to you. You can also have global categories for snippets that you want available everywhere.
+</p>
+<p>
+Another nice thing about Yankpad is that if you have YASnippet installed, Yankpad will pass its expanded text through it. That means things like YASnippet&rsquo;s tab stops and escape into Elisp will work with Yankpad too. It seems like the best of two worlds.
+</p>
+<p>
+There are several ways of specifying expansions and ways to trigger them. It seems like the typical &ldquo;scratch an itch&rdquo; project. Every time Sjöstrand needed a new feature or another way of adding snippets, he simply added it. The result is a nice package that can meet most or all of your snippet needs. Take a look at Ridenour&rsquo;s post or the Yankpad GitHub repository for the details.</p>

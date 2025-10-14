@@ -1,0 +1,27 @@
+<p>
+Over at sembr.org, Mattt has an interesting post on what he calls <a href="https://sembr.org/">semantic line breaks</a>. The idea, as he expresses it, is
+</p>
+<blockquote>
+<p>
+Semantic Line Breaks describe a set of conventions for using insensitive vertical whitespace to structure prose along semantic boundaries.
+</p>
+</blockquote>
+<p>
+That sounds a little abstract but in practice it means adding a line break after each sentence and after logical breaks in the text. Here&rsquo;s a more accessible description:
+</p>
+<blockquote>
+<p>
+When writing text with a compatible markup language, add a line break after each substantial unit of thought.
+</p>
+</blockquote>
+<p>
+There&rsquo;s a specification at the link that specifies where the line breaks could/should occur.
+</p>
+<p>
+The point of all this is that it makes it easier for the author or editors to read the input text while at the same time not affecting the way the text is rendered at output time. That works because of the way many markup languages—including, of course, Org mode—work. Take a look at the sembr.org site for the details and the precise specifications.
+</p>
+<p>
+This seems like something that might be useful for many writers but, personally, I find that using <code>visual-line-mode</code> is enough for me. It shows all the text on screen by default and although it doesn&rsquo;t break lines at semantically significant places, the semantic structure of the text comes through clearly for me.
+</p>
+<p>
+But you may be different. If you find that adding an occasional line break helps make the meaning of your text clearer than by all means add them. It won&rsquo;t affect the formatting of the output and it may help you and any editors you have in the process to parse the input.</p>

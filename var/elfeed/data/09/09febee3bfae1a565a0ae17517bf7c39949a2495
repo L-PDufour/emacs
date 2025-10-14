@@ -1,0 +1,1088 @@
+<p>
+Last week, I experimented with practising drawing
+little icons as a way of expanding my visual
+vocabulary.
+</p>
+
+<div class="sticky-toc" id="orgee290f0">
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="https://sachachua.com/blog/feed/index.xml#drawing-icons-in-a-grid-making-a-template">Making a template</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#drawing-icons-in-a-grid-the-drawings">The drawings</a>
+<ul>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-the-drawings-stream-of-consciousness">Stream of consciousness</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-the-drawings-learning-from-books">Learning from books</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-the-drawings-extracting-icons-from-my-other-sketches">Extracting icons from my other sketches</a></li>
+</ul>
+</li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#drawing-icons-in-a-grid-splitting-up-the-drawings-into-individual-components">Splitting up the drawings into individual components</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#drawing-icons-in-a-grid-looking-up-images">Looking up images</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-reflections-on-doodling">Reflections on doodling</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-reflections-on-sources">Reflections on sources</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-other-resources">Other resources</a></li>
+<li><a href="https://sachachua.com/blog/feed/index.xml#doodling-icons-in-a-grid-next-steps">Next steps</a></li>
+</ul>
+</div>
+
+</div>
+<div id="outline-container-drawing-icons-in-a-grid-making-a-template" class="outline-3">
+<h3 id="drawing-icons-in-a-grid-making-a-template">Making a template</h3>
+<div class="outline-text-3" id="text-drawing-icons-in-a-grid-making-a-template">
+<p>
+Building on <a href="https://sachachua.com/blog/2025/09/visual-vocabulary-practice-abcs/">Visual vocabulary practice - ABCs</a>, I
+decided to make a regular grid that I could then
+automatically split up into individual images. I
+used Emacs's svg.el to generate the grid. I
+started with 4 rows of 7 boxes to match the
+alphabet example, but I realized that using 5 rows
+of 7 boxes each would let me reuse the grid for a
+monthly calendar. I numbered the boxes to make it
+easier to double-check if the lists line up, but I
+can write over the numbers for things like dates
+since the background won't be exported.
+</p>
+
+
+<figure id="org273796e">
+<img src="https://sachachua.com/blog/2025/10/doodling-icons-in-a-grid/icon-grid.png" alt="icon-grid.png">
+
+</figure>
+
+<p>
+I used <code>convert icon-grid.svg icon-grid.png</code> to
+make it from the SVG produced by the following
+code.
+</p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Code for producing the template</strong></summary>
+<p>
+
+</p><div class="org-src-container">
+<pre class="src src-emacs-lisp" id="org79a17b1"><code>(<span class="org-keyword">require</span> <span class="org-highlight-quoted-quote">'</span><span class="org-constant">svg</span>)
+(<span class="org-keyword">defvar</span> <span class="org-variable-name">my-dot-grid-boxes-params</span>
+  <span class="org-highlight-quoted-quote">'</span>(<span class="org-builtin">:num-rows</span> 5
+    <span class="org-builtin">:num-cols</span> 7
+    <span class="org-builtin">:dot-size</span> 3
+    <span class="org-builtin">:line-width</span> 3
+    <span class="org-builtin">:dot-spacing</span> 60
+    <span class="org-builtin">:grid-color</span> <span class="org-string">"#a6d2ff"</span>
+    <span class="org-builtin">:row-size</span> 6
+    <span class="org-builtin">:col-size</span> 6
+    <span class="org-builtin">:text-size</span> 50
+    <span class="org-builtin">:margin-top</span> 2))
+(<span class="org-keyword">cl-defun</span> <span class="org-function-name">my-dot-grid-boxes-template</span> (<span class="org-type">&amp;key</span> (num-rows 5)
+                                           (num-cols 7)
+                                           (dot-size 3)
+                                           (line-width 3)
+                                           (dot-spacing 60)
+                                           (grid-color <span class="org-string">"#a6d2ff"</span>)
+                                           (row-size 6)
+                                           (col-size 6)
+                                           (text-size 50)
+                                           (margin-top 2))
+  <span class="org-doc">"Prepare an SVG with a dot grid within a table with solid gridlines.</span>
+<span class="org-doc">Each dot is a solid circle of DOT-SIZE filled with GRID-COLOR spaced DOT-SPACING apart.</span>
+<span class="org-doc">The gridlines are also GRID-COLOR. They should divide the image into ROWS and COLUMNS, which are ROW-SIZE * DOT-SPACING and COL-SIZE * DOT-SPACING apart.</span>
+<span class="org-doc">The table has a top margin with the dot grid, and this is MARGIN-TOP * DOT-SPACING tall.</span>
+<span class="org-doc">All dots are centered on their x, y coordinates.</span>
+<span class="org-doc">The rest of the image's background is white."</span>
+  (<span class="org-keyword">let*</span> ((width (* num-cols col-size dot-spacing))
+         (height (* dot-spacing (+ margin-top (* num-rows row-size))))
+         (margin-top-height (* margin-top dot-spacing))
+         (svg (svg-create width height)))
+    (<span class="org-keyword">dotimes</span> (row (+ (* num-rows row-size) margin-top))
+      (<span class="org-keyword">dotimes</span> (col (1+ (* num-cols col-size)))
+        (<span class="org-keyword">let</span> ((x (* col dot-spacing))
+              (y (* row dot-spacing)))
+          (svg-circle svg x y dot-size
+                      <span class="org-builtin">:fill-color</span> grid-color
+                      <span class="org-builtin">:stroke-width</span> 0))))
+    (<span class="org-keyword">when</span> (&gt; text-size 0)
+      (<span class="org-keyword">dotimes</span> (i (* num-rows num-cols))
+        (<span class="org-keyword">let</span> ((x (* (% i num-cols) col-size dot-spacing))
+              (y (+ margin-top-height (* (/ i num-cols) row-size dot-spacing))))
+          (svg-text svg
+                    (number-to-string (1+ i))
+                    <span class="org-builtin">:x</span> x <span class="org-builtin">:y</span> (+ y text-size)
+                    <span class="org-builtin">:fill-color</span> grid-color
+                    <span class="org-builtin">:font-size</span> text-size
+                    <span class="org-builtin">:stroke-width</span> 0))))
+    (<span class="org-keyword">dotimes</span> (col (1+ num-cols))
+      (<span class="org-keyword">let</span> ((x (* col col-size dot-spacing)))
+        (svg-line svg x margin-top-height x height
+                  <span class="org-builtin">:stroke-color</span> grid-color
+                  <span class="org-builtin">:stroke-width</span> line-width)))
+    (<span class="org-keyword">dotimes</span> (row (1+ num-rows))
+      (<span class="org-keyword">let</span> ((y (+ margin-top-height (* row row-size dot-spacing))))
+        (svg-line svg 0 y width y
+                  <span class="org-builtin">:stroke-color</span> grid-color
+                  <span class="org-builtin">:stroke-width</span> line-width)))
+    svg))
+</code></pre>
+</div>
+
+
+<p></p>
+
+
+</details>
+
+<p>
+With that function defined, I can make a template with:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">with-temp-file</span> <span class="org-string">"~/Dropbox/sketches/icon-grid.svg"</span>
+  (svg-print
+   (my-dot-grid-boxes-template)))
+</code></pre>
+</div>
+
+
+<p>
+I used that template to draw a bunch of little doodles. The <a href="http://getnoteful.com/">Noteful</a> app I use on my iPad makes it easy to <a href="https://www.youtube.com/watch?v=JGOAfz9Av60&amp;t=75">import a template</a> and then export my drawings without including the template.
+</p>
+
+<p>
+(If this blog post is out of date, you can check the <a href="https://sachachua.com/dotemacs#multimedia-images-dot-grid-box-templates">Dot-grid box templates</a> section in my config for my current code.)
+</p>
+
+<p>
+I've done this sort of thing before, when I <a href="https://sachachua.com/blog/2020/06/pythonfontforgeorg-i-made-a-font-based-on-my-handwriting/">made a
+font based on my handwriting</a>. That time, I used
+Python to <a href="https://github.com/sachac/sachac-hand/?tab=readme-ov-file#code-to-make-the-template">generate the template</a> with sample
+characters, and I used Python again to cut the
+exported image into <a href="https://github.com/sachac/sachac-hand/?tab=readme-ov-file#cut-into-glyphs">individual glyphs</a>.
+</p>
+</div>
+</div>
+<div id="outline-container-drawing-icons-in-a-grid-the-drawings" class="outline-3">
+<h3 id="drawing-icons-in-a-grid-the-drawings">The drawings</h3>
+<div class="outline-text-3" id="text-drawing-icons-in-a-grid-the-drawings">
+<p>
+Once I imported the template into Noteful, it was
+easy to draw using fragments of time. 35 boxes are
+a lot, but each icon was just a few minutes of
+drawing, and I enjoyed seeing the progress.
+</p>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-the-drawings-stream-of-consciousness" class="outline-4">
+<h4 id="doodling-icons-in-a-grid-the-drawings-stream-of-consciousness">Stream of consciousness</h4>
+<div class="outline-text-4" id="text-doodling-icons-in-a-grid-the-drawings-stream-of-consciousness">
+<p>
+Sometimes I drew whatever came to mind:
+</p>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-24-09%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-24-09%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-24-09 Drawing practice &#45;&#45; drawing icons" data-w="2900" data-h="1796"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-24-09%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="1796" alt="2025-09-24-09 Drawing practice &#45;&#45; drawing icons" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-24-09 Drawing practice &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+Drawing practice
+2025-09-24-09
+</p>
+
+<p>
+me
+A+
+pizza
+mom and kid
+flower
+witch hat
+pencil
+chopsticks
+rice bowl
+peach
+pillow
+desk fan
+folding fan
+pumpkin
+jack o' lantern
+ghost
+taxes
+broomstick
+bubbles
+candy
+bow
+bao
+bowl
+strawberry
+tomato
+cherries
+cake slice
+cake
+</p>
+
+
+</details>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-25-01%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-25-01%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-25-01 Drawing practice &#45;&#45; drawing icons" data-w="2900" data-h="1796"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-25-01%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="1796" alt="2025-09-25-01 Drawing practice &#45;&#45; drawing icons" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-25-01 Drawing practice &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+Drawing practice 2025-09-25-01
+</p>
+
+<p>
+mug
+teacup
+tempest in a teapot
+skull
+poison
+cauldron
+tree
+baseball cap
+propeller beanie
+top hat
+magic
+magic wand
+cape
+playing card
+hanging towel
+folded towels
+soap dispenser
+bar soap
+picnic table
+picnic basket
+bread
+croissant
+donut
+donut
+sandwich
+soup bowl
+rice and eggs
+oatmeal
+</p>
+
+
+</details>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-26-01%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-26-01%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-26-01 Drawing practice &#45;&#45; drawing icons" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-26-01%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="2212" alt="2025-09-26-01 Drawing practice &#45;&#45; drawing icons" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-26-01 Drawing practice &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+Drawing practice
+2025-09-26-01
+</p>
+
+<p>
+clogs
+slippers
+slipper
+tic-tac-toe
+stockpot
+skillet
+crepe pan
+crepe
+pancakes
+cereal
+sun
+sailboat
+crown
+see saw
+ice cream
+cupcake with icing
+dress and pants
+rice cooker
+leap
+heart
+heart - anatomical
+eye
+headband
+hairpin
+bandage
+glasses
+glass
+straw
+air purifier
+mask - KN95
+pie
+pie slice
+pie chart
+orange
+lemon
+</p>
+
+
+</details>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-26-02%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-26-02%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-26-02 Drawing practice &#45;&#45; drawing icons" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-26-02%20Drawing%20practice%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="2212" alt="2025-09-26-02 Drawing practice &#45;&#45; drawing icons" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-26-02 Drawing practice &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+Drawing practice
+2025-09-26-02
+</p>
+
+<p>
+trash can
+garbage can
+chef's knife
+paring knife
+steak knife
+bread knife
+butter knife
+egg
+egg shells
+scrambled egg
+toast
+bean
+peas
+peas
+hot dog in a bun
+hot dog octopus
+avocado
+taco
+milk
+yogurt
+applesauce
+chicken drumstick
+sushi - hand roll
+lamp
+present
+presentation
+audience
+applause
+almond
+bitter melon
+oil
+chopping board
+partly cloudy
+rainy
+cloudy
+</p>
+
+
+</details>
+</div>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-the-drawings-learning-from-books" class="outline-4">
+<h4 id="doodling-icons-in-a-grid-the-drawings-learning-from-books">Learning from books</h4>
+<div class="outline-text-4" id="text-doodling-icons-in-a-grid-the-drawings-learning-from-books">
+<p>
+Other times, I tried systematically going through the doodling books I checked out from the library:
+</p>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-26-05%20From%20%22How%20to%20Draw%20Almost%20Every%20Day%22%20-%20Kamo%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-26-05%20From%20%22How%20to%20Draw%20Almost%20Every%20Day%22%20-%20Kamo%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-26-05 From " How="" to="" Draw="" Almost="" Every="" Day"="" -="" Kamo="" &#45;&#45;="" drawing="" icons"="" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-26-05%20From%20%22How%20to%20Draw%20Almost%20Every%20Day%22%20-%20Kamo%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="2212" alt="2025-09-26-05 From " How="" to="" Draw="" Almost="" Every="" Day"="" -="" Kamo="" &#45;&#45;="" drawing="" icons"="" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-26-05 From "How to Draw Almost Every Day" - Kamo &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+From "How to Draw Almost Every Day" - Kamo
+2025-09-26-05
+</p>
+
+<p>
+sake bottle
+sake cup
+brush
+snowflake
+kite
+top
+cat sleeping
+orange
+rice cake ornament
+notebook
+kimono
+shopping bag
+pencil
+eraser
+thermometer
+medicine
+scarf
+mittens
+glove
+hat
+boot
+coat
+skate
+snowman
+shovel
+washer
+refrigerator
+microwave
+laundry
+convenience store
+blimp
+spatula
+hot pot
+bonsai
+coffee maker
+</p>
+
+
+</details>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-29-05%20From%20%22How%20to%20Draw%20Cute%20Doodles%20and%20Illustrations%22%20(Kamo)%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-29-05%20From%20%22How%20to%20Draw%20Cute%20Doodles%20and%20Illustrations%22%20(Kamo)%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-29-05 From " How="" to="" Draw="" Cute="" Doodles="" and="" Illustrations"="" (Kamo)="" &#45;&#45;="" drawing="" icons"="" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-29-05%20From%20%22How%20to%20Draw%20Cute%20Doodles%20and%20Illustrations%22%20(Kamo)%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="2212" alt="2025-09-29-05 From " How="" to="" Draw="" Cute="" Doodles="" and="" Illustrations"="" (Kamo)="" &#45;&#45;="" drawing="" icons"="" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-29-05 From "How to Draw Cute Doodles and Illustrations" (Kamo) &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+From "How to Draw Cute Doodles and Illustrations" - Kamo
+2025-09-29-05
+</p>
+
+<p>
+enjoyment
+crying
+happy or asleep
+making a mistake
+sleepy
+yum or cheeky
+cheerful or excited
+smiling
+confusion
+anger
+unsettled
+discomfort
+front view
+rear view
+side view
+sitting on a chair
+teacher
+baby
+kids (1-3)
+kids (4-5)
+walking
+running
+jumping
+raising a hand
+sitting on the floor
+swinging
+singing
+drawing
+sunny
+rain
+cloudy
+windy
+stormy
+snow
+moon and stars
+</p>
+
+
+</details>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-30-02%20From%20%22How%20to%20Draw%20Cute%20Doodles%20and%20Illustrations%22%20(Kamo)%20&#45;&#45;%20drawing%20icons.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-30-02%20From%20%22How%20to%20Draw%20Cute%20Doodles%20and%20Illustrations%22%20(Kamo)%20&#45;&#45;%20drawing%20icons.jpeg" data-title="2025-09-30-02 From " How="" to="" Draw="" Cute="" Doodles="" and="" Illustrations"="" (Kamo)="" &#45;&#45;="" drawing="" icons"="" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-30-02%20From%20%22How%20to%20Draw%20Cute%20Doodles%20and%20Illustrations%22%20(Kamo)%20&#45;&#45;%20drawing%20icons.jpeg" width="2900" height="2212" alt="2025-09-30-02 From " How="" to="" Draw="" Cute="" Doodles="" and="" Illustrations"="" (Kamo)="" &#45;&#45;="" drawing="" icons"="" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-30-02 From "How to Draw Cute Doodles and Illustrations" (Kamo) &#45;&#45; drawing icons</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+From "How to Draw Cute Doodles and Illustrations" – Kamo
+2025-09-30-05
+</p>
+
+<p>
+cat
+cat profile
+dog
+dog
+cat napping
+cat sitting upright
+dog
+dog (fluffy)
+rabbit
+monkey
+mouse
+cheetah
+bear
+raccoon dog
+fox
+squirrel
+lion
+koala
+pig
+elephant
+sheep
+giraffe
+horse
+bird (front)
+bird (profile)
+duck
+owl
+swan
+sparrow
+nest
+peacock
+chicken, chick, egg
+stork
+fish
+whale
+</p>
+
+
+</details>
+</div>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-the-drawings-extracting-icons-from-my-other-sketches" class="outline-4">
+<h4 id="doodling-icons-in-a-grid-the-drawings-extracting-icons-from-my-other-sketches">Extracting icons from my other sketches</h4>
+<div class="outline-text-4" id="text-doodling-icons-in-a-grid-the-drawings-extracting-icons-from-my-other-sketches">
+<p>
+I also extracted the <a href="https://sachachua.com/blog/2025/03/stick-figure-out-feelings/">stick figures</a> and <a href="https://sachachua.com/blog/2025/03/feline-feelings/">cats</a> I'd drawn for different emotions.
+</p>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-30-05%20Stick%20figure%20feelings%20&#45;&#45;%20drawing%20icons%20emotions.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-30-05%20Stick%20figure%20feelings%20&#45;&#45;%20drawing%20icons%20emotions.jpeg" data-title="2025-09-30-05 Stick figure feelings &#45;&#45; drawing icons emotions" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-30-05%20Stick%20figure%20feelings%20&#45;&#45;%20drawing%20icons%20emotions.jpeg" width="2900" height="2212" alt="2025-09-30-05 Stick figure feelings &#45;&#45; drawing icons emotions" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-30-05 Stick figure feelings &#45;&#45; drawing icons emotions</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+Stick figure feelings
+2025-09-30-05
+</p>
+
+<p>
+playful
+content
+interested
+proud
+accepted
+powerful
+peaceful
+trusting
+optimistic
+startled
+confused
+tired
+busy
+amazed
+stressed
+stressed
+excited
+bored
+scared
+mad
+aggressive
+frustrated
+frustrated
+let down
+bitter
+weak
+weak
+anxious
+distant
+critical
+humiliated
+rejected
+threatened
+insecure
+insecure
+</p>
+
+
+</details>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-09-30-06%20Stick%20figure%20and%20feline%20feelings%20&#45;&#45;%20drawing%20icons%20emotions.jpeg" data-src="https://sketches.sachachua.com/static/2025-09-30-06%20Stick%20figure%20and%20feline%20feelings%20&#45;&#45;%20drawing%20icons%20emotions.jpeg" data-title="2025-09-30-06 Stick figure and feline feelings &#45;&#45; drawing icons emotions" data-w="2900" data-h="2212"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-09-30-06%20Stick%20figure%20and%20feline%20feelings%20&#45;&#45;%20drawing%20icons%20emotions.jpeg" width="2900" height="2212" alt="2025-09-30-06 Stick figure and feline feelings &#45;&#45; drawing icons emotions" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-09-30-06 Stick figure and feline feelings &#45;&#45; drawing icons emotions</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text from sketch</strong></summary>
+<p>
+Stick figure and feline feelings
+2025-09-30-06
+</p>
+
+<p>
+lonely
+vulnerable
+despair
+guilty
+depressed
+hurt
+awful
+disapproving
+repelled
+disappointed
+startled
+confused
+bored
+scared
+excited
+tired
+let down
+rejected
+insecure
+anxious
+threatened
+humiliated
+cheeky
+interested
+peaceful
+successful
+content
+aggressive
+accepted
+trusting
+proud
+vulnerable
+optimistic
+lonely
+frustrated
+</p>
+
+
+</details>
+</div>
+</div>
+</div>
+<div id="outline-container-drawing-icons-in-a-grid-splitting-up-the-drawings-into-individual-components" class="outline-3">
+<h3 id="drawing-icons-in-a-grid-splitting-up-the-drawings-into-individual-components">Splitting up the drawings into individual components</h3>
+<div class="outline-text-3" id="text-drawing-icons-in-a-grid-splitting-up-the-drawings-into-individual-components">
+<p>
+Because I kept all my doodles within the
+template's boxes, it was easy to split up the
+images into individual files. First, I needed the
+text for all the labels. Sometimes I typed this in
+manually, and sometimes I <a href="https://sachachua.com/dotemacs#keybindings-embark-converting-handwriting-to-text">used Google Cloud Vision
+to extract the text</a> (editing it a little bit to
+put it in the right order and fix misrecognized
+text). Then I used Emacs Lisp to read the labels
+from the text file, calculate the coordinates, and
+use <a href="https://imagemagick.org/">ImageMagick</a> to extract that portion of the
+image into a file. I used filenames based on the
+label of the individual icon and the ID of the
+image it came from.
+</p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Code for extracting the icons</strong></summary>
+<p>
+
+</p><div class="org-src-container">
+<pre class="src src-emacs-lisp" id="org6a2b980"><code>(<span class="org-keyword">cl-defun</span> <span class="org-function-name">my-dot-grid-boxes-list</span> (<span class="org-type">&amp;key</span> (num-rows 5)
+                                       (num-cols 7)
+                                       (dot-spacing 60)
+                                       (row-size 6)
+                                       (col-size 6)
+                                       (text-bottom 1)
+                                       (margin-top 2)
+                                       filename
+                                       <span class="org-type">&amp;allow-other-keys</span>)
+  <span class="org-doc">"Return a list of boxes."</span>
+  (<span class="org-keyword">let*</span> ((margin-top-height (* margin-top dot-spacing))
+         (max-image-size nil)
+         (size (image-size (create-image filename nil nil <span class="org-builtin">:scale</span> 1) t))
+         (ratio (/ (car size) (* num-cols col-size dot-spacing 1.0)))
+         results)
+    (message <span class="org-string">"Expected adjusted height %f actual height %f"</span>
+             (* (+ margin-top (* num-rows row-size)) dot-spacing ratio)
+             (cdr size))
+    (<span class="org-keyword">dotimes</span> (i (* num-rows num-cols))
+      (<span class="org-keyword">let*</span> ((r (/ i num-cols))
+             (c (% i num-cols))
+             (y (* (+ margin-top-height (* r col-size dot-spacing)) ratio))
+             (x (* c row-size dot-spacing ratio))
+             (width (* col-size dot-spacing ratio))
+             (height (* (- row-size text-bottom) dot-spacing ratio)))
+        (<span class="org-keyword">setq</span> results (cons
+                       <span class="org-highlight-quoted-quote">`</span>((r . ,r)
+                         (c . ,c)
+                         (i . ,i)
+                         (x . ,(floor x))
+                         (y . ,(floor y))
+                         (w . ,(floor width))
+                         (h . ,(floor height))
+                         (x2 . ,(floor (+ x width)))
+                         (y2 . ,(floor (+ y height))))
+                       results))))
+    (nreverse results)))
+
+(<span class="org-keyword">defvar</span> <span class="org-variable-name">my-sketch-icon-directory</span> <span class="org-string">"~/sync/sketches/icons"</span>)
+(<span class="org-keyword">cl-defun</span> <span class="org-function-name">my-dot-grid-boxes-extract</span> (<span class="org-type">&amp;rest</span> args <span class="org-type">&amp;key</span> filename labels
+                                           (output-dir my-sketch-icon-directory) force <span class="org-type">&amp;allow-other-keys</span>)
+  (<span class="org-keyword">let*</span> ((list (apply <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">my-dot-grid-boxes-list</span> args))
+         (base (file-name-base filename))
+         (ext (concat <span class="org-string">"."</span> (file-name-extension filename)))
+         (id
+          (<span class="org-keyword">if</span> (string-match <span class="org-string">"^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]"</span> base)
+              (match-string 0 base)
+            <span class="org-string">""</span>))
+         results
+         args)
+    (<span class="org-keyword">dolist</span> (icon list)
+      (<span class="org-keyword">let-alist</span> icon
+        (<span class="org-keyword">let</span> ((new-filename (expand-file-name
+                             (concat (my-make-slug (elt labels .i)) <span class="org-string">"&#45;&#45;"</span>
+                                     id
+                                     (format <span class="org-string">"-%d-%d"</span>
+                                             .r .c)
+                                     ext)
+                             output-dir)))
+          (<span class="org-keyword">push</span> <span class="org-highlight-quoted-quote">`</span>((term . ,(elt labels .i))
+                  (icon . ,(file-name-nondirectory new-filename))
+                  (source . ,(file-name-nondirectory filename)))
+                results)
+          (<span class="org-keyword">when</span> (<span class="org-keyword">or</span> force (not (file-exists-p new-filename)))
+            (<span class="org-keyword">setq</span> args
+                  (list (expand-file-name filename)
+                        <span class="org-string">"-crop"</span>
+                        (format <span class="org-string">"%dx%d+%d+%d"</span> .w .h .x .y)
+                        <span class="org-string">"+repage"</span>
+                        new-filename))
+            (message <span class="org-string">"%s"</span> (concat <span class="org-string">"convert "</span> (mapconcat <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">shell-quote-argument</span> args <span class="org-string">" "</span>)))
+            (apply <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">call-process</span> <span class="org-string">"convert"</span> nil nil nil args)))))
+    (nreverse results)))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-dot-grid-boxes-labels</span> (id)
+  (<span class="org-keyword">with-temp-buffer</span>
+    (insert-file-contents (concat (file-name-sans-extension (my-get-sketch-filename id)) <span class="org-string">".txt"</span>))
+    (goto-char (point-min))
+    (re-search-forward <span class="org-string">"^ *$"</span>)
+    (split-string (string-trim (buffer-substring (point) (point-max))) <span class="org-string">"\n"</span>)))
+</code></pre>
+</div>
+
+
+<p></p>
+
+
+</details>
+
+
+<figure id="org296c1ec">
+<img src="https://sachachua.com/blog/2025/10/doodling-icons-in-a-grid/2025-09-30_13-13-52.png" alt="2025-09-30_13-13-52.png">
+
+<figcaption><span class="figure-number">Figure 1: </span>Dired and image-dired in Emacs</figcaption>
+</figure>
+
+<p>
+I really liked being able to write code to extract
+and name images all in one go. If you don't want
+to dive into Emacs Lisp, though, you can slice up
+a large image into small ones using <a href="https://stackoverflow.com/questions/9636350/using-imagemagick-how-can-i-slice-up-an-image-into-several-separate-images">ImageMagick</a>.
+</p>
+
+<p>
+Thinking ahead: if I use a similar process for my
+<a href="https://sachachua.com/blog/2025/09/considering-the-format-of-daily-sketches/">daily drawings</a>, I can extract an "on this day"
+slice like the one I have for <a href="https://sachachua.com/blog/on-this-day">blog posts and
+sketches</a> (<a href="https://sachachua.com/blog/2025/03/on-this-day/">blog post about it</a>).
+</p>
+
+<p>
+I had worked on a similar <a href="https://sachachua.com/blog/2013/10/visual-thinking-build-your-visual-library/">visual vocabulary
+project in 2013</a>, but I had made it as a shared
+notebook in Evernote. That's gone now, and I can't
+remember if I backed it up or where I would've
+saved a backup to. Ah well, no harm in starting
+again, with files under my control.
+</p>
+</div>
+</div>
+<div id="outline-container-drawing-icons-in-a-grid-looking-up-images" class="outline-3">
+<h3 id="drawing-icons-in-a-grid-looking-up-images">Looking up images</h3>
+<div class="outline-text-3" id="text-drawing-icons-in-a-grid-looking-up-images">
+<p>
+Now that I'd broken down the images into labelled
+components, I wanted to be able to quickly look up
+icons from a web browser; my own version of <a href="https://thenounproject.com/">The
+Noun Project</a>. First, I exported the label information
+into a <a href="https://sketches.sachachua.com/icons/index.json">JSON</a>.
+</p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Code for processing a sketch and updating the index</strong></summary>
+<p>
+
+</p><div class="org-src-container">
+<pre class="src src-emacs-lisp" id="orgdbf8bc5"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-sketch-icon-update-index</span> (list)
+  (<span class="org-keyword">let</span> (data
+        (index-file (expand-file-name <span class="org-string">"index.json"</span> my-sketch-icon-directory)))
+    (<span class="org-keyword">with-temp-file</span> index-file
+      (<span class="org-keyword">setq</span> data
+            (<span class="org-keyword">if</span> (file-exists-p index-file)
+                (json-read-file index-file)
+              <span class="org-highlight-quoted-quote">'</span>()))
+      (<span class="org-keyword">dolist</span> (entry list)
+        <span class="org-comment-delimiter">;; </span><span class="org-comment">Remove current entry</span>
+        (<span class="org-keyword">setq</span> data (seq-remove (<span class="org-keyword">lambda</span> (o)
+                                 (<span class="org-keyword">and</span> (string-match (regexp-quote (alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">source</span> o)) (alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">source</span> entry))
+                                      (string= (alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">term</span> o) (alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">term</span> entry))))
+                               data))
+        <span class="org-comment-delimiter">;; </span><span class="org-comment">Add a new entry</span>
+        (<span class="org-keyword">push</span>
+         <span class="org-highlight-quoted-quote">`</span>((term . ,(alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">term</span> entry))
+           (icon . ,(alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">icon</span> entry))
+           (source . ,(alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">source</span> entry)))
+         data))
+      (insert (json-encode (sort data <span class="org-builtin">:key</span> (<span class="org-keyword">lambda</span> (o) (alist-get <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">term</span> o)) <span class="org-builtin">:lessp</span> <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">string&lt;</span>))))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-dot-grid-boxes-process</span> (id <span class="org-type">&amp;optional</span> force)
+  (<span class="org-keyword">interactive</span>
+   (list
+    (my-complete-sketch-filename <span class="org-string">"drawing"</span>)
+    current-prefix-arg))
+  (<span class="org-keyword">let*</span> ((labels (my-dot-grid-boxes-labels id))
+         list)
+    (<span class="org-warning">cl-assert</span> (= (% (length labels) 7) 0))
+    (<span class="org-warning">cl-assert</span> (&gt; (length labels) 1))
+    (<span class="org-keyword">setq</span> list
+          (my-dot-grid-boxes-extract <span class="org-builtin">:output-dir</span> my-sketch-icon-directory
+                                     <span class="org-builtin">:num-rows</span> (/ (length labels) 7)
+                                     <span class="org-builtin">:filename</span> (my-get-sketch-filename id)
+                                     <span class="org-builtin">:labels</span> labels
+                                     <span class="org-builtin">:force</span> force))
+    (my-sketch-icon-update-index list)))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">my-dot-grid-boxes-process-all-icons</span> ()
+  (<span class="org-keyword">interactive</span>)
+  (<span class="org-keyword">dolist</span> (source (my-sketches <span class="org-string">"icons"</span>)) (my-dot-grid-boxes-process source)))
+</code></pre>
+</div>
+
+
+<p></p>
+
+
+</details>
+
+<p>
+Then I made a <a href="https://sketches.sachachua.com/icons/">simple interface for looking up icons</a>.
+</p>
+
+
+<figure id="org7bd169f">
+<img src="https://sachachua.com/blog/2025/10/doodling-icons-in-a-grid/2025-10-01_10-09-32.png" alt="2025-10-01_10-09-32.png">
+
+<figcaption><span class="figure-number">Figure 2: </span>Screencast showing my icon lookup interface</figcaption>
+</figure>
+
+<p>
+I can filter it by terms, and I can exclude the
+icons I've copied from illustration books for
+practice.
+</p>
+
+<p>
+I can even use it as a rudimentary visual menu for
+showing A+ some choices.
+</p>
+
+<p>
+<a href="https://sketches.sachachua.com/icons/?sources=all&amp;q=oatmeal,cereal,pancakes">Oatmeal, cereal, pancakes</a>
+</p>
+
+
+<figure id="org9719760">
+<img src="https://sachachua.com/blog/2025/10/doodling-icons-in-a-grid/2025-09-30_13-40-06.png" alt="2025-09-30_13-40-06.png">
+
+</figure>
+</div>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-reflections-on-doodling" class="outline-3">
+<h3 id="doodling-icons-in-a-grid-reflections-on-doodling">Reflections on doodling</h3>
+<div class="outline-text-3" id="text-doodling-icons-in-a-grid-reflections-on-doodling">
+<p>
+My curves are shaky. I'm mostly learning to ignore
+that and draw anyway. Good thing redoing them is
+a matter of a two-finger tap with my left
+hand, and then I can redraw until it feels mostly
+right. I try up to three times before I say, fine,
+let's just go with that.
+</p>
+
+<p>
+I often draw with my iPad balanced on my lap,
+so there's an inherent wobbliness to it. I think
+this is a reasonable trade-off. Then I can keep
+drawing cross-legged in the shade at the
+playground instead of sitting at the table in the
+sun. The shakiness is still there when I draw on a
+solid table, though. I have a Paperlike screen
+protector, which I like more than the slippery
+feel of the bare iPad screen. That helps a little.
+</p>
+
+<p>
+It's possible to cover it up and pretend to
+confidence that I can't draw with. I could smooth
+out the shakiness of my curves by switching to
+<a href="https://procreate.com/">Procreate</a>, which has more stylus sensitivity
+settings than Noteful does. A+ loves the way
+Procreate converts her curves to arcs. She moves
+the endpoints around to where she wanted to put
+them. I'm tempted to do the same, but I see her
+sometimes get frustrated when she tries to draw
+without that feature, and I want to show her the
+possibilities that come with embracing
+imperfection. It's okay for these sketches to be a
+little shaky. These are small and quick.
+They don't have to be polished.
+</p>
+
+<p>
+The Internet says to draw faster and with a looser
+grip, and that lots of practice will build fine
+motor skills. I'm not sure I'll get that much
+smoother. I think of my mom and her Parkinson's
+tremors, and I know that time doesn't necessarily
+bring improvement. But it's better to keep trying
+than to shy away from it. Maybe as I relax more
+into <a href="https://sachachua.com/blog/2025/09/coming-back-to-my-own-time/">having my own time</a>, <a href="https://sachachua.com/blog/2015/01/learning-work-things/">working on my own things</a>
+and <a href="https://sachachua.com/blog/2015/06/moving-past-getting-things-done/">moving past getting things done</a>, I'll give
+myself more time for drawing exercise, like
+filling pages with just lines and circles.
+</p>
+</div>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-reflections-on-sources" class="outline-3">
+<h3 id="doodling-icons-in-a-grid-reflections-on-sources">Reflections on sources</h3>
+<div class="outline-text-3" id="text-doodling-icons-in-a-grid-reflections-on-sources">
+<p>
+I had fun coming up with words and drawing them. I
+could start with whatever was in front of me and
+go from there. I used my phone to look up the
+occasional reference image, like the heart.
+Sometimes A+ suggested things to draw. Sometimes
+she even took over.
+</p>
+
+<p>
+The books were handy when I didn't feel like
+thinking much. I could just reproduce the
+already-simplified drawings. I often felt like I
+still wanted to tweak things a bit more to make
+them feel like my own, though, which was a useful
+way to figure out more about what I like.
+</p>
+
+<p>
+Instead of mimicking other people's sketches, I
+can mine <a href="https://sketches.sachachua.com/">my sketchnotes</a> and pull out the concepts
+I tend to think about a lot. If I've drawn them in
+Noteful, I can even copy them from their original
+sketches, resize them, and make the lines a
+consistent thickness. If I've drawn them
+elsewhere, it's easy enough to redraw.
+</p>
+</div>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-other-resources" class="outline-3">
+<h3 id="doodling-icons-in-a-grid-other-resources">Other resources</h3>
+<div class="outline-text-3" id="text-doodling-icons-in-a-grid-other-resources">
+<p>
+<a href="https://ellanew.com/2025/10/01/inktober-mustache">Ellane W's mustache post</a> reminded me that <a href="https://inktober.com/">Inktober</a> has just started, so that's another source of ideas.
+<a href="https://www.zsolt.blog/2021/07/sketchnoting-for-pkm.html">Zsolt's 2021 post on sketchnoting for PKM</a> led me to <a href="https://quickdraw.withgoogle.com">Quick, Draw!</a>, which has <a href="https://github.com/googlecreativelab/quickdraw-dataset/blob/master/categories.txt">345 simple drawing prompts</a> I can try. There's also a <a href="https://huggingface.co/datasets/sdiaeyu6n/tu-berlin">TU Berlin dataset</a> with <a href="https://huggingface.co/datasets/sdiaeyu6n/tu-berlin/blob/main/README.md">250 drawing prompts</a>. <a href="https://www.sketchdaily.net/">SketchDaily Reference Site</a> could be good for randomness and inspiration, too.
+</p>
+
+<p>
+Building a visual library is a great way to learn how to actually draw things.
+I'm curious about using this <a href="https://drawabox.com/community/submission/DJGBZ47W">30-minute drawing exercise</a> to start paying attention to a few things, and maybe using the <a href="https://prrb.tumblr.com/post/30177790499/shrimp-method">shrimp method</a> if there's something I really want to nail down.
+<a href="https://www.youtube.com/watch?v=w3ROXZLZZ_k">Visual mnemonic links</a> might be a way to explore the connections between things as I wander around ideas (even though this video is way more advanced than I am).
+</p>
+</div>
+</div>
+<div id="outline-container-doodling-icons-in-a-grid-next-steps" class="outline-3">
+<h3 id="doodling-icons-in-a-grid-next-steps">Next steps</h3>
+<div class="outline-text-3" id="text-doodling-icons-in-a-grid-next-steps">
+<p>
+I think I'll keep drawing these visual vocabulary
+practice sketches, focusing more on my own ways of
+drawing. It's fun. I have 324 icons at the moment.
+I wonder what the collection will be like when I
+have a thousand terms in it.
+</p>
+
+<p>
+On the Emacs side, it might be
+interesting to quickly add a related doodle to the
+margin of a blog post, or to look up or copy a
+personal reference image as I untangle my thoughts
+in a sketch. I'm tempted to write some Emacs Lisp
+that searches for these terms in my draft blog
+posts and adds a little hint whenever it finds a
+match. Another small piece of code might identify
+recurring nouns and verbs in recent posts and
+suggest those if I haven't drawn them yet. Could be fun.
+</p>
+
+<p>
+Check out <a href="https://sketches.sachachua.com/icons/">my icon library</a> if you're curious!</p>
+</div>
+</div>
+<div><a href="https://sachachua.com/blog/2025/10/doodling-icons-in-a-grid/index.org">View org source for this post</a></div>
+<p>You can <a href="https://social.sachachua.com/@sacha/statuses/01K6G5MZJ25W7EYPCE66YGRPC9" target="_blank" rel="noopener noreferrer">comment on Mastodon</a> or <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F10%2Fdoodling-icons-in-a-grid%2F&body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p>

@@ -1,0 +1,154 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>For me, one of the finest things of using Emacs is having the same user experience both when I am
+sessioning trough SSH, hacking with Tmux, reading my RSS news or working as a software engineer. Having
+no worries about changing between text editors is really nice. Also, starting a "one session to rule" then
+all as a deamon and opening several GUI/TUI frames in the same session, wow... Emacs is still very cool :)</p>
+<p>It's been a while since I "launched" my public Emacs config. It is something I was relutant to do as it
+reflected some 15+ years of learnig, patching and well, not cleaning it up as I should.</p>
+<p>This led me to many situations where I wasn't confortable sharing stuff, either if I needed help or
+if I wanted to help someone.</p>
+<p>And just as this blog is kind of an effort project to expose my self more. I redid my Emacs config
+to be at least "readable", maybe "enjoyable" :)</p>
+<p>As I said before having GUI and TUI behaving the same is very important to me. It is horrible to see
+flymake anottating things on the fringe, just to find out that TUI has no fringe. An option to enable
+marking on the margin? No thanks. And that's one of several reasons I preferred flycheck over the
+years.</p>
+<p>Do you want the cool Eglot to show documentation? Maybe use eldoc-box? No support for TUI unfortunally. And
+that's another big win to lsp-mode.</p>
+<p>Little things like these added up trough the years to make this config the way it is nowadays.</p>
+<p>What I expected from sharing it? Just the joy of providing other people with some insights and maybe
+receiving some positive improvable feedbacks.</p>
+<p>You can find it in here: <a href="https://github.com/LionyxML/LEmacs">LEmacs Config</a></p>
+<p>Bellow I provide a copy of LEmacs README so you can take a look at it.</p>
+<h2>LEmacs - L(ionyx)Emacs Config</h2>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">    ██╗     ███████╗███╗   ███╗ █████╗  ██████╗███████╗
+    ██║     ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝
+    ██║     █████╗  ██╔████╔██║███████║██║     ███████╗
+    ██║     ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║
+    ███████╗███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║
+    ╚══════╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝</code></pre></div>
+<p>Emacs for the modern developer focused on seamlessly TUI/GUI experience, either standalone or in
+a server/client mode.</p>
+<p>Left (Terminal User Interface) / Right (Graphical User Interface)</p>
+<p>Demo 01:
+<img src="https://raw.githubusercontent.com/LionyxML/lemacs/main/doc/demo01.png" alt="img"></p>
+<p>Demo 02:
+<img src="https://raw.githubusercontent.com/LionyxML/lemacs/main/doc/demo02.png" alt="img"></p>
+<p>Demo 03:
+<img src="https://raw.githubusercontent.com/LionyxML/lemacs/main/doc/demo03.png" alt="img"></p>
+<p>Demo 04 (highlight guideline):
+<img src="https://raw.githubusercontent.com/LionyxML/lemacs/main/doc/demo04.png" alt="img"></p>
+<p>Demo 05 (git gutter):
+<img src="https://raw.githubusercontent.com/LionyxML/lemacs/main/doc/demo05.png" alt="img"></p>
+<p>Demo 06 (line blame):
+<img src="https://raw.githubusercontent.com/LionyxML/lemacs/main/doc/demo06.png" alt="img"></p>
+<p>And all the power of Vertico, Orderless, Marginalia, Embark, Consult, LSP, TreeSitter, Vterm, and many more!</p>
+<p>Fork it at will! :)</p>
+<p><a id="orgdabcea0"></a></p>
+<h2>Motivation</h2>
+<p>Greetings to LEmacs, my customized configuration now shared with the community! This configuration
+is crafted to deliver a seamless and delightful Emacs experience, whether you're navigating through the
+Text User Interface (TUI) or the Graphical User Interface (GUI). It's designed to excel in both
+standalone mode and as a daemon/client setup.</p>
+<p>This means (of course to my personal taste and opinions) that I will prefer packages that support
+both Terminal and Graphics, so you may never be worried about where to use Emacs or other editors.</p>
+<p>You can use Emacs, everywhere, always ;)</p>
+<h2>Installation</h2>
+<h3>Preparation</h3>
+<ol>
+<li>
+<p>Emacs Version</p>
+<p>Ensure you have Emacs version 29 or higher, compiled with native compilation, JSON, and tree-sitter support.</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">emacs --version
+emacs -nw -q --batch --eval &#39;(message system-configuration-options)&#39;</code></pre></div>
+</li>
+<li>
+<p>JS/TS LSP Servers</p>
+<p>To use LSP (and also node/typescript/eslint,  prettier), you can install Node JS globally or use a version
+management tool, in the case you have several projects with several node versions it is common to use <strong><strong>nvm</strong></strong>
+or <strong><strong>asdf</strong></strong>. I recommend to install Node JS via <strong><strong>asdf</strong></strong> (<a href="https://asdf-vm.com/">https://asdf-vm.com/</a>).</p>
+<p>Note: asdf must be loaded on .bash<sub>profile</sub> for macos, and .bashrc for Linux,
+for testing (after Lemacs install), run eshell and look at <strong><strong>asdf –version</strong></strong> output.</p>
+<p>You need to Install globally (and for every every asdf plugin shim if you're using asdf):</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">npm i -g vscode-langservers-extracted prettier@2.8.8
+npm i -g typescript-language-server typescript</code></pre></div>
+</li>
+<li>
+<p>Backup your config</p>
+<p>Make a backup of your ~/.emacs.d/, ~/.emacs files and delete them, recommended:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">cp -r ~/.emacs.d/ ~/.emacs.d_backup
+cp ~/.emacs ~/.emacs_backup
+
+rm -rf ~/.emacs.d ~/.emacs</code></pre></div>
+</li>
+</ol>
+<h3>Clone and install LEmacs</h3>
+<p>Now, let's get you set up:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">git clone https://github.com/LionyxML/LEmacs ~/.emacs.d
+emacs -nw --eval=&quot;(my-first-install)&quot;</code></pre></div>
+<p>During installation, you'll be prompted to:</p>
+<ul>
+<li>Choose whether to compile vterm now or later (recommended: yes)</li>
+<li>Specify the Tree Sitter library bundle version (hit RET for default)</li>
+<li>Opt to display installed grammars (recommended: yes)</li>
+<li>Decide on downloading and installing fonts for use with NerdFonts (recommended: yes)</li>
+</ul>
+<p>If anything goes awry, exit and restart the installation script. If all goes smoothly, you'll be back at your shell prompt.</p>
+<p>Launch Emacs, whether from the GUI or TUI (emacs -nw or emacs), and you're good to roll!</p>
+<h2>Troubleshooting</h2>
+<h3>LSP-mode</h3>
+<p>It's always a good idea to run <strong><strong>M-x lsp-doctor</strong></strong> to check that everything is working.</p>
+<p>This might be necessary when dealing with nodeJS, watches, etc:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">echo fs.inotify.max_user_watches=393210 \
+| sudo tee -a /etc/sysctl.conf \
+&amp;&amp; sudo sysctl -p</code></pre></div>
+<h3>Emacs is hanging…</h3>
+<p>If you're experiencing UI freezes in Emacs, here's a handy way to pinpoint the culprit:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">M-x profiler-start
+;; choose CPU
+;; do stuff and make the UI freeze
+M-x profiler-stop
+M-x profiler-report</code></pre></div>
+<p>This will help you identify what's causing the slowdown. Pay attention to the profiler
+report for insights into resource-intensive operations.</p>
+<p>It's worth noting that this configuration makes native compilation asynchronous.
+Consequently, the first time you use a package, there might be a background process
+compiling it. Check for any Async-native-compile-log buffers using:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">M-x ibuffer</code></pre></div>
+<p>Inspect these buffers to ensure that compilation processes are running as expected.</p>
+<h2>FAQ</h2>
+<h3>Why not X Feature?</h3>
+<p>If you're wondering, "Why not X feature?"—great question!</p>
+<p>Open an issue on our GitHub repository, and let's dive into the
+discussion. I am open to exploring new additions or substitutions.</p>
+<h2>Extra: Emacs install</h2>
+<h3>Debian (or Debian Based distros)</h3>
+<p>For Debian or Debian based Distros, such as Ubuntu and it's derivatives.</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">sudo apt install emacs</code></pre></div>
+<p>Check the installed version with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">emacs --version</code></pre></div>
+<h3>MacOS</h3>
+<p>On macOS compiling with a brew formulae is the recommendated way:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">brew install \
+  --ignore-dependencies \
+  emacs-plus@30 \
+  --with-native-comp \
+  --with-xwidgets \
+  --with-imagemagick \
+  --with-mailutils \
+  --with-poll \
+  --with-no-frame-refocus</code></pre></div>
+<h3>Compile Emacs from scratch (Debian)</h3>
+<p>Before everything, this is optional, but may help on reducing troubleshooting time:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">sudo apt-get build-dep emacs</code></pre></div>
+<p>Take a look on the repo first to make sure Emacs on master branch matches the above version requirement.</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">git clone git://git.savannah.gnu.org/emacs.git
+
+./configure --with-native-compilation=aot --with-tree-sitter --with-gif --with-png --with-jpeg --with-rsvg --with-tiff --with-imagemagick --with-x-toolkit=lucid --with-json --with-mailutils
+
+make clean
+
+make -j8
+
+sudo make install</code></pre></div>

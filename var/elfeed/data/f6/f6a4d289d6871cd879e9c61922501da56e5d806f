@@ -1,0 +1,30 @@
+<p>I am developing two new themes for my minimalistic <code class="language-plaintext highlighter-rouge">doric-themes</code>
+package for Emacs. These combine gold with teal hues. <code class="language-plaintext highlighter-rouge">doric-beach</code> is
+the light theme and <code class="language-plaintext highlighter-rouge">doric-valley</code> is its dark counterpart. Here are
+the screenshots:</p>
+
+<p><a href="https://protesilaos.com/assets/images/doric/doric-beach.png"><img alt="doric-beach theme sample" src="https://protesilaos.com/assets/images/doric/doric-beach.png" /></a></p>
+
+<p><a href="https://protesilaos.com/assets/images/doric/doric-valley.png"><img alt="doric-valley theme sample" src="https://protesilaos.com/assets/images/doric/doric-valley.png" /></a></p>
+
+<h2>Coming in version 0.4.0</h2>
+
+<p>The character of the themes is well-defined, though I may still make some small tweaks. Expect these and other improvements to be available in the next stable version of the <code class="language-plaintext highlighter-rouge">doric-themes</code>, which I expect to publish some time before the end of August.</p>
+
+<h2>About the Doric themes</h2>
+
+<p>The Doric themes use few colours and will appear monochromatic in many
+contexts. They are my most minimalist themes. Styles involve the
+careful use of typographic features and subtleties in colour gradients
+to establish a consistent rhythm.</p>
+
+<p>If you want maximalist themes in terms of colour, check my <code class="language-plaintext highlighter-rouge">ef-themes</code>
+package. For something in-between, which I would consider the best
+“default theme” for a text editor, opt for my <code class="language-plaintext highlighter-rouge">modus-themes</code>.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">doric-themes</code></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/emacs/doric-themes-pictures">https://protesilaos.com/emacs/doric-themes-pictures</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/doric-themes">https://github.com/protesilaos/doric-themes</a></li>
+  <li>Backronym: Doric Only Really Intensifies Conservatively … themes.</li>
+</ul>

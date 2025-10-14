@@ -1,0 +1,1002 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Validation is a crucial aspect of any application, ensuring that the
+data it operates on meets the necessary criteria. However,
+implementing robust validation can often be complex and
+time-consuming. Enter ZOD, the lightweight and versatile validation
+library that simplifies this process without compromising on
+functionality.</p>
+<h2>Intro</h2>
+<p>According to
+<a href="https://zod.dev/?id=introduction">https://zod.dev/?id=introduction</a>,
+Zod is a TypeScript-first schema declaration and validation library,
+where the term "schema" to broadly refer to any data type, from a
+simple string to a complex nested object.</p>
+<p>Some great aspects of Zod:</p>
+<ul>
+<li>
+<p>Zero dependencies</p>
+</li>
+<li>
+<p>Works in Node.js, Bun and Deno and all modern browsers</p>
+</li>
+<li>
+<p>Tiny: 8kb minified + zipped</p>
+</li>
+<li>
+<p>Immutable: methods (e.g. .optional()) return a new instance</p>
+</li>
+<li>
+<p>Concise, chainable interface</p>
+</li>
+<li>
+<p>Functional approach: parse, don't validate</p>
+</li>
+<li>
+<p>Works with plain JavaScript too! You don't need to use TypeScript.</p>
+</li>
+</ul>
+<h2>Initializing our playground</h2>
+<p>To initialize our playground project we will start by creating a generic typescript
+project using Vite <a href="https://vitejs.dev/guide/">https://zod.dev/?id=introduction</a>.</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token function">pnpm</span> create vite
+</code></pre></div>
+<p>We can choose <code>vanilla</code>, <code>typescript</code>, and <code>zod-testing</code> for our project name.</p>
+<p>This will create the following tree:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell">└── zod-testing
+    ├── index.html
+    ├── package.json
+    ├── public
+    │   └── vite.svg
+    ├── src
+    │   ├── counter.ts
+    │   ├── main.ts
+    │   ├── style.css
+    │   ├── typescript.svg
+    │   └── vite-env.d.ts
+    └── tsconfig.json
+</code></pre></div>
+<p>You can go ahead and delete almost all files, leaving just these:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell">└── zod-testing
+    ├── index.html
+    ├── package.json
+    ├── public
+    ├── src
+    │   └── main.ts
+    └── tsconfig.json
+</code></pre></div>
+<p>You may also empty the contents of <code>main.ts</code>.</p>
+<p>Now, cd into zod-testing and install the dependencies:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token builtin class-name">cd</span> zod-testing
+<span class="token function">pnpm</span> <span class="token function">install</span>
+</code></pre></div>
+<p>Let's now create a hello world message just to see if everything is
+working properly. Inside <code>src/main.ts</code>.</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Hello Zod"</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>And on the project root run <code>pnpm dev</code>.</p>
+<p>You should see something like:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell">➜ <span class="token function">pnpm</span> dev
+
+<span class="token operator">></span> zod-testing@0.0.0 dev /home/rmj/Projects/github/zod-tutorial/zod-testing
+<span class="token operator">></span> vite
+
+
+
+  VITE v5.1.6  ready <span class="token keyword">in</span> <span class="token number">100</span> ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use <span class="token parameter variable">--host</span> to expose
+  ➜  press h + enter to show <span class="token builtin class-name">help</span>
+
+</code></pre></div>
+<p>Navigate to the URL provided (<code>http://localhost:5173/</code> in my case),
+you'll see an empty page, but opening your <code>Developer Tools Console</code>
+you will get the hello world message.</p>
+<p>We're opting on use your browser developer tools because it probably
+shows messages formatted in a better way than directly on the console,
+besides providing an running REPL instance of V8 context aware of your
+project.</p>
+<h2>Installing Zod</h2>
+<p>We just set a <code>NodeJS</code> project. If you want to use Zod with Deno or Bun, check Zod Introduction Page to check how to to it:
+<a href="https://zod.dev/?id=introduction">https://zod.dev/?id=introduction</a>.</p>
+<p>To install zod we can just:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts">pnpm install zod
+</code></pre></div>
+<p>It might be super quick and need no external dependencies.</p>
+<h2>Basic Usage</h2>
+<p>Very very simple, you import it and start using it. Let's clean our <code>main.ts</code> file and
+add:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span>z<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Also, please check that your tsconfig.json has the "strict" option under "compilerOptions"
+set to true.</p>
+<p>Let's start by defining our first schema. Using it and calling our parser.</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token string">"Rahul"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>What the parse function does is basically ask if the provided data
+matches our schema.</p>
+<p>We might see on the console:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+    <span class="token string-property property">"username"</span><span class="token operator">:</span> <span class="token string">"Rahul"</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>If we change our username to an invalid option such as:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token operator">...</span>
+	<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token operator">...</span>
+</code></pre></div>
+<p>We now get an error:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts">zod<span class="token punctuation">.</span>js<span class="token operator">?</span>v<span class="token operator">=</span>72bcbb81<span class="token operator">:</span><span class="token number">479</span> Uncaught ZodError<span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    <span class="token string-property property">"code"</span><span class="token operator">:</span> <span class="token string">"invalid_type"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"expected"</span><span class="token operator">:</span> <span class="token string">"string"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"received"</span><span class="token operator">:</span> <span class="token string">"number"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"path"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token string">"username"</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"message"</span><span class="token operator">:</span> <span class="token string">"Expected string, received number"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+    at <span class="token keyword">get</span> <span class="token function">error</span> <span class="token punctuation">(</span>zod<span class="token punctuation">.</span>js<span class="token operator">?</span>v<span class="token operator">=</span>72bcbb81<span class="token operator">:</span><span class="token number">479</span><span class="token operator">:</span><span class="token number">23</span><span class="token punctuation">)</span>
+    at _ZodObject<span class="token punctuation">.</span><span class="token function">parse</span> <span class="token punctuation">(</span>zod<span class="token punctuation">.</span>js<span class="token operator">?</span>v<span class="token operator">=</span>72bcbb81<span class="token operator">:</span><span class="token number">578</span><span class="token operator">:</span><span class="token number">18</span><span class="token punctuation">)</span>
+    at main<span class="token punctuation">.</span>ts<span class="token operator">:</span><span class="token number">9</span><span class="token operator">:</span><span class="token number">24</span>
+</code></pre></div>
+<p>And that's great, because we can now get errors based on the
+validation of our data.</p>
+<p>Another cool feature from Zod that makes it very popular is how easy
+it is to integrate it with typescript Types.</p>
+<p>We may have the following code:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user<span class="token operator">:</span> User <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token string">"Rahul"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>See it is almost the same, but we defined the User type.</p>
+<p>It's nothing wrong with it, but we defined our type twice: once in the
+Schema and once on the type directive.</p>
+<p>With Zod what we can do is actually infer the type from the Schema, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user<span class="token operator">:</span> User <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token string">"Rahul"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</code></pre></div>
+<p>The <code>z.infer</code> can infer the type for us and we may now maintain only
+the Schema, without repeating our selfs.</p>
+<p>Another cool thing we can do is using the method <code>safeParse</code>, such as:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>This returns:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+    <span class="token string-property property">"success"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"error"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token string-property property">"issues"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                <span class="token string-property property">"code"</span><span class="token operator">:</span> <span class="token string">"invalid_type"</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"expected"</span><span class="token operator">:</span> <span class="token string">"string"</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"received"</span><span class="token operator">:</span> <span class="token string">"number"</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"path"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                    <span class="token string">"username"</span>
+                <span class="token punctuation">]</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"message"</span><span class="token operator">:</span> <span class="token string">"Expected string, received number"</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"ZodError"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"_error"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token string-property property">"issues"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                <span class="token string-property property">"code"</span><span class="token operator">:</span> <span class="token string">"invalid_type"</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"expected"</span><span class="token operator">:</span> <span class="token string">"string"</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"received"</span><span class="token operator">:</span> <span class="token string">"number"</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"path"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                    <span class="token string">"username"</span>
+                <span class="token punctuation">]</span><span class="token punctuation">,</span>
+                <span class="token string-property property">"message"</span><span class="token operator">:</span> <span class="token string">"Expected string, received number"</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"ZodError"</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>As you can see, we won't raising any errors using <code>safeParse</code>, but we
+have an object containing the <code>success</code> property, and if this false,
+the <code>error</code> property can be read to show specific what went wrong
+during parsing.</p>
+<p>Fixing our username to a string:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token string">"Rahul"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We now have the following result from <code>safeParse</code>:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+    <span class="token string-property property">"success"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"data"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token string-property property">"username"</span><span class="token operator">:</span> <span class="token string">"Rahul"</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>As you may see the <code>success</code> property is true and our parsed data is
+passed within the <code>data</code> property.</p>
+<h2>Primitives</h2>
+<p>Delving a bit more into Zod, let's study a bit of the primitives datatypes:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token string">"Rahul"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">.</span>success<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>As we can see, we can test for strings, numbers (also Bigints, and
+other forms), dates (several kinds), booleans and so on.</p>
+<p>But this code actually returns <code>false</code>, why so?</p>
+<p>Because inside of Zod, every single validation is required by default.</p>
+<p>We can mark a validation as optional like this if we want to:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">optional</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">optional</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">optional</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token string">"Rahul"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">.</span>success<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>And now it returns <code>true</code>.</p>
+<p>We can also use:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">optional</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">optional</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">optional</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  test<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">undefined</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>      <span class="token comment">// it must be undefined</span>
+  test2<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">null</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>          <span class="token comment">// it must be null</span>
+  test3<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>          <span class="token comment">// it must be void, like the return of a function</span>
+  test4<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">any</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>           <span class="token comment">// anything is valid</span>
+  test5<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">unknown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>       <span class="token comment">// anything is valid</span>
+  test6<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">never</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>         <span class="token comment">// it should never have this property</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h2>Basic Validations</h2>
+<p>Here we may find a basic example of how to do a validation:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// .max()  .url()  ....</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> <span class="token number">37</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">.</span>success<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>This returns <code>true</code>.</p>
+<p>I won't cover every single detail, but as you can see each validation
+may have several chainable sub validators, such as <code>min</code>, <code>max</code>,
+<code>regex</code>, and so on.</p>
+<p>Here we extend a bit our example:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isGamer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">nullable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// can be null</span>
+  isMetalhead<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">nullish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// can be null OR undefined</span>
+  isZen<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  luckyNumber<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span>random<span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> <span class="token number">37</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  isGamer<span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+  isMetalhead<span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">.</span>success<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>As we can see we now have <code>nullable</code>, that marks a field to be of the
+type OR null.  We also have <code>nullish</code> that accepts the parsing type,
+null OR undefined. The <code>default</code> method, that actually defines a
+fallback value if the parsing fails. The <code>default</code> can also accept a
+function, like we did in the example with luckyNumber.</p>
+<p>When dealing with a list of possibilities, we can use the <code>enum</code> method to list all
+possible values. Note this won't be typed as an enum by <code>infer</code>.</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isGamer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">nullable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// can be null</span>
+  isMetalhead<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">nullish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// can be null OR undefined</span>
+  isZen<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  luckyNumber<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span>random<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> <span class="token number">37</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  isGamer<span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+  isMetalhead<span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  preferedHobby<span class="token operator">:</span> <span class="token string">"Programming"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">.</span>success<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>This returns <code>true</code> and hovering over the <code>User</code> type we get:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+     username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+    birthday<span class="token operator">:</span> Date<span class="token punctuation">;</span>q
+    isProgrammer<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+    isGamer<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    isZen<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+    luckyNumber<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+    preferedHobby<span class="token operator">:</span> <span class="token string">"Programming"</span> <span class="token operator">|</span> <span class="token string">"Weight Lifiting"</span> <span class="token operator">|</span> <span class="token string">"Guitar"</span><span class="token punctuation">;</span>
+    isMetalhead<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token operator">...</span> <span class="token number">1</span> more <span class="token operator">...</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<h2>Object Type</h2>
+<p>Let's begin by taking a look at this code:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> <span class="token number">37</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">partial</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>What is happening here is that we now have a partial, really useful to
+use with forms and whenever you need partial validation.</p>
+<p>Even tough preferedhobby is there on the schema, .partial() usage makes
+every field optional.</p>
+<p>If we move the <code>.partial()</code> to the schema, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">partial</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We can now check that the type of the UserSchema is turned on all
+fields optional:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodObject<span class="token operator">&#x3C;</span><span class="token punctuation">{</span>
+     username<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodOptional<span class="token operator">&#x3C;</span>z<span class="token punctuation">.</span>ZodString<span class="token operator">></span><span class="token punctuation">;</span>
+    age<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodOptional<span class="token operator">&#x3C;</span>z<span class="token punctuation">.</span>ZodNumber<span class="token operator">></span><span class="token punctuation">;</span>
+    birthday<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodOptional<span class="token operator">&#x3C;</span>z<span class="token punctuation">.</span>ZodDate<span class="token operator">></span><span class="token punctuation">;</span>
+    isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodOptional<span class="token operator">&#x3C;</span>z<span class="token punctuation">.</span>ZodBoolean<span class="token operator">></span><span class="token punctuation">;</span>
+    preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodOptional<span class="token operator">&#x3C;</span><span class="token operator">...</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token string">"strip"</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span>ZodTypeAny<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token operator">...</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token operator">...</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token operator">></span>
+</code></pre></div>
+<p>We can also use other things from typescript, such as <code>.pick()</code>.</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">pick</span><span class="token punctuation">(</span><span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>And now we only use the <code>username</code> validation;</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+	username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>We could also use <code>omit()</code>, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">omit</span><span class="token punctuation">(</span><span class="token punctuation">{</span> username<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>And now everything BUT username is here on the type:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+    birthday<span class="token operator">:</span> Date<span class="token punctuation">;</span>
+    isProgrammer<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+    preferedHobby<span class="token operator">:</span> <span class="token string">"Programming"</span> <span class="token operator">|</span> <span class="token string">"Weight Lifiting"</span> <span class="token operator">|</span> <span class="token string">"Guitar"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>Also, we have <code>.deepPartial()</code> that is the same as partial but makes
+objects inside of objects inside of objects... deeply nested, all
+partials.</p>
+<p>Another thing you can do is "extend" an object with <code>.extend()</code>:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">extend</span><span class="token punctuation">(</span><span class="token punctuation">{</span> knowsTypescript<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>And if we had multiple Schemas we could merge them with:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    age<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    birthday<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    isProgrammer<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">boolean</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    preferedHobby<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">enum</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"Programming"</span><span class="token punctuation">,</span> <span class="token string">"Weight Lifiting"</span><span class="token punctuation">,</span> <span class="token string">"Guitar"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">merge</span><span class="token punctuation">(</span>
+    z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      name<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      surname<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>And now for the last:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  alias<span class="token operator">:</span> <span class="token string">"rmj"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">partial</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>What should happen here? We defined a key to an object that is not
+present on our schema.</p>
+<p>Well, we get:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>username<span class="token operator">:</span> <span class="token string">'Rahul'</span><span class="token punctuation">}</span>
+</code></pre></div>
+<p>By default if allows you to pass something nothing inside the schema,
+but it takes the thing of the result object.</p>
+<p>You can change this behaviour by passing <code>.passthrough()</code>.</p>
+<p>With:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">passthrough</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We now have:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>username<span class="token operator">:</span> <span class="token string">'Rahul'</span><span class="token punctuation">,</span> alias<span class="token operator">:</span> <span class="token string">'rmj'</span><span class="token punctuation">}</span>
+</code></pre></div>
+<p>You could also add <code>.strict()</code> to the schema, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">strict</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>This will throw an error, because the extra data is being treated as
+not recognized by the schema.</p>
+<h2>Array Type</h2>
+<p>Take a look at this code:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    friends<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">array</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">strict</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  friends<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"Amy"</span><span class="token punctuation">,</span> <span class="token string">"Boris"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">partial</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We are now declaring a "friends" array of strings.</p>
+<p>The type of User is:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+     username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    friends<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>We can also check the expected type by using <code>shape</code>, like in:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts">UserSchema<span class="token punctuation">.</span>shape<span class="token punctuation">.</span>friends<span class="token punctuation">.</span>element<span class="token punctuation">;</span>
+</code></pre></div>
+<p>Hovering over <code>element</code> we get:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">(</span>property<span class="token punctuation">)</span> ZodArray<span class="token operator">&#x3C;</span>ZodString<span class="token punctuation">,</span> <span class="token string">"many"</span><span class="token operator">></span><span class="token punctuation">.</span>element<span class="token operator">:</span> z<span class="token punctuation">.</span>ZodString 
+</code></pre></div>
+<p>Now we can add the <code>.nonempty()</code> property to arrays, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  friends<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">array</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">nonempty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>And now passing an empty array to the <code>friends</code> property raises an
+error.</p>
+<p>We can also specify things like <code>.min()</code>, <code>.max()</code>, <code>.length()</code>.</p>
+<h2>Tuples</h2>
+<p>Starting the advanced types, tuples are a fixed lenght array where
+each element has a specific type.</p>
+<p>Take a look at this example code:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  coords<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>It returns:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+    <span class="token string-property property">"username"</span><span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"coords"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token number">1</span><span class="token punctuation">,</span>
+        <span class="token number">2</span><span class="token punctuation">,</span>
+        <span class="token number">3</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>If we change the lenght or types of the provided "coords" data, we now
+get an error.</p>
+<p>We can also change and combine whatever we want like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts">coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+</code></pre></div>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts">coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">gt</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">int</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+</code></pre></div>
+<p>And we can also use <code>.rest()</code> to define a type for the last infinity next numbers of the array, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">rest</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We can now declare a user like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"Rahul"</span><span class="token punctuation">,</span>
+  coords<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"1"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h2>Union Type</h2>
+<p>Let's take a look in the code below:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+ id<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">union</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+ id<span class="token operator">:</span> <span class="token string">"abcde"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We now have a union in our id, meaning the type could be something or other.</p>
+<p>An alternative would be using "or" like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  id<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">or</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Another kind of union is a discriminated union, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  id<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">discriminatedUnion</span><span class="token punctuation">(</span><span class="token string">"status"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>
+    z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span> status<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">literal</span><span class="token punctuation">(</span><span class="token string">"success"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> data<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span> status<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">literal</span><span class="token punctuation">(</span><span class="token string">"failed"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> error<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">instanceof</span><span class="token punctuation">(</span>Error<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  id<span class="token operator">:</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token string">"success"</span><span class="token punctuation">,</span> data<span class="token operator">:</span> <span class="token string">"asdf"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</code></pre></div>
+<p>This will grant you a conditional parser, testing first the status value
+and returning either one or another data.</p>
+<p>In this case the snippet returns:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+    <span class="token string-property property">"id"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token string-property property">"status"</span><span class="token operator">:</span> <span class="token string">"success"</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"data"</span><span class="token operator">:</span> <span class="token string">"asdf"</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>If we change our user to:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  id<span class="token operator">:</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token string">"failed"</span><span class="token punctuation">,</span> error<span class="token operator">:</span> <span class="token function">Error</span><span class="token punctuation">(</span><span class="token string">"asdfg"</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We get in return:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+    <span class="token string-property property">"status"</span><span class="token operator">:</span> <span class="token string">"failed"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"error"</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+</code></pre></div>
+<p>Documentation says this is going to have performance gains. So, if
+performance is an issue, use a <code>discriminatedUnion</code> when you can.</p>
+<h2>Record Type</h2>
+<p>Now, what happens when you have like a map of users, like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token punctuation">{</span>
+  <span class="token string-property property">"abcce-asbcde-abd"</span><span class="token operator">:</span> <span class="token string">"User 1"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"ab123-asdkjk-j2k"</span><span class="token operator">:</span> <span class="token string">"User 2"</span><span class="token punctuation">,</span>
+  <span class="token operator">...</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>We can use a <code>.record()</code> method to define what we want inside the
+record:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserMap <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">record</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token string-property property">"abcce-asbcde-abd"</span><span class="token operator">:</span> <span class="token string">"User 1"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"ab123-asdkjk-j2k"</span><span class="token operator">:</span> <span class="token string">"User 2"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserMap<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</code></pre></div>
+<p>This returns:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token punctuation">{</span>
+    <span class="token string">"abcce-asbcde-abd"</span><span class="token builtin class-name">:</span> <span class="token string">"User 1"</span>,
+    <span class="token string">"ab123-asdkjk-j2k"</span><span class="token builtin class-name">:</span> <span class="token string">"User 2"</span>
+<span class="token punctuation">}</span>
+
+</code></pre></div>
+<p>And if we change our users to:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserMap <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">record</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token string-property property">"abcce-asbcde-abd"</span><span class="token operator">:</span> <span class="token string">"User 1"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"ab123-asdkjk-j2k"</span><span class="token operator">:</span> <span class="token number">123</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserMap<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>We now get an error. This is how we parse "objects" (recors) values.</p>
+<p>But what happens if we change our key to, let's say a number?</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserMap <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">record</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token string-property property">"abcce-asbcde-abd"</span><span class="token operator">:</span> <span class="token string">"User 1"</span><span class="token punctuation">,</span>
+</code></pre></div>
+<p>Now we get:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token punctuation">{</span>
+    <span class="token string">"123"</span><span class="token builtin class-name">:</span> <span class="token string">"User 2"</span>,
+    <span class="token string">"abcce-asbcde-abd"</span><span class="token builtin class-name">:</span> <span class="token string">"User 1"</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>See? No errors.</p>
+<p>If we want to define both key and value datatypes, we define our record with 2
+parameters, the first is always the key and the second the value:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserMap <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">record</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token string-property property">"abcce-asbcde-abd"</span><span class="token operator">:</span> <span class="token number">321</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"ab123-asdkjk-j2k"</span><span class="token operator">:</span> <span class="token number">123</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserMap<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>This returns:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token punctuation">{</span>
+    <span class="token string">"abcce-asbcde-abd"</span><span class="token builtin class-name">:</span> <span class="token number">321</span>,
+    <span class="token string">"ab123-asdkjk-j2k"</span><span class="token builtin class-name">:</span> <span class="token number">123</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<h2>Map Type</h2>
+<p>Most times when you're dealing with things with set Keys and set Values types,
+you maybe want to use a Map instead of a Record, and Zod has support for it,
+example:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserMap <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span> name<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+  <span class="token punctuation">[</span><span class="token string">"abcce-asbcde-abd"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token string">"John"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token punctuation">[</span><span class="token string">"321"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token string">"Mary"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserMap<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>That returns:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    <span class="token punctuation">[</span>
+        <span class="token string">"abcce-asbcde-abd"</span><span class="token punctuation">,</span>
+        <span class="token punctuation">{</span>
+            <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"John"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">[</span>
+        <span class="token string">"321"</span><span class="token punctuation">,</span>
+        <span class="token punctuation">{</span>
+            <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"Mary"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>Set Type</h2>
+<p>We can also work with Sets, a modified array where every value is
+unique, like in this example:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserMap <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserMap<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>It can also use <code>.min()</code>, <code>.max()</code> and other arrays methods.</p>
+<h2>Promise Type</h2>
+<p>With Zod we can also validate Promises:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> PromiseSchema <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">promise</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> p <span class="token operator">=</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">"asdf"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>PromiseSchema<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>That returns:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell">Promise <span class="token punctuation">{</span><span class="token operator">&#x3C;</span>pending<span class="token operator">></span><span class="token punctuation">}</span>
+</code></pre></div>
+<p>And if we parse another non string info inside resolve or pass
+something that is not a promise at all, like a string, we get the
+error.</p>
+<p>A site note here, the promise validation is actually a 2 step process,
+meaning it validades this is a promise and than validates the promise
+content.</p>
+<h2>Advanced Validation</h2>
+<p>You can create your own custom validation with <code>.refine()</code>.</p>
+<p>This means we could do something like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> BrandEmail <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">email</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">refine</span><span class="token punctuation">(</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span> <span class="token operator">=></span> val<span class="token punctuation">.</span><span class="token function">endsWith</span><span class="token punctuation">(</span><span class="token string">"@something.com"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    message<span class="token operator">:</span> <span class="token string">"Email should end with @something.com"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> email <span class="token operator">=</span> <span class="token string">"test@something.com"</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>BrandEmail<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>email<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Which returns:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts">test<span class="token decorator"><span class="token at operator">@</span><span class="token function">something</span></span><span class="token punctuation">.</span>com
+</code></pre></div>
+<p>If we test with some email like <code>test@test.com</code> we would get:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell">Uncaught ZodError: <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    <span class="token string">"code"</span><span class="token builtin class-name">:</span> <span class="token string">"custom"</span>,
+    <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Email should end with @something.com"</span>,
+    <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+</code></pre></div>
+<p>You can also take this a step further using the method <code>superRefine()</code>,
+which we won't cover in here but it is good to know about.</p>
+<h2>Error Handling</h2>
+<p>Let's get back to this example:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">rest</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">strict</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"rmj"</span><span class="token punctuation">,</span>
+  coords<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>As you can see we provided a number 1 to where a string was expected
+on coords.</p>
+<p>This will output the error:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token punctuation">{</span>
+    <span class="token string">"success"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"error"</span><span class="token builtin class-name">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"issues"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                <span class="token string">"code"</span><span class="token builtin class-name">:</span> <span class="token string">"invalid_type"</span>,
+                <span class="token string">"expected"</span><span class="token builtin class-name">:</span> <span class="token string">"string"</span>,
+                <span class="token string">"received"</span><span class="token builtin class-name">:</span> <span class="token string">"number"</span>,
+                <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
+                    <span class="token string">"coords"</span>,
+                    <span class="token number">0</span>
+                <span class="token punctuation">]</span>,
+                <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Expected string, received number"</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>,
+        <span class="token string">"name"</span><span class="token builtin class-name">:</span> <span class="token string">"ZodError"</span>
+    <span class="token punctuation">}</span>,
+    <span class="token string">"_error"</span><span class="token builtin class-name">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"issues"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                <span class="token string">"code"</span><span class="token builtin class-name">:</span> <span class="token string">"invalid_type"</span>,
+                <span class="token string">"expected"</span><span class="token builtin class-name">:</span> <span class="token string">"string"</span>,
+                <span class="token string">"received"</span><span class="token builtin class-name">:</span> <span class="token string">"number"</span>,
+                <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
+                    <span class="token string">"coords"</span>,
+                    <span class="token number">0</span>
+                <span class="token punctuation">]</span>,
+                <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Expected string, received number"</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>,
+        <span class="token string">"name"</span><span class="token builtin class-name">:</span> <span class="token string">"ZodError"</span>
+        <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">..</span>.,
+		<span class="token string">"formErrors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">..</span>.,
+		<span class="token punctuation">..</span>.
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>Using those errors directly can be really dificult, what is
+recommended tough is customizing your error messages like:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z
+      <span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        description<span class="token operator">:</span> <span class="token string">"Must be a String"</span><span class="token punctuation">,</span>
+        required_error<span class="token operator">:</span> <span class="token string">"This is REQUIRED"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token string">"It should be 3 or more"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">rest</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">strict</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Basically, inside each validation you can pass parameters about what
+to show when parsing validation fails.</p>
+<p>In this case we could set the username with undefined to see the
+required_error message, or provide a number to it, or even a small 2
+letters string.</p>
+<p>Those would all fail with the previded messages being send after
+validation.</p>
+<p>As you can see this is not always great to reach for messages, that's the reason
+one could recommend a plugin: <code>zod-validation-error</code>.</p>
+<p>This will give us really easy validation messages with 1 line of code.</p>
+<p>First start by installing it:</p>
+<div class="remark-highlight"><pre class="language-shell"><code class="language-shell"><span class="token function">pnpm</span> i zod-validation-error
+</code></pre></div>
+<p>We can use like this:</p>
+<div class="remark-highlight"><pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> fromZodError <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"zod-validation-error"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> UserSchema <span class="token operator">=</span> z
+  <span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    username<span class="token operator">:</span> z
+      <span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        description<span class="token operator">:</span> <span class="token string">"Must be a String"</span><span class="token punctuation">,</span>
+        required_error<span class="token operator">:</span> <span class="token string">"This is REQUIRED"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token string">"It should be 3 or more"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    coords<span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">tuple</span><span class="token punctuation">(</span><span class="token punctuation">[</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> z<span class="token punctuation">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">rest</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">number</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">strict</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> z<span class="token punctuation">.</span>infer<span class="token operator">&#x3C;</span><span class="token keyword">typeof</span> UserSchema<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  username<span class="token operator">:</span> <span class="token string">"ab"</span><span class="token punctuation">,</span>
+  coords<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"test"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> result <span class="token operator">=</span> UserSchema<span class="token punctuation">.</span><span class="token function">safeParse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>result<span class="token punctuation">.</span>success<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">fromZodError</span><span class="token punctuation">(</span>result<span class="token punctuation">.</span>error<span class="token punctuation">)</span><span class="token punctuation">.</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>And of course, this is not the total best thing to use for everything,
+since this is programatically, but it is good enough for most user
+responses you can customize.</p>
+<h2>Wrap Up</h2>
+<p>This is it! Happy Zodding!</p>

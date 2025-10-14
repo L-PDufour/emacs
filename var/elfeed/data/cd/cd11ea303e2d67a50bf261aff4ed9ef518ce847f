@@ -1,0 +1,58 @@
+<p>This is a small release that makes <code class="language-plaintext highlighter-rouge">spacious-padding-mode</code> work as
+intended when used in tandem with the Emacs daemon and subsequent
+calls to <code class="language-plaintext highlighter-rouge">emacsclient -c</code>. I made the function responsible for
+triggering the “spacious padding” effects work with individual frames
+and then I responded to issue 33 by Lou Woell about integrating that
+with the <code class="language-plaintext highlighter-rouge">server-after-make-frame-hook</code>: <a href="https://github.com/protesilaos/spacious-padding/issues/33">https://github.com/protesilaos/spacious-padding/issues/33</a>.</p>
+
+<p>Additionally, the package now defines two faces that can be used to
+configure the user option <code class="language-plaintext highlighter-rouge">spacious-padding-subtle-mode-line</code> (read
+its documentation string for all the possible values it accepts).</p>
+
+<p>Here is how they can be set (default value is <code class="language-plaintext highlighter-rouge">nil</code>):</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">setq</span> <span class="nv">spacious-padding-subtle-mode-line</span>
+      <span class="o">'</span><span class="p">(</span> <span class="ss">:mode-line-active</span> <span class="nv">spacious-padding-subtle-mode-line-active</span>
+         <span class="ss">:mode-line-inactive</span> <span class="nv">spacious-padding-subtle-mode-line-inactive</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Reload the <code class="language-plaintext highlighter-rouge">spacious-padding-mode</code> for changes to take effect.</p>
+
+<p>When configured this way and with default styles they make the mode
+line use a minimalist overline with no background colour. The active
+mode line has a more noticeable border than the inactive ones. All my
+themes are designed to support this aesthetic (though themes can style
+those faces as they see fit).</p>
+
+<h2>About Spacious Padding</h2>
+
+<p>This package provides a global minor mode to increase the
+spacing/padding of Emacs windows and frames.  The idea is to make
+editing and reading feel more comfortable.  Enable the mode with <code class="language-plaintext highlighter-rouge">M-x
+spacious-padding-mode</code>.  Adjust the exact spacing values by modifying
+the user option <code class="language-plaintext highlighter-rouge">spacious-padding-widths</code>.</p>
+
+<p>Inspiration for this package comes from <a href="https://github.com/rougier">Nicolas Rougier’s impressive
+designs</a> and <a href="https://github.com/minad/org-modern">Daniel Mendler’s
+<code class="language-plaintext highlighter-rouge">org-modern</code> package</a>.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">spacious-padding</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/spacious-padding">https://protesilaos.com/emacs/spacious-padding</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/spacious-padding">https://protesilaos.com/emacs/spacious-padding</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/spacious-padding">https://github.com/protesilaos/spacious-padding</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/spacious-padding">https://gitlab.com/protesilaos/spacious-padding</a></li>
+    </ul>
+  </li>
+  <li>Sample images:
+    <ul>
+      <li><a href="https://protesilaos.com/codelog/2023-06-03-emacs-spacious-padding/">https://protesilaos.com/codelog/2023-06-03-emacs-spacious-padding/</a></li>
+      <li><a href="https://protesilaos.com/codelog/2023-11-15-spacious-padding-extra-ui-dev/">https://protesilaos.com/codelog/2023-11-15-spacious-padding-extra-ui-dev/</a></li>
+    </ul>
+  </li>
+  <li>Backronyms: Space Perception Adjusted Consistently Impacts Overall
+Usability State … padding; Spacious … Precise Adjustments to
+Desktop Divider Internals Neatly Generated.</li>
+</ul>

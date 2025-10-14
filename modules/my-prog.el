@@ -32,8 +32,8 @@
 
 ;; A lean fork of dumb-jump.
 (use-package tempel
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
+  :custom
+  (tempel-trigger-prefix "<")
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
@@ -79,12 +79,12 @@
 (defun my/eglot-capf ()
   "Set up completion with buffer validation."
   (when (and (buffer-live-p (current-buffer))
-			 (bound-and-true-p eglot--managed-mode))
-	(setq-local completion-at-point-functions
-				(list #'eglot-completion-at-point
-					  #'tempel-complete
-					  #'cape-dabbrev
-					  #'cape-file))))
+             (bound-and-true-p eglot--managed-mode))
+    (setq-local completion-at-point-functions
+                (list #'eglot-completion-at-point
+                      #'tempel-complete
+                      #'cape-dabbrev
+                      #'cape-file))))
 
 (use-package eglot
   :ensure nil

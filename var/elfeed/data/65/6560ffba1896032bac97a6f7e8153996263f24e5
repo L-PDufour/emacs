@@ -1,0 +1,9 @@
+As a followup to <a href="https://lwn.net/Articles/1035727/">his OSS Europe talk on the
+future of 32-bit support in the kernel</a>, Arnd Bergmann has put together
+<a href="https://lwn.net/ml/all/4ff89b72-03ff-4447-9d21-dd6a5fe1550f@app.fastmail.com">a
+detailed plan</a> for the eventual removal of high-memory support, which he
+calls "<q>one of the least popular features of the Linux kernel</q>".  The
+intent is "<q>to gradually phase out highmem over the next 2 years for
+mainline kernels</q>".  This plan is posted as a prompt for a discussion to
+be held at the Kernel Summit in December, so chances are it will evolve
+considerably in the next few months.

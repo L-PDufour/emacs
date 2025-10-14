@@ -1,0 +1,82 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>The 0.3.0 release of <a href="https://github.com/LionyxML/emacs-kick">Emacs
+Kick</a> lands today, bringing
+quiet but quality-of-life improvements while paving the way for future
+support in Emacs 31.</p>
+<p>Gone is the <code>company-mode</code> UI. Enter: <code>corfu</code>, floating tooltips, rich
+font support, and more predictable behavior. Whether you use Emacs in
+GUI or terminal, the UX feels tighter, more modern, and (if you're on
+Emacs 31) frankly beautiful.</p>
+<p>Let’s walk through what changed, and why this matters.</p>
+<hr>
+<h2>✨ What's New in 0.3.0</h2>
+<p>This release is focused on simplifying and modernizing the core
+experience—particularly <strong>completion</strong> and <strong>inline documentation</strong>.</p>
+<hr>
+<h3>🧠 Corfu replaces Company</h3>
+<p><code>company-mode</code> has served us well, but it’s showing its age. In 0.3.0,
+it’s replaced with <a href="https://github.com/minad/corfu"><code>corfu</code></a>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Femacs-kick-030-02.png&w=3840&q=75" alt="emacs-kicks-corfu"></p>
+<p>This:</p>
+<p>➖ Easily supports <strong>Nerd Fonts</strong> icons on TUI.</p>
+<p>➖ Provides info about completion candidate on TUI (Emacs >31).</p>
+<p>➖ Feels native and snappy.</p>
+<p>➖ Integrates beautifully with <code>cape</code>, <code>vertico</code>, <code>orderless</code>, the modern minibuffer stack.</p>
+<p>➖ Plays nice with LSP and non-LSP backends alike.</p>
+<p>Corfu stays out of your way until you need it. Completion is now
+<strong>manual by default</strong>, triggered via <code>TAB</code>. No more random popups
+mid-thought.</p>
+<p>You can re-enable auto-completion if you prefer, but the default now
+gives you back control.</p>
+<h3>💡 Floating Eldoc (with eldoc-box) on Emacs 31</h3>
+<p>If you're running the bleeding-edge Emacs 31, you now get floating
+documentation (via child-frame) out of the box using eldoc-box.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Femacs-kick-030-01.png&w=3840&q=75" alt="emacs-kicks-eldoc-box"></p>
+<p>That means pressing <code>K</code> (uppercase!) shows a clean, floating doc
+tooltip right next to your point.</p>
+<p>No more jumping to temporary buffers to read type signatures or
+docstrings. It feels like a native IDE. And if you’re still on Emacs
+30? No problem, the fallback is still the <em>eldoc</em> buffer.</p>
+<h3>✨ Smaller Tweaks That Matter</h3>
+<p>True to the Emacs spirit, small details make a big difference. This
+release includes several subtle but impactful visual and behavioral
+changes:</p>
+<p>➖ <strong>Company Mode Removed</strong>: All <code>company-mode</code> related packages have
+been fully removed for a cleaner, Corfu-native experience.</p>
+<p>➖ <strong>Consistent <code>TAB</code> Behavior</strong>: <code>TAB</code> is now exclusively for
+completion, removing the ambiguity where it might trigger
+indentation instead.</p>
+<p>➖ <strong>Quicker Dired</strong>: <code>&#x3C;leader> e d</code> now opens dired on current
+working directory. This complements <code>&#x3C;leader> e e</code> which opens the
+side explorer.</p>
+<p>➖ <strong>Cleaner Diffs</strong>: The markers used by <code>diff-hl</code> in the margin have
+been updated to clearer box-drawing characters (<code>┃</code>, <code>┆</code>), making
+it easier to see new, modified, and saved changes.</p>
+<p>➖ <strong>Iconic Magit</strong>: When you have Nerd Fonts enabled, your Magit
+status buffer now includes file-type icons, giving it a richer,
+modern feel.</p>
+<p>➖ <strong>Less Noise</strong>: The automatic highlighting of the current line
+(<code>global-hl-line-mode</code>) is now off by default to reduce visual
+distraction.</p>
+<h3>🚀 What This Means for You</h3>
+<p>Remember this:</p>
+<div class="remark-highlight"><pre class="language-txt"><code class="language-txt">Emacs-Kick isn’t a full-fledged distribution
+but rather a starting point for building your
+own Emacs configuration. It’s designed to be
+especially accessible for Vim/Neovim users,
+letting you explore the power of Emacs without
+committing to its entire ecosystem.</code></pre></div>
+<p>This release doubles down on that. It gets out of your way. It gives
+you just enough: snappy completions, modern visuals, but no monolithic
+frameworks.</p>
+<h3>📦 How to Upgrade</h3>
+<p>Check install instructions on the official Github Repository:
+<a href="https://github.com/LionyxML/emacs-kick">https://github.com/LionyxML/emacs-kick</a></p>
+<h3>💬 Final Thoughts</h3>
+<p>This release makes Emacs Kick feel... well, kick-ass. It’s smoother,
+quieter, and more intentional. If you value clean defaults, fast
+completion, and less cognitive noise. You’ll feel the difference.</p>
+<p>Let me know what you think, what broke, and what could improve. PRs
+and issues welcome as always.</p>
+<p>Happy hacking! ⚡️</p>

@@ -1,0 +1,157 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Discover how to configure Emacs to use the project-specific ESLint
+binary, ensuring compatibility with older projects. Learn about the
+issue caused by the ESLint v9.0.0 update and how to hack Flymake (via
+flymake-eslint) for a happy experience.</p>
+<h2>Making Emacs Work with Project's ESLint</h2>
+<p>This means: local ESlint from node_modules, the one you installed to
+your project.</p>
+<h3>Introduction</h3>
+<p>After a recent clean reinstall of the <code>asdf</code> plugin, which manages my
+Node.js versions via <code>.tool-versions</code>, I encountered an issue: ESLint
+stopped working in Emacs. My older projects, which were not compatible
+with the newer globally installed ESLint, caused Emacs to fail
+silently when trying to load ESLint. Debugging revealed that the
+incompatibility stemmed from the ESLint v9.0.0 update, which
+deprecated the previous configuration format, <code>.eslintrc</code>, in favor of
+the new default configuration format, <code>eslint.config.js</code>
+[<a href="https://eslint.org/docs/latest/use/migrate-to-9.0.0#-new-default-config-format-eslintconfigjs">source</a>].
+This change affected both my Emacs and Neovim personal configurations,
+as neither editor was set to use the local ESLint binary, but rather
+the global one.</p>
+<h3>The Hack: Using Local ESLint Binary with Flymake</h3>
+<p>To solve this problem, I created/adapted a hack to make Flymake in
+Emacs use the project-local ESLint binary located in
+<code>node_modules/.bin/eslint</code> instead of the globally installed
+version. This ensures that each project uses the version of ESLint it
+was originally configured with, avoiding compatibility issues.</p>
+<p>Here’s how to set it up:</p>
+<ol>
+<li>
+<p><strong>Install flymake-eslint</strong></p>
+<p>First, make sure you have <code>flymake-eslint</code> installed. You can do
+this by adding the following to your Emacs configuration file:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> flymake-eslint
+      <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+      <span class="token lisp-property property">:config</span>
+      <span class="token comment">;; If Emacs is compiled with JSON support</span>
+      <span class="token punctuation">(</span><span class="token keyword">setq</span> flymake-eslint-prefer-json-diagnostics <span class="token boolean">t</span><span class="token punctuation">)</span>
+</code></pre></div>
+<ol start="2">
+<li>
+<p><strong>Define Function to Use Local ESLint</strong></p>
+<p>Next, define a function that sets the project's <code>node_modules</code>
+binary ESLint as the first priority. Note that my functions are
+prefixed with <code>lemacs</code>, which is the name of my Emacs
+configuration available at
+<a href="https://github.com/LionyxML/LEmacs">LEmacs</a>:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">lemacs/use-local-eslint</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+      <span class="token string">"Set project's <span class="token symbol">`node_modules'</span> binary eslint as first priority.
+    If nothing is found, keep the default value flymake-eslint set or
+    your override of `flymake-eslint-executable-name.'"</span>
+      <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">root</span> <span class="token punctuation">(</span><span class="token car">locate-dominating-file</span> <span class="token punctuation">(</span><span class="token car">buffer-file-name</span><span class="token punctuation">)</span> <span class="token string">"node_modules"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+             <span class="token punctuation">(</span><span class="token car">eslint</span> <span class="token punctuation">(</span><span class="token keyword">and</span> root
+                          <span class="token punctuation">(</span><span class="token car">expand-file-name</span> <span class="token string">"node_modules/.bin/eslint"</span>
+                                            root<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">and</span> eslint <span class="token punctuation">(</span><span class="token car">file-executable-p</span> eslint<span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token punctuation">(</span><span class="token car">setq-local</span> flymake-eslint-executable-name eslint<span class="token punctuation">)</span>
+          <span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"Found local ESLINT! Setting: %s"</span> eslint<span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token punctuation">(</span><span class="token car">flymake-eslint-enable</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<ol start="3">
+<li>
+<p><strong>Configure ESLint with Flymake</strong></p>
+<p>You can configure Flymake to use the local ESLint for specific
+major modes like <code>tsx-ts-mode</code>, <code>typescript-ts-mode</code>, and
+<code>typescriptreact-mode</code>:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">lemacs/configure-eslint-with-flymake</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+	<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">or</span> <span class="token punctuation">(</span><span class="token car">eq</span> major-mode <span class="token quoted-symbol variable symbol">'tsx-ts-mode</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">eq</span> major-mode <span class="token quoted-symbol variable symbol">'typescript-ts-mode</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">eq</span> major-mode <span class="token quoted-symbol variable symbol">'typescriptreact-mode</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token car">lemacs/use-local-eslint</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<ol start="4">
+<li>
+<p><strong>Add Hooks</strong></p>
+<p>Finally, add the function to the <code>eglot-managed-mode-hook</code> and
+other relevant hooks:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token car">add-hook</span> <span class="token quoted-symbol variable symbol">'eglot-managed-mode-hook</span> <span class="token quoted-symbol variable symbol">#'lemacs/use-local-eslint</span><span class="token punctuation">)</span>
+
+    <span class="token comment">;; With older projects without LSP or if eglot fails</span>
+    <span class="token comment">;; you can call interactivelly M-x lemacs/use-local-eslint RET</span>
+    <span class="token comment">;; or add a hook like:</span>
+    <span class="token punctuation">(</span><span class="token car">add-hook</span> <span class="token quoted-symbol variable symbol">'js-ts-mode-hook</span> <span class="token quoted-symbol variable symbol">#'lemacs/use-local-eslint</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>Notice that as <code>lemacs/use-local-eslint</code> is an interactive function it
+might also be called manually with <code>M-x lemacs/use-local-eslint RET</code>.</p>
+<h3>Full Code</h3>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> flymake-eslint
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token comment">;; If Emacs is compiled with JSON support</span>
+  <span class="token punctuation">(</span><span class="token keyword">setq</span> flymake-eslint-prefer-json-diagnostics <span class="token boolean">t</span><span class="token punctuation">)</span>
+    
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">lemacs/use-local-eslint</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+    <span class="token string">"Set project's <span class="token symbol">`node_modules'</span> binary eslint as first priority.
+If nothing is found, keep the default value flymake-eslint set or
+your override of `flymake-eslint-executable-name.'"</span>
+    <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+    <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">root</span> <span class="token punctuation">(</span><span class="token car">locate-dominating-file</span> <span class="token punctuation">(</span><span class="token car">buffer-file-name</span><span class="token punctuation">)</span> <span class="token string">"node_modules"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+           <span class="token punctuation">(</span><span class="token car">eslint</span> <span class="token punctuation">(</span><span class="token keyword">and</span> root
+                        <span class="token punctuation">(</span><span class="token car">expand-file-name</span> <span class="token string">"node_modules/.bin/eslint"</span>
+                                          root<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">and</span> eslint <span class="token punctuation">(</span><span class="token car">file-executable-p</span> eslint<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token car">setq-local</span> flymake-eslint-executable-name eslint<span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"Found local ESLINT! Setting: %s"</span> eslint<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token car">flymake-eslint-enable</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+
+  <span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">lemacs/configure-eslint-with-flymake</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+	<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">or</span> <span class="token punctuation">(</span><span class="token car">eq</span> major-mode <span class="token quoted-symbol variable symbol">'tsx-ts-mode</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">eq</span> major-mode <span class="token quoted-symbol variable symbol">'typescript-ts-mode</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">eq</span> major-mode <span class="token quoted-symbol variable symbol">'typescriptreact-mode</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token car">lemacs/use-local-eslint</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token car">add-hook</span> <span class="token quoted-symbol variable symbol">'eglot-managed-mode-hook</span> <span class="token quoted-symbol variable symbol">#'lemacs/use-local-eslint</span><span class="token punctuation">)</span>
+
+  <span class="token comment">;; With older projects without LSP or if eglot fails</span>
+  <span class="token comment">;; you can call interactivelly M-x lemacs/use-local-eslint RET</span>
+  <span class="token comment">;; or add a hook like:</span>
+  <span class="token punctuation">(</span><span class="token car">add-hook</span> <span class="token quoted-symbol variable symbol">'js-ts-mode-hook</span> <span class="token quoted-symbol variable symbol">#'lemacs/use-local-eslint</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h3>Demo</h3>
+<h4>Case A:</h4>
+<p>Project with Typescript and ESLint version 8.x.x.</p>
+<p>Without the Hack (only typescript server errors are shown):</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Feslint_01.png&w=3840&q=75" alt="eslint_01"></p>
+<p>With the Hack (both typescript server and eslint errors are shown):</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Feslint_02.png&w=3840&q=75" alt="eslint_02"></p>
+<h4>Case B:</h4>
+<p>Project with only ESLint in an ancient version.</p>
+<p>Without the Hack (no linting):</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Feslint_03.png&w=3840&q=75" alt="eslint_03"></p>
+<p>With the Hack (the right 'age compatible' linting):</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Feslint_04.png&w=3840&q=75" alt="eslint_04"></p>
+<h3>Conclusion</h3>
+<p>By hacking <code>flymake-eslint</code> to use the local ESLint binary, you can
+maintain compatibility with older projects without relying on globally
+installed versions that may introduce breaking changes. This approach
+ensures a smooth development experience in Emacs, keeping ESLint
+functional across various project setups.</p>
+<p>As a small sidenote, I did noticed some time between the first time
+the first project buffer opens and flymake starts to work, but it
+looks like this is already the case even without the hack, just start
+editing and things will adjust themselves.</p>
+<p>Also, if you do not use your projects with the built-in <code>project.el</code>
+(as you probably should), I believe the hack is easy enough to be
+changed to your needs.</p>

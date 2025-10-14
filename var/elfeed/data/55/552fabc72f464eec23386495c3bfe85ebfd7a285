@@ -1,0 +1,140 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <h2>EDIT:</h2>
+<p><strong>Important!</strong> This was always a very specific solution to a very
+specific issue. However, starting from Emacs <strong>30</strong>, it will no longer
+work or have any beneficial effects.</p>
+<p>From Emacs 30 onward, <code>.eln</code> files are <strong>linked per machine</strong>, meaning
+the <code>eln-cache</code> directory will automatically include a subfolder based
+on the <code>comp-abi-hash</code> variable and no adjustments from the user side
+are needed.</p>
+<p>For more details, see this discussion: <a href="https://debbugs.gnu.org/cgi/bugreport.cgi?bug=76586">Bug
+#76586</a>.</p>
+<p><strong>TL;DR:</strong> Do not use these hacks anymore.</p>
+<h2>How to Share Your Emacs Configuration Between Different Machines (and Architectures) with Native Compilation</h2>
+<p>If you use Emacs on multiple machines, especially ones running
+different architectures or operating systems, sharing your Emacs
+configuration across those machines can become tricky. Add native
+compilation (introduced in Emacs 28) to the mix, and you might run
+into conflicts when Emacs tries to reuse compiled <code>.eln</code> files between
+machines.</p>
+<p>Fortunately, with a bit of smart configuration, you can make Emacs
+share your configuration while keeping native compilation enabled for
+each machine. In this post, I'll show you how to set up your Emacs so
+that native compilation caches (<code>.eln</code> files) are kept separate for
+each machine. We'll also discuss why this is important and what your
+directory structure will look like.</p>
+<h2>Why Is This Important?</h2>
+<p>Emacs uses native compilation to compile Elisp files into optimized
+<code>.eln</code> binaries, which are architecture and system-dependent. If you
+share your Emacs configuration across machines without accounting for
+this, you may encounter issues:</p>
+<ol>
+<li>
+<p><strong>Conflicting <code>.eln</code> files</strong>: A <code>.eln</code> file compiled for a Linux
+machine might not work on a macOS machine.</p>
+</li>
+<li>
+<p><strong>Unnecessary recompilations</strong>: Emacs may attempt to recompile
+packages on each startup, which can slow things down and clutter your
+<code>eln-cache</code> directory.</p>
+</li>
+</ol>
+<p>By separating the native compilation cache for each machine, you ensure:</p>
+<p>• Faster startup times since Emacs doesn't recompile already-compiled
+code.</p>
+<p>• A cleaner and more predictable setup across machines.</p>
+<h2>The Solution: Machine-Specific <code>eln-cache</code> Directories</h2>
+<p>To keep <code>.eln</code> files organized and avoid conflicts, you can configure
+Emacs to use a machine-specific <code>eln-cache</code> directory. Here's the
+configuration snippet to add into your <code>early-init.el</code>:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token heading comment title">;;; Native Compile Settings</span>
+<span class="token comment">;; I use a &#x3C;emacs-default-dir>/eln-cache-&#x3C;machine-hostname>/ dir to store</span>
+<span class="token comment">;; my different machines' eln compiled code. This allows the same config</span>
+<span class="token comment">;; to be used on several machines without conflicts.</span>
+<span class="token comment">;; This is added in early-init.el to prevent unwanted recompilations.</span>
+
+<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token car">featurep</span> <span class="token quoted-symbol variable symbol">'native-compile</span><span class="token punctuation">)</span>
+  <span class="token comment">;; Set the right directory to store the native compilation cache</span>
+  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">path</span> <span class="token punctuation">(</span><span class="token car">expand-file-name</span> <span class="token punctuation">(</span><span class="token keyword">concat</span> <span class="token string">"eln-cache-"</span> <span class="token punctuation">(</span><span class="token car">system-name</span><span class="token punctuation">)</span> <span class="token string">"/"</span><span class="token punctuation">)</span> user-emacs-directory<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token car">setq-default</span> native-comp-eln-load-path       <span class="token punctuation">(</span><span class="token car">list</span> path<span class="token punctuation">)</span>
+				  native-compile-target-directory path<span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token car">startup-redirect-eln-cache</span> path<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token car">setq-default</span> native-comp-async-report-warnings-errors <span class="token boolean">nil</span>  <span class="token comment">;; Silence compiler warnings as they can be disruptive</span>
+				native-comp-jit-compilation              <span class="token boolean">t</span>    <span class="token comment">;; Enable async native compilation</span>
+				package-native-compile                   <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">;; Compile installed packages</span>
+</code></pre></div>
+<h2>What Does This Code Do?</h2>
+<ol>
+<li>
+<p><code>(system-name):</code> Retrieves the hostname of the machine. This is
+used to create a unique directory for each machine's eln-cache.</p>
+</li>
+<li>
+<p><code>expand-file-name:</code> Combines the Emacs configuration directory
+(user-emacs-directory) with the machine-specific
+<code>eln-cache-&#x3C;hostname></code> folder.</p>
+</li>
+<li>
+<p><code>native-comp-eln-load-path</code> and <code>native-compile-target-directory:</code>
+Set the paths for Emacs to store and load the compiled <code>.eln</code> files.</p>
+</li>
+<li>
+<p><code>startup-redirect-eln-cache:</code> Ensures Emacs uses the specified
+eln-cache directory right from startup.</p>
+</li>
+</ol>
+<p>Optional settings:</p>
+<p>• <code>native-comp-async-report-warnings-errors:</code> Silences disruptive compiler warnings.</p>
+<p>• <code>native-comp-jit-compilation:</code> Enables Just-In-Time (JIT) native
+compilation for faster execution.</p>
+<p>• <code>package-native-compile:</code> Ensures all installed packages are
+natively compiled.</p>
+<p>By placing this in your <code>early-init.el</code>, you make sure Emacs sets up
+the <code>eln-cache</code> directory <em>before</em> it starts loading packages or
+recompiling files.</p>
+<h2>Folder Structure Example</h2>
+<p>Let's say you have two machines, with the following hostnames:</p>
+<p>• <code>debian:</code> A Linux workstation.</p>
+<p>• <code>macbook:</code> A macOS laptop.</p>
+<p>With the above configuration, your Emacs directory structure will look like this:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">~/.emacs.d/
+<span class="token operator">|</span>-- early-init.el
+<span class="token operator">|</span>-- init.el
+<span class="token operator">|</span>-- eln-cache-debian/          <span class="token comment"># Cache for 'debian'</span>
+<span class="token operator">|</span>   <span class="token operator">|</span>-- abcdef01-abcdefgh01.eln
+<span class="token operator">|</span>   <span class="token operator">|</span>-- xyz12345-xyzabc123.eln
+<span class="token operator">|</span>
+<span class="token operator">|</span>-- eln-cache-macbook/         <span class="token comment"># Cache for 'macbook'</span>
+	<span class="token operator">|</span>-- abcdef01-abcdefgh01.eln
+	<span class="token operator">|</span>-- pqr67890-pqrxyz678.eln
+</code></pre></div>
+<h2>Setting Up for a New Machine</h2>
+<p>If you're setting up Emacs on a new machine:</p>
+<ol>
+<li>
+<p>Clone or copy your shared Emacs configuration (e.g., from GitHub).</p>
+</li>
+<li>
+<p>Make sure the above snippet is in your early-init.el.</p>
+</li>
+<li>
+<p>Start Emacs. It will automatically create a new
+<code>eln-cache-&#x3C;hostname></code> directory and begin compiling packages natively
+for the current machine.</p>
+</li>
+</ol>
+<h2>Conclusion</h2>
+<p>Sharing Emacs configurations across machines doesn't have to be a
+hassle, even when using native compilation. By directing Emacs to use
+machine-specific eln-cache directories, you can:</p>
+<p>• Avoid conflicts caused by incompatible .eln files.</p>
+<p>• Speed up startup times by preventing unnecessary recompilations.</p>
+<p>• Maintain a clean and organized Emacs setup.</p>
+<p>I hope with the provided configuration, you can easily manage Emacs on
+multiple machines—whether you're switching between Linux, macOS, or
+different hardware architectures.</p>
+<p>Happy hacking!</p>
+<h3>Edit</h3>
+<p><strong>2025-02-26:</strong> Added the "do not use this" note above the header.</p>

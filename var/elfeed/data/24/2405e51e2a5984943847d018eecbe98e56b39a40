@@ -1,0 +1,629 @@
+<p>Denote aims to be a simple-to-use, focused-in-scope, and effective
+note-taking and file-naming tool for Emacs.</p>
+
+<p>Denote is based on the idea that files should follow a predictable and
+descriptive file-naming scheme.  The file name must offer a clear
+indication of what the contents are about, without reference to any
+other metadata.  Denote basically streamlines the creation of such
+files or file names while providing facilities to link between them
+(where those files are editable).</p>
+
+<p>Denote’s file-naming scheme is not limited to “notes”.  It can be used
+for all types of file, including those that are not editable in Emacs,
+such as videos.  Naming files in a constistent way makes their
+filtering and retrieval considerably easier.  Denote provides relevant
+facilities to rename files, regardless of file type.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">denote</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/denote">https://protesilaos.com/emacs/denote</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/denote-changelog">https://protesilaos.com/emacs/denote-changelog</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/denote">https://github.com/protesilaos/denote</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/denote">https://gitlab.com/protesilaos/denote</a></li>
+    </ul>
+  </li>
+  <li>Video demo: <a href="https://protesilaos.com/codelog/2022-06-18-denote-demo/">https://protesilaos.com/codelog/2022-06-18-denote-demo/</a></li>
+  <li>Backronyms: Denote Everything Neatly; Omit The Excesses.  Don’t Ever
+Note Only The Epiphenomenal.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<h2>Version 4.0.0 on 2025-04-15</h2>
+
+<p>This is a massive release. There is one breaking change, which should
+be easy to adapt to: this pertains to the reorganisation of the
+project to separate the “core” of Denote from its “extensions”. The
+core is the <code class="language-plaintext highlighter-rouge">denote</code> package. Each extension now has its own package
+(details below).</p>
+
+<p>Other than that, this version includes lots of new features for
+searching and linking as well as quality-of-life refinements. We have
+generalised the infrastructure for performing queries in the
+<code class="language-plaintext highlighter-rouge">denote-directory</code> and made the buffers with the search results more
+useful.</p>
+
+<p>Take your time to read through this publication. I am writing it for
+you. Also remember that the most up-to-date resource for anything
+related to Denote is its manual. You are always welcome to contact me:
+<a href="https://protesilaos.com/contact">https://protesilaos.com/contact</a>. Or join the development on the Git
+repository.</p>
+
+<p>As usual, special thanks to Jean-Philippe Gagné Guay for making high
+quality contributions to Denote since the beginning of the project ~3
+years ago. Those will not always be headline features, but are
+important improvements to the underlying code base.</p>
+
+<p>I mention contributions from Jean-Philippe and others in its context.
+Though I do not cover implementation details, otherwise this document
+will be the size of a book. This does not mean that they are no
+important though. Please consult the Git commit log for all the
+technicalities.</p>
+
+<h3>All the “extras” are in separate packages, including the Org dynamic blocks</h3>
+
+<p>In previous versions of Denote, we included some optional extensions
+as part of the <code class="language-plaintext highlighter-rouge">denote</code> package. These included the files
+<code class="language-plaintext highlighter-rouge">denote-org-extras.el</code> (Org dynamic blocks, among others),
+<code class="language-plaintext highlighter-rouge">denote-journal-extras.el</code> (streamlined for journaling),
+<code class="language-plaintext highlighter-rouge">denote-silo-extras.el</code> (working with multiple Denote silos).</p>
+
+<p>The files <code class="language-plaintext highlighter-rouge">denote-md-extras.el</code> (Markdown extras) and
+<code class="language-plaintext highlighter-rouge">denote-sequence.el</code> (sequence notes, including Luhmann-style
+alphanumeric sequences) were also part of the project during the last
+development cycle, though they never made it into a tagged release.</p>
+
+<p>All these are now available as standalone packages on the official GNU
+ELPA archive:</p>
+
+<ul>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">denote-org</code>:</strong> In the Emacs configuration file, replace all
+instances of <code class="language-plaintext highlighter-rouge">denote-org-extras</code> with <code class="language-plaintext highlighter-rouge">denote-org</code>.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">denote-journal</code>:</strong> Replace <code class="language-plaintext highlighter-rouge">denote-journal-extras</code> with <code class="language-plaintext highlighter-rouge">denote-journal</code>.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">denote-silo</code>:</strong> Replace <code class="language-plaintext highlighter-rouge">denote-silo-extras</code> with <code class="language-plaintext highlighter-rouge">denote-silo</code>.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">denote-markdown</code> :</strong> Replace <code class="language-plaintext highlighter-rouge">denote-md-extras</code> with <code class="language-plaintext highlighter-rouge">denote-markdown</code>.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">denote-sequence</code>:</strong> No changes to any of the defined symbols.
+Simply get the new package.</p>
+  </li>
+</ul>
+
+<p>I will document each of these packages further below. The plan, going
+forward, is to maintain all the packages and coordinate their new
+versions.</p>
+
+<h3>More things in “core”</h3>
+
+<p>While the extras are moved out to their own code repositories, all
+other features are merged into <code class="language-plaintext highlighter-rouge">denote.el</code>. Those include everything
+that was in <code class="language-plaintext highlighter-rouge">denote-sort.el</code> and <code class="language-plaintext highlighter-rouge">denote-rename-buffer.el</code>.</p>
+
+<ul>
+  <li>
+    <p>The “sort” mechanism is mostly for package developers. We use it
+extensively in our Org dynamic blocks, which are now part of the
+<code class="language-plaintext highlighter-rouge">denote-org</code> package.</p>
+  </li>
+  <li>
+    <p>The <code class="language-plaintext highlighter-rouge">denote-dired</code> command (alias <code class="language-plaintext highlighter-rouge">denote-sort-dired</code>) is the only
+user-facing “sort” command we have always provided. It produces a
+fully fledged Dired buffer showing the results of the given search
+for file names. The matching files are sorted according to the
+user’s expressed preference. The details are described in the
+manual.</p>
+  </li>
+  <li>
+    <p>The <code class="language-plaintext highlighter-rouge">denote-rename-buffer-mode</code> and all of its user options are
+unchanged. This mode automatically renames the buffer of a given
+Denote file so that it is easier to read it. Again, the manual
+covers the technicalities.</p>
+  </li>
+</ul>
+
+<p>Users do not need to make changes, unless they are explicitly loading
+<code class="language-plaintext highlighter-rouge">denote-sort-dired</code> and <code class="language-plaintext highlighter-rouge">denote-rename-buffer</code>. In that case, they may
+just remove those calls: only <code class="language-plaintext highlighter-rouge">denote</code> needs to be loaded.</p>
+
+<h3>The <code class="language-plaintext highlighter-rouge">denote-query-mode</code></h3>
+
+<p>Many of the features I will describe below produce search results via
+the built-in Xref mechanism. Xref performs a search with a Grep or
+Grep-like program, subject to the user option <code class="language-plaintext highlighter-rouge">xref-search-program</code>.
+The buffer those search results are displayed in runs the
+<code class="language-plaintext highlighter-rouge">denote-query-mode</code>. It supersedes <code class="language-plaintext highlighter-rouge">denote-backlinks-mode</code>.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">denote-query-mode</code> supports the following:</p>
+
+<ul>
+  <li>Results are shown in the context, with the exact match in highlight.</li>
+  <li>Matches are grouped by file. Each file is a “heading”.</li>
+  <li>Headings can be folded with <code class="language-plaintext highlighter-rouge">TAB</code>, just how it is done in Org buffers.</li>
+  <li>The results can be used for further queries. Type <code class="language-plaintext highlighter-rouge">C-h m</code>
+(<code class="language-plaintext highlighter-rouge">describe-mode</code>) to learn about all the relevant commands.</li>
+</ul>
+
+<p>We have had support for Xref since the original version of Denote. It
+now is more generalised to cover backlinks, query links, and
+<code class="language-plaintext highlighter-rouge">denote-grep</code> (more below).</p>
+
+<h3>Use query links for file contents or file names</h3>
+
+<p>Denote has always provided the option to link directly to a file with
+a given name by referencing its identifier. This can be done with the
+command <code class="language-plaintext highlighter-rouge">denote-link</code>, among a few others like it (always consult the
+manual of Denote).</p>
+
+<p>In addition to these “direct links”, we also support “query links”.
+Those do not point to a file but instead trigger a search. The results
+are placed in a buffer that uses the appropriate major mode.</p>
+
+<p>There are two types of query links:</p>
+
+<ul>
+  <li>
+    <p><strong>Query file contents:</strong> Use the command <code class="language-plaintext highlighter-rouge">denote-query-contents-link</code>
+to insert a query link at point for “file contents”. It perform a
+search inside files in the <code class="language-plaintext highlighter-rouge">denote-directory</code> and put the results in
+a <code class="language-plaintext highlighter-rouge">denote-query-mode</code> buffer.</p>
+  </li>
+  <li>
+    <p><strong>Query file names:</strong> Use the <code class="language-plaintext highlighter-rouge">denote-query-filenames-link</code> to insert
+a query link for “file names”. It performs the query against file
+names (not contents!) and puts the results in a <code class="language-plaintext highlighter-rouge">dired</code> buffer.</p>
+  </li>
+</ul>
+
+<p>The display of the buffer with the query link results is controlled by
+the user option <code class="language-plaintext highlighter-rouge">denote-query-links-display-buffer-action</code>.</p>
+
+<p>Query links are styled a little bit differently than direct links.
+Compare the <code class="language-plaintext highlighter-rouge">denote-faces-link</code> with <code class="language-plaintext highlighter-rouge">denote-faces-query-link</code>. Both
+should look okay with most themes.</p>
+
+<p>Denote query links are supported as part of the <code class="language-plaintext highlighter-rouge">denote:</code> hyperlink
+type. They are available in all file types we define (per the user
+option <code class="language-plaintext highlighter-rouge">denote-file-type</code>) and should, in principle, work in any
+custom file type (advanced users can check the variable <code class="language-plaintext highlighter-rouge">denote-file-types</code>).</p>
+
+<h3>Backlinks now always show their context</h3>
+
+<p>In the past, the command <code class="language-plaintext highlighter-rouge">denote-backlinks</code> would produce a bespoke
+buffer showing a list of file names that included links to the current
+file (any file with the Denote file-naming scheme can have backlinks,
+by the way, including PDFs, videos, etc.). This buffer did not provide
+any additional functionality. We used to support the option to show
+results in their context via <code class="language-plaintext highlighter-rouge">denote-backlinks-show-context</code>. Those
+would be rendered in a standard Xref buffer.</p>
+
+<p>The contextual results are now the default and sole option. This is
+because we have expanded the functionality of those buffers to use the
+<code class="language-plaintext highlighter-rouge">denote-query-mode</code>, as explained above. Plus, it makes our code base
+simpler.</p>
+
+<p>Users will notice how backlikns look just like a query link for file
+contents. This is because backlinks are the original query links since
+day one of Denote.</p>
+
+<h3>Direct links to a file with matching contents</h3>
+
+<p>The command <code class="language-plaintext highlighter-rouge">denote-link-to-file-with-contents</code> allows users to
+produce a direct link to a file whose contents (not file name!)
+includes the given query.</p>
+
+<p>Similarly, the command <code class="language-plaintext highlighter-rouge">denote-link-to-all-files-with-contents</code>
+generates a typographic list (bullet list) to all files whose contents
+match the given query.</p>
+
+<p>The manual covers all linking commands in depth.</p>
+
+<h3>The essence of <code class="language-plaintext highlighter-rouge">denote-search</code> is part of <code class="language-plaintext highlighter-rouge">denote</code></h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">denote-search</code> package by Lucas Quintana uses the infrastructure
+of Denote to perform searches in file contents. We now provide its
+feature set as part of core <code class="language-plaintext highlighter-rouge">denote</code>.</p>
+
+<p>We decided to do this since query links already introduced all of the
+requisite generalisations to <code class="language-plaintext highlighter-rouge">denote-query-mode</code>.</p>
+
+<p>Users can rely on the commands <code class="language-plaintext highlighter-rouge">denote-grep</code>, <code class="language-plaintext highlighter-rouge">denote-grep-marked-dired-files</code>,
+and <code class="language-plaintext highlighter-rouge">denote-grep-files-referenced-in-region</code>.</p>
+
+<p>The placement of these buffers is subject to the user option
+<code class="language-plaintext highlighter-rouge">denote-grep-display-buffer-action</code>.</p>
+
+<p>This functionality was introduced in two pull requests by Lucas
+Quintana, 571 and 573, with further changes by me:</p>
+
+<ul>
+  <li><a href="https://github.com/protesilaos/denote/pull/571">https://github.com/protesilaos/denote/pull/571</a>.</li>
+  <li><a href="https://github.com/protesilaos/denote/pull/573">https://github.com/protesilaos/denote/pull/573</a>.</li>
+</ul>
+
+<p>Lucas has assigned copyright to the Free Software Foundation.</p>
+
+<p>I think this was a much-needed addition to the core of Denote. It
+complements <code class="language-plaintext highlighter-rouge">denote-dired</code> and query links.</p>
+
+<h3>Formatting of links with <code class="language-plaintext highlighter-rouge">denote-link-description-format</code></h3>
+
+<p>The old user option <code class="language-plaintext highlighter-rouge">denote-link-description-function</code> is deprecated
+and superseded by the new <code class="language-plaintext highlighter-rouge">denote-link-description-format</code>. The new
+user option still accepts a custom function as its value, so the old
+behaviour should be retained.</p>
+
+<p>What the new <code class="language-plaintext highlighter-rouge">denote-link-description-format</code> supports is an easier
+way to customise the description of a link by using format specifiers
+for common options. For example, users who only want to see the title
+of the linked file can do this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(setq denote-link-description-format "%t")
+</code></pre></div></div>
+
+<p>The documentation of this user option covers all the format specifiers
+and further details.</p>
+
+<h3>Miscellaneous changes for all users</h3>
+
+<ul>
+  <li>
+    <p>The command <code class="language-plaintext highlighter-rouge">denote-add-front-matter</code> is superseded by
+<code class="language-plaintext highlighter-rouge">denote-rename-file</code> and related. Those renaming commands will add
+missing front matter or rewrite the modified lines of existing front
+matter. This is due to refinements made by Jean-Philippe Gagné Guay
+to the file renaming mechanism. We discussed this deprecation in
+issue 498: <a href="https://github.com/protesilaos/denote/issues/498">https://github.com/protesilaos/denote/issues/498</a>. Also
+thanks to Samuel Flint for reporting an earlier problem with file
+name signatures: <a href="https://github.com/protesilaos/denote/issues/492">https://github.com/protesilaos/denote/issues/492</a>.</p>
+  </li>
+  <li>
+    <p>The user option <code class="language-plaintext highlighter-rouge">denote-open-link-function</code> specifies the function
+used by Denote to open the file of a direct link.</p>
+  </li>
+  <li>
+    <p>The user option <code class="language-plaintext highlighter-rouge">denote-org-store-link-to-heading</code> can now be set to
+form generic context links without a <code class="language-plaintext highlighter-rouge">PROPERTIES</code> drawer and
+corresponding <code class="language-plaintext highlighter-rouge">CUSTOM_ID</code>. Set the value of this variable to
+<code class="language-plaintext highlighter-rouge">'context</code>. Read its documentation for further details.</p>
+  </li>
+  <li>
+    <p>Also about <code class="language-plaintext highlighter-rouge">denote-org-store-link-to-heading</code>, we have changed its
+default value to <code class="language-plaintext highlighter-rouge">nil</code>, which is what we were doing for most of
+Denote’s history. This means that, by default, <code class="language-plaintext highlighter-rouge">org-store-link</code> and
+anything building on top of it will create a link only to the
+current Denote file, like <code class="language-plaintext highlighter-rouge">denote:IDENTIFIER</code>, but not to the
+current heading within that file. To create links to the
+file+heading, set the value of this variable to <code class="language-plaintext highlighter-rouge">'id</code>.</p>
+  </li>
+  <li>
+    <p>The command <code class="language-plaintext highlighter-rouge">denote-dired-link-marked-notes</code> is an alias for
+<code class="language-plaintext highlighter-rouge">denote-link-dired-marked-notes</code>.</p>
+  </li>
+  <li>
+    <p>The user option <code class="language-plaintext highlighter-rouge">denote-sort-dired-extra-prompts</code> control what
+<code class="language-plaintext highlighter-rouge">denote-dired</code> (alias <code class="language-plaintext highlighter-rouge">denote-sort-dired</code>) prompts for. It accepts
+either a nil value or a list of symbols among <code class="language-plaintext highlighter-rouge">sort-by-component</code>,
+<code class="language-plaintext highlighter-rouge">reverse-sort</code>, and <code class="language-plaintext highlighter-rouge">exclude-regexp</code>. The order those symbols appear
+in the list is significant, with the leftmost coming first.</p>
+  </li>
+  <li>
+    <p>There is a new <code class="language-plaintext highlighter-rouge">denote-sort-identifier-comparison-function</code> variable
+which determines how identifier-based sorting should be done by
+default. It complements the existing <code class="language-plaintext highlighter-rouge">denote-sort-title-comparison-function</code>,
+<code class="language-plaintext highlighter-rouge">denote-sort-keywords-comparison-function</code>, <code class="language-plaintext highlighter-rouge">denote-sort-signature-comparison-function</code>.
+Thanks to Maikol Solís for the contribution in pull request 517:
+<a href="https://github.com/protesilaos/denote/pull/517">https://github.com/protesilaos/denote/pull/517</a>. The change is
+small, meaning that Maikol does not need to assign copyright to the
+Free Software Foundation (though I believe the paperwork is done, anyway).</p>
+  </li>
+  <li>
+    <p>Lots of refinements to the doc strings of individual variables
+and/or functions as well as the manual.</p>
+  </li>
+  <li>
+    <p>Lots of other contributions to discussions and questions on the Git
+repository. Granted, these are not “changes” per se but are part of
+the development effort nonetheless.</p>
+  </li>
+  <li>
+    <p>Made <code class="language-plaintext highlighter-rouge">denote-get-path-by-id</code> use <code class="language-plaintext highlighter-rouge">denote-get-file-extension-sans-encryption</code>
+instead of <code class="language-plaintext highlighter-rouge">denote-get-file-extension</code>. This fixes a bug where the
+extension is duplicated if it has an encryption component. Thanks to
+eum3l for the patch in pull request 562: <a href="https://github.com/protesilaos/denote/pull/562">https://github.com/protesilaos/denote/pull/562</a>.
+The change is small, meaning that the author does not need to assign
+copyright to the Free Software Foundation.</p>
+  </li>
+  <li>
+    <p>Same as above for <code class="language-plaintext highlighter-rouge">denote--rename-file</code>, which was done in pull
+request 557: <a href="https://github.com/protesilaos/denote/pull/557">https://github.com/protesilaos/denote/pull/557</a>.</p>
+  </li>
+</ul>
+
+<h3>For developers or advanced users</h3>
+
+<p>The following have been added or modified.</p>
+
+<ul>
+  <li>
+    <p><strong>NEW Function <code class="language-plaintext highlighter-rouge">denote-file-has-denoted-filename-p</code>:</strong> Return non-nil
+if <code class="language-plaintext highlighter-rouge">FILE</code> respects the file-naming scheme of Denote. This tests the
+rules of Denote’s file-naming scheme. Sluggification is ignored. It
+is done by removing all file name components and validating what
+remains. Thanks to Jean-Philippe Gagné Guay for the pull request
+515: <a href="https://github.com/protesilaos/denote/pull/515">https://github.com/protesilaos/denote/pull/515</a>.</p>
+  </li>
+  <li>
+    <p><strong>NEW Functions <code class="language-plaintext highlighter-rouge">denote-infer-keywords-from-files</code>:</strong> Return list of
+keywords in <code class="language-plaintext highlighter-rouge">denote-directory-files</code>. With optional
+<code class="language-plaintext highlighter-rouge">FILES-MATCHING-REGEXP</code>, only extract keywords from the matching
+files. Otherwise, do it for all files. Keep any duplicates. Users
+who do not want duplicates should refer to the functions
+<code class="language-plaintext highlighter-rouge">denote-keywords</code>.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-keywords</code>:</strong> Returns an appropriate list
+of keyword candidates, while accounting for the value of the user
+option <code class="language-plaintext highlighter-rouge">denote-infer-keywords</code>. It now also accepts the optional
+<code class="language-plaintext highlighter-rouge">FILES-MATCHING-REGEXP</code> parameter.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-directory-files</code>:</strong> Returns a list of
+absolute file paths in variable <code class="language-plaintext highlighter-rouge">denote-directory</code>. It now accepts
+the optional <code class="language-plaintext highlighter-rouge">EXCLUDE-REGEXP</code> parameter.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-format-file-name</code>:</strong> Formats a file name.
+The way it treats its <code class="language-plaintext highlighter-rouge">ID</code> parameter has changed. Please read its
+doc string. Thanks to Jean-Philippe Gagné Guay for the pull request
+496: <a href="https://github.com/protesilaos/denote/pull/496">https://github.com/protesilaos/denote/pull/496</a>.</p>
+  </li>
+  <li>
+    <p><strong>ALIAS Function <code class="language-plaintext highlighter-rouge">denote-retrieve-filename-keywords-as-list</code>:</strong> This
+is a name that is easier to discover than <code class="language-plaintext highlighter-rouge">denote-extract-keywords-from-path</code>,
+because of the many other functions with the <code class="language-plaintext highlighter-rouge">denote-retrieve-*</code> prefix.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-retrieve-filename-identifier</code>:</strong> Extracts
+the identifier from <code class="language-plaintext highlighter-rouge">FILE</code> name, if present, else returns nil. To
+create a new one from a date, refer to the <code class="language-plaintext highlighter-rouge">denote-get-identifier</code>
+function. Thanks to Jean-Philippe Gagné Guay for the pull request
+476: <a href="https://github.com/protesilaos/denote/pull/476">https://github.com/protesilaos/denote/pull/476</a>.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-get-identifier</code>:</strong> Converts <code class="language-plaintext highlighter-rouge">DATE</code> into a
+Denote identifier using <code class="language-plaintext highlighter-rouge">denote-id-format</code>. If <code class="language-plaintext highlighter-rouge">DATE</code> is nil, it
+returns an empty string as the identifier. Also by Jean-Philippe in
+pull request 476 mentioned right above.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-date-prompt</code>:</strong> Prompts for a date,
+expecting <code class="language-plaintext highlighter-rouge">YYYY-MM-DD</code> or that plus <code class="language-plaintext highlighter-rouge">HH:MM</code> (or even <code class="language-plaintext highlighter-rouge">HH:MM:SS</code>).
+Can also use Org’s more advanced date selection utility if the user
+option <code class="language-plaintext highlighter-rouge">denote-date-prompt-use-org-read-date</code> is non-nil. It now has
+the optional parameters <code class="language-plaintext highlighter-rouge">INITIAL-DATE</code> and <code class="language-plaintext highlighter-rouge">PROMPT-TEXT</code>. Thanks to
+Jean-Philippe Gagné Guay for the pull request 576:
+<a href="https://github.com/protesilaos/denote/pull/576">https://github.com/protesilaos/denote/pull/576</a>.</p>
+  </li>
+  <li>
+    <p><strong>NEW Function <code class="language-plaintext highlighter-rouge">denote-retrieve-groups-xref-query</code>:</strong> Accesses the
+location of xrefs for <code class="language-plaintext highlighter-rouge">QUERY</code> and group them per file. Limit the
+search to text files.</p>
+  </li>
+  <li>
+    <p><strong>NEW Function <code class="language-plaintext highlighter-rouge">denote-retrieve-files-xref-query</code>:</strong> Returns sorted,
+deduplicated file names with matches for <code class="language-plaintext highlighter-rouge">QUERY</code> in their contents.
+Limits the search to text files.</p>
+  </li>
+  <li>
+    <p><strong>NEW Function <code class="language-plaintext highlighter-rouge">denote-retrieve-xref-alist</code>:</strong> Returns xref alist of
+files with the location of matches for <code class="language-plaintext highlighter-rouge">QUERY</code>. With optional
+<code class="language-plaintext highlighter-rouge">FILES-MATCHING-REGEXP</code>, it limits the list of files accordingly
+(per <code class="language-plaintext highlighter-rouge">denote-directory-files</code>). At all times, it limits the search
+to text files.</p>
+  </li>
+  <li>
+    <p><strong>NEW Function <code class="language-plaintext highlighter-rouge">denote-prepend-front-matter</code>:</strong> Prepend front matter
+to <code class="language-plaintext highlighter-rouge">FILE</code>. The <code class="language-plaintext highlighter-rouge">TITLE</code>, <code class="language-plaintext highlighter-rouge">KEYWORDS</code>, <code class="language-plaintext highlighter-rouge">DATE</code>, <code class="language-plaintext highlighter-rouge">ID</code>, <code class="language-plaintext highlighter-rouge">SIGNATURE</code>, and
+<code class="language-plaintext highlighter-rouge">FILE-TYPE</code> are passed from the renaming command and are used to
+construct a new front matter block if appropriate.</p>
+  </li>
+  <li>
+    <p><strong>MODIFIED Function <code class="language-plaintext highlighter-rouge">denote-rewrite-front-matter</code>:</strong> Rewrites front
+matter of note after <code class="language-plaintext highlighter-rouge">denote-rename-file</code> (or related). The <code class="language-plaintext highlighter-rouge">FILE</code>,
+<code class="language-plaintext highlighter-rouge">TITLE</code>, <code class="language-plaintext highlighter-rouge">KEYWORDS</code>, <code class="language-plaintext highlighter-rouge">SIGNATURE</code>, <code class="language-plaintext highlighter-rouge">DATE</code>, <code class="language-plaintext highlighter-rouge">IDENTIFIER</code>, and
+<code class="language-plaintext highlighter-rouge">FILE-TYPE</code> arguments are given by the renaming command and are used
+to construct new front matter values if appropriate. If
+<code class="language-plaintext highlighter-rouge">denote-rename-confirmations</code> contains <code class="language-plaintext highlighter-rouge">rewrite-front-matter</code>,
+prompt to confirm the rewriting of the front matter. Otherwise
+produce a <code class="language-plaintext highlighter-rouge">y-or-n-p</code> prompt to that effect. Thanks to
+Jean-Philippe Gagné Guay for the pull request 558:
+<a href="https://github.com/protesilaos/denote/pull/558">https://github.com/protesilaos/denote/pull/558</a>.</p>
+  </li>
+</ul>
+
+<h3>Denote “extensions” that are not in the <code class="language-plaintext highlighter-rouge">denote</code> package anymore</h3>
+
+<h4><code class="language-plaintext highlighter-rouge">denote-journal</code> integrates nicely with <code class="language-plaintext highlighter-rouge">M-x calendar</code></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">calendar</code> can now highlight days that have journal entry. It may
+also be used as a date picker to view or write a journal entry for
+that day.</p>
+
+<ul>
+  <li>
+    <p>Thanks to Alan Schmitt for reporting an issue with the calendar
+integration during development:
+<a href="https://github.com/protesilaos/denote-journal/issues/8">https://github.com/protesilaos/denote-journal/issues/8</a>.</p>
+  </li>
+  <li>
+    <p>Thanks to Vineet C. Kulkarni for tweaking the identification of the
+journal keyword to be more robust:
+<a href="https://github.com/protesilaos/denote-journal/pull/4">https://github.com/protesilaos/denote-journal/pull/4</a>.</p>
+  </li>
+  <li>
+    <p>Thanks to Honza Pokorny for fixing two small issues with the path
+expansion:</p>
+    <ul>
+      <li><a href="https://github.com/protesilaos/denote-journal/pull/5">https://github.com/protesilaos/denote-journal/pull/5</a></li>
+      <li><a href="https://github.com/protesilaos/denote-journal/pull/7">https://github.com/protesilaos/denote-journal/pull/7</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>Other than that, the package is providing the same functionality as
+the discontinued <code class="language-plaintext highlighter-rouge">denote-journal-extras.el</code>.</p>
+
+<ul>
+  <li>Manual: <a href="https://protesilaos.com/emacs/denote-journal">https://protesilaos.com/emacs/denote-journal</a>.</li>
+  <li>GitHub: <a href="https://github.com/protesilaos/denote-journal">https://github.com/protesilaos/denote-journal</a>.</li>
+</ul>
+
+<h4><code class="language-plaintext highlighter-rouge">denote-org</code> is almost the same as the discontinued <code class="language-plaintext highlighter-rouge">denote-org-extras.el</code></h4>
+
+<p>The only addition to dynamic blocks the optional <code class="language-plaintext highlighter-rouge">:not-regexp</code> parameter.
+This is a regular expression that can further filter the results of a
+search, such that the matching items are removed from the output.</p>
+
+<p>The official manual of <code class="language-plaintext highlighter-rouge">denote-org</code> covers the technicalities.</p>
+
+<ul>
+  <li>Manual: <a href="https://protesilaos.com/emacs/denote-org">https://protesilaos.com/emacs/denote-org</a>.</li>
+  <li>GitHub: <a href="https://github.com/protesilaos/denote-org">https://github.com/protesilaos/denote-org</a>.</li>
+</ul>
+
+<p>Also thanks to Elias Storms for fixing a small issue with the “missing
+links” Org dynamic block, in pull request 486: <a href="https://github.com/protesilaos/denote/pull/486">https://github.com/protesilaos/denote/pull/486</a></p>
+
+<h4><code class="language-plaintext highlighter-rouge">denote-silo</code> is the same as the discontinued <code class="language-plaintext highlighter-rouge">denote-silo-extras.el</code></h4>
+
+<p>I have only made small tweaks to it, but nothing that changes the user
+experience.</p>
+
+<ul>
+  <li>Manual: <a href="https://protesilaos.com/emacs/denote-silo">https://protesilaos.com/emacs/denote-silo</a></li>
+  <li>GitHub: <a href="https://github.com/protesilaos/denote-silo">https://github.com/protesilaos/denote-silo</a></li>
+</ul>
+
+<h4><code class="language-plaintext highlighter-rouge">denote-markdown</code> for some Markdown-specific extras</h4>
+
+<p>This package provides some convenience functions to better integrate
+Markdown with Denote. This is mostly about converting links from one
+type to another so that they can work in different applications
+(because Markdown does not have a standardised way to define custom
+link types). It also defines an “Obsidian” file type which does not
+have any front matter but only uses a level 1 heading for the title of
+the note.</p>
+
+<p>The code of <code class="language-plaintext highlighter-rouge">denote-markdown</code> used to be bundled up with the <code class="language-plaintext highlighter-rouge">denote</code>
+package before version <code class="language-plaintext highlighter-rouge">4.0.0</code> of the latter and was available in the
+file <code class="language-plaintext highlighter-rouge">denote-md-extras.el</code>. Users of the old code will need to adapt
+their setup to use the <code class="language-plaintext highlighter-rouge">denote-markdown</code> package. This can be done by
+replacing all instances of <code class="language-plaintext highlighter-rouge">denote-md-extras</code> with <code class="language-plaintext highlighter-rouge">denote-markdown</code>
+across their configuration.</p>
+
+<ul>
+  <li>Manual: <a href="https://protesilaos.com/emacs/denote-markdown">https://protesilaos.com/emacs/denote-markdown</a></li>
+  <li>GitHub: <a href="https://github.com/protesilaos/denote-markdown">https://github.com/protesilaos/denote-markdown</a></li>
+</ul>
+
+<h4>Write sequence notes (or “folgezettel”) with <code class="language-plaintext highlighter-rouge">denote-sequence</code></h4>
+
+<p>Users who want their notes to have an inherent structure can use
+<code class="language-plaintext highlighter-rouge">denote-sequence</code>. The idea is to have thoughts that naturally form
+sequences and are named accordingly. The sequence scheme is either
+numeric or alphanumeric. The manual of the package explains all the
+details.</p>
+
+<ul>
+  <li>Manual: <a href="https://protesilaos.com/emacs/denote-sequence">https://protesilaos.com/emacs/denote-sequence</a></li>
+  <li>GitHub: <a href="https://github.com/protesilaos/denote-sequence">https://github.com/protesilaos/denote-sequence</a></li>
+</ul>
+
+<p>I had a lot of fun developing this comprehensive package during the
+winter holidays.</p>
+
+<p>Thanks to Claudio Migliorelli, Kierin Bell, Mirko Hernandez for
+helping me fix some issues during development:</p>
+
+<ul>
+  <li><a href="https://github.com/protesilaos/denote/pull/518">https://github.com/protesilaos/denote/pull/518</a>.</li>
+  <li><a href="https://github.com/protesilaos/denote/pull/528">https://github.com/protesilaos/denote/pull/528</a>.</li>
+  <li><a href="https://github.com/protesilaos/denote/pull/540">https://github.com/protesilaos/denote/pull/540</a>.</li>
+  <li><a href="https://github.com/protesilaos/denote/pull/541">https://github.com/protesilaos/denote/pull/541</a>.</li>
+  <li><a href="https://github.com/protesilaos/denote-sequence/issues/2">https://github.com/protesilaos/denote-sequence/issues/2</a>.</li>
+</ul>
+
+<h3>The <code class="language-plaintext highlighter-rouge">consult-denote</code> also gets a small update</h3>
+
+<p>This has always been a standalone package. I made the function
+<code class="language-plaintext highlighter-rouge">consult-denote-file-prompt</code> read the special-purpose variable
+<code class="language-plaintext highlighter-rouge">denote-file-prompt-use-files-matching-regexp</code>. This is related to
+commit <code class="language-plaintext highlighter-rouge">e0f1d47</code> in denote.git, about issue 536 as reported by Alan
+Schmitt: <a href="https://github.com/protesilaos/denote/issues/536">https://github.com/protesilaos/denote/issues/536</a>. The
+variable <code class="language-plaintext highlighter-rouge">denote-file-prompt-use-files-matching-regexp</code> is meant to be
+<code class="language-plaintext highlighter-rouge">let</code> bound and is for advanced users or developers.</p>
+
+<h3>Feature freeze at least until the end of April 2025</h3>
+
+<p>I will not develop new features or accept pull request for a couple of
+weeks. The idea is to focus on fixing any bug reports. We can then
+publish point releases quickly.</p>
+
+<p>New features can be included after we are confident that the packages
+we have are okay.</p>
+
+<h3>Git commits</h3>
+
+<p>This is just an overview of the Git commits, though remember that
+there is more that goes into a project, such as the reporting of
+inconsistencies, discussion of new ideas, et cetera. Thanks to
+everybody involved! Plus, some commits are large while others are
+tiny.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Git/Projects/denote $ git shortlog 3.1.0..4.0.0  --summary --numbered
+   470	Protesilaos Stavrou
+    90	Jean-Philippe Gagné Guay
+     6	Kierin Bell
+     4	Alan Schmitt
+     3	eum3l
+     2	Claudio Migliorelli
+     2	Lucas Quintana
+     2	grtcdr
+     1	Elias Storms
+     1	Laurent Gatto
+     1	Maikol Solís
+     1	Octavian
+     1	TomoeMami
+</code></pre></div></div>
+
+<p>The following are not accurate because they only reflect the changes
+after the reorganisation I made. But we have to start from somewhere.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/Git/Projects/denote-journal $ git shortlog  --summary --numbered
+    54	Protesilaos Stavrou
+     2	Honza Pokorny
+     1	Vineet C. Kulkarni
+
+~/Git/Projects/denote-sequence $ git shortlog  --summary --numbered
+    22	Protesilaos Stavrou
+
+~/Git/Projects/denote-silo $ git shortlog  --summary --numbered
+    17	Protesilaos Stavrou
+
+~/Git/Projects/denote-org $ git shortlog  --summary --numbered
+    15	Protesilaos Stavrou
+
+~/Git/Projects/denote-markdown $ git shortlog  --summary --numbered
+    11	Protesilaos Stavrou
+</code></pre></div></div>

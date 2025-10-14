@@ -1,0 +1,11 @@
+<p>
+The Linux kernel has to handle many different sources of data that should not
+be trusted: user space, network connections, and removable storage, to name a
+few. The kernel has to remain secure even if one of these sends garbled (or
+malicious) data. Benno Lossin has been working on an API for kernel Rust code
+that makes it harder to accidentally make decisions based on data from user space. That work
+is now on its
+<a href="https://lwn.net/ml/all/20250814124424.516191-1-lossin@kernel.org/">
+fourth revision</a>, and Lossin has asked kernel developers to experiment with
+it and see where problems remain, making this a good time to look at the proposed API.
+</p>

@@ -1,0 +1,86 @@
+<p>TMR provides facilities for setting timers using a convenient
+notation. Lots of commands are available to operate on timers, while
+there also exists a tabulated view to display all timers in a nice
+grid.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">tmr</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/tmr">https://protesilaos.com/emacs/tmr</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/tmr-changelog">https://protesilaos.com/emacs/tmr-changelog</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/tmr">https://github.com/protesilaos/tmr</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/tmr">https://gitlab.com/protesilaos/tmr</a></li>
+    </ul>
+  </li>
+  <li>Backronym: TMR May Ring; Timer Must Run.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<h2>Version 1.1.0 on 2025-04-18</h2>
+
+<p>This version makes small refinements to an already stable package.</p>
+
+<h3>All of <code class="language-plaintext highlighter-rouge">tmr-tabulated.el</code>  is part of <code class="language-plaintext highlighter-rouge">tmr.el</code></h3>
+
+<p>The command <code class="language-plaintext highlighter-rouge">tmr-tabulated-view</code>, which produces a grid with
+timers+descriptions, used to be in a separate file. It now is part of
+the singular <code class="language-plaintext highlighter-rouge">tmr.el</code> to keep things simple. Users who were using
+<code class="language-plaintext highlighter-rouge">(require 'tmr-tabulated)</code> or similar will now get a warning. Simply
+load <code class="language-plaintext highlighter-rouge">tmr</code> instead.</p>
+
+<h3>Refined the behaviour of the <code class="language-plaintext highlighter-rouge">tmr-tabulated-view</code> command</h3>
+
+<p>When the command <code class="language-plaintext highlighter-rouge">tmr-tabulated-view</code> (alias <code class="language-plaintext highlighter-rouge">tmr-list-timers</code>) is
+called interactively, it uses the <code class="language-plaintext highlighter-rouge">*tmr-tabulated-view*</code> buffer just
+as it did before. Though it also evaluates the new user option
+<code class="language-plaintext highlighter-rouge">tmr-list-timers-action-alist</code>: it is a variable that controls where
+the buffer is displayed. The default value displays the buffer at the
+bottom of the Emacs frame and makes some other tweaks for usability.</p>
+
+<p>Watch my video on the <code class="language-plaintext highlighter-rouge">display-buffer-alist</code> for further details on
+how to control the display of buffers: <a href="https://protesilaos.com/codelog/2024-02-08-emacs-window-rules-display-buffer-alist/">https://protesilaos.com/codelog/2024-02-08-emacs-window-rules-display-buffer-alist/</a>.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">tmr-tabulated-view</code> command is further revised to make it
+callable from a program. One scenario where we do this is to interrupt
+the termination of Emacs if there are running timers (more below).</p>
+
+<h3>TMR interrupts the termination of Emacs if it must</h3>
+
+<p>In the past, we did not have anything to prevent the termination of
+Emacs if timers were running: Emacs would simply shut down. Now we
+define the <code class="language-plaintext highlighter-rouge">tmr-kill-emacs-query-function</code>, which is added to the
+standard <code class="language-plaintext highlighter-rouge">kill-emacs-query-functions</code>: if there are running timers, it
+asks for confirmation before closing Emacs. To make it easier for
+users to decide how to proceed, it also pops up the list with all the
+timers (i.e. it uses <code class="language-plaintext highlighter-rouge">tmr-tabulated-view</code> from Lisp, as noted above).</p>
+
+<h3>The list view is easier to follow</h3>
+
+<p>The buffer produced by <code class="language-plaintext highlighter-rouge">tmr-tabulated-view</code> now uses more colours to
+make it easier to track the data it presents. These are all the faces
+it applies:</p>
+
+<ul>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">tmr-tabulated-start-time</code>:</strong> The time when the timer was started.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">tmr-tabulated-end-time</code>:</strong> The time when the timer is set to end.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">tmr-tabulated-remaining-time</code>:</strong> The remaining time.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">tmr-tabulated-acknowledgement</code>:</strong> Whether the timer needs to be
+“acknowledged” after it ends (if it is marked as “acknowledged”,
+then it will not go away until the user confirms they have seen it).</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">tmr-tabulated-description</code>:</strong> The text describing what the timer is
+about.</p>
+  </li>
+</ul>

@@ -1,0 +1,55 @@
+
+<p>I occasionally receive emails asking me to look at the writer's new language/library/tool. Sometimes it's in an area I know well, like formal methods. Other times, I'm a complete stranger to the field. Regardless, I'm generally happy to check it out.</p>
+<p>When starting out, this is the biggest question I'm looking to answer:</p>
+<blockquote>
+<p>What does this technology make easy that's normally hard?</p>
+</blockquote>
+<p>What justifies me learning and migrating to a <em>new</em> thing as opposed to fighting through my problems with the tools I already know? The new thing has to have some sort of value proposition, which could be something like "better performance" or "more secure". The most universal value and the most direct to show is "takes less time and mental effort to do something". I can't accurately judge two benchmarks, but I can see two demos or code samples and compare which one feels easier to me.</p>
+<h2>Examples</h2>
+<h3>Functional programming</h3>
+<p>What drew me originally to functional programming was higher order functions. </p>
+<div class="codehilite"><pre><span></span><code># Without HOFs
+
+out = []
+for x in input {
+  if test(x) {
+    out.append(x)
+ }
+}
+
+# With HOFs
+
+filter(test, input)
+</code></pre></div>
+<p style="height:16px; margin:0px !important;"></p>
+<p>We can also compare the easiness of various tasks between examples within the same paradigm. If I know FP via Clojure, what could be appealing about Haskell or F#? For one, null safety is a lot easier when I've got option types.</p>
+<h3>Array Programming</h3>
+<p>Array programming languages like APL or J make certain classes of computation easier. For example, finding all of the indices where two arrays <del>differ</del> match. Here it is in Python:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+
+<span class="o">>>></span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
+</code></pre></div>
+<p>And here it is in J:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="nv">x</span><span class="w"> </span><span class="o">=:</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">  </span><span class="nv">y</span><span class="w"> </span><span class="o">=:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">4</span>
+
+<span class="w">  </span><span class="nv">I</span><span class="o">.</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">y</span>
+<span class="mi">7</span><span class="w"> </span><span class="mi">9</span>
+</code></pre></div>
+<p>Not every tool is meant for every programmer, because you might not have any of the problems a tool makes easier. What comes up more often for you: filtering a list or finding all the indices where two lists differ? Statistically speaking, functional programming is more useful to you than array programming.</p>
+<p>But <em>I</em> have this problem enough to justify learning array programming.</p>
+<h3>LLMs</h3>
+<p>I think a lot of the appeal of LLMs is they make a lot of specialist tasks easy for nonspecialists. One thing I recently did was convert some rst <a href="https://docutils.sourceforge.io/docs/ref/rst/directives.html#list-table" target="_blank">list tables</a> to <a href="https://docutils.sourceforge.io/docs/ref/rst/directives.html#csv-table-1" target="_blank">csv tables</a>. Normally I'd have to do write some tricky parsing and serialization code to automatically convert between the two. With LLMs, it's just</p>
+<blockquote>
+<p>Convert the following rst list-table into a csv-table: [table]</p>
+</blockquote>
+<p>"Easy" can trump "correct" as a value. The LLM might get some translations wrong, but it's so convenient I'd rather manually review all the translations for errors than write specialized script that is correct 100% of the time.</p>
+<h2>Let's not take this too far</h2>
+<p>A college friend once claimed that he cracked the secret of human behavior: humans do whatever makes them happiest. "What about the martyr who dies for their beliefs?" "Well, in their last second of life they get REALLY happy."</p>
+<p>We can do the same here, fitting every value proposition into the frame of "easy". CUDA makes it easier to do matrix multiplication. Rust makes it easier to write low-level code without memory bugs. TLA+ makes it easier to find errors in your design. Monads make it easier to sequence computations in a lazy environment. Making everything about "easy" obscures other reason for adopting new things.</p>
+<h3>That whole "simple vs easy" thing</h3>
+<p>Sometimes people think that "simple" is better than "easy", because "simple" is objective and "easy" is subjective. This comes from the famous talk <a href="https://www.infoq.com/presentations/Simple-Made-Easy/" target="_blank">Simple Made Easy</a>. I'm not sure I agree that simple is better <em>or</em> more objective: the speaker claims that polymorphism and typeclasses are "simpler" than conditionals, and I doubt everybody would agree with that.</p>
+<p>The problem is that "simple" is used to mean both "not complicated" <em>and</em> "not complex". And everybody agrees that "complicated" and "complex" are different, even if they can't agree <em>what</em> the difference is. This idea should probably expanded be expanded into its own newsletter.</p>
+<p>It's also a lot harder to pitch a technology on being "simpler". Simplicity by itself doesn't make a tool better equipped to solve problems. Simplicity can unlock other benefits, like compositionality or <a href="https://buttondown.com/hillelwayne/archive/the-capability-tractability-tradeoff/" target="_blank">tractability</a>, that provide the actual value. And often that value is in the form of "makes some tasks easier". </p>
