@@ -129,7 +129,6 @@
    :preview-key "M-."))
 
 
-
 (use-package orderless
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
