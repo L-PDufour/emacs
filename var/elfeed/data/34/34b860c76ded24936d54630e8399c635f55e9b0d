@@ -1,0 +1,25 @@
+<html><head></head><body><p>⚠️ Note that this doesn’t work properly. There’s a “nil” at the end.</p>
+<p><a href="https://github.com/kaorahi/howm">Howm</a> has a handy menu for viewing tasks and notes. One thing I wanted to add was my Emacs diary entries for the current date. This took 3 things:</p>
+<p>First, I created a function for inserting the day’s entries from Emacs diary in the current buffer.</p>
+<div class="highlight"><pre><code class="language-emacs-lisp"><span><span>(defun my/insert-diary-entries-for-today ()
+</span></span><span><span>  <span>"Insert diary entries for today at point."</span>
+</span></span><span><span>  (interactive)
+</span></span><span><span>  (let ((diary-list-entries-hook <span>nil</span>)
+</span></span><span><span>        (diary-display-function <span>'ignore</span>))
+</span></span><span><span>    (let ((diary-entries (diary-list-entries (calendar-current-date) <span>1</span>)))
+</span></span><span><span>      (if diary-entries
+</span></span><span><span>          (dolist (entry diary-entries)
+</span></span><span><span>            (<span>insert</span> (cadr entry) <span>"\n"</span>))
+</span></span><span><span>        (<span>message</span> <span>"No diary entries for today"</span>)))))
+</span></span></code></pre></div><p>(and by “I” I mean Claude, mostly)</p>
+<p>Then I added the function to the allowed list</p>
+<div class="highlight"><pre><code class="language-emacs-lisp"><span><span><span>;; For including Emacs diary in Howm Menu</span>
+</span></span><span><span>(setq howm-menu-allow (<span>append</span> <span>'</span>(my/insert-diary-entries-for-today) howm-menu-allow))
+</span></span></code></pre></div><p>Finally, I added <code>%here%(my/insert-diary-entries-for-today)</code> to Howm’s menu file. And now, Howm’s menu shows the day’s diary entries.</p>
+<figure>
+    <img loading="lazy" src="howm-menu.jpg" alt="Screenshot of Howm Menu"> <figcaption>
+            <p>Screenshot of Howm Menu</p>
+        </figcaption>
+</figure>
+
+</body></html>

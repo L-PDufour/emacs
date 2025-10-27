@@ -1,0 +1,9 @@
+The GNU Tools Cauldron is almost entirely focused on user-space tools, but
+kernel developers need a solid toolchain too.  In what appears to be a
+developing tradition (<a href="https://lwn.net/Articles/990379/">started in 2024</a>),
+some kernel developers attended the <a
+href="https://conf.gnu-tools-cauldron.org/opo25/">2025 Cauldron</a> for the
+second year in a row to discuss their needs with the assembled toolchain
+developers.  Topics covered in this year's gathering include Rust, better
+<a href="https://www.kernel.org/doc/html/latest/bpf/btf.html">BPF type
+format (BTF)</a> support, SFrame, and more.

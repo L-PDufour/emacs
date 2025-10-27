@@ -6,7 +6,6 @@
 
 (use-package nix-mode
   :mode "\\.nix\\'"
-  :hook (nix-mode . eglot-ensure)
   :config
   ;; Add LSP support via nil (Nix Language Server)
   (with-eval-after-load 'eglot

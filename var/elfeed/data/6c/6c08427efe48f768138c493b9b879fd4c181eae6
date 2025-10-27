@@ -1,0 +1,25 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Discover how to effortlessly resolve the ç (ce cedilla) issue on your
+Debian 12 system with a step-by-step guide that makes keyboard quirks
+a thing of the past. From configuring character input to optimizing
+your GNOME desktop, this article provides practical solutions for a
+more user-friendly experience.</p>
+<h2>Problem Statement</h2>
+<p>I am encountering an issue with my English US, intl. keyboard,
+configured to 'portuguese-br,' where it occasionally outputs <code>ć</code>
+instead of <code>ç</code> in certain windows and terminals. This problem persists
+on my Debian 12 system with the GNOME desktop environment.</p>
+<h2>Solution</h2>
+<p>To rectify this issue, you can create or modify the file located at
+~/.Xcompose with the following content:</p>
+<div class="remark-highlight"><pre class="language-txt"><code class="language-txt"> # UTF-8 (Unicode) compose sequences
+
+ # Overrides C acute with Ccedilla:
+ &lt;dead_acute&gt; &lt;C&gt; : &quot;Ç&quot; &quot;Ccedilla&quot;
+ &lt;dead_acute&gt; &lt;c&gt; : &quot;ç&quot; &quot;ccedilla&quot;</code></pre></div>
+<p>Afterwards, execute the following command in your terminal:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">gsettings <span class="token builtin class-name">set</span> org.gnome.settings-daemon.plugins.xsettings overrides <span class="token string">"{'Gtk/IMModule': &#x3C;'ibus'>}"</span>
+</code></pre></div>
+<p>To apply the changes, restart your computer or switch between Wayland and Xorg sessions.</p>
+<p>And there you have it! Your issue should now be resolved.</p>

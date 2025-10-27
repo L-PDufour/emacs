@@ -1,0 +1,75 @@
+<p>These are my minimalist themes. They use few colours and will appear
+mostly monochromatic in many contexts. Styles involve the careful use
+of typography, such as italics and bold italics.</p>
+
+<p>If you want maximalist themes in terms of colour, check my <code class="language-plaintext highlighter-rouge">ef-themes</code>
+package. For something in-between, which I would consider the best
+“default theme” for a text editor, opt for my <code class="language-plaintext highlighter-rouge">modus-themes</code>.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">doric-themes</code></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/emacs/doric-themes-pictures">https://protesilaos.com/emacs/doric-themes-pictures</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/doric-themes">https://github.com/protesilaos/doric-themes</a></li>
+  <li>Backronym: Doric Only Really Intensifies Conservatively … themes.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<h2>Update to doric-themes version 0.4.0</h2>
+
+<p>This version brings several refinements to the package, as well as two
+new themes.</p>
+
+<h3>Enjoy doric-beach and doric-valley</h3>
+
+<p>Most of the Doric themes feel monochromatic. By contrast, the
+<code class="language-plaintext highlighter-rouge">doric-beach</code> (light) and <code class="language-plaintext highlighter-rouge">doric-valley</code> (dark) are dichromatic: they
+combine warm hues, such as orange, with cold hues like teal. They
+still are minimalistic, like the rest of the family, but appear a bit
+more playful than their more austere counterparts.</p>
+
+<p>[ The <code class="language-plaintext highlighter-rouge">doric-oak</code> and <code class="language-plaintext highlighter-rouge">doric-pine</code> are similar in this regard. ]</p>
+
+<h3>Refashioned diffs</h3>
+
+<p>All diff interfaces, including Magit, diff-mode, and Ediff now rely on
+a comprehensive new subset of colours. They use colour-coded
+backgrounds throughout, whereas before they had just colour-coded
+text. The problem with highlighting only text is that it is harder
+to (i) discern the colour and thus (ii) quickly estimate the
+boundaries of a change.</p>
+
+<p>For Magit in particular, there are distinct styles for the
+highlighted/current diff hunk, all other diff hunks, as well as the
+common word-wise (“refined”) diffs that all interfaces share.</p>
+
+<h3>Org agenda and dates are more consistent</h3>
+
+<p>The changes here are subtle but should contribute to a more pleasant
+experience, owning to the more careful emphasis of information.
+“Scheduled” entries are easier to notice, as they are distinct from
+other events. Date headings also have a more clear distinction from
+the tasks they contain.</p>
+
+<p>For the M-x calendar, in particular, month and date headings are
+revised to be consistent with the Org agenda, while the diary and
+holiday faces are redone to look harmonious in context. Thanks to Amin
+Bandali for checking those and suggesting some tweaks.</p>
+
+<h3>Certain header-like faces stand out more</h3>
+
+<p>In various contexts, such as in git-mode commit message comments or
+Dired buffers, there are pieces of text that conceptually are
+headings. Those are rendered in a distinct style than other generic
+“bold” faces, to better perform their function.</p>
+
+<h3>Flymake fringe indicators are easier to spot</h3>
+
+<p>Those now have a fine background colour, coded to the type of warning.</p>
+
+<h3>Support for the <code class="language-plaintext highlighter-rouge">lin</code> and <code class="language-plaintext highlighter-rouge">pulsar</code> packages</h3>
+
+<p>Those define faces that affect the background of a line. These
+packages now feel right when used in tandem with the doric-themes.</p>

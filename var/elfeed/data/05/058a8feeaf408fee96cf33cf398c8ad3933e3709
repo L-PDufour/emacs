@@ -1,0 +1,56 @@
+
+<p>Happy new year everyone!</p>
+<p>I released the first <em>Logic for Programmers</em> alpha six months ago. There's since been four new versions since then, with the November release putting us in beta. Between work and holidays I didn't make much progress in December, but there will be a 0.6 release in the next week or two.</p>
+<p>People have asked me if the book will ever be available in print, and my answer to that is "when it's done". To keep "when it's done" from being "never", I'm committing myself to <strong>have the book finished by July.</strong> That means roughly six more releases between now and the official First Edition. Then I will start looking for a way to get it printed.</p>
+<h3>The Current State and What Needs to be Done</h3>
+<p>Right now the book is 26,000 words. For the most part, the structure is set— I don't plan to reorganize the chapters much. But I still need to fix shortcomings identified by the reader feedback. In particular, a few topics need more on real world applications, and the Alloy chapter is pretty weak. There's also a bunch of notes and todos and "fix this"s I need to go over.</p>
+<p>I also need to rewrite the introduction and predicate logic chapters. Those haven't changed much since 0.1 and I need to go over them <em>very carefully</em>.</p>
+<p>After that comes copyediting.</p>
+<h4>Ugh, Copyediting</h4>
+<p>Copyediting means going through the entire book to make word and sentence sentence level changes to the flow. An example would be changing</p>
+<table>
+<thead>
+<tr>
+<th>From</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I said predicates are just “boolean functions”. That isn’t <em>quite</em> true.</td>
+<td>It's easy to think of predicates as just "boolean" functions, but there is a subtle and important difference.</td>
+</tr>
+</tbody>
+</table>
+<p>It's a tiny difference but it reads slightly better to me and makes the book slghtly better. Now repeat that for all 3000-odd sentences in the book and I'm done with copyediting!</p>
+<p>For the first pass, anyway. Copyediting is miserable. </p>
+<p>Some of the changes I need to make come from reader feedback, but most will come from going through it line-by-line with a copyeditor. Someone's kindly offered to do some of this for free, but I want to find a professional too. If you know anybody, let me know.</p>
+<h4>Formatting</h4>
+<p>The book, if I'm being honest, looks ugly. I'm using the default sphinx/latex combination for layout and typesetting. My thinking is it's not worth making the book pretty until it's worth reading. But I also want the book, when it's eventually printed, to look <em>nice</em>. At the very least it shouldn't have "self-published" vibes. </p>
+<p>I've found someone who's been giving me excellent advice on layout and I'm slowly mastering the LaTeX formatting arcana. It's gonna take a few iterations to get things right.</p>
+<h4>Front cover</h4>
+<p>Currently the front cover is this:</p>
+<p><img alt="Front cover" class="newsletter-image" src="https://assets.buttondown.email/images/b42ee3de-9d8a-4729-809e-a8739741f0cf.png?w=960&fit=max"/></p>
+<p>It works but gives "programmer spent ten minutes in Inkscape" vibes. I have a vision in my head for what would be nicer. A few people have recommended using Fiverr. So far the results haven't been that good, </p>
+<h4>Fixing Epub</h4>
+<p><em>Ugh</em></p>
+<p>I thought making an epub version would be kinder for phone reading, but it's such a painful format to develop for. Did you know that epub backlinks work totally different on kindle vs other ereaders? Did you know the only way to test if you got em working right is to load them up in a virtual kindle? The feedback loops are miserable. So I've been treating epub as a second-class citizen for now and only fixing the <em>worst</em> errors (like math not rendering properly), but that'll have to change as the book finalizes.</p>
+<h3>What comes next?</h3>
+<p>After 1.0, I get my book an ISBN and figure out how to make print copies. The margin on print is <em>way</em> lower than ebooks, especially if it's on-demand: the net royalties for <a href="https://kdp.amazon.com/en_US/help/topic/G201834330" target="_blank">Amazon direct publishing</a> would be 7 dollars on a 20-dollar book (as opposed to Leanpub's 16 dollars). Would having a print version double the sales? I hope so! Either way, a lot of people have been asking about print version so I want to make that possible.</p>
+<p>(I also want to figure out how to give people who already have the ebook a discount on print, but I don't know if that's feasible.)</p>
+<p>Then, I dunno, maybe make a talk or a workshop I can pitch to conferences. Once I have that I think I can call <em>LfP</em> complete... at least until the second edition.</p>
+<hr/>
+<p>Anyway none of that is actually technical so here's a quick fun thing. I spent a good chunk of my break reading the <a href="https://www.mcrl2.org/web/index.html" target="_blank">mCRL2 book</a>. mCRL2 defines an "algebra" for "communicating processes". As a very broad explanation, that's defining what it means to "add" and "multiply" two processes. What's interesting is that according to their definition, the algebra follows the distributive law, <em>but only if you multiply on the right</em>. eg</p>
+<div class="codehilite"><pre><span></span><code>// VALID
+(a+b)*c = a*c + b*c
+
+// INVALID
+a*(b+c) = a*b + a*c
+</code></pre></div>
+<p>This is the first time I've ever seen this in practice! Juries still out on the rest of the language.</p>
+<hr/>
+<h3>Videos and Stuff</h3>
+<ul>
+<li>My <em>DDD Europe</em> talk is now out! <a href="https://www.youtube.com/watch?v=uRmNSuYBUOU" target="_blank">What We Know We Don't Know</a> is about empirical software engineering in general, and software engineering research on Domain Driven Design in particular.</li>
+<li>I was interviewed in the last video on <a href="https://www.youtube.com/watch?v=yXxmSI9SlwM" target="_blank">Craft vs Cruft</a>'s "Year of Formal Methods". Check it out!</li>
+</ul>

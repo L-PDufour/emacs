@@ -1,0 +1,60 @@
+<html><head></head><body><p>Yesterday I wrote <a href="https://takeonrules.com/2025/09/20/generating-descriptions-of-org-insert-link/">Generating Descriptions of org-insert-link</a>; in which I wrote
+about pulling the default description for links to works.  <time>Today</time> I added one
+more function that resolves three use cases: <code>abbr</code>, <code>abbr-plural</code>, and <code>denote</code>
+links to subheadings.</p>
+<p>For each of the above, I set the <code>:insert-description #'jf/org-link-description/work</code> configuration.  That function deconstructs the
+link and then looks up the information in the corresponding <span><a href="https://protesilaos.com/emacs/denote">Denote</a></span> <small><a href="https://takeonrules.com/site-map/glossary/#abbr-dfn-GLOSSARY-DENOTE">📖</a></small>
+ file.  In the
+case of <code>abbr</code>, I use the <code>ABBR</code> property for the description.</p>
+<p>What does that look like?  The link is to a glossary entry “Rich Site Summary”
+and that entry has an <code>ABBR</code> property of “RSS”.  The description would then be
+“RSS”.</p>
+<p>See the <a href="https://github.com/jeremyf/dotemacs/blob/f61746d35efa5b662ba648d01430681bc950c3ca/emacs.d/init.el#L752-L782">jf/org-link-description/glossary (link to Github)</a> below:</p>
+<pre><code class="language-emacs-lisp">(defun jf/org-link-description/glossary (link desc)
+  "Provide default DESC for a glossary LINK.
+
+Types can be: abbr, abbr-plural, and denote"
+  (if desc
+      desc
+    (let* ((_match
+            (string-match "^\\([^:]+\\):\\([^:]+\\)\\(::#\\(.*\\)\\)?"
+                          link))
+           (type
+            (match-string 1 link))
+           (denote-identifier
+            (match-string 2 link))
+           (custom_id
+            (match-string 4 link))
+           (entry
+            (car (org-map-entries
+                  #'org-element-at-point
+                  (format "CUSTOM_ID=\"%s\"" custom_id)
+                  (list (denote-get-path-by-id denote-identifier))))))
+      (if entry
+          (pcase type
+            ("abbr"
+             (or (org-entry-get entry "ABBR")
+                 (org-element-property :title entry)))
+            ("abbr-plural"
+             (or (org-entry-get entry "PLURAL_ABBR")
+                 (org-element-property :title entry)))
+            ("denote"
+             (org-element-property :title entry)))
+        nil))))
+</code></pre>
+<p>This next part is <a href="https://github.com/jeremyf/dotemacs/blob/f61746d35efa5b662ba648d01430681bc950c3ca/emacs.d/init.el#L1343-L1348">me appending to the “denote” <code>org-link-parameters</code> configuration
+(see code on Github)</a>:</p>
+<pre><code class="language-emacs-lisp">(with-eval-after-load 'denote-org
+  (let ((config
+          (alist-get "denote" org-link-parameters nil nil #'string=)))
+    (plist-put config :insert-description
+      #'jf/org-link-description/glossary)
+    (org-link-set-parameters "denote" config)))
+</code></pre>
+<p>Getting this to work was made easy by leveraging <span><a href="https://en.wikipedia.org/wiki/Emacs">Emacs</a></span> <small><a href="https://takeonrules.com/site-map/glossary/#abbr-dfn-GLOSSARY-EMACS">📖</a></small>
+’s <span><a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">Read-eval-print loop</a></span> (<abbr>REPL</abbr> <small><a href="https://takeonrules.com/site-map/glossary/#abbr-dfn-GLOSSARY-REPL">📖</a></small>)
+, something I
+greatly miss when I’m writing <span><a href="https://takeonrules.com/tags/golang/">Go Lang</a></span> <small><a href="https://takeonrules.com/site-map/glossary/#abbr-dfn-GLOSSARY-GO">📖</a></small>
+ code for my day job.</p>
+
+      </body></html>

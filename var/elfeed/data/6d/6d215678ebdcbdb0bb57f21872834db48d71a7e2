@@ -1,0 +1,352 @@
+<div class="update" id="org6b3ea27">
+<p>
+<span class="timestamp-wrapper"><time class="timestamp" datetime="2025-09-23">[2025-09-23 Tue]</time></span>: Changed my mind, I want the clipboard URL to be used by default. More bugfixes.
+<span class="timestamp-wrapper"><time class="timestamp" datetime="2025-09-22">[2025-09-22 Mon]</time></span>: Fix bug in <code>my-page-title</code>. Add <code>mastodon-toot-mode-map</code>.
+</p>
+
+</div>
+
+<p>
+I love so many things about <a href="https://orgmode.org/">Org Mode</a>'s links. I can use <code>C-c C-l</code> (<code>org-insert-link</code>) to insert a link. If I've selected some text, <code>C-c C-l</code> turns the text into the link's description. I can define my own custom link types with interactive completion, default descriptions, and export formats. This is so nice, I want it in all the different places I write links in:
+</p>
+
+<ul class="org-ul">
+<li>Markdown, like on the <a href="https://emacsconf.org">EmacsConf wiki</a>; then I don't have to remember Markdown's syntax for links</li>
+<li><a href="https://codeberg.org/martianh/mastodon.el">mastodon.el</a> toots</li>
+<li>Oddmuse, like on <a href="https://emacswiki.org">EmacsWiki</a></li>
+<li>HTML/Web mode</li>
+<li>Org Mode HTML export blocks</li>
+</ul>
+
+<p>
+Some considerations inspired by <a href="https://xenodium.com/emacs-dwim-do-what-i-mean/">Emacs DWIM: do what ✨I✨ mean</a>, which I used as a starting point:
+</p>
+
+<ul class="org-ul">
+<li>I want Emacs to use the URL from the clipboard.</li>
+<li>If I haven't already selected some text, I want to use the page title or the custom link description as a default description.</li>
+<li>I want to be able to use my custom link types for completion, but I want it to insert the external web links if I'm putting the link into a non-Org Mode buffer (or in a source or export block that isn't Org Mode). For example, let's say I select <code>dotemacs:my-org-insert-link-dwim</code> with completion. In Org Mode, it should use that as the link target so that I can follow the link to my config and have it exported as an HTML link. In Markdown, it should be inserted as <code>[Adding Org Mode niceties elsewhere: my-org-insert-link-dwim](https://sachachua.com/dotemacs#my-org-insert-link-dwim)</code>.</li>
+</ul>
+
+<p>
+Mostly, this is motivated by my annoyance with having to work with different link syntaxes:
+</p>
+
+<table>
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">HTML</td>
+<td class="org-left"><code>&lt;a href="https://example.com"&gt;title&lt;/a&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left">Org</td>
+<td class="org-left"><code>[[https://example.com][title]]</code></td>
+</tr>
+
+<tr>
+<td class="org-left">Plain text</td>
+<td class="org-left"><code>title https://example.com</code></td>
+</tr>
+
+<tr>
+<td class="org-left">Markdown</td>
+<td class="org-left"><code>[https://example.com](title)</code></td>
+</tr>
+
+<tr>
+<td class="org-left">Oddmuse</td>
+<td class="org-left"><code>[https://example.com title]</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+I want things to Just Work.
+</p>
+
+<div class="media-post" id="org6b7a943">
+<p>
+
+</p>
+
+<p>
+</p><figure><video controls="1" src="https://sachachua.com/blog/2025/09/adding-org-mode-link-awesomeness-elsewhere-my-org-insert-link-dwim/my-org-insert-link-dwim.webm" type="video/webm"><a href="https://sachachua.com/blog/2025/09/adding-org-mode-link-awesomeness-elsewhere-my-org-insert-link-dwim/my-org-insert-link-dwim.webm">Download the video</a></video><figcaption><div>Screencast showing how I insert links</div></figcaption></figure>
+<p></p>
+
+<p>
+Play by play:
+</p>
+
+<ol class="org-ol">
+<li><span class="media-time" data-start="0.000">0:00:00</span> inserting a custom dotemacs link with completion</li>
+<li><span class="media-time" data-start="11.000">0:00:11</span> inserting a link to a blog post</li>
+<li><span class="media-time" data-start="28.000">0:00:28</span> selecting text in an HTML export block and adding a link to it</li>
+<li><span class="media-time" data-start="48.000">0:00:48</span> adding a bookmark link as a plain text link in a Python src block</li>
+</ol>
+
+</div>
+
+<p>
+Here's the <code>my-org-insert-link-dwim</code> function, using <code>my-org-link-as-url</code> from <a href="https://sachachua.com/dotemacs#web-link">Copy web link</a> and <code>my-org-set-link-target-with-search</code> from <a href="https://sachachua.com/dotemacs#completion-consult-consult-omni-using-web-searches-and-bookmarks-to-quickly-link-placeholders-in-org-mode">Using web searches and bookmarks to quickly link placeholders in Org Mode</a>:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-org-insert-link-dwim</span> ()
+  <span class="org-doc">"Like `</span><span class="org-doc"><span class="org-constant">org-insert-link</span></span><span class="org-doc">' but with personal dwim preferences."</span>
+  (<span class="org-keyword">interactive</span>)
+  (<span class="org-keyword">let*</span> ((point-in-link (<span class="org-keyword">and</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>) (org-in-regexp org-link-any-re 1)))
+         (point-in-html-block (<span class="org-keyword">and</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>)
+                                   (<span class="org-keyword">let</span> ((elem (org-element-context)))
+                                     (<span class="org-keyword">and</span> (eq (org-element-type elem) <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">export-block</span>)
+                                          (string= (org-element-property <span class="org-builtin">:type</span> elem) <span class="org-string">"HTML"</span>)))))
+         (point-in-src-or-export-block
+          (<span class="org-keyword">and</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>)
+               (<span class="org-keyword">let</span> ((elem (org-element-context)))
+                 (<span class="org-keyword">and</span> (member (org-element-type elem) <span class="org-highlight-quoted-quote">'</span>(src-block export-block))
+                      (not (string= (org-element-property <span class="org-builtin">:type</span> elem) <span class="org-string">"Org"</span>))))))
+         (url (<span class="org-keyword">cond</span>
+               ((my-org-in-bracketed-text-link-p) nil)
+               ((not point-in-link) (my-org-read-link
+                                     <span class="org-comment-delimiter">;; </span><span class="org-comment">clipboard</span>
+                                     (<span class="org-keyword">when</span> (string-match-p <span class="org-string">"^http"</span> (current-kill 0))
+                                       (current-kill 0))
+                                     ))))
+         (region-content (<span class="org-keyword">when</span> (region-active-p)
+                           (buffer-substring-no-properties (region-beginning)
+                                                           (region-end))))
+         (title (<span class="org-keyword">or</span> region-content
+                    (<span class="org-keyword">when</span> (<span class="org-keyword">or</span> (string-match (regexp-quote <span class="org-string">"*new toot*"</span>) (buffer-name))
+                              (derived-mode-p <span class="org-highlight-quoted-quote">'</span>(markdown-mode web-mode oddmuse-mode))
+                              point-in-html-block
+                              point-in-src-or-export-block
+                              (not (<span class="org-keyword">and</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>)
+                                        point-in-link)))
+                      (read-string <span class="org-string">"Title: "</span>
+                                   (<span class="org-keyword">or</span> (my-org-link-default-description url nil)
+                                       (my-page-title url)))))))
+    <span class="org-comment-delimiter">;; </span><span class="org-comment">resolve the links; see my-org-link-as-url in  https://sachachua.com/dotemacs#web-link</span>
+    (<span class="org-keyword">unless</span> (<span class="org-keyword">and</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>)
+                 (not (<span class="org-keyword">or</span> point-in-html-block point-in-src-or-export-block)))
+      (<span class="org-keyword">setq</span> url (my-org-link-as-url url)))
+    (<span class="org-keyword">when</span> (region-active-p) (delete-region (region-beginning) (region-end)))
+    (<span class="org-keyword">cond</span>
+     ((<span class="org-keyword">or</span> (string-match (regexp-quote <span class="org-string">"*new toot*"</span>) (buffer-name))
+          (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">markdown-mode</span>))
+      (insert (format <span class="org-string">"[%s](%s)"</span> title url)))
+     ((<span class="org-keyword">or</span> (derived-mode-p <span class="org-highlight-quoted-quote">'</span>(web-mode html-mode)) point-in-html-block)
+      (insert (format <span class="org-string">"&lt;a href=\"%s\"&gt;%s&lt;/a&gt;"</span> url title)))
+     ((derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">oddmuse-mode</span>)
+      (insert (format <span class="org-string">"[%s %s]"</span> url title)))
+     ((<span class="org-keyword">or</span> point-in-src-or-export-block
+          (not (derived-mode-p <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-mode</span>)))
+      (insert title <span class="org-string">" "</span> url))
+     ((<span class="org-keyword">and</span> region-content url (not point-in-link))
+      (insert (org-link-make-string url region-content)))
+     ((<span class="org-keyword">and</span> url (not point-in-link))
+      (insert (org-link-make-string
+               url
+               (<span class="org-keyword">or</span> title
+                   (read-string <span class="org-string">"Title: "</span>
+                                (<span class="org-keyword">or</span> (my-org-link-default-description url nil)
+                                    (my-page-title url)))))))
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">bracketed [[plain text]]; see Using web searches and bookmarks to quickly link placeholders in Org Mode https://sachachua.com/dotemacs#completion-consult-consult-omni-using-web-searches-and-bookmarks-to-quickly-link-placeholders-in-org-mode</span>
+     ((my-org-set-link-target-with-search))
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">In Org Mode, edit the link</span>
+     ((call-interactively <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-insert-link</span>)))))
+</code></pre>
+</div>
+
+
+<p>
+Consistent keybindings mean less thinking.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">dolist</span> (group <span class="org-highlight-quoted-quote">'</span>((org . org-mode-map)
+                 (markdown-mode . markdown-mode-map)
+                 (mastodon-toot . mastodon-toot-mode-map)
+                 (web-mode . web-mode-map)
+                 (oddmuse-mode . oddmuse-mode-map)
+                 (text-mode . text-mode-map)
+                 (html-mode . html-mode-map)))
+  (<span class="org-keyword">with-eval-after-load</span> (car group)
+    (keymap-set (symbol-value (cdr group))  <span class="org-string">"C-c C-l"</span> <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">my-org-insert-link-dwim</span>)))
+</code></pre>
+</div>
+
+
+<p>
+All right, let's dig into the details. This code
+gets the page title so that we can use it as the
+link's description. I like to simplify some page
+titles. For example, when I link to Reddit or HN
+discussions, I just want to use "Reddit" or "HN".
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-page-title</span> (url)
+  <span class="org-doc">"Get the page title for URL. Simplify some titles."</span>
+  (<span class="org-keyword">condition-case</span> nil
+      (<span class="org-keyword">pcase</span> url
+        ((<span class="org-keyword">rx</span> <span class="org-string">"reddit.com"</span>) <span class="org-string">"Reddit"</span>)
+        ((<span class="org-keyword">rx</span> <span class="org-string">"news.ycombinator.com"</span>) <span class="org-string">"HN"</span>)
+        ((<span class="org-keyword">rx</span> <span class="org-string">"lobste.rs"</span>) <span class="org-string">"lobste.rs"</span>)
+        (_
+         (<span class="org-keyword">with-current-buffer</span> (url-retrieve-synchronously url)
+           (string-trim
+            (replace-regexp-in-string
+             <span class="org-string">"[ \n]+"</span> <span class="org-string">" "</span>
+             (replace-regexp-in-string
+              <span class="org-string">"</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">(</span></span><span class="org-string">^Github - </span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">:: Sacha Chua</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">)</span></span><span class="org-string">"</span> <span class="org-string">""</span>
+              (<span class="org-keyword">or</span>
+               (dom-texts (car
+                           (dom-by-tag (libxml-parse-html-region
+                                        (point-min)
+                                        (point-max))
+                                       <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">title</span>)))
+               <span class="org-string">""</span>)))))))
+    (<span class="org-warning">error</span> nil)))
+</code></pre>
+</div>
+
+
+<p>
+Let's use that as the default for <code>https:</code> links too.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-org-link-https-insert-description</span> (link desc)
+  <span class="org-doc">"Default to the page title."</span>
+  (<span class="org-keyword">unless</span> desc (my-page-title link)))
+
+(<span class="org-keyword">with-eval-after-load</span> <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org</span>
+  (org-link-set-parameters <span class="org-string">"https"</span> <span class="org-builtin">:insert-description</span> <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">my-org-link-https-insert-description</span>))
+</code></pre>
+</div>
+
+
+<p>
+I want to get the default description for a link,
+even if it uses a custom link type. I extracted
+this code from <code>org-insert-link</code>.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-org-link-default-description</span> (link desc)
+  <span class="org-doc">"Return the default description for an Org Mode LINK.</span>
+<span class="org-doc">This uses :insert-description if defined."</span>
+  (<span class="org-keyword">let*</span> ((abbrevs org-link-abbrev-alist-local)
+         (all-prefixes (append (mapcar <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">car</span> abbrevs)
+                               (mapcar <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">car</span> org-link-abbrev-alist)
+                               (org-link-types)))
+         (type
+          (<span class="org-keyword">cond</span>
+           ((<span class="org-keyword">and</span> all-prefixes
+                 (string-match (rx-to-string <span class="org-highlight-quoted-quote">`</span>(: string-start (submatch (<span class="org-keyword">or</span> ,@all-prefixes)) <span class="org-string">":"</span>)) link))
+            (match-string 1 link))
+           ((file-name-absolute-p link) <span class="org-string">"file"</span>)
+           ((string-match <span class="org-string">"\\`\\.\\.?/"</span> link) <span class="org-string">"file"</span>))))
+    (<span class="org-keyword">when</span> (org-link-get-parameter type <span class="org-builtin">:insert-description</span>)
+      (<span class="org-keyword">let</span> ((def (org-link-get-parameter type <span class="org-builtin">:insert-description</span>)))
+        (<span class="org-keyword">condition-case</span> nil
+            (<span class="org-keyword">cond</span>
+             ((stringp def) def)
+             ((functionp def)
+              (funcall def link desc)))
+          (<span class="org-warning">error</span>
+           nil))))))
+</code></pre>
+</div>
+
+
+<p>
+Now I want an Emacs Lisp function that interactively reads a link with completion, but doesn't actually insert it. I extracted this logic from <code>org-read-link</code>.
+</p>
+
+<details><summary>my-org-read-link, extracted from org-read-link</summary>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">defun</span> <span class="org-function-name">my-org-read-link</span> (<span class="org-type">&amp;optional</span> default)
+  <span class="org-doc">"Act like `</span><span class="org-doc"><span class="org-constant">org-insert-link</span></span><span class="org-doc">'. Return link."</span>
+  (<span class="org-keyword">let*</span> ((wcf (current-window-configuration))
+         (origbuf (current-buffer))
+         (abbrevs org-link-abbrev-alist-local)
+         (all-prefixes (append (mapcar <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">car</span> abbrevs)
+                               (mapcar <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">car</span> org-link-abbrev-alist)
+                               (org-link-types)))
+
+         link)
+    (<span class="org-keyword">unwind-protect</span>
+        <span class="org-comment-delimiter">;; </span><span class="org-comment">Fake a link history, containing the stored links.</span>
+        (<span class="org-keyword">let</span> ((org-link&#45;&#45;history
+               (append (mapcar <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">car</span> org-stored-links)
+                       org-link&#45;&#45;insert-history)))
+          (<span class="org-keyword">setq</span> link
+                (org-completing-read
+                 (org-format-prompt <span class="org-string">"Insert link"</span> (<span class="org-keyword">or</span> default (caar org-stored-links)))
+                 (append
+                  (mapcar (<span class="org-keyword">lambda</span> (x) (concat x <span class="org-string">":"</span>)) all-prefixes)
+                  (mapcar <span class="org-highlight-quoted-quote">#'</span><span class="org-highlight-quoted-symbol">car</span> org-stored-links)
+                  <span class="org-comment-delimiter">;; </span><span class="org-comment">Allow description completion.  Avoid "nil" option</span>
+                  <span class="org-comment-delimiter">;; </span><span class="org-comment">in the case of `</span><span class="org-comment"><span class="org-constant">completing-read-default</span></span><span class="org-comment">' when</span>
+                  <span class="org-comment-delimiter">;; </span><span class="org-comment">some links have no description.</span>
+                  (delq nil (mapcar <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">cadr</span> org-stored-links)))
+                 nil nil nil
+                 <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">org-link&#45;&#45;history</span>
+                 (<span class="org-keyword">or</span> default (caar org-stored-links))))
+          (<span class="org-keyword">unless</span> (org-string-nw-p link) (<span class="org-warning">user-error</span> <span class="org-string">"No link selected"</span>))
+          (<span class="org-keyword">dolist</span> (l org-stored-links)
+            (<span class="org-keyword">when</span> (equal link (cadr l))
+              (<span class="org-keyword">setq</span> link (car l))))
+          (<span class="org-keyword">when</span> (<span class="org-keyword">or</span> (member link all-prefixes)
+                    (<span class="org-keyword">and</span> (equal <span class="org-string">":"</span> (substring link -1))
+                         (member (substring link 0 -1) all-prefixes)
+                         (<span class="org-keyword">setq</span> link (substring link 0 -1))))
+            (<span class="org-keyword">setq</span> link (<span class="org-keyword">with-current-buffer</span> origbuf
+                         (org-link&#45;&#45;try-special-completion link)))))
+      (<span class="org-keyword">when-let*</span> ((window (get-buffer-window <span class="org-string">"*Org Links*"</span> t)))
+        (quit-window <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">kill</span> window))
+      (set-window-configuration wcf)
+      (<span class="org-keyword">when</span> (get-buffer <span class="org-string">"*Org Links*"</span>)
+        (kill-buffer <span class="org-string">"*Org Links*"</span>)))
+    link))
+</code></pre>
+</div>
+
+</details>
+
+<p>
+So now the <code>my-org-insert-link-dwim</code> function can read a link with completion (unless I'm getting it from the clipboard), get the default description from the link (using custom links' <code>:insert-description</code> or the webpage's title), and either wrap the link around the region or insert it in whatever syntax makes sense.
+</p>
+
+<p>
+On a related note, you might also enjoy:
+</p>
+<ul class="org-ul">
+<li><a href="https://sachachua.com/dotemacs#org-bookmarks">Bookmarks</a> - my custom link type for bookmark: that offers completion from resources.org</li>
+<li><a href="https://sachachua.com/dotemacs#linking-to-blog-posts">Linking to blog posts</a> - my custom link type for blog posts</li>
+<li><a href="https://sachachua.com/dotemacs#git-projects">Using an Emacs Lisp macro to define quick custom Org Mode links to project files; plus URLs and search</a></li>
+</ul>
+
+<p>
+And elsewhere:
+</p>
+<ul class="org-ul">
+<li><a href="https://takeonrules.com/2025/09/20/generating-descriptions-of-org-insert-link/">Generating Descriptions of org-insert-link // Take on Rules</a></li>
+<li><a href="https://takeonrules.com/2025/09/21/adding-more-link-description-defaults/">Adding More Link Description Defaults // Take on Rules</a></li>
+</ul>
+
+<div class="note">This is part of my <a href="https://sachachua.com/dotemacs#my-org-insert-link-dwim">Emacs configuration.</a></div><div><a href="https://sachachua.com/blog/2025/09/adding-org-mode-link-awesomeness-elsewhere-my-org-insert-link-dwim/index.org">View org source for this post</a></div>
+<p>You can <a href="https://social.sachachua.com/@sacha/statuses/01K5PY2YJ57735N9JM2S3VSDNA" target="_blank" rel="noopener noreferrer">comment on Mastodon</a> or <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F09%2Fadding-org-mode-link-awesomeness-elsewhere-my-org-insert-link-dwim%2F&body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p>

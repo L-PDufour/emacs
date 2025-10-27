@@ -1,0 +1,334 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Turn Emacs into a powerful Docker development environment that
+supports both Docker and Podman workflows. This guide walks you
+through setting up Dockerfile editing, container management, and
+automated builds, all within Emacs. Whether you’re switching between
+Docker and Podman or managing complex containerized projects, Emacs
+can streamline your development process. Dive in to discover how to
+integrate Docker with Emacs and boost your workflow!</p>
+<h2>Introduction</h2>
+<p>Emacs is a powerhouse for development, and with the right
+configuration, it can even manage your Docker (or Podman) workflows
+without leaving the editor. In this guide, we’ll walk through setting
+up Emacs specifically to work with Docker and Podman. We’ll cover
+editing Dockerfiles, managing containers, and integrating
+Docker-specific language support.</p>
+<h2>External (non Emacs related) Dependencies</h2>
+<p>To use Docker or Podman effectively within Emacs, ensure the
+following external dependencies are installed and functioning on your
+system:</p>
+<ul>
+<li>
+<p><strong>Docker</strong>: Expected to be installed and running.</p>
+</li>
+<li>
+<p><strong>Docker-Compose</strong>: Expected to be installed and functional.</p>
+</li>
+</ul>
+<p>and/or</p>
+<ul>
+<li>
+<p><strong>Podman</strong>: Expected to be installed and running.</p>
+</li>
+<li>
+<p><strong>Podman-Compose</strong>: Expected to be installed and functional.</p>
+</li>
+</ul>
+<h2>Setting the Docker Executable</h2>
+<p>In LEmacs (my own config for Emacs), I've created a flexible setup
+that allows you to toggle between Docker and Podman as your primary
+container engine. This makes it easy to adapt your workflow depending
+on your environment. No needs to use LEmacs by the way, I'll show here
+all the code needed.</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">lemacs-docker-executable</span></span> <span class="token quoted-symbol variable symbol">'docker</span>
+  <span class="token string">"The executable to be used with docker-mode."</span>
+  <span class="token lisp-property property">:type</span> <span class="token punctuation">'(</span><span class="token car">choice</span>
+		   <span class="token punctuation">(</span><span class="token car">const</span> <span class="token lisp-property property">:tag</span> <span class="token string">"docker"</span> docker<span class="token punctuation">)</span>
+		   <span class="token punctuation">(</span><span class="token car">const</span> <span class="token lisp-property property">:tag</span> <span class="token string">"podman"</span> podman<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'lemacs</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p><strong>Explanation:</strong> This customizable variable allows you to switch
+between Docker and Podman in Emacs by simply updating the
+<code>lemacs-docker-executable</code> setting. It’s an efficient way to keep your
+setup flexible, especially if you work with both Docker and Podman
+environments.</p>
+<p>The <code>docker</code> package provides a way to manage containers directly from
+Emacs. With the following setup, you can open the docker menu with
+<code>C-c d</code> and manage your containers, images, and volumes without ever
+leaving Emacs.</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> docker
+	<span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+	<span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+	<span class="token lisp-property property">:bind</span> <span class="token punctuation">(</span><span class="token string">"C-c d"</span> <span class="token punctuation">.</span> docker<span class="token punctuation">)</span>
+	<span class="token lisp-property property">:config</span>
+	<span class="token punctuation">(</span><span class="token car">pcase</span> lemacs-docker-executable
+	  <span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'docker</span>
+	   <span class="token punctuation">(</span><span class="token car">setf</span> docker-command <span class="token string">"docker"</span>
+			 docker-compose-command <span class="token string">"docker-compose"</span>
+			 docker-container-tramp-method <span class="token string">"docker"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'podman</span>
+	   <span class="token punctuation">(</span><span class="token car">setf</span> docker-command <span class="token string">"podman"</span>
+			 docker-compose-command <span class="token string">"podman-compose"</span>
+			 docker-container-tramp-method <span class="token string">"podman"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p><strong>Explanation:</strong> By setting up docker.el with a keybinding, you can
+quickly access Docker or Podman management commands. The
+<code>lemacs-docker-executable</code> check allows docker.el to adapt to the
+selected engine, setting the appropriate commands for docker-command
+and docker-compose-command.</p>
+<h2>Editing Dockerfiles with <code>dockerfile-mode</code></h2>
+<p>Writing Dockerfiles in Emacs is made easier with <code>dockerfile-mode</code>,
+which provides syntax highlighting, indentation, and command
+customization. Here’s how we configure it:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> dockerfile-mode
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token punctuation">(</span><span class="token car">pcase</span> lemacs-docker-executable
+	<span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'docker</span>
+	 <span class="token punctuation">(</span><span class="token keyword">setq</span> dockerfile-mode-command <span class="token string">"docker"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'podman</span>
+	 <span class="token punctuation">(</span><span class="token keyword">setq</span> dockerfile-docker-command <span class="token string">"podman"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p><strong>Explanation:</strong> This setup activates <code>dockerfile-mode</code> for any file
+named <code>Dockerfile</code>, providing Dockerfile-specific syntax
+support. Additionally, based on <code>lemacs-docker-executable</code>, it sets the
+command used to build images, either <code>docker</code> or <code>podman</code>, so you can run
+<code>dockerfile-build-buffer</code> with the correct tool.</p>
+<h2>Adding Language Support for Dockerfiles with <code>lsp-mode</code></h2>
+<p>To enhance editing with features like autocompletion, diagnostics, and
+linting, you’ve set up <code>lsp-mode</code> with
+<code>dockerfile-language-server-nodejs</code>. This provides IDE-like
+capabilities for Dockerfile editing in Emacs.</p>
+<p>In order to do so, just run <code>M-x lsp-install-server RET</code> and look for
+<code>docker</code>, of course, you have to properly setup <code>lsp-mode</code> first.</p>
+<p><code>Explanation:</code> With <code>lsp-mode</code> and <code>dockerfile-language-server-nodejs</code>, you
+gain smart language features while writing Dockerfiles, such as error
+checking and autocomplete. This is especially useful for complex
+Dockerfiles, where syntax and structure are critical for successful
+builds.</p>
+<h2>Setting Up <code>yaml-mode</code> for Docker-Compose Files</h2>
+<p>To effectively work with <code>docker-compose.yml</code> files, it’s beneficial to
+have syntax highlighting and proper indentation for YAML. We can
+achieve this by setting up yaml-mode in Emacs. Here's how you can
+configure it:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> yaml-mode
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:mode</span>
+  <span class="token punctuation">(</span><span class="token string">"\\.yaml\\'"</span> <span class="token string">"\\.yml\\'"</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:custom-face</span>
+  <span class="token punctuation">(</span><span class="token car">font-lock-variable-name-face</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token lisp-property property">:foreground</span> <span class="token string">"#cba6f7"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:config</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p><code>Explanation:</code> This setup uses <code>use-package</code> to ensure <code>yaml-mode</code> is
+installed and deferred until needed, activates it for .yaml and .yml
+files, customizes the appearance of variable names with a specific
+foreground color, and allows for additional
+configurations as required.</p>
+<h2>LAB Time!</h2>
+<p>Now that we’ve set up Emacs for Docker (or Podman), let's dive into
+some hands-on tasks to see how this configuration works in action.</p>
+<h3>1. Create and Edit a Dockerfile</h3>
+<p>Start by creating a new <code>Dockerfile</code> in Emacs. Open a new buffer and
+save it with the filename <code>Dockerfile</code>. Once saved, <code>dockerfile-mode</code> will
+kick in automatically, giving you syntax highlighting and other
+Dockerfile-specific features.</p>
+<p>Given we have a React project (it could've been any other project, this
+is just an example) we could containerize it by creating this <code>Dockerfile</code>.</p>
+<div class="remark-highlight"><pre class="language-docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">FROM</span> node:21-alpine</span>
+
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /app</span>
+
+<span class="token instruction"><span class="token keyword">ENV</span> PATH /app/node_modules/.bin:<span class="token variable">$PATH</span></span>
+
+<span class="token instruction"><span class="token keyword">COPY</span> package.json ./</span>
+<span class="token instruction"><span class="token keyword">COPY</span> package-lock.json ./</span>
+<span class="token instruction"><span class="token keyword">RUN</span> npm install --silent</span>
+<span class="token instruction"><span class="token keyword">RUN</span> npm install react-scripts@5.0.0 -g --silent</span>
+
+<span class="token instruction"><span class="token keyword">COPY</span> . ./</span>
+
+<span class="token instruction"><span class="token keyword">CMD</span> [<span class="token string">"npm"</span>, <span class="token string">"start"</span>]</span>
+</code></pre></div>
+<p><strong>Tip:</strong> With lsp-mode configured for Dockerfiles, you’ll get
+autocompletion, syntax checking, and even inline diagnostics, making
+it easier to spot issues as you write.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-01.png&w=3840&q=75" alt="docker"></p>
+<h3>2. Build the Dockerfile</h3>
+<p>After saving your Dockerfile, it’s time to build it.</p>
+<p>Of course, you can open <code>shell</code> or <code>eshell</code> and run something like:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">docker</span> build <span class="token parameter variable">-t</span> my-app <span class="token builtin class-name">.</span>
+</code></pre></div>
+<p>or</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">podman</span> build <span class="token parameter variable">-t</span> my-app <span class="token builtin class-name">.</span>
+
+</code></pre></div>
+<p>But since we have the <code>dockerfile-mode</code> set. We can simply issue
+<code>M-x dockerfile-build-buffer</code> or <code>M-x dockerfile-build-no-cache-buffer</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-02.png&w=3840&q=75" alt="docker"></p>
+<p>You'll be prompted for an image name, like <code>docker-app</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-03.png&w=3840&q=75" alt="docker"></p>
+<p>And a new buffer with the build status will appear.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-04.png&w=3840&q=75" alt="docker"></p>
+<p>Wait for it until it is finished.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-05.png&w=3840&q=75" alt="docker"></p>
+<h3>3. Run a Container with Custom Options</h3>
+<p>After building your image, we could, once again, issue some shell
+command to have it running, like:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">3000</span>:3000 docker-app
+</code></pre></div>
+<p>or</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">podman</span> run <span class="token parameter variable">-p</span> <span class="token number">3000</span>:3000 docker-app
+</code></pre></div>
+<p>Now <code>docker</code> package shines again, running <code>M-x docker RET</code> we get:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-06.png&w=3840&q=75" alt="docker"></p>
+<p>The bottom buffer is a transient menu, much like what you get when
+opening <code>magit</code>, this means there's no need to focus the buffer or
+navigate your cursor inside it.</p>
+<p>We can check our built images hitting <code>i</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-07.png&w=3840&q=75" alt="docker"></p>
+<p>In our case we have an node image from what our image derives, and our
+nice <code>docker-app</code> image.</p>
+<p>You can also mark it with <code>m</code>, unmark it with <code>u</code>, spin up what is
+marked, delete and so on, at any sub-menu just hit <code>?</code> for a list of
+options.</p>
+<p>Let's run our recently built image. Put the cursor on the line with
+our <code>docker-app</code>. Hit <code>?</code> to see the options:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-08.png&w=3840&q=75" alt="docker"></p>
+<p>Now hit <code>R</code> to run it, and add any arguments, like <code>p</code> for port forwarding:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-10.png&w=3840&q=75" alt="docker"></p>
+<p><code>R</code> again and <code>RET</code>.</p>
+<p>And there we have it, our app is running.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-11.png&w=3840&q=75" alt="docker"></p>
+<p>Issuing <code>M-x docker RET</code> again we can see the containers status:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-12.png&w=3840&q=75" alt="docker"></p>
+<p>Hitting <code>c</code> will give us a list with all containers and its statuses:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-13.png&w=3840&q=75" alt="docker"></p>
+<p>Again, hitting <code>?</code> prompts us with many options, keep your time and explore it!</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-14.png&w=3840&q=75" alt="docker"></p>
+<p>For now, I'll just stop it with <code>O</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-15.png&w=3840&q=75" alt="docker"></p>
+<h3>4. Working with Docker-Compose</h3>
+<p>While <code>docker.el</code> makes it easy to manage individual Docker containers,
+using <code>docker-compose</code> within Emacs allows us to orchestrate multiple
+containers at once-perfect for projects with multiple services like
+databases, backends, and frontends.</p>
+<p>First, ensure you have a <code>docker-compose.yml</code> file in your project
+directory. Here’s an example:</p>
+<div class="remark-highlight"><pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"3.7"</span>
+
+<span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">docked-app</span><span class="token punctuation">:</span>
+	<span class="token key atrule">container_name</span><span class="token punctuation">:</span> docked<span class="token punctuation">-</span>app
+	<span class="token key atrule">build</span><span class="token punctuation">:</span>
+	  <span class="token key atrule">context</span><span class="token punctuation">:</span> .
+	  <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile
+	<span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+	  <span class="token punctuation">-</span> <span class="token string">".:/app"</span>
+	  <span class="token punctuation">-</span> <span class="token string">"/app/node_modules"</span>
+	<span class="token key atrule">ports</span><span class="token punctuation">:</span>
+	  <span class="token punctuation">-</span> 3001<span class="token punctuation">:</span><span class="token number">3000</span>
+	<span class="token key atrule">environment</span><span class="token punctuation">:</span>
+	  <span class="token punctuation">-</span> CHOKIDAR_USEPOLLING=true
+</code></pre></div>
+<p>Notice you can also install an LSP server to help with editing this
+sort of file, like <code>yamlls</code> or any other of your liking.</p>
+<p>Also notice this is a <code>yaml</code> file and it is not using our previous
+installed <code>dockerfile-mode</code> but <code>yaml-mode</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-16.png&w=3840&q=75" alt="docker"></p>
+<p>Once again, we could issue a <code>shell</code> command like:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">docker-compose</span> up <span class="token parameter variable">-d</span>
+</code></pre></div>
+<p>or</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">podman-compose</span> up <span class="token parameter variable">-d</span>
+</code></pre></div>
+<p>Fortunately <code>docker</code> package also provides us with a nice frontend for
+managing <code>docker-compose</code>.</p>
+<p>Issue <code>M-x docker RET</code> once again, see the last option <code>C</code>.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-17.png&w=3840&q=75" alt="docker"></p>
+<p>We are presented with all sorts of options regarding <code>docker-compose</code>:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-18.png&w=3840&q=75" alt="docker"></p>
+<p>We are choosing <code>B</code> for build, and them <code>A</code> for all services. Note
+this example has one service, but <code>docker-compose</code> really shines
+in a use case of several services, like <code>backend-api</code>, plus
+<code>database</code>, plus <code>frontend</code>, and so on.</p>
+<p>Again, we wait for a complete build.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-19.png&w=3840&q=75" alt="docker"></p>
+<p>When finished we again issue <code>M-x docker RET</code>, <code>C</code> for compose and <code>R</code> to run.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fdocker-20.png&w=3840&q=75" alt="docker"></p>
+<p>Again, add any other custom configuration and hit <code>R RET</code> to run it.</p>
+<p>And there we have it, our own little cluster is up!</p>
+<p>From now on you can figure out what to do 😉.</p>
+<h2>All the covered code</h2>
+<p>Here it is all the presented code, for a quicker copy-paste.</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">lemacs-docker-executable</span></span> <span class="token quoted-symbol variable symbol">'docker</span>
+  <span class="token string">"The executable to be used with docker-mode."</span>
+  <span class="token lisp-property property">:type</span> <span class="token punctuation">'(</span><span class="token car">choice</span>
+		   <span class="token punctuation">(</span><span class="token car">const</span> <span class="token lisp-property property">:tag</span> <span class="token string">"docker"</span> docker<span class="token punctuation">)</span>
+		   <span class="token punctuation">(</span><span class="token car">const</span> <span class="token lisp-property property">:tag</span> <span class="token string">"podman"</span> podman<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'lemacs</span><span class="token punctuation">)</span>
+
+
+<span class="token punctuation">(</span><span class="token keyword">use-package</span> docker
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:bind</span> <span class="token punctuation">(</span><span class="token string">"C-c d"</span> <span class="token punctuation">.</span> docker<span class="token punctuation">)</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token punctuation">(</span><span class="token car">pcase</span> lemacs-docker-executable
+	<span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'docker</span>
+	 <span class="token punctuation">(</span><span class="token car">setf</span> docker-command <span class="token string">"docker"</span>
+		 docker-compose-command <span class="token string">"docker-compose"</span>
+		 docker-container-tramp-method <span class="token string">"docker"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'podman</span>
+	 <span class="token punctuation">(</span><span class="token car">setf</span> docker-command <span class="token string">"podman"</span>
+		 docker-compose-command <span class="token string">"podman-compose"</span>
+		 docker-container-tramp-method <span class="token string">"podman"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+
+<span class="token punctuation">(</span><span class="token keyword">use-package</span> dockerfile-mode
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:config</span>
+  <span class="token punctuation">(</span><span class="token car">pcase</span> lemacs-docker-executable
+	<span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'docker</span>
+	 <span class="token punctuation">(</span><span class="token keyword">setq</span> dockerfile-mode-command <span class="token string">"docker"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token quoted-symbol variable symbol">'podman</span>
+	 <span class="token punctuation">(</span><span class="token keyword">setq</span> dockerfile-docker-command <span class="token string">"podman"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">(</span><span class="token keyword">use-package</span> yaml-mode
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:mode</span>
+  <span class="token punctuation">(</span><span class="token string">"\\.yaml\\'"</span> <span class="token string">"\\.yml\\'"</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:custom-face</span>
+  <span class="token punctuation">(</span><span class="token car">font-lock-variable-name-face</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token boolean">t</span> <span class="token punctuation">(</span><span class="token lisp-property property">:foreground</span> <span class="token string">"#cba6f7"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token lisp-property property">:config</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>Conclusion</h2>
+<p>In this blog post, we explored how to effectively set up Emacs for
+Docker and Docker-Compose management, leveraging the power of
+<code>docker.el</code> to streamline container orchestration within our
+development environment. From building Docker images to running and
+managing containers seamlessly, Emacs provides an efficient interface
+that enhances productivity and simplifies workflows.</p>
+<p>By integrating <code>yaml-mode</code>, we ensured that our docker-compose.yml
+files are easy to read and edit, allowing us to focus on coding rather
+than configuration. With these tools at our disposal, we can harness
+the full potential of containerization directly from our favorite text
+editor.</p>
+<p>We encourage you to explore the myriad options available within
+docker.el and Docker-Compose to tailor your Emacs setup even
+further. Happy coding, and may your containers run smoothly!</p>
+<h3>Edit</h3>
+<p><strong>2024-11-05:</strong> Updated from <code>when</code> to <code>pcase</code> logic style and removed
+not required mode load for <code>dockerfile-mode</code>. References, suggestions, credits:
+<a href="https://www.reddit.com/r/emacs/comments/1gk4hk7/using_emacs_for_container_development_configuring/">Reddit (r/emacs)</a></p>
+<p><strong>2024-12-17:</strong> After finishing this article, I submitted an PR to
+<code>docker.el</code> so we can directly open a shell and/or use shell commands
+from its interface. It was already possible with docker but not with
+podman. This PR got accepted and we now have the new option variable
+<code>docker-container-tramp-method</code>, that can be set to docker/podman as
+the other options presented here. For further reference: <a href="https://github.com/Silex/docker.el/pull/239#issuecomment-2467588155">Github
+(docker.el)</a></p>

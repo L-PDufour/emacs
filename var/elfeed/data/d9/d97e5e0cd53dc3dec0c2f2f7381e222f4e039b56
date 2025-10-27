@@ -1,0 +1,30 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Have you ever encountered issues when updating your Node.js project?
+Learn how to upgrade your packages with care and precision, rather
+than blindly.</p>
+<h2>Interactive Package Upgrades</h2>
+<p>Yarn offers a powerful feature: the ability to upgrade your packages
+interactively. This means you can selectively choose which packages to
+update while also getting a sneak peek at their compatibility status.</p>
+<p>To utilize this feature, run the following command in your terminal:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">yarn</span> upgrade-interactive
+</code></pre></div>
+<p>This command will display a color-coded list of all available upgrades, where:</p>
+<p>Red indicates a major update with potentially backward-incompatible changes.</p>
+<ul>
+<li>Yellow signifies a minor update, typically introducing backward-compatible features.</li>
+<li>Green represents a patch update, often addressing backward-compatible bug fixes.</li>
+<li>You can now use the spacebar to select the packages you wish to
+upgrade and confirm your selections by pressing Enter.</li>
+</ul>
+<p>For additional guidance and more information, you can refer to the official documentation <a href="https://classic.yarnpkg.com/lang/en/docs/cli/upgrade-interactive/">here!</a></p>
+<p>Upgrading your Node.js project doesn't have to be a daunting
+task. With Yarn's interactive package upgrade feature, you can
+approach it methodically, ensuring that you only update what you need
+while staying informed about compatibility changes. By making use of
+this powerful tool, you'll not only streamline your development
+process but also reduce the chances of unexpected issues arising
+during upgrades. So, remember to upgrade with care and precision, and
+let Yarn's interactive upgrades be your trusty companion in
+maintaining a healthy and up-to-date Node.js project.</p>

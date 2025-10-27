@@ -1,0 +1,21 @@
+<p>
+Here&rsquo;s a bit of humor that I&rsquo;ve had sitting in one of my browser tabs for some time. Over on the Emacs subreddit, Hlorri asks you to <a href="https://www.reddit.com/r/emacs/comments/1n1knpl/tell_me_you_use_emacs_without_telling_me_you_use/">Tell me you use emacs (without telling me you use emacs)</a>. Although meant to be humorous—and many of the answers <i>are</i> humorous—a lot of them reveal important things about Emacs.
+</p>
+<p>
+The most common humorous answer involves the strength of the user&rsquo;s pinky. A typical example is, &ldquo;I thumb wrestle with my pinky.&rdquo; Another, that I really liked and could relate to was, &ldquo;My editor&rsquo;s config file is older than some of my co-workers.&rdquo; Several offerings involved the wearing away of the text on the CTRL key.
+</p>
+<p>
+Among the answers that weren&rsquo;t so much funny as telling were:
+</p>
+<ul class="org-ul">
+<li>I expect to get things done in a single app.</li>
+<li>I cannot use essentially any other piece of software without accidentally opening 10 print dialogs or new blank documents/tabs at some point. (and several variations on this theme)</li>
+<li>There&rsquo;s a mixture of awe, confusion, and mystery when I pair program with co-workers.</li>
+<li>Whenever someone wants to give me any &ldquo;advice&rdquo; I frown.</li>
+<li>I interactively do right what other people write programs to do wrong.</li>
+<li>I use the same program for e-mails, coding, calendar and keeping notes (and probably much more).</li>
+<li>I write utilities in elisp instead of bash.</li>
+<li>You mean your code editor doesn&rsquo;t have a media player, or a planner, or its own window manager?</li>
+</ul>
+<p>
+And a bunch more. Take a look at Hlorri&rsquo;s post to see them all.</p>

@@ -1,0 +1,62 @@
+<html><head></head><body><p>For my completion framework, I’m currently using <code>fido-mode</code>, and more recently, <code>fido-vertical-mode</code>. However, I’m scratching yet another itch in my ongoing quest to be more efficient in Emacs, specifically to jump to files more quickly. I explored this in a previous post where I enhanced the <code>recentf</code> functionality to work through completing-read in a predictable order, but what about the completing-read interface itself?</p>
+<figure><img src="https://emacs.dyerdwelling.family/ox-hugo/20250905100614-emacs--Customizing-Emacs-Completion:-From-Fido%27s-Fuzzy-Matching-to-Literal-Substring-Search.jpg" width="100%">
+</figure>
+
+<p>This happens to me often in Emacs, there is a subconscious functional annoyance which eventually bubbles to the surface and this case the surface bubble revolves around fido’s fuzzy matching behaviour.  Simply put, I don’t like it!</p>
+<p>While it can be helpful for discovering files and commands you partially remember, sometimes you know exactly what you’re looking for and want a more literal, predictable search experience, in fact for me now, I would say it is not just sometimes, but always!. The fuzzy matching is finding too many candidates when I type in a few characters and really I want a contiguous input string to be literally matched.</p>
+<p>This post chronicles my journey from fido’s flex matching to a custom setup that provides literal substring matching, perfect for when you know what you want and just want to type it directly.</p>
+<p>Hang on a sec, can’t I just change the completion style?, this should be easy!</p>
+<div class="highlight"><pre><code class="language-elisp"><span><span>(setq completion-styles <span>'</span>(<span>substring</span> basic))
+</span></span></code></pre></div><p>But that has no effect!, boooo!</p>
+<p>Anyways, that was a quick attempt at a fix, in the meantime lets explore flex a little bit more and <code>icomplete</code> (which is the underpinning completion technology of fido) and see if we cam come up with a robust solution.</p>
+<p>Fido-mode use what’s called “flex” completion by default. This means that when you type <code>abc</code>, it will match files like <code>a_long_b_filename_c.txt</code> because it finds the letters a, b, and c in that order, even with other characters between them.</p>
+<p>While this flexibility is powerful, it can be frustrating when you want to search for a specific substring. If you’re looking for a file named <code>project-abc-config.txt</code>, you might expect typing <code>abc</code> to prioritize that match, but flex matching might show you <code>a_big_collection.txt</code> first instead.</p>
+<p>So back to my initial attempt at a fix by setting the <code>completion-styles</code> variable. The <code>substring</code> style matches your input as a contiguous block anywhere within candidates, while <code>basic</code> does prefix matching. This seemed like exactly what I wanted, I just need to find a way to set it and to make it stick.</p>
+<p>After some digging into the source code, I found the culprit in <code>icomplete.el</code>. The <code>icomplete--fido-mode-setup</code> function contains the following:</p>
+<div class="highlight"><pre><code class="language-elisp"><span><span>(defun icomplete--fido-mode-setup ()
+</span></span><span><span>  <span>"Setup </span><span>`fido-mode'</span><span>'s minibuffer."</span>
+</span></span><span><span>  (when (and icomplete-mode (icomplete-simple-completing-p))
+</span></span><span><span>    <span>;; ... other settings ...</span>
+</span></span><span><span>    (setq-local completion-styles <span>'</span>(flex)  <span>; This line forces flex!</span>
+</span></span><span><span>                completion-flex-nospace <span>nil</span>
+</span></span><span><span>                <span>;; ... more settings ...</span>
+</span></span><span><span>                )))
+</span></span></code></pre></div><p>This function runs every time you enter the minibuffer, forcibly overriding any <code>completion-styles</code> setting you might have configured. This explains why my <code>setq</code> had no effect, fido was resetting it on every use!</p>
+<p>Rather than fight fido’s opinionated behaviour, I could instead switch to <code>icomplete-vertical-mode</code>, which provides a similar interface but respects the standard completion configuration.</p>
+<div class="highlight"><pre><code class="language-elisp"><span><span>(icomplete-vertical-mode <span>1</span>)
+</span></span><span><span>
+</span></span><span><span><span>;; scroll list rather than rotating</span>
+</span></span><span><span>(setq icomplete-scroll <span>t</span>)
+</span></span><span><span>
+</span></span><span><span><span>;; Make completion case-insensitive</span>
+</span></span><span><span>(setq completion-ignore-case <span>t</span>)
+</span></span><span><span>(setq read-file-name-completion-ignore-case <span>t</span>)
+</span></span><span><span>(setq read-buffer-completion-ignore-case <span>t</span>)
+</span></span><span><span>
+</span></span><span><span>(with-eval-after-load <span>'icomplete</span>
+</span></span><span><span>  (setq completion-styles <span>'</span>(<span>substring</span> basic partial-completion emacs22)))
+</span></span></code></pre></div><p>This gave me the literal substring matching I wanted and I think I have managed to set up everything else to the way fido comes out of the box.</p>
+<p>However, there was one more hurdle.</p>
+<p>By default, <code>icomplete-vertical-mode</code> requires you to explicitly select a completion before submitting with <code>C-m</code> (Enter) which is a keybinding I had grown accustomed to using in fido. This adds an extra confirmation step that fido-mode doesn’t have.  There is a way around this however and that is to adapt to the keybinding <code>C-j</code> which typically is more of a do literal action then exit type of thing, where C-m is more of just a simple Enter/action.  I am willing to adapt to this keybinding.</p>
+<p>So this works pretty well for me really, but can I not just get <code>completion-styles</code> to stick for fido?, even though I have a solution I really want to see if I can adjust fido’s default functionality.</p>
+<p>Well simply I used an advice function to wrap around the original fido setup function and set up the <code>completion-styles</code> local variable after fido has done its thing:</p>
+<div class="highlight"><pre><code class="language-elisp"><span><span>(defun my-fido-completion-styles-advice (<span>&amp;rest</span> _args)
+</span></span><span><span>  <span>"Override completion styles after fido setup."</span>
+</span></span><span><span>  (when (and fido-mode (icomplete-simple-completing-p))
+</span></span><span><span>    (setq-local completion-styles <span>'</span>(<span>substring</span> basic partial-completion))))
+</span></span><span><span>
+</span></span><span><span>(advice-add <span>'icomplete--fido-mode-setup</span> :after <span>#'</span>my-fido-completion-styles-advice)
+</span></span></code></pre></div><p>Now I have two options for using completion in Emacs the way I want it and now I can find files, or anything else for that matter much more quickly.</p>
+<p>This journey taught me several important lessons about Emacs customization:</p>
+<ol>
+<li>
+<p><strong>Read the source</strong>: When configuration variables don’t seem to work as expected, the source code often reveals why.</p>
+</li>
+<li>
+<p><strong>Local vs. global settings</strong>: Fido uses <code>setq-local</code> to override settings per-buffer, which is why global <code>setq</code> calls don’t work.</p>
+</li>
+<li>
+<p><strong>There’s always another way</strong>: Emacs’ flexibility means there are usually multiple approaches to achieving the same goal.</p>
+</li>
+</ol>
+<p>While fido-mode’s fuzzy matching is excellent for discovery and exploration, I just wanted the predictability of literal substring matching and with a small advice function, you can have the best of both worlds!</p></body></html>

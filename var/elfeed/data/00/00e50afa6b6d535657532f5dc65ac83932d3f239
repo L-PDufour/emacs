@@ -1,0 +1,112 @@
+<p>
+<code>libxml-parse-html-region</code> turns HTML into a DOM
+(document object model). There's also
+<code>xml-parse-file</code> and <code>xml-parse-region</code>.
+<code>xml-parse-string</code> actually parses the character
+data at point and returns it as a string instead
+of parsing a string as a parameter. If you have a
+string and you want to parse it, insert it into a
+temporary buffer and use
+<code>libxml-parse-html-region</code> or <code>xml-parse-region</code>.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">let</span> ((s <span class="org-string">"&lt;span&gt;Hello world&lt;/span&gt;"</span>)
+      dom)
+  (<span class="org-keyword">setq</span> dom
+        (<span class="org-keyword">with-temp-buffer</span>
+          (insert s)
+          (libxml-parse-html-region))))
+</code></pre>
+</div>
+
+
+<pre class="example" id="orgf0cc8dc">
+(html nil (body nil (span nil Hello world)))
+</pre>
+
+<p>
+Then you can use functions like <code>dom-by-tag</code>,
+<code>dom-search</code>, <code>dom-attr</code>, <code>dom-children</code>, etc. If
+you need to make a deep copy of the DOM, you can
+use <code>copy-tree</code>.
+</p>
+
+<p>
+Turning the DOM back into HTML can be a little
+tricky. By default, <code>dom-print</code> escapes &amp; in
+attributes, which could mess up things like href:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>  (<span class="org-keyword">with-temp-buffer</span>
+    (dom-print (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">a</span> <span class="org-highlight-quoted-quote">'</span>((href . <span class="org-string">"https://example.com?a=b&amp;c=d"</span>))))
+     (buffer-string))
+</code></pre>
+</div>
+
+
+<pre class="example" id="orgffdb4ab">
+  &lt;a href="https://example.com?a=b&amp;amp;c=d" /&gt;
+</pre>
+
+
+<p>
+<code>shr-dom-print</code> handles &amp; correctly, but it adds spaces in between elements. Also, you need to escape HTML entities in text, maybe with <code>org-html-encode-plain-text</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>  (<span class="org-keyword">with-temp-buffer</span>
+    (shr-dom-print
+      (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">p</span> nil
+                (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">span</span> nil <span class="org-string">"hello"</span>)
+                (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">span</span> nil <span class="org-string">"world"</span>)
+                (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">a</span> <span class="org-highlight-quoted-quote">'</span>((href . <span class="org-string">"https://example.com?a=b&amp;c=d"</span>))
+                          (org-html-encode-plain-text <span class="org-string">"text &amp; stuff"</span>))))
+    (buffer-string))
+</code></pre>
+</div>
+
+
+<pre style="white-space: wrap" class="example" id="org95a1079">
+  &lt;p&gt; &lt;span&gt;hello&lt;/span&gt; &lt;span&gt;world&lt;/span&gt; &lt;a href="https://example.com?a=b&amp;c=d"&gt;text &amp;amp; stuff&lt;/a&gt;&lt;/p&gt;
+</pre>
+
+<p>
+<code>svg-print</code> does the right thing when it comes to href and tags, but you need to escape HTML entities yourself as usual.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">with-temp-buffer</span>
+  (svg-print
+   (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">p</span> nil
+             (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">span</span> nil <span class="org-string">"hello"</span>)
+             (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">span</span> nil <span class="org-string">"world"</span>)
+             (dom-node <span class="org-highlight-quoted-quote">'</span><span class="org-highlight-quoted-symbol">a</span> <span class="org-highlight-quoted-quote">'</span>((href . <span class="org-string">"https://example.com?a=b&amp;c=d"</span>))
+                       (org-html-encode-plain-text <span class="org-string">"text &amp; stuff"</span>))))
+  (buffer-string))
+</code></pre>
+</div>
+
+
+<pre style="white-space: wrap" class="example" id="org3e3d0ec">
+  &lt;p&gt;&lt;span&gt;hello&lt;/span&gt;&lt;span&gt;world&lt;/span&gt;&lt;a href="https://example.com?a=b&amp;c=d"&gt;text &amp;amp; stuff&lt;/a&gt;&lt;/p&gt;
+</pre>
+
+<p>
+Looks like I'll be using <code>svg-print</code> for more than just <abbr title="Scalable Vector Graphics" tabindex="0">SVG</abbr>s.
+</p>
+
+<p>
+Relevant Emacs info pages:
+</p>
+
+<ul class="org-ul">
+<li><a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Document-Object-Model.html">Document Object Model (GNU Emacs Lisp Reference Manual)</a></li>
+<li><a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Parsing-HTML_002fXML.html">Parsing HTML/XML (GNU Emacs Lisp Reference Manual)</a></li>
+</ul>
+<div><a href="https://sachachua.com/blog/2025/09/emacs-and-dom-el-quick-notes-on-parsing-html-and-turning-doms-back-into-html/index.org">View org source for this post</a></div>
+<p>You can <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F09%2Femacs-and-dom-el-quick-notes-on-parsing-html-and-turning-doms-back-into-html%2F&body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p>

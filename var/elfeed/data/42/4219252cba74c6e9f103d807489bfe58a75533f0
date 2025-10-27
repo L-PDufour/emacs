@@ -1,0 +1,11 @@
+<p>
+There are a large number of ways to configure the 6.16
+Linux kernel. It has 32,468 different configuration options on x86_64,
+and a comparable number for other platforms. Exploring the ways the kernel can
+be configured is sufficiently difficult that it requires specialized tools.
+These show the
+<a href="https://lwn.net/Articles/1034812/">
+number of possible configurations</a> that options can be combined in has
+6,550 digits. How has that number changed over the history of the kernel, and
+what does it mean for testing?
+</p>

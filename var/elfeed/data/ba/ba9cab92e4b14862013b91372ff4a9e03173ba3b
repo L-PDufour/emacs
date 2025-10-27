@@ -1,0 +1,478 @@
+
+<p class=" text-justify drop-cap">If you’re a command line hacker – and I know you are – then I am sure you are familiar with, and possibly use, GNU <code>screen</code> or its contemporary replacement, <code>tmux</code>. If you are in the process of <a href="/article/switching-from-vim-to-emacs" class=" article-link">switching from Vim to Emacs</a>, then <code>tmux</code> is no doubt a large part of your workflow.</p>
+<p class=" text-justify">But here’s the thing: you do not need a terminal multiplexer if you are already using Emacs. Emacs can accomplish nearly everything your terminal multiplexer can do. If you’re not a serious user of <code>screen</code> or <code>tmux</code>, but you’re still addicted to the command line, then I’m sure this article will convince you of the merits of multiplexers, and how Emacs can slot right in. If you’re still unconvinced after having read this article, then my parting advice is to read about the <a href="/article/keyboard-shortcuts-every-command-line-hacker-should-know-about-gnu-readline" class=" article-link">keyboard shortcuts in GNU readline</a> as that’ll at least bring more of Emacs to your command line life.</p>
+<p class=" text-justify">Before I get into the weeds of why, let me just quickly state that, sure, <code>tmux</code> and friends will always have their uses: on remote servers for people who insist on running their daemons inside a <code>screen</code> session like it’s 1997 (bonus points if it’s an IRC client); and of course for actual terminal use on machines where Emacs is not available, or where you have to work with others who may not know Emacs.</p>
+<p class=" text-justify">Caveats aside, let me share why I think you should consider using Emacs for some or all of your multiplexing needs, as it can do everything from detaching and re-attaching sessions; to windowing; to terminal emulation and running shells; and even the odd bit of text editing…</p>
+<H2 id="the-perils-of-terminal-programs">The Perils of Terminal Programs</H2>
+<p class=" text-justify">Naturally, terminal multiplexers are meant for terminals, and as such, I’ll talk exclusively about running Emacs in a terminal from now on, although nearly all the advice I write applies equally to GUI Emacs. My thoughts on terminal Emacs are well known if you’re a frequent reader, but I will restate them again by saying that running GUI Emacs is a far better proposition than running Emacs in a terminal (multiplexer or not) for the following simple reasons:</p>
+<dl>
+<dt>Key Bindings often clash with your terminal</dt>
+<dd>
+<p class=" text-justify">It’s such a common problem for beginners: they fire up Emacs in a terminal, and wonder why some keys don’t work at all. The answer is usually the terminal tool itself. You’ll have to disable their invasive overreach of your key bindings so they pass through to the terminal, but now you lose said key bindings as you may want to use them elsewhere.</p>
+</dd>
+<dt>Not all key bindings work in a terminal</dt>
+<dd>
+<p class=" text-justify">Despite a lot of bolted-on protocols, additions and extensions made over the years, the fact of the matter is that some keys are simply not possible to represent and transmit to a terminal and the underlying program. This is another common newbie trap.</p>
+</dd>
+<dt>Lack of fidelity</dt>
+<dd>
+<p class=" text-justify">You cannot view PDFs, use images, or rice your Emacs with fancy SVG icons; some terminal emulators have limited color bit depth. The value of this is debatable, but I find the ability to view PDFs and images useful.</p>
+</dd>
+<dt>Flow Control Chaos</dt>
+<dd>
+<p class=" text-justify">And the ultimate trap of them all: the ossified flow control feature that some terminals still enable by default. Type <code>Control+s</code> in some terminal setups, and your terminal freezes, so as to give you enough time to read the text before it can scroll by. <code>Control+q</code> thaws your terminal. A fantastic feature when you’re downloading Dr. Who fan scripts from a dusty newsgroup back in the 1980s. Today… not so much. You can permanently disable flow control with <code>stty -ixon</code>, but it’s just one more thing to think about.</p>
+</dd>
+</dl>
+<p class=" text-justify">There’s one more reason not to run terminal Emacs inside a <em>terminal multiplexer</em> and that is… well, everything, actually. The multiplexer gets first dips on the ANSI escape codes terminals use to move the cursor and draw stuff to the screen, and it’s oh-so-easy to break or gum things up. Mismatched colors; loss of color bit-depth; keys not getting translated properly; keys intercepted and repurposed by the multiplexer; weird scrollback and buffering issues; the list goes on and on.</p>
+<p class=" text-justify">Terminal multiplexers are awesome, but they’re also faced with a tricky problem: they <em>must</em> work with nearly everything in a way that is sensible and consistent and often across a wide range of terminal capabilities and platforms. Sure, you can tweak this stuff: do you really want to, though?</p>
+<p class=" text-justify">So those are the downsides of terminal Emacs with or without the lather of a multiplexer messing with your escape codes. But as annoying as these issues are, terminal Emacs is a full-fledged Emacs experience otherwise.</p>
+<p class=" text-justify">Now let’s replicate the multiplexing experience inside Emacs.</p>
+<H2 id="emacss-client-server-architecture">Emacs’s Client-Server Architecture</H2>
+<p class=" text-justify">Of course Emacs has a client-server architecture. It’s a <em>text editor!</em></p>
+<p class=" text-justify">Run <code>M-x server-start</code> in an active Emacs instance and your current Emacs becomes the server host. Note that there are multiple ways of running Emacs in server mode. If you use <code>emacs --daemon</code> to start the daemon, you’ll get a persistent daemon that does not spawn a frame; you must then type <code>emacsclient -c</code> to connect to your Emacs. A third way is <code>systemctl --user enable emacs</code> and you can let systemd run Emacs as a daemon.</p>
+<p class=" text-justify">Either way, from that moment on, if you call <code>emacsclient</code>, Emacs will talk to your Emacs server. This is how experienced hackers prefer to use Emacs, but you do not have to, of course. If you run <code>emacs</code> it will launch a standalone instance. You can even mix and match.</p>
+<p class=" text-justify">Now you can set <code>emacsclient</code> to your <code>$EDITOR</code> and everything Just Works.</p>
+<blockquote>
+<p class=" text-justify"><em>NOTE</em>: Emacs’s client-server architecture is not intended to straddle multiple computers; both should be run on the same machine, lest you run into weird, hard-to-debug problems. If you want to use Emacs ‘remotely’, you can use <a href="https://www.gnu.org/software/tramp/" class=" article-link">Tramp</a> or <code>ssh</code> to your target machine and run Emacs as a client-server architecture there.</p>
+</blockquote>
+<H2 id="running-programs-from-emacs">Running Programs from Emacs</H2>
+<p class=" text-justify">Obviously this is the main purpose of a multiplexer, and Emacs is more than capable of doing this. Running instances of your favorite shell is the most common, so let’s start with that.</p>
+<H3 id="shells-and-terminal-emulators">Shells and Terminal Emulators</H3>
+<table class=" table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Command</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+<tr class="even">
+<td><code>M-x shell</code></td>
+<td><p class=" text-justify">Runs your preferred shell via a pseudo-terminal or pipe. Uses Emacs keys, Emacs for scrollback, its own history, better search and a plain Emacs buffer.</p>
+<p class=" text-justify">Limited emulation; cannot handle curses apps without third-party packages like <code>xterm-color</code>.</p></td>
+</tr>
+<tr class="odd">
+<td><code>M-x term</code></td>
+<td>Emacs’s builtin terminal emulator. Can switch between traditional terminal mode and a mode that makes it temporarily behave like an Emacs buffer. Can be quite slow.</td>
+</tr>
+<tr class="even">
+<td><code>M-x vterm</code></td>
+<td><p class=" text-justify">Uses <code>libvterm</code> to provide a modern, fast and compliant terminal emulator.</p>
+<p class=" text-justify"><strong>NOTE</strong>: Requires a third-party package.</p></td>
+</tr>
+<tr class="odd">
+<td><code>M-x eat</code></td>
+<td><p class=" text-justify">EAT is another terminal emulator that plugs into Eshell and also has its own terminal mode. Very fast.</p>
+<p class=" text-justify"><strong>NOTE</strong>: Requires a third-party package.</p></td>
+</tr>
+<tr class="even">
+<td><code>M-x eshell</code></td>
+<td><p class=" text-justify">Not a terminal emulator, but instead a replacement for your preferred shell. It’s loosely inspired by <code>zsh</code> and friends, and is written entirely in Emacs Lisp.</p>
+<p class=" text-justify"><strong>NOTE</strong>: Eshell is a pathway to many abilities some consider to be unnatural.</p></td>
+</tr>
+</tbody>
+</table>
+<p class=" text-justify">My article on <a href="/article/running-shells-in-emacs-overview" class=" article-link">Running Shells and Terminal Emulators in Emacs</a> is a more in-depth look at these options. If you want a near-terminal-like experience, then <code>vterm</code> is a great package. If you want to lean into the Emacs way of doing things, then <code>M-x shell</code> is a good choice, and that is what I mostly use, unless I absolutely have to run a curses app (then I use <code>M-x vterm</code>.) If you are unsure, then I recommend you install <code>vterm</code> and start with that.</p>
+<p class=" text-justify">Another way – the more Emacsy way – is to instead consider that most things may not require a shell (and a terminal) at all for common tasks. If you just want to compile stuff (or run your development server, test harness, etc. etc.), then <a href="/article/compiling-running-scripts-emacs" class=" article-link">compiling and running scripts in Emacs</a> is the way to go. You gain the added benefit of error highlighting (with hyperlinks to the erroneous file) that works with darn near every structured error output you can throw at it.</p>
+<p class=" text-justify">But wait, there’s more: you can run a range of <a href="/article/network-utilities-emacs" class=" article-link">command line network utilities</a>; <a href="/article/displaying-interacting-processes-proced" class=" article-link">use M-x proced, Emacs’s replacement for top</a>; and use dired, Emacs’s <a href="/article/dired-shell-commands-find-xargs-replacement" class=" article-link">directory editor</a> to do all sorts of cool stuff.</p>
+<p class=" text-justify">For simple things? You can <a href="/article/executing-shell-commands-emacs" class=" article-link">execute shell commands</a> directly, or even feed buffer text to the standard input of a command line program and get the output piped back. That solves a whole swathe of problems also.</p>
+<H4 id="interacting-with-fzf">Interacting with <code>fzf</code></H4>
+<p class=" text-justify">Not really multiplexer related per se, so I’m going to point out that you can use <a href="/article/fuzzy-finding-emacs-instead-of-fzf" class=" article-link">Emacs for fuzzy finding</a> instead of <code>fzf</code> using a fistful of shell script code. Kinda cool.</p>
+<H3 id="starting-programs-from-outside-or-inside-emacs">Starting programs from outside or inside Emacs</H3>
+<p class=" text-justify">Another common thing to do with a multiplexer is to quickly open a program inside a running tmux instance; perhaps from a shell pane <em>inside</em> your <code>tmux</code> instance, or perhaps outside it.</p>
+<p class=" text-justify">You can do this with Emacs also (with <code>M-x vterm</code> if it’s installed, otherwise <code>M-x term</code>) with the provided bash script. Let’s call it <code>emux.sh</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="bu">set</span> <span class="at">-o</span> nounset <span class="at">-o</span> errexit <span class="at">-o</span> pipefail</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="va">argcmd</span><span class="op">=</span><span class="st">"</span><span class="va">$@</span><span class="st">"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="va">cmd</span><span class="op">=</span><span class="st">"</span><span class="va">${argcmd</span><span class="op">:=</span><span class="va">$SHELL}</span><span class="st">"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="bu">exec</span> emacsclient <span class="at">-e</span> <span class="op">&lt;&lt;EOF</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="st">(let ((vterm-shell "</span><span class="va">${cmd}</span><span class="st">")) (if (fboundp 'vterm) (vterm t) (term vterm-shell)))</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1" class=" article-link"></a><span class="op">EOF</span></span></code></pre></div>
+<p class=" text-justify">Here I temporarily bind the Emacs variable <code>vterm-shell</code> to the command to run (it defaults to your shell). Then I invoke <code>vterm</code> (if it’s installed, otherwise I use <code>term</code>) and start a new instance.</p>
+<p class=" text-justify">To use it is simple:</p>
+<ul>
+<li><code>./emux.sh top</code> runs <code>top</code> inside your active Emacs instance.</li>
+<li><code>./emus.sh watch free -hg</code> calls <code>watch</code> and tells it to run <code>free -hg</code>.</li>
+<li><code>./emux.sh</code> on its own will call your <code>$SHELL</code> instead.</li>
+</ul>
+<p class=" text-justify">All from the comfort of your Emacs. You don’t have to run this from inside an Emacs instance, either. Provided you’ve got the client-server feature enabled, it’ll work anywhere.</p>
+<H3 id="detaching-and-attaching-long-running-programs">Detaching and Attaching &amp; Long-running programs</H3>
+<p class=" text-justify">By running programs in an Emacs server instance, you can leave them running even if you hang up your remote connection (such as when you disconnect from <code>ssh</code>) but that does depend a bit on the method you used to start your server. I recommend you daemonize it with <code>emacs --daemon</code>, or run it through systemd, to ensure this works.</p>
+<p class=" text-justify">Your Emacs server remembers everything: processes, sockets, buffers — you name it. You can even have multiple daemons if you really, really want to.</p>
+<p class=" text-justify">So if your workflow depends heavily on the ability to engage and disengage from a ‘running’ session of work, then Emacs can definitely do this.</p>
+<p class=" text-justify">If you regularly work on remote servers, a lot of your work could be done from your local Emacs by talking to the remote server directly with Emacs’s <a href="https://www.gnu.org/software/tramp/" class=" article-link">Tramp</a>.</p>
+<H2 id="panes-windows-buffers-frames">Panes, Windows, Buffers, Frames</H2>
+<p class=" text-justify">Emacs’s windowing technology is so far ahead of every other terminal or GUI application that I’d struggle to even begin to cover all the things you can do with it. Emacs is a tiling window manager onto itself (and some do indeed use it as their tiling window manager!), with hundreds of commands and variables that govern how it works. It also has <em>frames</em> (Emacs’s name for what most people call <em>windows</em>), if you prefer a non-tiling approach.</p>
+<p class=" text-justify">I’ve made a handy table of the window-related nomenclature used in <code>screen</code> and <code>tmux</code> and of course Emacs. They do differ, so let’s just quickly cover that.</p>
+<table style="width:99%;" class=" table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Term</strong></td>
+<td><strong>Emacs</strong></td>
+<td><strong>tmux</strong></td>
+<td><strong>GNU Screen</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Frame</strong></td>
+<td>The entire Emacs instance visible on screen, can contain multiple windows</td>
+<td>The entire terminal instance running tmux, equivalent to the terminal window</td>
+<td>The entire terminal instance running Screen, equivalent to the terminal window</td>
+</tr>
+<tr class="odd">
+<td><strong>Window</strong></td>
+<td>A subdivision within a frame that displays one buffer</td>
+<td>A full-screen view within a session that can be divided into panes (similar to tabs)</td>
+<td>A full-screen virtual terminal identified by a number or name</td>
+</tr>
+<tr class="even">
+<td><strong>Buffer</strong></td>
+<td>Container for text being edited, displayed within windows</td>
+<td>No direct equivalent (closest is the content displayed in a pane)</td>
+<td>No direct equivalent (closest is the content displayed in a window)</td>
+</tr>
+<tr class="odd">
+<td><strong>Pane</strong></td>
+<td>No direct equivalent (similar to windows)</td>
+<td>Subdivision of a window that contains a separate terminal instance</td>
+<td>Called “regions” — subdivisions of the display when split screen is used</td>
+</tr>
+<tr class="even">
+<td><strong>Session</strong></td>
+<td>Another term for an Emacs server instance</td>
+<td>A collection of windows under a single server instance that can be detached/reattached</td>
+<td>A detachable collection of windows running as a single process</td>
+</tr>
+</tbody>
+</table>
+<p class=" text-justify">Of note is that in Emacs, a <em>frame</em> is of course what most people would call a <em>window</em>, but there’s another dimension to it: frames behave differently in a terminal Emacs session.</p>
+<p class=" text-justify">In terminal Emacs, a frame is really more like <em>window</em> in <code>tmux</code> or <code>screen</code>. Only one is ever visible at a time; in GUI Emacs, you can have many visible at the same time, subject to the whims of your window manager (tiling vs stacking for example) and Emacs has another set of complex commands for interacting with frames specifically. Emacs does its level best to provide parity between the GUI and terminal versions, but this is one area where there is some difference in appearance and behavior.</p>
+<p class=" text-justify">Now let’s talk about – let’s call it “windowing features” for want of a better phrase – across the multiplexers and Emacs. There’s an awful lot of asterisks attached to some of these, but more on that below.</p>
+<table style="width:99%;" class=" table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>tmux Feature</strong></td>
+<td><strong>screen Key Binding</strong></td>
+<td><strong>tmux Key Binding</strong></td>
+<td><strong>Emacs Key Binding</strong></td>
+</tr>
+<tr class="even">
+<td>Create new window</td>
+<td><code>C-a c</code></td>
+<td><code>C-b c</code></td>
+<td><code>C-x 2</code>, <code>C-x 3</code> (splits instead)</td>
+</tr>
+<tr class="odd">
+<td>Close current window</td>
+<td><code>C-a K</code></td>
+<td><code>C-b &amp;</code></td>
+<td><code>C-x 0</code> (close window), <code>C-x k</code> (kill buffer)</td>
+</tr>
+<tr class="even">
+<td>Rename current window</td>
+<td><code>C-a A</code></td>
+<td><code>C-b ,</code></td>
+<td><code>M-x rename-buffer</code> or <code>C-x x r</code></td>
+</tr>
+<tr class="odd">
+<td>List all windows</td>
+<td><code>C-a "</code></td>
+<td><code>C-b w</code></td>
+<td><code>C-x b</code> (switch to) or <code>C-x C-b</code></td>
+</tr>
+<tr class="even">
+<td>Next window</td>
+<td><code>C-a n</code></td>
+<td><code>C-b n</code></td>
+<td><code>C-x o</code> (other window)</td>
+</tr>
+<tr class="odd">
+<td>Previous window</td>
+<td><code>C-a p</code></td>
+<td><code>C-b p</code></td>
+<td>N/A but you can fiddle with numeric arguments to <code>C-x o</code> to simulate it, or use windmove.</td>
+</tr>
+<tr class="even">
+<td>Go to window by number</td>
+<td><code>C-a [0-9]</code></td>
+<td><code>C-b [0-9]</code></td>
+<td>Registers can sort of stand in for this, but there is no simple equivalent.</td>
+</tr>
+<tr class="odd">
+<td>Go to last active window</td>
+<td><code>C-a C-a</code></td>
+<td><code>C-b l</code></td>
+<td>Maybe <code>M-x mode-line-other-buffer</code></td>
+</tr>
+<tr class="even">
+<td>Split window horizontally</td>
+<td><code>C-a S</code> (added later)</td>
+<td><code>C-b "</code></td>
+<td><code>C-x 2</code></td>
+</tr>
+<tr class="odd">
+<td>Split window vertically</td>
+<td><code>C-a |</code> (added later)</td>
+<td><code>C-b %</code></td>
+<td><code>C-x 3</code></td>
+</tr>
+<tr class="even">
+<td>Move to next pane</td>
+<td><code>C-a tab</code></td>
+<td><code>C-b o</code></td>
+<td><code>C-x o</code></td>
+</tr>
+<tr class="odd">
+<td>Convert pane to window</td>
+<td>N/A</td>
+<td><code>C-b !</code></td>
+<td>N/A</td>
+</tr>
+<tr class="even">
+<td>Show pane numbers</td>
+<td>N/A</td>
+<td><code>C-b q</code></td>
+<td>N/A</td>
+</tr>
+<tr class="odd">
+<td>Toggle between pane layouts</td>
+<td>N/A</td>
+<td><code>C-b space</code></td>
+<td>Window Configurations; <code>M-x tab-bar-mode</code></td>
+</tr>
+<tr class="even">
+<td>Resize pane</td>
+<td>N/A (not as intuitive)</td>
+<td><code>C-b C-[arrow keys]</code></td>
+<td><code>C-x {</code> / <code>C-x }</code></td>
+</tr>
+<tr class="odd">
+<td>Break pane into window</td>
+<td>N/A</td>
+<td><code>C-b !</code></td>
+<td>N/A</td>
+</tr>
+<tr class="even">
+<td>Join pane from window</td>
+<td>N/A</td>
+<td><code>C-b :join-pane -s [window]</code></td>
+<td>N/A</td>
+</tr>
+<tr class="odd">
+<td>Enter copy mode</td>
+<td><code>C-a [</code></td>
+<td><code>C-b [</code></td>
+<td>N/A</td>
+</tr>
+<tr class="even">
+<td>Search in copy mode</td>
+<td><code>/</code> (forward), <code>?</code> (backward)</td>
+<td><code>/</code> (forward), <code>?</code> (backward)</td>
+<td><code>C-s</code> (forward), <code>C-r</code> (backward)</td>
+</tr>
+<tr class="odd">
+<td>Swap window positions</td>
+<td><code>C-a :number [n]</code></td>
+<td><code>C-b .</code> (prompt for new number)</td>
+<td>Use Windmove</td>
+</tr>
+<tr class="even">
+<td>Detach from session</td>
+<td><code>C-a d</code></td>
+<td><code>C-b d</code></td>
+<td><code>C-x #</code> (if in an emacs client)</td>
+</tr>
+<tr class="odd">
+<td>Choose a session</td>
+<td>N/A (via command line)</td>
+<td><code>C-b s</code></td>
+<td>Technically a thing, but multiple daemons is a rarely used feature.</td>
+</tr>
+<tr class="even">
+<td>Zoom pane (toggle full-screen)</td>
+<td>N/A</td>
+<td><code>C-b z</code></td>
+<td><code>C-x 1</code></td>
+</tr>
+<tr class="odd">
+<td>Rotate panes</td>
+<td>N/A</td>
+<td><code>C-b C-o</code></td>
+<td>N/A</td>
+</tr>
+<tr class="even">
+<td>Display clock</td>
+<td><code>C-a t</code></td>
+<td><code>C-b t</code></td>
+<td><code>M-x display-time</code></td>
+</tr>
+<tr class="odd">
+<td>Command prompt</td>
+<td><code>C-a :</code></td>
+<td><code>C-b :</code></td>
+<td><code>M-x</code></td>
+</tr>
+</tbody>
+</table>
+<p class=" text-justify"><code>tmux</code> and <code>screen</code> are not trying to be Emacs, and Emacs did not set out to replace either of these tools — it’s just that it is so advanced that it can step into the role of multiplexer with relative ease.</p>
+<p class=" text-justify">Windows in Emacs are <em>transient</em> and considered disposable, and the commands are sort of built around that idea. That is a stark difference to other IDEs and editors, but consider that this is a complex topic with a lot of opinions. Luckily, Emacs can accommodate most of people’s complex windowing requirements, if you’re willing to <a href="/article/demystifying-emacs-window-manager" class=" article-link">learn how Emacs’s Window Manager works</a>. As such swapping windows or referencing them by number is not really an Emacsy thing to do, though you can with a little bit of code (or using a third-party package like <code>avy</code>), or perhaps by bending registers to your will.</p>
+<p class=" text-justify">In Emacs you have to contend with buffers first and foremost, as that is the <a href="/article/why-emacs-has-buffers" class=" article-link">currency of Emacs</a>. Buffers, though, have no real equivalents in the multiplexers, as you can preserve the window layout in Emacs but change their buffers to show something else (though you technically <em>can</em> do this in <code>tmux</code>, it’s clearly not a well-trodden path) so in Emacs I’ve crammed both buffer and window switching commands into the mix. I would be remiss if I did not also mention both <code>M-x global-tab-line-mode</code>, for browser-style tabs; and <code>M-x tab-bar-mode</code> to set up and switch between window configurations (“pane layouts” in <code>tmux</code>), but more on that below.</p>
+<p class=" text-justify">The builtin package <em>windmove</em> adds ortographic movement from the current active window (for example, <code>C-x &lt;up&gt;</code> to pick the window above the current one) as opposed to layout-driven keys like <code>C-x o</code> that cycle through the windows on your screen. It’s a useful package, and one a lot of people use to make movement between windows more intuitive and faster.</p>
+<p class=" text-justify">Detaching / attaching to a session is best done by explicitly launching a server daemon (as I mentioned before) with <code>emacs --daemon</code> and then connecting and disconnecting (<code>C-x #</code>) at will with <code>emacsclient</code>.</p>
+<p class=" text-justify">Because GUI frames and terminal frames behave differently, I have opted to use a mix of buffer and window commands to represent the pane/window commands as that is ultimately what you are going to use in Emacs. But that’s obviously not the only way of looking at this: if you want to mirror the behavior of <code>screen</code> or <code>tmux</code> you can use Emacs’s frames for some of this:</p>
+<table style="width:99%;" class=" table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Operation</strong></td>
+<td><strong>Terminal Emacs Frame</strong></td>
+<td><strong>tmux</strong></td>
+<td><strong>GNU Screen</strong></td>
+</tr>
+<tr class="even">
+<td>Create new frame</td>
+<td><code>C-x 5 2</code></td>
+<td><code>C-b c</code> (new window)</td>
+<td><code>C-a c</code> (new window)</td>
+</tr>
+<tr class="odd">
+<td>Switch to next frame</td>
+<td><code>C-x 5 o</code></td>
+<td><code>C-b n</code> (next window)</td>
+<td><code>C-a n</code> (next window)</td>
+</tr>
+<tr class="even">
+<td>Previous frame</td>
+<td>N/A</td>
+<td><code>C-b p</code> (previous window)</td>
+<td><code>C-a p</code> (previous window)</td>
+</tr>
+<tr class="odd">
+<td>Close current frame</td>
+<td><code>C-x 5 0</code></td>
+<td><code>C-b &amp;</code> (kill window)</td>
+<td><code>C-a K</code> (kill window)</td>
+</tr>
+<tr class="even">
+<td>Open file in new frame</td>
+<td><code>C-x 5 f</code></td>
+<td><code>C-b c</code></td>
+<td><code>C-a c</code></td>
+</tr>
+<tr class="odd">
+<td>Open buffer in new frame</td>
+<td><code>C-x 5 b</code></td>
+<td><code>C-b c</code></td>
+<td><code>C-a c</code></td>
+</tr>
+<tr class="even">
+<td>List all frames</td>
+<td><code>M-x select-frame-by-name</code></td>
+<td><code>C-b w</code> (list windows)</td>
+<td><code>C-a "</code> (list windows)</td>
+</tr>
+<tr class="odd">
+<td>Rename current frame</td>
+<td><code>M-x set-frame-name</code></td>
+<td><code>C-b ,</code> (rename window)</td>
+<td><code>C-a A</code> (rename window)</td>
+</tr>
+</tbody>
+</table>
+<p class=" text-justify">Personally, I think the frame approach is an average facsimile, and that it’s better to just embrace Emacs’s way of doing things, instead of shoehorning frames into the multiplexers’ notion of “windows”.</p>
+<p class=" text-justify">For that, I recommend you just use <code>M-x tab-bar-mode</code>. Each tab is its own window configuration, and you can interact with tabs in many ways. Note again that tab <em>bars</em> are not like tab <em>lines</em>, the latter being more like a browser’s open tabs.</p>
+<table class=" table">
+<colgroup>
+<col style="width: 51%">
+<col style="width: 48%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Operation</strong></td>
+<td><strong>Emacs tab-bar-mode Key Binding</strong></td>
+</tr>
+<tr class="even">
+<td>Enable tab-bar-mode</td>
+<td><code>M-x tab-bar-mode</code></td>
+</tr>
+<tr class="odd">
+<td>Create new tab</td>
+<td><code>C-x t 2</code> or <code>C-x t n</code></td>
+</tr>
+<tr class="even">
+<td>Close current tab</td>
+<td><code>C-x t 0</code> or <code>C-x t k</code></td>
+</tr>
+<tr class="odd">
+<td>Rename current tab</td>
+<td><code>C-x t r</code></td>
+</tr>
+<tr class="even">
+<td>Switch to next tab</td>
+<td><code>C-x t o</code> or <code>C-TAB</code></td>
+</tr>
+<tr class="odd">
+<td>Switch to previous tab</td>
+<td><code>C-S-TAB</code></td>
+</tr>
+<tr class="even">
+<td>Switch to tab by name</td>
+<td><code>C-x t RET</code></td>
+</tr>
+<tr class="odd">
+<td>Duplicate current tab</td>
+<td><code>C-x t n</code></td>
+</tr>
+<tr class="even">
+<td>List all tabs</td>
+<td><code>M-x tab-switcher</code> or <code>M-x tab-list</code></td>
+</tr>
+<tr class="odd">
+<td>Open file in new tab</td>
+<td><code>C-x t f</code></td>
+</tr>
+</tbody>
+</table>
+<p class=" text-justify">So that’s yet another way to do it. This is my preferred approach: it’s consistent across GUI and terminal Emacs, and it’s a more ergonomic way of interacting with window setups in Emacs. It is also a close approximation of how your terminal multiplexer treats distinct “windows”.</p>
+<H2 id="prefix-keys">Prefix Keys</H2>
+<p class=" text-justify">The problem with <code>screen</code> and <code>tmux</code> is that their default prefix keys override two rather useful Emacs key bindings that <a href="/article/keyboard-shortcuts-every-command-line-hacker-should-know-about-gnu-readline" class=" article-link">also work everywhere GNU Readline</a> is used: <code>C-a</code>, to move to the beginning of a line; and <code>C-b</code> to move backward a character.</p>
+<p class=" text-justify">In Emacs, that obviously isn’t a problem, as the key bindings you’ll need are scattered across a range of keys, and in any event, you’ll have full control over the keys available to you inside Emacs and which ones are sent to the underlying process, should you choose to use Emacs as your terminal emulator.</p>
+<H2 id="scrollback-copying-and-searching">Scrollback, Copying and Searching</H2>
+<p class=" text-justify">Emacs is a full-fledged text editor, and it has scrollback everywhere, so there’s not much more to say about that. Selecting (marking) and copying is available everywhere, and Emacs’s terminal emulators can switch from “terminal mode” to “cooked” (meaning it behaves like a regular Emacs buffer with freeform navigation) so you can copy and search as you please. Now is the time mention occur mode, one of many ways of sifting through text. It lets you <a href="/article/searching-buffers-occur-mode" class=" article-link">regexp search in Buffers</a> with a handy popup window of the matches. Terminal multiplexers can’t do that without plugins.</p>
+<H2 id="my-workflow">My Workflow</H2>
+<p class=" text-justify">Workflow are personal things, but I’ll quickly talk about how I use Emacs in lieu of a multiplexer.</p>
+<ol type="1">
+<li><p class=" text-justify">I prefer to do everything local to my machine, where feasible.</p>
+<p class=" text-justify">For remote sessions, I will use <code>ssh</code> in a <code>M-x shell</code> instance (unless I have to interface with curses apps, then I use <code>M-x vterm</code>) and combine it with <a href="https://www.gnu.org/software/tramp/" class=" article-link">Tramp</a> for file editing.</p></li>
+<li><p class=" text-justify">I avoid running Emacs on a remote machine directly because I will always opt for local, as I mentioned in #1. But when I <em>have</em> to, I will run emacs in a client-server architecture. Having said that, it is very rare that I cannot do 90% of my work from my local machine.</p>
+<p class=" text-justify">For things like docker containers or even talking to kubernetes pods, I can do this with Tramp also. I can also ssh to a bastion host and then onwards to root with <code>sudo</code> and then perhaps into a container with <code>docker</code>. I can bookmark these things in Emacs so I can return to them with the snap of a finger.</p></li>
+<li><p class=" text-justify">Emacs’s Tramp can execute command line programs remotely for you. If you’re editing a remote file in a buffer, then <code>M-x dired</code> (<code>C-x d</code>) and tools like <code>M-x compile</code>, <code>M-x grep</code>, etc. automatically call out to their remote counterpart and return the results back to your local Emacs instance. Very powerful.</p></li>
+<li><p class=" text-justify"><code>M-x shell</code> is the right tool for me. It’s a ‘dumb terminal’ in the sense that everything is fed into an Emacs buffer which is then enriched with features such as history, prompt detection, and more. Works great, except when it does not. However, I can live with the tradeoffs. I prefer a free-flowing buffer with all the advantages and disadvantages that brings. For example, I can type <code>M-s h p</code> (<code>M-x highlight-phrase</code>) and highlight stuff in the buffer by regexp. Emacs will highlight current and future instances.</p>
+<p class=" text-justify">I’m sure you’re thinking of all the many, many instances in your career where you wished you could do such a simple, simple thing like highlight stuff.</p></li>
+<li><p class=" text-justify">Watching logs and other changing files. Again with Tramp: open the file then <code>M-x auto-revert-mode</code> or <code>M-x auto-revert-tail-mode</code> and Emacs will revert the file when it changes. Simple.</p></li>
+</ol>
+<p class=" text-justify">And that’s just <em>some</em> of the things I do. The main thing to take away from my workflow – and this article – is that things orbit around Emacs, because I am proficient at using Emacs, and it is capable of a great many things.</p>
+<p class=" text-justify">Honestly? Thrashing around on the command line – no matter your shell, even with nice ones like fish – feels like an enormous step back in productivity compared to using Emacs and regular old bash.</p>
+<p class=" text-justify">But that’s me. You’ll build your own workflow that meets your needs.</p>
+<H2 id="conclusion">Conclusion</H2>
+<p class=" text-justify">If you’re familiar with Emacs then most of my advice should not come as a surprise to you. If you’re new or still learning, then I hope this will give you some food for thought.</p>
+<p class=" text-justify">You can pare back your use of your if it makes sense to do so: but most of the day-to-day grind I see <code>tmux</code> users do can easily be done from within Emacs, but with a real gain to your productivity. Switching to Emacs <em>just</em> to replace your terminal multiplexer is perhaps a harder sell, but if you can learn and memorize your multiplexer’s commands, then you’ll do just fine learning Emacs also.</p>
+<p class=" text-justify">Let me know in the comments if ditching a multiplexer helps (or hinders!) your workflow!</p>

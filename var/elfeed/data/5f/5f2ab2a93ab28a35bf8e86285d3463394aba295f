@@ -1,0 +1,40 @@
+<html><head></head><body><p><time>This year</time> Jenny and I are participating in our local library’s reading
+challenge.  We formed our own team, with the goal of the team reading 100 books.</p>
+<p>On <time>Friday</time> I read <a href="https://itinerantlibrarian.blogspot.com/2025/09/reading-about-reading-life-september-12.html">Reading about the reading life: September 12, 2025 edition</a>, in
+which the author draws attention to <a href="https://www.openculture.com/2025/08/a-man-read-3599-books-over-60-years-and-now-his-family-has-shared-the-entire-list-online.html">a man who read 3,599 books</a> and hand-recorded
+each book read; all books having come from public libraries.  Memorialized in
+<a href="https://what-dan-read.com/">What Dan Read</a>.</p>
+<p>I found Dan’s dedication inspiring—a simple bit of note taking sustained over
+the decades.  That list, creating a bit of imortality, with its longitudinal
+insight into the intersection of individual curiosity, collection curation, and
+the currents of culture.</p>
+<p>Drawing on that inspiration, I started thinking about my personal habits that
+I’m establishing.  Namely writing journal entries then printing those out each
+month.  I also use <span><a href="https://orgmode.org/">Org-Mode</a></span> <small><a href="https://takeonrules.com/site-map/glossary/#abbr-dfn-GLOSSARY-ORG-MODE">📖</a></small>
+ to track my reading.  I have a single <span>Org-Mode</span>
+
+document that:</p>
+<ul>
+<li>Tracks when I started, completed/abandoned reading a book.</li>
+<li>Any quotes that I’ve gathered from that book.</li>
+<li>Additional notes around the read.</li>
+</ul>
+<p>I wrote about some of this in Re-Wiring My Epigraphs Functionality to Leverage
+My Bibliography File</p>
+<p>So, drawing inspiration from Dan, I wrote an <span><a href="https://en.wikipedia.org/wiki/Emacs">Emacs</a></span> <small><a href="https://takeonrules.com/site-map/glossary/#abbr-dfn-GLOSSARY-EMACS">📖</a></small>
+ function:
+<a href="https://github.com/jeremyf/dotemacs/blob/1e83bb57da5555d0aae5256a8ccaec25fc4a9cb1/emacs.d/personal.el#L1151-L1211">org-dblock-write:books-finished</a>.  That function conforms to the Dynamic Block
+API and I simply drop it into my <span>Org-Mode</span>
+ document at some point within the
+month’s entries.</p>
+<p>What it does:</p>
+<ul>
+<li>Determine the month and year for the block</li>
+<li>Query my Bibliography for books I finished reading</li>
+<li>Insert into the document a list of those books, as links to those books</li>
+</ul>
+<p>This way, when I print my monthly journal, I’ll have a list of books I finished
+that month.</p>
+<h1>Code for <code>org-dblock-write:books-finished</code></h1>
+
+      </body></html>

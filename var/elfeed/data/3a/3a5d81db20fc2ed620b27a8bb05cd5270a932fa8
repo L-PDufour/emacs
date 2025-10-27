@@ -1,0 +1,67 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>One thing I really missed from Emacs was how easy it was to upload files and
+text snippets to <strong>0x0.st</strong>.</p>
+<p>For those unfamiliar, <strong>0x0.st</strong> is a simple, no-fuss file and text-sharing
+service where you can upload texts and images and get a shareable link
+instantly (you can also host your own instance of it).</p>
+<p>So, I decided to bring that experience to Neovim with <strong>nvim-0x0</strong>, my first
+ever Neovim plugin! 🎉</p>
+<h2>Obligatory Demos</h2>
+<ul>
+<li>
+<p>Uploading the current opened file:<br>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fnvim_0x0_demo_file.gif&w=3840&q=75" alt="icomplete"></p>
+</li>
+<li>
+<p>Uploading a visual selection:<br>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fnvim_0x0_demo_visual_selection.gif&w=3840&q=75" alt="icomplete"></p>
+</li>
+<li>
+<p>Uploading the last yanked/deleted text:<br>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fnvim_0x0_demo_yank.gif&w=3840&q=75" alt="icomplete"></p>
+</li>
+<li>
+<p>Uploading a file selected in <code>oil.nvim</code>:<br>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fnvim_0x0_demo_oil.gif&w=3840&q=75" alt="icomplete"></p>
+</li>
+<li>
+<p>Uploading an image selected in <code>oil.nvim</code>:<br>
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fnvim_0x0_demo_oil_image.gif&w=3840&q=75" alt="icomplete"></p>
+</li>
+</ul>
+<h2>Installation</h2>
+<h3>Using lazy.nvim</h3>
+<p>Add the following to your <code>lazy.nvim</code> configuration:</p>
+<div class="remark-highlight"><pre class="language-lua"><code class="language-lua"><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'lazy'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setup</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token punctuation">{</span>
+    <span class="token string">"LionyxML/nvim-0x0"</span><span class="token punctuation">,</span>
+    opts <span class="token operator">=</span> <span class="token punctuation">{</span>
+      <span class="token comment">-- base_url = "https://&#x3C;your-0x0-instance>/",  -- only needed if you host your own 0x0 instance</span>
+      use_default_keymaps <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>                    <span class="token comment">-- Set to false if you want to define your own keymaps</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>Usage</h2>
+<p>By default, the following keymaps are available:</p>
+<ul>
+<li><code>&#x3C;leader>0f</code> - Upload the current file</li>
+<li><code>&#x3C;leader>0s</code> - Upload the current visual selection</li>
+<li><code>&#x3C;leader>0y</code> - Upload the last yank or delete content</li>
+<li><code>&#x3C;leader>0o</code> - Upload a file selected in <code>oil.nvim</code></li>
+</ul>
+<p>If <code>use_default_keymaps = false</code>, you can define your own mappings, like:</p>
+<div class="remark-highlight"><pre class="language-lua"><code class="language-lua">vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'n'</span><span class="token punctuation">,</span> <span class="token string">'&#x3C;leader>uf'</span><span class="token punctuation">,</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"nvim-0x0"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>upload_current_file<span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Upload current file"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'v'</span><span class="token punctuation">,</span> <span class="token string">'&#x3C;leader>us'</span><span class="token punctuation">,</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"nvim-0x0"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>upload_selection<span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Upload selection"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'n'</span><span class="token punctuation">,</span> <span class="token string">'&#x3C;leader>uy'</span><span class="token punctuation">,</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"nvim-0x0"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>upload_yank<span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Upload yank"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+vim<span class="token punctuation">.</span>keymap<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'n'</span><span class="token punctuation">,</span> <span class="token string">'&#x3C;leader>uo'</span><span class="token punctuation">,</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"nvim-0x0"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>upload_oil_file<span class="token punctuation">,</span> <span class="token punctuation">{</span> desc <span class="token operator">=</span> <span class="token string">"Upload oil.nvim file"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>If you would like to host your own instance of 0x0, set <code>base_url = "https://0x0.st/"</code>.</p>
+<h2>Conclusion</h2>
+<p>I made <strong>nvim-0x0</strong> to bring a simple and fast 0x0.st experience to Neovim, and
+I hope it makes your workflow smoother. If you try it out, let me know what you
+think!</p>
+<p>Check out the plugin on GitHub:<br>
+➡ <strong><a href="https://github.com/LionyxML/nvim-0x0">nvim-0x0 Repository</a></strong></p>
+<p>Feel free to open issues, share feedback, or contribute. 🚀</p>

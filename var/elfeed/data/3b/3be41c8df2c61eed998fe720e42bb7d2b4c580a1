@@ -1,0 +1,38 @@
+<html><head></head><body><p>This package lets you preview a font inside of Emacs. It does so in
+three ways:</p>
+
+<ul>
+  <li>Prompt for a font on the system and display it in a buffer.</li>
+  <li>List all known fonts in a buffer, with a short preview for each.</li>
+  <li>Provide a major mode to preview a font whose file is among the
+installed ones.</li>
+</ul>
+
+<p>Sources:</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">show-font</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/show-font">https://protesilaos.com/emacs/show-font</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/show-font-changelog">https://protesilaos.com/emacs/show-font-changelog</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/show-font">https://github.com/protesilaos/show-font</a></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/codelog/2024-09-10-emacs-show-font-0-1-0/">https://protesilaos.com/codelog/2024-09-10-emacs-show-font-0-1-0/</a></li>
+  <li>Backronym: Should Highlight Only With the Family Of the Named Typeface.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr>
+
+<h2>Version 0.4.0 on 2025-08-26</h2>
+
+<p>This version expands the capabilities of the font preview mechanism to
+handle emoji and icon fonts (i.e. those with codepoints in the Unicode
+Private Use Area).</p>
+
+<p>Both the <code class="language-plaintext highlighter-rouge">show-font-select-preview</code> and <code class="language-plaintext highlighter-rouge">show-font-tabulated</code> commands
+now handle these types of font.</p>
+
+<p>Previews for emoji or icon fonts are done using the string of
+characters set to the variable <code class="language-plaintext highlighter-rouge">show-font-emoji-sample</code> or
+<code class="language-plaintext highlighter-rouge">show-font-icon-sample</code>. These symbols are user options.</p>
+        </body></html>

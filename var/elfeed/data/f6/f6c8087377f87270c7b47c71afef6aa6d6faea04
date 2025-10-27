@@ -1,0 +1,321 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Are you considering migrating your GitHub repositories to Codeberg but
+finding the process daunting? Look no further! In this blog post, we
+introduce a powerful solution: the "Github to Codeberg Bulk Migration
+Script." This script offers a nice way to transfer your projects from
+GitHub to Codeberg, leveraging automation to simplify the process.</p>
+<p>In recent years, the landscape of code hosting platforms has expanded
+beyond the traditional giants. Codeberg, a community-driven and
+open-source alternative to GitHub, has gained traction among
+developers seeking a platform aligned with principles of privacy,
+transparency, and community governance. In this blog post, we'll
+explore how to migrate your repositories from GitHub to Codeberg using
+a simple and efficient migration script.</p>
+<h2>Why Codeberg?</h2>
+<p>Codeberg is indeed a noteworthy alternative to GitHub, particularly
+for those seeking an open-source and community-driven platform. Here's
+why Codeberg stands out:</p>
+<p>• <strong>Open Source Philosophy:</strong> Codeberg operates on an open-source
+philosophy, ensuring transparency and fostering a collaborative
+environment where developers can freely contribute to projects.</p>
+<p>• <strong>Privacy and Data Sovereignty:</strong> Codeberg prioritizes user privacy and
+data sovereignty, providing a platform where users have control over
+their data and can trust that it won't be exploited for commercial
+purposes.</p>
+<p>• <strong>Community and Governance:</strong> Codeberg is community-driven, allowing users
+to participate in decision-making processes and shape the direction of
+the platform. This democratic approach ensures that the platform
+evolves in line with the needs and values of its users.</p>
+<p>• <strong>Support for Free and Open Source Software (FOSS):</strong> Codeberg is
+committed to promoting and supporting free and open-source software,
+providing a home for projects that align with these principles.</p>
+<h2>Why Bulk Migration Matters</h2>
+<p>Migrating repositories one by one can be a tedious and time-consuming
+task, especially if you have numerous projects to transfer. Bulk
+migration streamlines this process by allowing you to transfer
+multiple repositories simultaneously, significantly reducing the time
+and effort required.</p>
+<h2>Introducing the Migration Script</h2>
+<p>This is a bash script designed to simplify the migration of
+repositories from GitHub to Codeberg. It automates the migration
+process, making it easy to transfer your projects in bulk while
+preserving their metadata and access permissions.</p>
+<h2>Key Features</h2>
+<ol>
+<li>
+<p>• <strong>Bulk Migration</strong>: The script allows you to migrate multiple
+repositories from GitHub to Codeberg simultaneously, saving you
+time and effort.</p>
+</li>
+<li>
+<p>• <strong>Customization Options</strong>: You can customize various aspects of the
+migration process, including repository selection and description
+prefix, to suit your specific requirements.</p>
+</li>
+<li>
+<p>• <strong>Error Handling</strong>: The script includes error handling mechanisms
+to handle any migration failures gracefully, ensuring a smooth and
+reliable migration process.</p>
+</li>
+</ol>
+<h2>Preparing the Ground</h2>
+<p>Before diving into the migration process, you'll need to obtain API
+keys from GitHub and Codeberg. Here's how you can do it:</p>
+<h3>Obtaining API Key from GitHub</h3>
+<ol>
+<li>
+<p>• <strong>Visit GitHub Developer Settings</strong>: Go to your GitHub account
+settings and navigate to the "Developer settings" section.</p>
+</li>
+<li>
+<p>• <strong>Create a Personal Access Token</strong>: Click on "Personal access
+tokens" and then "Generate new token." Provide a descriptive name
+for the token and select the desired scopes (e.g., <code>repo</code> for full
+access to repositories). Click "Generate token" to create the
+token.</p>
+</li>
+<li>
+<p>• <strong>Copy the Token</strong>: Once the token is generated, make sure to copy
+it immediately. GitHub will not display the token again for
+security reasons.</p>
+</li>
+</ol>
+<h3>Obtaining API Key from Codeberg</h3>
+<ol>
+<li>
+<p>• <strong>Access Codeberg Account Settings</strong>: Log in to your Codeberg
+account and navigate to the account settings page.</p>
+</li>
+<li>
+<p>• <strong>Generate Personal Access Token</strong>: In the settings menu, select
+"Applications" and then click on "Generate new token." Provide a
+name for the token and select the necessary scopes (e.g., <code>repo</code>
+for repository access).</p>
+</li>
+<li>
+<p>• <strong>Save the Token</strong>: After generating the token, make sure to save
+it securely. Like GitHub, Codeberg will not display the token
+again, so it's essential to store it in a safe location.</p>
+</li>
+</ol>
+<p>With your API keys in hand, you're now ready to proceed with the
+migration process using the "GitHub to Codeberg Bulk Migration
+Script."</p>
+<h2>How It Works</h2>
+<p>Before proceeding with the migration process, it's crucial to ensure
+that you understand the script's functionality and potential
+implications. Here's how you can get started:</p>
+<ol>
+<li>
+<p>• <strong>Download the Script</strong>: Begin by downloading the migration script
+from the following repository:</p>
+<ul>
+<li>• <a href="https://codeberg.org/LionyxML/migrate-github-to-codeberg">Codeberg
+Repository</a></li>
+<li>• <a href="https://github.com/LionyxML/migrate-github-to-codeberg">GitHub
+Repository</a></li>
+</ul>
+</li>
+<li>
+<p>• <strong>Read the Script</strong>: Once downloaded, take the time to thoroughly
+read and understand the script
+(<code>migrate_github_to_codeberg.sh</code>). It's essential never to run a
+script without comprehending its functionality and potential
+effects on your system. While the script is provided as a helpful
+tool, it comes with no warranties, and understanding its behavior
+is critical for a safe and successful migration. Here's what you'll
+find in the user configuration section:</p>
+</li>
+</ol>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token comment"># User Configuration:</span>
+<span class="token comment"># --------------------</span>
+<span class="token comment"># GitHub username and personal access token</span>
+<span class="token comment"># GITHUB_USERNAME="YourGitHubUsername"</span>
+<span class="token comment"># GITHUB_TOKEN="YourGitHubToken"</span>
+<span class="token comment">#</span>
+<span class="token comment"># Codeberg username and personal access token</span>
+<span class="token comment"># CODEBERG_USERNAME="YourCodebergUsername"</span>
+<span class="token comment"># CODEBERG_TOKEN="YourCodebergToken"</span>
+<span class="token comment">#</span>
+<span class="token comment"># Define the REPOSITORIES array with repository names you want to migrate</span>
+<span class="token comment"># Leave it blank to migrate all repositories, or create a list of repositories</span>
+<span class="token comment"># if you want to select specific ones.</span>
+<span class="token comment"># REPOSITORIES=(</span>
+<span class="token comment">#     "repository1"</span>
+<span class="token comment">#     "repository2"</span>
+<span class="token comment">#     "repository3"</span>
+<span class="token comment"># )</span>
+<span class="token comment">#</span>
+<span class="token comment"># Custom prefix for description</span>
+<span class="token comment"># DESCRIPTION_PREFIX=""</span>
+<span class="token comment"># or something like:</span>
+<span class="token comment"># DESCRIPTION_PREFIX="[MIRROR] "</span>
+</code></pre></div>
+<ol start="3">
+<li>
+<p>• <strong>Configure User Settings</strong>: Open the script in a text editor and
+navigate to the user configuration section. Here, you'll need to
+update your GitHub and Codeberg credentials, as well as any other
+settings according to your preferences.</p>
+</li>
+<li>
+<p>• <strong>Review Customization Options</strong>: Take advantage of the script's
+customization options to tailor the migration process to your
+specific needs. You can define the repositories you want to
+migrate, specify a description prefix, and adjust other parameters
+as required.</p>
+</li>
+<li>
+<p>• <strong>Install Dependencies</strong>: Ensure that the necessary dependencies,
+such as <code>curl</code> and <code>jq</code>, are installed on your system to facilitate
+the migration process. You can install these dependencies using
+your system's package manager.</p>
+</li>
+<li>
+<p>• <strong>Run the Script</strong>: Once you've reviewed and configured the script
+to your satisfaction, execute it in your terminal by running
+<code>./migrate_github_to_codeberg.sh</code>. Follow the on-screen
+instructions to initiate the migration process.</p>
+</li>
+<li>
+<p>• <strong>Monitor Progress and Review Results</strong>: The script will provide
+real-time updates on the migration progress, allowing you to
+monitor successful migrations and identify any errors
+encountered. Once the migration is complete, review the results to
+ensure that all desired repositories have been successfully
+migrated to Codeberg.</p>
+</li>
+</ol>
+<h2>Some output examples</h2>
+<p>Migrating some few repositories with the prefix <code>[MIRROR] </code> to the
+description of the repository.</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">----------------------------------------------
+    Welcome to Github to Codeberg Migration Script
+    ----------------------------------------------
+
+    User on Github          <span class="token builtin class-name">:</span> LionyxML
+    User on Codeberg        <span class="token builtin class-name">:</span> LionyxML
+    Using description prefix: <span class="token punctuation">[</span>MIRROR<span class="token punctuation">]</span> 
+    Migrating repo          <span class="token builtin class-name">:</span> aa
+    Migrating repo          <span class="token builtin class-name">:</span> dotfiles
+    Migrating repo          <span class="token builtin class-name">:</span> flycheck
+    Migrating repo          <span class="token builtin class-name">:</span> my_emacs_config
+
+    If you wish to change this, abort and change this script.
+
+
+
+    Press ENTER to continue, C-c to abort.
+
+
+<span class="token operator">>></span><span class="token operator">></span> Working<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Migrating: aa<span class="token punctuation">..</span>. Error<span class="token operator">!</span> Already exists on Codeberg.
+<span class="token operator">>></span><span class="token operator">></span> Migrating: flycheck<span class="token punctuation">..</span>. Success<span class="token operator">!</span>
+<span class="token operator">>></span><span class="token operator">></span> Migration complete<span class="token operator">!</span>
+</code></pre></div>
+<p>Migrating all repositories.</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">Github to Codeberg Migration Script
+    ----------------------------------------------
+
+    User on Github          <span class="token builtin class-name">:</span> LionyxML
+    User on Codeberg        <span class="token builtin class-name">:</span> LionyxML
+    Using description prefix: <span class="token punctuation">[</span>MIRROR<span class="token punctuation">]</span> 
+    Migrating repo          <span class="token builtin class-name">:</span> all
+
+    If you wish to change this, abort and change this script.
+
+
+
+    Press ENTER to continue, C-c to abort.
+
+
+<span class="token operator">>></span><span class="token operator">></span> Working<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Migrating: 100_computer_science_concepts<span class="token punctuation">..</span>. Error<span class="token operator">!</span> Already exists on Codeberg.
+<span class="token operator">>></span><span class="token operator">></span> Migrating: 10_design_patterns<span class="token punctuation">..</span>. Error<span class="token operator">!</span> Already exists on Codeberg.
+<span class="token operator">>></span><span class="token operator">></span> Migrating: aa<span class="token punctuation">..</span>. Error<span class="token operator">!</span> Already exists on Codeberg.
+<span class="token punctuation">..</span>.
+</code></pre></div>
+<p>Notice it can fail for one or other repository (eg.: it is already
+migrated from another script run), but it keeps going until the end.</p>
+<p>By following these steps and exercising caution throughout the
+process, you can safely and efficiently migrate your repositories from
+GitHub to Codeberg using the provided script. Remember to always read
+and understand scripts before execution, and proceed with care to
+ensure a smooth transition.</p>
+<h2>Limitations</h2>
+<p>While the script offers a convenient solution for transferring
+repositories, there are some limitations to be aware of:</p>
+<ul>
+<li>
+<p>• <strong>Repository Quota</strong>: Codeberg limits the number of repositories per
+user to 100 by default. If you have more than 100 repositories to
+migrate, you'll need to request a higher quota following their
+instructions. Additionally, Codeberg mirrors repositories, meaning
+that a repository on Codeberg acts as a mirror of the original
+repository on GitHub. This may affect certain functionalities, such
+as repository forks and pull requests.</p>
+</li>
+<li>
+<p>• <strong>API Changes and Improvements</strong>: As with any script utilizing
+external APIs, there's a possibility that API endpoints or
+functionalities may change over time. Codeberg may also introduce
+new features or improvements to their platform, offering better
+options for migration. It's essential to keep this in mind and
+periodically review and update the script to align with any changes
+or enhancements.</p>
+</li>
+<li>
+<p>• <strong>Local Repository Copies</strong>: The migration script only handles the
+transfer of repository metadata and contents to Codeberg. Your local
+copies of repositories will remain unaffected by the migration
+process. After running the script, you'll need to manually add a new
+remote for each repository pointing to Codeberg and push the changes
+to both GitHub and Codeberg remotes until you feel confident that
+the migration is complete.</p>
+</li>
+</ul>
+<p>To add a new remote for a repository and push to both GitHub and
+Codeberg remotes using SSH, follow these steps:</p>
+<p>1 . <strong>Navigate to Repository Directory</strong>: Open the terminal and
+navigate to the directory of the repository you want to migrate.</p>
+<p>2 . <strong>Edit <code>.git/config</code></strong>: Open the <code>.git/config</code> file in a text
+editor. Add a new remote entry under the <code>[remote "codeberg"]</code>
+section with the SSH URL of your Codeberg repository. Here's an
+example of how it might look:</p>
+<div class="remark-highlight"><pre class="language-ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">remote "codeberg"</span><span class="token punctuation">]</span></span>
+   <span class="token key attr-name">url</span> <span class="token punctuation">=</span> <span class="token value attr-value">git@codeberg.org:YourUsername/YourRepository.git</span>
+   <span class="token key attr-name">fetch</span> <span class="token punctuation">=</span> <span class="token value attr-value">+refs/heads/*:refs/remotes/codeberg/*</span>
+</code></pre></div>
+<p>3 . <strong>Save and Close:</strong> Save the changes to the .git/config file and
+close the text editor.</p>
+<p>4 . <strong>Push Changes:</strong> In the terminal, run the following commands to
+push changes to both GitHub and Codeberg remotes:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">git</span> push origin master  <span class="token comment"># Push changes to GitHub</span>
+<span class="token function">git</span> push codeberg master  <span class="token comment"># Push changes to Codeberg</span>
+</code></pre></div>
+<p>Of course you could also do it without checking your config with:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">git</span> remote <span class="token function">add</span> codeberg git@codeberg.org:YourUsername/YourRepository.git
+</code></pre></div>
+<p>Repeat these steps for each repository you've migrated until you feel
+confident that the migration process is complete. Or maybe you'll feel
+in the mood to hack a script to do it 😉.</p>
+<p>As one can see, this script provides a solid foundation for repository
+migration, users are encouraged to customize and enhance it according
+to their specific use cases and requirements. By leveraging the
+script's flexibility, users can optimize the migration process to suit
+their individual needs and preferences.</p>
+<h2>Deleting API Keys</h2>
+<p>After completing the migration process, it's essential to delete the
+API keys you generated for GitHub and Codeberg to maintain
+security. Follow the respective platforms' instructions to revoke or
+delete the API keys from your account settings.</p>
+<h2>Conclusion</h2>
+<p>The "GitHub to Codeberg Bulk Migration Script" offers a simple and
+efficient solution for migrating your repositories from GitHub to
+Codeberg in bulk. By automating the migration process, this script
+saves you time and effort while ensuring a seamless transition to
+Codeberg. Whether you're migrating a handful of projects or an
+extensive portfolio of repositories, this script has got you
+covered. Say goodbye to manual migration headaches and embrace the
+convenience of bulk migration with this powerful script.</p>

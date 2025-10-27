@@ -1,0 +1,39 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Speed up your Emacs experience and enjoy quicker startup times with these clever tricks and optimizations.</p>
+<h2>Launching Emacs</h2>
+<p>As you can see in the image above, I have configured my Emacs to be
+fully featured, capable of handling a wide range of tasks.</p>
+<p>I use it as an integrated development environment (IDE), a music
+player, a note-taking app, a frontend for several daemon services, and
+more.</p>
+<p>However, this versatility comes at a cost—Emacs takes a
+significant amount of time to start up due to my preference for
+installing packages manually rather than using use-package (the
+reasons for this choice could fill another post).</p>
+<p>In this context, the "right way" to use Emacs is to take advantage of
+its server/client architecture. Essentially, you can run Emacs as a
+server and open multiple command-line (CLI) or graphical user
+interface (GUI) clients, all of which share the same server instance.</p>
+<p>To achieve this, I like to set up a few aliases in my .bashrc file:</p>
+<div class="remark-highlight"><pre class="language-sh"><code class="language-sh"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">emd</span><span class="token operator">=</span><span class="token string">'emacs --daemon'</span>
+<span class="token builtin class-name">alias</span> <span class="token assign-left variable">em</span><span class="token operator">=</span><span class="token string">'emacsclient -t'</span>
+<span class="token builtin class-name">alias</span> <span class="token assign-left variable">emg</span><span class="token operator">=</span><span class="token string">'emacsclient -c'</span>
+</code></pre></div>
+<p>Using these aliases, running <code>emd</code> starts the Emacs server. You only
+need to do this once when you start your terminal or set it to run as
+a server/daemon on system startup.</p>
+<p>The initial startup time is the only downside, but this delay occurs
+only once. Afterward, using <code>em</code> opens the full-featured Emacs
+instantly. You can even use it to open a specific file like this: <code>em my_file.txt</code>.</p>
+<p>Similarly, we have <code>emg</code>, which does the same as <code>em</code> but opens a client
+in graphical mode.</p>
+<p>Any instance opened with <code>em</code> or <code>emg</code> will share the same Emacs server,
+allowing you to take advantage of data sharing between different
+"sessions."</p>
+<p>In conclusion, by harnessing the power of Emacs' server/client
+architecture and a few nifty aliases, you can transform your Emacs
+experience into a seamlessly versatile tool for your daily tasks. So,
+why wait? Dive into the world of efficient, lightning-fast Emacs
+sessions, and let your creativity and productivity soar. Happy
+hacking!</p>

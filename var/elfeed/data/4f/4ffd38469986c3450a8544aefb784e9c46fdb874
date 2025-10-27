@@ -1,0 +1,47 @@
+<p>These are my minimalist themes. They use few colours and will appear
+mostly monochromatic in many contexts. Styles involve the careful use
+of typography, such as italics and bold italics.</p>
+
+<p>If you want maximalist themes in terms of colour, check my <code class="language-plaintext highlighter-rouge">ef-themes</code>
+package. For something in-between, which I would consider the best
+“default theme” for a text editor, opt for my <code class="language-plaintext highlighter-rouge">modus-themes</code>.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">doric-themes</code></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/emacs/doric-themes-pictures">https://protesilaos.com/emacs/doric-themes-pictures</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/doric-themes">https://github.com/protesilaos/doric-themes</a></li>
+  <li>Backronym: Doric Only Really Intensifies Conservatively … themes.</li>
+</ul>
+
+<p>Below are the release notes.</p>
+
+<hr />
+
+<h2>The new <code class="language-plaintext highlighter-rouge">oak</code> and <code class="language-plaintext highlighter-rouge">pine</code> themes</h2>
+
+<p>These explore the woody+earthly style:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">doric-oak</code> has dark text against an ochre background, with accents
+of green.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">doric-pine</code> uses light text against a dark green background, with
+accents of brown.</p>
+  </li>
+</ul>
+
+<h2>Background colours for diffs</h2>
+
+<p>All diff-related interfaces, including Magit, diff-mode, and Ediff,
+now use colour-coded background values where appropriate. This is done
+to improve usability, as it otherwise can be hard to discern the
+boundaries of individual diff hunks.</p>
+
+<h2>Alternating foreground values for message/email quotes</h2>
+
+<p>In <code class="language-plaintext highlighter-rouge">message-mode</code>, Gnus, and related interfaces all quoted/cited
+message level now conforming with an odd VS even colouring scheme. The
+style is still subtle, but now the individual levels of depths are
+easier to spot.</p>

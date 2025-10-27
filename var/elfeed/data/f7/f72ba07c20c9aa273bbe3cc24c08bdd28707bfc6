@@ -1,0 +1,55 @@
+
+                                <p><a href="https://github.com/symfony/symfony/pull/61864" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony 6.4.26</a> has just been released.</p>
+<p>Read the <a href="https://symfony.com/doc/current/setup/upgrade_major.html" class="reference external">Symfony upgrade guide</a> to learn more about upgrading Symfony
+and use the <a href="https://insight.symfony.com/" class="reference external">SymfonyInsight upgrade reports</a> to detect the code you will
+need to change in your project.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Want to be notified whenever a new Symfony release is published? Or when a
+version is not maintained anymore? Or only when a security issue is fixed?
+Consider <a href="https://symfony.com/account/notifications" class="reference external">subscribing to the Symfony Roadmap Notifications</a>.</p>
+</div>
+<div class="section">
+<h2 id="changelog-since-symfony-6-4-25"><a class="headerlink" href="#changelog-since-symfony-6-4-25" title="Permalink to this headline">Changelog Since Symfony 6.4.25</a></h2>
+<ul>
+    <li>bug <a href="https://github.com/symfony/symfony/pull/61856" class="reference external" rel="external noopener noreferrer" target="_blank">#61856</a> [Console] do not pass the empty string to ord() (@xabbuh)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61855" class="reference external" rel="external noopener noreferrer" target="_blank">#61855</a> [DoctrineBridge][Yaml] don't cast strings exceeding the min/max int ranges (@xabbuh)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61844" class="reference external" rel="external noopener noreferrer" target="_blank">#61844</a>  do not coerce NAN to other types (@xabbuh)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61825" class="reference external" rel="external noopener noreferrer" target="_blank">#61825</a> [DoctrineBridge] Make EntityUserProviders pass attributes to their loader (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61793" class="reference external" rel="external noopener noreferrer" target="_blank">#61793</a>  [AssetMapper] Prevent duplicate entries in module preloads (@xDeSwa)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61757" class="reference external" rel="external noopener noreferrer" target="_blank">#61757</a> [FrameworkBundle] Perform-no-deep-merging on workflow transitions' from/to configs (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61766" class="reference external" rel="external noopener noreferrer" target="_blank">#61766</a>  Fix ord()-related PHP 8.5 deprecations (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61368" class="reference external" rel="external noopener noreferrer" target="_blank">#61368</a> [HttpKernel] Refine Vary header check to skip special handling of 'Accept-Language' when it's the only entry and '_vary_by_language' is true  in CacheAttributeListener (@santysisi)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61746" class="reference external" rel="external noopener noreferrer" target="_blank">#61746</a> [Serializer] Fix unknown type in denormalization errors when union type used in constructor (@d-mitrofanov-v)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61724" class="reference external" rel="external noopener noreferrer" target="_blank">#61724</a> [Console] Fix handling of \E in Bash completion (@HypeMC)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61518" class="reference external" rel="external noopener noreferrer" target="_blank">#61518</a> [HttpKernel] Handle an array vary header in the http cache store for write (@philpichet)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61736" class="reference external" rel="external noopener noreferrer" target="_blank">#61736</a> [PhpUnitBridge] do not try to modify the result of a PhptTestCase (@xabbuh)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61731" class="reference external" rel="external noopener noreferrer" target="_blank">#61731</a> [PhpUnitBridge] Fix gathering deprecation in phpt (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61729" class="reference external" rel="external noopener noreferrer" target="_blank">#61729</a> [PhpUnitBridge] Silence deprecation of __sleep/wakeup() (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61727" class="reference external" rel="external noopener noreferrer" target="_blank">#61727</a>  Replace __sleep/wakeup() by __(un)serialize() for throwing and internal usages (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61693" class="reference external" rel="external noopener noreferrer" target="_blank">#61693</a> [Console] Don’t append a new line to test inputs ending with an EOT (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61596" class="reference external" rel="external noopener noreferrer" target="_blank">#61596</a> [FrameworkBundle] Normalize workflow places separately (@KevinVanSonsbeek)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61690" class="reference external" rel="external noopener noreferrer" target="_blank">#61690</a> [Console] Don’t automatically append EOT to multiline test inputs (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61667" class="reference external" rel="external noopener noreferrer" target="_blank">#61667</a> [Config] Fix GlobResource pattern with trailing slash (@HypeMC)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61659" class="reference external" rel="external noopener noreferrer" target="_blank">#61659</a> [Security] Fix HttpUtils::createRequest() when the base request is forwarded (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61645" class="reference external" rel="external noopener noreferrer" target="_blank">#61645</a>  Replace backtick operator, deprecated in PHP 8.5, with shell_exec() (@iluuu1994)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61097" class="reference external" rel="external noopener noreferrer" target="_blank">#61097</a> [Serializer] Fix normalizing objects with accessors having the same name as a property (@RafaelKr)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61614" class="reference external" rel="external noopener noreferrer" target="_blank">#61614</a> [SecurityBundle] Prevent accessing the tracked token storage when collecting data (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61605" class="reference external" rel="external noopener noreferrer" target="_blank">#61605</a> [Cache] Fix internal representation of non-static values (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61599" class="reference external" rel="external noopener noreferrer" target="_blank">#61599</a> [Cache] Make TagAwareAdapter registrable as a service (@a.dmitryuk)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61595" class="reference external" rel="external noopener noreferrer" target="_blank">#61595</a> [Security] Pass attributes to nested ChainUserProviders (@valtzu)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61232" class="reference external" rel="external noopener noreferrer" target="_blank">#61232</a> [Messenger] Firebird Database - incompatibility with expected lowercase columns (@DSsatwareAG)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61583" class="reference external" rel="external noopener noreferrer" target="_blank">#61583</a> [DoctrineBridge] Fix exception catch when deleting temporary table in the sameDatabaseChecker (@GromNaN)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61585" class="reference external" rel="external noopener noreferrer" target="_blank">#61585</a> [HttpFoundation][SQLSRV] Change column type from TEXT to STRING (@Matt-PMCT)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61571" class="reference external" rel="external noopener noreferrer" target="_blank">#61571</a> [Serializer] Fix dealing with asymmetric visilibity for properties (@santysisi)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61573" class="reference external" rel="external noopener noreferrer" target="_blank">#61573</a> [Inflector][String] Fix edge cases (@OskarStark)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61548" class="reference external" rel="external noopener noreferrer" target="_blank">#61548</a> [Security] Fix attribute-based chained user providers (@valtzu)</li>
+</ul>
+</div>
+                <hr style="margin-bottom: 5px" />
+                <div style="font-size: 90%">
+                    <a href="https://symfony.com/sponsor">Sponsor</a> the Symfony project.
+                </div>
+            

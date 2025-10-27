@@ -1,0 +1,73 @@
+<p>This is a simple package to automatically preview in a window the file
+at point in Dired buffers. Preview windows are closed when they are no
+longer relevant, while preview buffers are killed if they have not
+been used for other purposes beside previewing. The package provides
+several customisation options to control its behaviour.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">dired-preview</code></li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/dired-preview">https://protesilaos.com/emacs/dired-preview</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/dired-preview">https://github.com/protesilaos/dired-preview</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/dired-preview">https://gitlab.com/protesilaos/dired-preview</a></li>
+    </ul>
+  </li>
+  <li>Backronym: Directories Invariably Render Everything Decently …
+preview; dired … PDFs Require Extra Viewing Instructions for Emacs
+to Work.</li>
+</ul>
+
+<p>Below are the release notes</p>
+
+<hr />
+
+<h2>Version 0.5.0 on 2025-04-09</h2>
+
+<p>This version contains a few bug fixes and minor refinements that
+should improve the behaviour of the package.</p>
+
+<h3>Revised how preview windows are deleted</h3>
+
+<p>In the past, <code class="language-plaintext highlighter-rouge">dired-preview-mode</code> could delete windows that held
+another buffer, thus undoing the window layout that was present before
+a preview buffer was displayed. Now <code class="language-plaintext highlighter-rouge">dired-preview-mode</code> makes sure to
+only delete windows that have not had another buffer shown in them,
+i.e. windows that were created just for preview purposes.</p>
+
+<h3>Directories no longer get misunderstood as “large files”</h3>
+
+<p>We tweaked how we test the type of the buffer-to-be-preview such that
+directories are not mistaken for “large files”. This was an issue for
+Mac computers that Sean Devlin brought to my attention in issue 27:
+<a href="https://github.com/protesilaos/dired-preview/issues/27">https://github.com/protesilaos/dired-preview/issues/27</a>.</p>
+
+<h3>The <code class="language-plaintext highlighter-rouge">dired-preview-delay</code> has a 0.1 second minimum to avoid instability</h3>
+
+<p>A value of 0 could lead to a noticeably degraded experience while
+navigating the Dired buffer. Thanks to Yiyu Zhou for reporting the
+matter in issue 2 on the GitLab mirror:
+<a href="https://gitlab.com/protesilaos/dired-preview/-/issues/2">https://gitlab.com/protesilaos/dired-preview/-/issues/2</a>.</p>
+
+<h3>Files without an extension can also be ignored</h3>
+
+<p>The user option <code class="language-plaintext highlighter-rouge">dired-preview-ignored-extensions-regexp</code> will now
+also match files without an extension, such as the <code class="language-plaintext highlighter-rouge">.DS_Store</code> on Mac
+computers.</p>
+
+<p>Thanks to Sean Devlin for the contribution in pull request 26:
+<a href="https://github.com/protesilaos/dired-preview/pull/26">https://github.com/protesilaos/dired-preview/pull/26</a>. The change is
+within the ~15-line limit, meaning that Sean does not need to assign
+copyright to the Free Software Foundation.</p>
+
+<h3>The preview buffer is the “other window” for scrolling purposes</h3>
+
+<p>The commands which scroll the other window, such as
+<code class="language-plaintext highlighter-rouge">scroll-other-window</code> now operate on the preview buffer when that is
+displayed. Thanks to Karthik Chikmagalur for proposing this in issue
+24: <a href="https://github.com/protesilaos/dired-preview/issues/24">https://github.com/protesilaos/dired-preview/issues/24</a>.</p>
+
+<p>This is in addition to the commands we already provided for scrolling
+the preview window, namely, <code class="language-plaintext highlighter-rouge">dired-preview-page-up</code> and <code class="language-plaintext highlighter-rouge">dired-preview-page-down</code>.
+Do <code class="language-plaintext highlighter-rouge">M-x describe-keymap</code> and then search for <code class="language-plaintext highlighter-rouge">dired-preview-mode-map</code>:
+it is in effect when <code class="language-plaintext highlighter-rouge">dired-preview-mode</code> is enabled.</p>

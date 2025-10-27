@@ -1,0 +1,138 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Terminal Emacs users often face an annoying limitation: <strong>copying and
+pasting</strong> between Emacs and the system clipboard doesn’t "just work."
+While graphical Emacs integrates with the OS clipboard by default, the
+terminal version leaves that responsibility to you, especially if
+you're inside <code>tmux</code>, <code>ssh</code>, or simply prefer living in the terminal.</p>
+<p>Thankfully, there are excellent packages like:
+<a href="https://github.com/emacsmirror/xclip/blob/master/xclip.el"><code>xclip</code></a> and
+<a href="https://github.com/spudlyo/clipetty"><code>clipetty</code></a>, as well as guides like
+<a href="https://www.emacswiki.org/emacs/CopyAndPaste"><code>Emacswiki: CopyAndPaste</code></a> that
+tackle this. They offer elegant solutions, often with additional
+features and broader compatibility.</p>
+<p>But sometimes, you just want something small and direct, something
+you can <strong>copy-paste into your config</strong> and tweak per OS, with no
+external Emacs dependencies.</p>
+<p>That’s what I present here.</p>
+<hr>
+<h2>✂️ emacs-solo-clipboard: A Minimal Clipboard Bridge</h2>
+<p>This snippet is part of my
+<a href="https://github.com/LionyxML/emacs-solo"><code>emacs-solo</code></a> configuration. It gives
+terminal Emacs clipboard support using native system tools (which, of course, you
+need installed in your system):</p>
+<p>➖ <code>pbcopy</code> / <code>pbpaste</code> for macOS</p>
+<p>➖ <code>clip.exe</code> / <code>powershell.exe</code> for WSL</p>
+<p>➖ <code>wl-copy</code> / <code>wl-paste</code> for Wayland</p>
+<p>➖ <code>xclip</code> for X11</p>
+<p>It hooks into Emacs' standard <code>interprogram-cut-function</code> and <code>interprogram-paste-function</code> APIs.</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token heading comment title">;;; EMACS-SOLO-CLIPBOARD</span>
+<span class="token comment">;;</span>
+<span class="token comment">;;  Allows proper copy/pasting on terminals</span>
+<span class="token comment">;;</span>
+<span class="token punctuation">(</span><span class="token keyword">use-package</span> emacs-solo-clipboard
+  <span class="token lisp-property property">:ensure</span> <span class="token boolean">nil</span>
+  <span class="token lisp-property property">:no-require</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:defer</span> <span class="token boolean">t</span>
+  <span class="token lisp-property property">:init</span>
+  <span class="token punctuation">(</span><span class="token keyword">cond</span>
+   <span class="token comment">;; macOS: use pbcopy/pbpaste</span>
+   <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">eq</span> system-type <span class="token quoted-symbol variable symbol">'darwin</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-cut-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">text</span> <span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">_</span></span></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">process-connection-type</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">proc</span> <span class="token punctuation">(</span><span class="token car">start-process</span> <span class="token string">"pbcopy"</span> <span class="token string">"*Messages*"</span> <span class="token string">"pbcopy"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-string</span> proc text<span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-eof</span> proc<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-paste-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token car">shell-command-to-string</span> <span class="token string">"pbpaste"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+   <span class="token comment">;; WSL (Windows Subsystem for Linux): Use clip.exe for copy and powershell.exe for paste</span>
+   <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token car">eq</span> system-type <span class="token quoted-symbol variable symbol">'gnu/linux</span><span class="token punctuation">)</span>
+		 <span class="token punctuation">(</span><span class="token car">getenv</span> <span class="token string">"WSLENV"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-cut-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">text</span> <span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">_</span></span></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">process-connection-type</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">proc</span> <span class="token punctuation">(</span><span class="token car">start-process</span> <span class="token string">"clip.exe"</span> <span class="token string">"*Messages*"</span> <span class="token string">"clip.exe"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-string</span> proc text<span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-eof</span> proc<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-paste-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token car">string-trim</span> <span class="token punctuation">(</span><span class="token car">shell-command-to-string</span> <span class="token string">"powershell.exe -command Get-Clipboard"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+   <span class="token comment">;; Linux with wl-copy/wl-paste (Wayland)</span>
+   <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token car">eq</span> system-type <span class="token quoted-symbol variable symbol">'gnu/linux</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">executable-find</span> <span class="token string">"wl-copy"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-cut-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">text</span> <span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">_</span></span></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">process-connection-type</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">proc</span> <span class="token punctuation">(</span><span class="token car">start-process</span> <span class="token string">"wl-copy"</span> <span class="token string">"*Messages*"</span> <span class="token string">"wl-copy"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-string</span> proc text<span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-eof</span> proc<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-paste-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token car">shell-command-to-string</span> <span class="token string">"wl-paste -n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+   <span class="token comment">;; Linux with xclip (X11)</span>
+   <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token car">eq</span> system-type <span class="token quoted-symbol variable symbol">'gnu/linux</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">executable-find</span> <span class="token string">"xclip"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-cut-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">text</span> <span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">_</span></span></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">process-connection-type</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">proc</span> <span class="token punctuation">(</span><span class="token car">start-process</span> <span class="token string">"xclip"</span> <span class="token string">"*Messages*"</span> <span class="token string">"xclip"</span> <span class="token string">"-selection"</span> <span class="token string">"clipboard"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-string</span> proc text<span class="token punctuation">)</span>
+				<span class="token punctuation">(</span><span class="token car">process-send-eof</span> proc<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> interprogram-paste-function
+		  <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+			<span class="token punctuation">(</span><span class="token car">shell-command-to-string</span> <span class="token string">"xclip -selection clipboard -o"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<h2>⚠️ This Is Hacky, and That's the Point</h2>
+<p>This is <strong>not</strong> a library or polished package. It's a minimal Emacs Lisp
+snippet that works well <em>if</em> your system already provides the right clipboard
+utilities. It doesn't abstract anything and won't handle edge cases. But that
+also means:</p>
+<p>✅ Easy to audit</p>
+<p>✅ Easy to tweak</p>
+<p>✅ Easy to share small pieces</p>
+<p>You can literally just copy the macOS or Wayland part and ignore the rest.</p>
+<hr>
+<h2>🖥️ Bonus: OSC 52 Might Be All You Need</h2>
+<p>If you’re using a modern terminal emulator that supports <strong>OSC 52</strong>
+(like Kitty, Windows Terminal, or Xterm with proper settings), you
+might not need <em>any</em> of the above clipboard setup.</p>
+<p>Emacs has built-in support for OSC 52 clipboard integration via this simple line:</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token keyword">setq</span> xterm-extra-capabilities <span class="token punctuation">'(</span><span class="token car">getSelection</span> setSelection modifyOtherKeys<span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>This tells Emacs to assume your terminal supports some extra features, including:</p>
+<ul>
+<li><code>getSelection</code>: paste from the system clipboard</li>
+<li><code>setSelection</code>: copy to the system clipboard</li>
+<li><code>modifyOtherKeys</code>: unlock more reliable keybindings (like <code>C-,</code>)</li>
+</ul>
+<p>This works <strong>without any external tools</strong> as long as your terminal
+supports OSC 52 and your Emacs was built with Xterm support (most
+builds are).</p>
+<blockquote>
+<p>💡 <strong>Tip</strong>: Try it! Copy something in Emacs with <code>M-w</code> and paste outside. If it works, you’re set.
+Otherwise, fallback to one of the system-specific setups above.</p>
+</blockquote>
+<blockquote>
+<p>🔒 <strong>tmux users</strong>: OSC 52 support may require this to your <code>~/.tmux.conf</code>:</p>
+</blockquote>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">set-option <span class="token parameter variable">-s</span> set-clipboard on
+<span class="token builtin class-name">set</span> <span class="token parameter variable">-g</span> allow-passthrough on
+</code></pre></div>
+<hr>
+<h2>✅ Wrap-Up</h2>
+<p>If you’re running Emacs in the terminal and want clipboard support without
+extra layers or packages, this might be just what you need.</p>
+<p>It’s not pretty. It might be not <em>that</em> smart. But it works.</p>
+<p>And sometimes, that’s exactly the kind of config you want.</p>
+<hr>
+<p>Let me know if you run into clipboard quirks I didn’t cover here, or if you’ve
+built your own minimalist setup, I’m always curious about tiny hacks that
+punch above their weight. 🧠🛠️🔥</p>
+<hr>
+<h3>Edit:</h3>
+<p><strong>2025-06-20:</strong> Added the <em>Bonus</em> section reffering to
+<code>xterm-extra-capabilities</code> as suggested by user <code>u/passkyw</code> on
+<a href="https://www.reddit.com/r/emacs/comments/1leu2r7/hacky_minimal_clipboard_support_in_terminal_emacs/">r/emacs</a>.</p>

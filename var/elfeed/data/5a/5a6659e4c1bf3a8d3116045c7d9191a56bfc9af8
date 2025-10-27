@@ -1,0 +1,17 @@
+<p>
+Ashton Wiersdorf has a nice post on <a href="https://lambdaland.org/posts/2025-10-03_reading_papers/">how he organizes papers, notes, and citations for his research</a>. Of course, Emacs is at the center of that process and it&rsquo;s another aspect of Emacs use that fascinates me. A couple of weeks ago I wrote about Kiran Gopinathan&rsquo;s <a href="https://irreal.org/blog/?p=13279">method of doing paper reviews</a>, which overlaps considerably with Wiersdorf&rsquo;s post. Two and a half years ago, I wrote <a href="https://irreal.org/blog/?p=11125">how John Kitchin does the same thing</a>.
+</p>
+<p>
+Wiersdorf is a self-described Emacs maximalist but he is, nevertheless, also a heavy <a href="https://www.zotero.org/">Zotero</a> user. I&rsquo;ve written about Zotero <a href="https://irreal.org/blog/?s=zotero">many times before</a>. It a package for storing, managing, and building the bibliographies for papers. See <a href="https://en.wikipedia.org/wiki/Zotero">this Wikipedia article</a> for details. Wiersdorf&rsquo;s post describes how he combines Zotero and Emacs to manage his research papers.
+</p>
+<p>
+He also recommends the <a href="https://github.com/emacs-citar/citar">citar</a> package for handling citations. John Kitchin&rsquo;s <a href="https://github.com/jkitchin/org-ref/blob/master/org-ref.org">Org-ref</a> is another excellent choice for this but the citar package works well with Zotero. Lots of folks swear by Zotero and if you&rsquo;re one of those people, citar may be for you.
+</p>
+<p>
+The other major package that Wiersdorf uses is Protesilaos Stavrou&rsquo;s <a href="https://protesilaos.com/emacs/denote">Denote</a>. He describes it as a Zettelkasten-like package. Gopinathan uses <a href="https://www.orgroam.com/">Org-roam</a> for the same thing so you should take a look at both packages to see which you like best.
+</p>
+<p>
+Finally, Wiersdorf uses the <a href="https://github.com/pprevos/citar-denote">citar-denote</a> package to integrate denote and citar. It ties citar and denote together and allows you to easily access papers from their citation. Take a look at Wiersdorf&rsquo;s post for some details.
+</p>
+<p>
+The most important thing, Wiersdorf says, is to use Emacs to build your own system. It&rsquo;s not an editor, he says, but a toolkit to build your ideal editor. That&rsquo;s differs a bit from my <a href="https://irreal.org/blog/?p=13302">usual definition</a> but is certainly a good description. Regardless, the goal is to make Emacs into an editor that meets your exact needs.</p>

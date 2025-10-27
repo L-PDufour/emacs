@@ -1,0 +1,17 @@
+<html><head></head><body><p>
+Although, as I have said, <a href="https://takeonrules.com/2025/08/01/emacs-carnival-2025-08-your-elevator-pitch-for-emacs/">the Emacs elevator pitch</a> is a difficult challenge, several people have stepped forward to meet it. Eric MacAdie is one of those people and has provided <a href="https://macadie.info/2025/08/26/emacs-carnival-elevator-pitch-and-post-pitch-talking-points/">his own contribution</a>. His approach is to offer some talking points for such a pitch without making an actual elevator pitch himself.
+</p>
+<p>
+His points, it seems to me, are an excellent précis of what we love about Emacs and why we’re still using it after other editors have come and gone. His post is well worth reading but here’s a short summary of his points.
+</p>
+<ul>
+<li>When you’re starting, use a a cheat sheet. It’s <i>not</i> a sign of weakness.</li>
+<li>Don’t try to learn everything at once. After you learn the basics you can start worrying about living your life in Emacs.</li>
+<li>In Microsoft products, everything seems easy in the beginning but you soon reach a point where everything is hard. Emacs is just the opposite: at first things seem hard but you soon reach a point where you can do anything you want.</li>
+<li>Emacs is older than the IBM CUA standards and has its own way of doing things. Instead of asking why Emacs doesn’t follow the CUA standards, perhaps you should ask we everyone else isn’t following the Emacs standards.</li>
+<li>Most things in Emacs don’t change. The things you learned 30 years ago still work. At the same time, Emacs continues to evolve and add new capabilities.</li>
+<li>Completion. Completion is one of Emacs’ magical powers. You don’t have to memorize the key chords for every command. Rather you can use <kbd>Meta</kbd>+<kbd>x</kbd> and an approximation of the command name to bring up list of candidates. Seventeen years on, I’m still using this technique to find seldom used commands.</li>
+</ul>
+<p>
+As I said, MacAdie’s post is a good summary of reasons to use Emacs. Take a look and see if you don’t agree.</p>
+</body></html>

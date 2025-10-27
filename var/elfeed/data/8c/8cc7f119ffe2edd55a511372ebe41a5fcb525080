@@ -1,0 +1,170 @@
+<p>In this new video series, I talk to anybody who is interested to have a video call with me (so do contact me if you want!). The topics cover anything related to Emacs, technology, and life in general. More information in the announcement I posted: <a href="https://protesilaos.com/codelog/2025-07-10-prot-asks-chats-videos-proposal/">https://protesilaos.com/codelog/2025-07-10-prot-asks-chats-videos-proposal/</a>.</p>
+
+<p>Today I learnt from Ihor Radchenko what kind of work goes into maintaining the Emacs Org package. We discussed the process of contributing to Org and how the community is involved in the process. Other than the technicalities of Emacs, I asked Ihor about general interests in life. Some of those involve the study of history, which we explored in some further depth. Ihor has travelled and worked in various parts of the planet. I wanted to understand more about those experiences. Towards the end of our meeting, I wanted to gain insights into what “material science” is in practice.</p>
+
+<h2>From Ihor</h2>
+
+<ul>
+  <li>Emacs browsers
+    <ul>
+      <li>https://protesilaos.com/codelog/2021-03-25-emacs-eww/</li>
+      <li>https://github.com/manateelazycat/emacs-application-framework</li>
+      <li>https://github.com/qutebrowser/qutebrowser/
+        <ul>
+          <li>my config: https://github.com/yantar92/emacs-config/blob/master/system-config.org#qutebrowser-1</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Key bindings
+    <ul>
+      <li>https://github.com/jyp/boon
+        <ul>
+          <li>my config: https://github.com/yantar92/emacs-config/blob/master/config.org#key-bindings</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>My talk, where I describe a bit more about how I got to maintain Org mode
+    <ul>
+      <li>https://emacsconf.org/2024/talks/org-update/</li>
+    </ul>
+  </li>
+  <li>On making first contribution easier:
+https://orgmode.org/worg/org-contribute.html#org2bb8d25</li>
+  <li>My email setup to recognize first-time mailing list participants and first-time contributors
+    <ul>
+      <li>https://github.com/yantar92/emacs-config/blob/master/config.org#detect-fsf-contribution-status-of-sender-for-org-ml</li>
+    </ul>
+  </li>
+  <li>Philosophy about being friendly to the newcomers
+https://orgmode.org/worg/org-maintenance.html#org18cc771</li>
+  <li>Guix migration away from email-based workflow to codeberg
+    <ul>
+      <li>https://guix.gnu.org/blog/2025/migrating-to-codeberg/</li>
+    </ul>
+  </li>
+  <li>web page about org-element API
+    <ul>
+      <li>https://orgmode.org/worg/dev/org-element-api.html</li>
+      <li>Section of the manual linking to that page: https://orgmode.org/manual/Advanced-Export-Configuration.html</li>
+    </ul>
+  </li>
+  <li>org-ml library: https://github.com/ndwarshuis/org-ml</li>
+  <li>meditation (Autogenic training)
+    <ul>
+      <li>https://en.wikipedia.org/wiki/Autogenic_training#Applications</li>
+    </ul>
+  </li>
+  <li>Textbook on finance I am reading: Modern Portfolio Theory and Investment Analysis, 9th Edition
+    <ul>
+      <li>https://www.wiley.com/en-us/Modern+Portfolio+Theory+and+Investment+Analysis%2C+9th+Edition-p-9781118469941</li>
+    </ul>
+  </li>
+  <li>EDX course on animal husbandry
+    <ul>
+      <li>The actual course is no longer available online, but https://learning.edx.org/course/course-v1:WageningenX+ABG02x+2T2025/home is similar</li>
+    </ul>
+  </li>
+  <li>Greek philosophy
+    <ul>
+      <li>https://historyofphilosophy.net/series/classical-greek-philosophy</li>
+    </ul>
+  </li>
+  <li>Bronze Age collapse
+https://www.youtube.com/watch?v=B965f8AcNbw
+https://www.youtube.com/watch?v=bRcu-ysocX4</li>
+  <li>The Cambridge history of ancient China : from the origins of civilization to 221 B.C.
+https://archive.org/details/cambridgehistory0000unse_i9g4</li>
+  <li>pottery village near Xi’an (陈炉): https://www.bilibili.com/video/BV1ce4y1Q7MX/</li>
+  <li>On different cultures in China
+    <ul>
+      <li>https://www.bilibili.com/video/BV13f4y1Q7qa?p=2&amp;spm_id_from=333.788.videopod.episodes</li>
+      <li>https://en.wikipedia.org/wiki/Sanxingdui
+https://www.youtube.com/watch?v=teCKq6AJtP8</li>
+    </ul>
+  </li>
+  <li>On China/Greece contacts
+https://www.history.com/articles/greeks-may-have-influenced-chinas-terra-cotta-army
+(I also recall one of the excavated tombs in Xi’an having western person buried)
+https://www.youtube.com/watch?v=J-pfeFbssMw</li>
+  <li>Heixi corridor
+    <ul>
+      <li>https://www.youtube.com/watch?v=OZH9IBGnoNU&amp;list=PL_gSHsLUsq9GYtGHstai8yY4R5cSNjvGn&amp;index=10</li>
+      <li>https://en.wikipedia.org/wiki/Hexi_Corridor</li>
+    </ul>
+  </li>
+  <li>Dunhuang
+https://en.wikipedia.org/wiki/Dunhuang
+    <ul>
+      <li>The caves: Mogao caves
+https://en.wikipedia.org/wiki/Mogao_Caves
+https://www.youtube.com/watch?v=–XM0cES6Sg
+3d virtual museum: https://www.e-dunhuang.com/index.htm</li>
+    </ul>
+  </li>
+  <li>Singapore
+https://www.youtube.com/watch?v=-wwW3wLNFAY&amp;t=341s</li>
+  <li>Manila
+https://www.youtube.com/watch?v=Ra6ztNcUlsY (slums)
+https://www.youtube.com/watch?v=8w-X-NU-p9U (the rest)</li>
+  <li>Taiwan
+    <ul>
+      <li>trains: https://www.youtube.com/watch?v=ogv4jIz9H3w</li>
+      <li>the actual place I went to: https://www.youtube.com/watch?v=1FWymGGdKrI</li>
+    </ul>
+  </li>
+  <li>Zakopane, Poland
+    <ul>
+      <li>https://www.youtube.com/watch?v=bfEJDvPxGtA</li>
+    </ul>
+  </li>
+  <li>Mountains in Xi’an: https://www.youtube.com/watch?v=GkHR9GQGcfA
+https://www.youtube.com/watch?v=b7lAFBbaMpg</li>
+  <li>Mountains in the south of China (known from classical paintings)
+https://www.youtube.com/watch?v=MIWXK7fPRTY (not exactly what I was talking about, but gives an idea)
+    <ul>
+      <li>Similar in Greece (Meteora)
+        <ul>
+          <li>https://wikitravel.org/en/Meteora</li>
+          <li>https://www.youtube.com/watch?v=OF4o5u-kYTw</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>And hanging temple in China
+https://www.youtube.com/watch?v=xZTtILl-xpE</li>
+  <li>Ancient Chinese irrigation projects
+    <ul>
+      <li>https://www.youtube.com/watch?v=4KvvnJa1d5Y (Chengdu, dam)</li>
+      <li>https://www.youtube.com/watch?v=-O19SeNqauA (canal - through half of China)</li>
+    </ul>
+  </li>
+  <li>Reinforced concrete
+https://www.youtube.com/watch?v=JHuf1Hu7ApU</li>
+  <li>On carbon fiber composites for airplanes
+    <ul>
+      <li>https://www.youtube.com/watch?v=STRidcDx47I</li>
+    </ul>
+  </li>
+  <li>On research funding
+    <ul>
+      <li>https://www.youtube.com/watch?v=6sBeKHyiV6c</li>
+      <li>these days, there is generally more focus on concrete outcomes of
+research (de facto, even what called “basic research” on paper)</li>
+    </ul>
+  </li>
+  <li>On sodium-ion (table salt) batteries
+    <ul>
+      <li>https://www.youtube.com/watch?v=RQE56ksVBB4 (video is 2 years old; now there are many more companies)</li>
+    </ul>
+  </li>
+  <li>Li-ion (super-expensive) super storage to capture solar/wind power
+during the day and provide energy during night (simply speaking)
+    <ul>
+      <li>https://en.wikipedia.org/wiki/Hornsdale_Power_Reserve</li>
+    </ul>
+  </li>
+  <li>Example of basic science to understand human behavior
+https://www.youtube.com/watch?v=NNnIGh9g6fA&amp;list=PL150326949691B199</li>
+</ul>

@@ -1,0 +1,109 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>In this article, we'll guide you through enhancing PyRadio using a
+Python package that I've developed. This package is designed to
+streamline the process of importing m3u files into
+PyRadio. Additionally, it offers the convenience of automatically
+populating PyRadio with an extensive list of radios using just one
+command!</p>
+<h2>What is PyRadio?</h2>
+<p><strong>PyRadio</strong> stands as a powerful and versatile command-line radio player, offering a unique blend of features that cater to a seamless and customizable radio streaming experience. Here's a closer look at its notable attributes:</p>
+<h3>Features:</h3>
+<ul>
+<li>
+<p><strong>Intuitive Navigation:</strong> PyRadio adopts vi-like keys, providing a familiar and efficient navigation experience using arrows, special keys, and vi-like station registers.</p>
+</li>
+<li>
+<p><strong>Station Management:</strong> Enjoy the convenience of a station editor with support for CJK characters, allowing you to effortlessly add or edit stations.</p>
+</li>
+<li>
+<p><strong>Configurability:</strong> Customize PyRadio according to your preferences using the built-in configuration editor, ensuring a personalized and tailored radio environment.</p>
+</li>
+<li>
+<p><strong>Playlist Diversity:</strong> PyRadio supports multiple playlists, enabling you to organize and switch between different sets of your favorite stations effortlessly.</p>
+</li>
+<li>
+<p><strong>Search Functionality:</strong> Seamlessly find your preferred stations with PyRadio's search function, enhancing the overall accessibility of your radio experience.</p>
+</li>
+<li>
+<p><strong>Theming Support:</strong> Personalize the visual aesthetics of PyRadio with theming support, allowing you to tailor the interface to match your style.</p>
+</li>
+<li>
+<p><strong>RadioBrowser Integration:</strong> Benefit from RadioBrowser support, expanding your radio station options and providing a broader spectrum of choices.</p>
+</li>
+<li>
+<p><strong>Remote Control:</strong> PyRadio extends its functionality with remote control capabilities, allowing for enhanced accessibility and control.</p>
+</li>
+<li>
+<p><strong>Compatibility:</strong> PyRadio is designed to run on Linux, macOS, and Windows, offering a versatile solution across different operating systems.</p>
+</li>
+<li>
+<p><strong>Easy Installation:</strong> Install or update PyRadio effortlessly through distribution packages, where available. For cases where distribution packages are not an option, building PyRadio from source ensures a straightforward installation process.</p>
+</li>
+<li>
+<p><strong>Extended Compatibility:</strong> PyRadio interfaces seamlessly with popular multimedia players, requiring MPV, MPlayer, or VLC to be installed and accessible in your system's path.</p>
+</li>
+<li>
+<p><strong>Optional Enhancements:</strong> For users seeking additional features, PyRadio supports optional integration with MKVToolNix (cli files) to insert tags, chapters, and cover to recordings, as well as optional netifaces for enhanced network interface functionality.</p>
+</li>
+</ul>
+<h3>Requirements:</h3>
+<ul>
+<li>Python 2.7/3.5+</li>
+<li>Setuptools</li>
+<li>Wheel</li>
+<li>Requests</li>
+<li>Dnspython</li>
+<li>Psutil</li>
+<li>Rich</li>
+<li>Python-dateutil</li>
+<li>Netifaces (optional)</li>
+<li>MPV, MPlayer, or VLC installed and in your system's path</li>
+<li>MKVToolNix (cli files) for optional advanced features</li>
+</ul>
+<h3>Installation:</h3>
+<p>For optimal installation, use distribution packages when available, such as on Arch Linux and derivatives, where PyRadio can be easily installed from the AUR. In cases where distribution packages are not accessible, building PyRadio from source ensures a smooth installation process, bringing you closer to an enriched command-line radio experience.</p>
+<p>For more information, check <a href="https://github.com/coderholic/pyradio">PyRadio's GitHub Repository</a>.</p>
+<h2>What is m3u_to_pyradio?</h2>
+<p><strong>m3u_to_pyradio</strong> is a versatile Python package designed as a PyRadio playlist generator from m3u playlist files. It addresses the common desire to seamlessly insert extensive m3u playlists into PyRadio or even automate the process of downloading and converting m3u playlists from external sources.</p>
+<p>For complete information, check <a href="https://github.com/LionyxML/pyradio-m3u-to-playlist">m3u_to_pyradio_playlist Github Repository</a>.</p>
+<h3>How to use it</h3>
+<p><strong>Install and Usage:</strong>
+To get started, install the package with <code>pip install m3u_to_pyradio_playlist</code>. Once installed, you can utilize the following command-line options:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">m3u_to_pyradio <span class="token punctuation">[</span>-h<span class="token punctuation">]</span> <span class="token punctuation">[</span>-i INPUT <span class="token parameter variable">-o</span> OUTPUT<span class="token punctuation">]</span> <span class="token punctuation">[</span>-d<span class="token punctuation">]</span> <span class="token punctuation">[</span>-a<span class="token punctuation">]</span>
+
+This program converts .m3u files into pyradio playlists.
+
+examples:
+   m3u_to_pyradio <span class="token parameter variable">-d</span>    Downloads and creates a huge stations.csv
+   m3u_to_pyradio <span class="token parameter variable">-a</span>    Same as <span class="token parameter variable">-a</span> and overrides current pyradio stations
+   m3u_to_pyradio <span class="token parameter variable">-i</span> playlist.m3u <span class="token parameter variable">-o</span> playlist.csv
+                        Creates playlist.csv <span class="token function">file</span> from your playlist.m3u <span class="token function">file</span>
+
+options:
+  -h, <span class="token parameter variable">--help</span>            show this <span class="token builtin class-name">help</span> message and <span class="token builtin class-name">exit</span>
+  <span class="token parameter variable">-i</span> INPUT, <span class="token parameter variable">--input</span> INPUT
+                        The m3u input <span class="token function">file</span>
+  <span class="token parameter variable">-o</span> OUTPUT, <span class="token parameter variable">--output</span> OUTPUT
+                        The output CSV <span class="token function">file</span> where playlist will be saved
+  -d, --download-super-list
+                        Download and convert the complete m3u list from
+                        https://github.com/junguler/m3u-radio-music-playlists.
+  -a, <span class="token parameter variable">--auto</span>            DANGER: Same as <span class="token parameter variable">-dsl</span> but OVERRIDES your
+                        ~/.config/pyradio/stations.csv
+</code></pre></div>
+<p><strong>Usage Examples:</strong></p>
+<p>-- Import a custom m3u file to PyRadio: <code>m3u_to_pyradio -i my_playlist.m3u -o converted.csv</code></p>
+<p>-- Automatically download the "everything-full.m3u" playlist and save it as stations.csv: <code>m3u_to_pyradio -d</code></p>
+<p>-- Override your current playlist with the downloaded list: <code>m3u_to_pyradio -a</code></p>
+<p>The output .csv file is what pyradio actually reads.</p>
+<p><strong>Uninstall</strong></p>
+<p>To uninstall, use: <code>pip uninstall m3u_to_pyradio_playlist</code></p>
+<h3>How to make everything work with one command?</h3>
+<p>Achieving a seamless integration of the extensive playlist from the junguler repository into PyRadio, automatically downloading, converting it to PyRadio's custom .csv format, and seamlessly replacing the existing configuration can be effortlessly accomplished by executing:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">m3u_to_pyradio <span class="token parameter variable">-a</span> <span class="token operator">&&</span> pyradio
+</code></pre></div>
+<p>This single command ensures a streamlined experience, opening PyRadio with all the components seamlessly integrated.</p>
+<h2>Conclusion</h2>
+<p>In a nutshell, PyRadio just got cooler with "m3u_to_pyradio." This Python package makes importing m3u files a breeze – a quick command, and you're seamlessly integrating extensive playlists, updating configurations, all in one go. It's a perfect match for radio enthusiasts who want a snappy, customized command-line radio experience. Whether you're tinkering with playlists, automating updates, or exploring stations from repositories like junguler's, "m3u_to_pyradio" has your back. Check out the GitHub repository for the inside scoop and to elevate your PyRadio vibes effortlessly. Now, sit back and let the tunes roll! 🎶</p>
+<p>Happy listening!</p>

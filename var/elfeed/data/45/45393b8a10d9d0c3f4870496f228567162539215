@@ -1,0 +1,243 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Hey everyone! I recently gave a presentation to my team about using
+Web Workers with React, and the reception was so positive that I
+decided to turn the content into a blog post.</p>
+<p>In this guide, we'll explore how Web Workers can help us keep our
+React interfaces responsive, even when dealing with heavy
+computational tasks. We'll go through a practical example, starting
+with a common problem and evolving to more robust solutions.</p>
+<p>The complete source code for each step is available in <a href="https://github.com/LionyxML/web-workers-react-talk">my GitHub
+repository</a>.</p>
+<h2>Part 1: The Problem - The UI That Freezes</h2>
+<p>Imagine you have a React application that needs to calculate the
+Fibonacci number for a relatively high value, like 42. The simplest
+way to implement the Fibonacci function is using recursion:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/App.tsx (part-01-heavy-work-lock-ui)</span>
+<span class="token keyword">function</span> <span class="token function">fib</span><span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> n <span class="token operator">&#x3C;=</span> <span class="token number">1</span> <span class="token operator">?</span> n <span class="token operator">:</span> <span class="token function">fib</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token function">fib</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>Now, let's call this function when a button is clicked:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/App.tsx (part-01-heavy-work-lock-ui)</span>
+<span class="token keyword">const</span> <span class="token function-variable function">handleClick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token function">setResults</span><span class="token punctuation">(</span><span class="token punctuation">(</span>results<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">[</span>
+	<span class="token operator">...</span>results<span class="token punctuation">,</span>
+	<span class="token punctuation">{</span> id<span class="token operator">:</span> idRef<span class="token punctuation">.</span>current<span class="token operator">++</span><span class="token punctuation">,</span> result<span class="token operator">:</span> <span class="token function">fib</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>What happens when we click the button? The user interface (UI)
+freezes. Buttons stop responding, transitions stutter, and the app
+feels like it’s crashed. This happens because JavaScript is
+<em>single-threaded</em>, the long-running Fibonacci calculation blocks the
+main thread, which also handles user interactions and rendering.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fweb-workers-react-demo-01.gif&w=3840&q=75" alt="web-workers-react-demo-01"></p>
+<p>You might notice that the UI is in Portuguese, this demo was
+originally built for an internal presentation at work. I decided to
+keep it that way since the interface is simple enough to follow even
+if you don't speak the language. 😀</p>
+<p>Also, if you’re wondering why the rotating icon keeps spinning even
+when everything else is frozen, that’s a neat detail! CSS animations
+(like <code>transform: rotate</code>) are handled by the browser’s compositor
+thread, not JavaScript, so they continue running smoothly even when
+the main thread is blocked.</p>
+<h2>Part 2: The Solution - Web Workers to the Rescue</h2>
+<p>To solve the UI freezing problem, we can move the heavy calculation to
+a <em>Web Worker</em>. A Web Worker runs JavaScript code in a separate
+thread, allowing the main thread to remain free to handle user
+interactions and UI updates.</p>
+<p>First, let's create our worker:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/workers/fibWorker.ts (part-02-03-heavy-work-with-workers)</span>
+self<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> data <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token function">fib</span><span class="token punctuation">(</span>data<span class="token punctuation">.</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  self<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span><span class="token punctuation">{</span> id<span class="token operator">:</span> data<span class="token punctuation">.</span>id<span class="token punctuation">,</span> result <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">fib</span><span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> n <span class="token operator">&#x3C;=</span> <span class="token number">1</span> <span class="token operator">?</span> n <span class="token operator">:</span> <span class="token function">fib</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token function">fib</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>Next, in our React component, we create an instance of the worker and
+communicate with it:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/App.tsx (part-02-03-heavy-work-with-workers)</span>
+<span class="token function">useEffect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  workerRef<span class="token punctuation">.</span>current <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Worker</span><span class="token punctuation">(</span>
+	<span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span><span class="token string">"./workers/fibWorker.ts"</span><span class="token punctuation">,</span> <span class="token keyword">import</span><span class="token punctuation">.</span>meta<span class="token punctuation">.</span>url<span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">"module"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  workerRef<span class="token punctuation">.</span>current<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token punctuation">(</span>e<span class="token operator">:</span> MessageEvent<span class="token operator">&#x3C;</span>Result<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+	<span class="token function">setResults</span><span class="token punctuation">(</span><span class="token punctuation">(</span>prev<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">[</span><span class="token operator">...</span>prev<span class="token punctuation">,</span> e<span class="token punctuation">.</span>data<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">handleClick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>workerRef<span class="token punctuation">.</span>current<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	workerRef<span class="token punctuation">.</span>current<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span><span class="token punctuation">{</span> id<span class="token operator">:</span> idRef<span class="token punctuation">.</span>current<span class="token operator">++</span><span class="token punctuation">,</span> n<span class="token operator">:</span> <span class="token number">42</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Now, when we click the button, the Fibonacci calculation runs in the
+background, and the UI remains responsive.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fweb-workers-react-demo-02.gif&w=3840&q=75" alt="web-workers-react-demo-02"></p>
+<h2>Part 3: Handling Multiple Tasks</h2>
+<p>What happens if we click the button multiple times in quick
+succession? With the current implementation, each click sends a new
+message to the worker, and it will process all requests concurrently,
+with no guaranteed order of completion.</p>
+<p>If we, for example, change our <code>fibWorker.ts</code> to performe some
+asynchronous tasks:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/workers/fibWorker.ts (part-02-03-heavy-work-with-workers)</span>
+<span class="token keyword">function</span> <span class="token function">fib</span><span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> n <span class="token operator">&#x3C;=</span> <span class="token number">1</span> <span class="token operator">?</span> n <span class="token operator">:</span> <span class="token function">fib</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token function">fib</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">function</span> <span class="token function">delay</span><span class="token punctuation">(</span>ms<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token builtin">Promise</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> ms<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+self<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token keyword">async</span> <span class="token punctuation">(</span>e<span class="token operator">:</span> MessageEvent<span class="token operator">&#x3C;</span><span class="token punctuation">{</span> id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span> n<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">}</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> <span class="token function">delay</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token function">fib</span><span class="token punctuation">(</span>e<span class="token punctuation">.</span>data<span class="token punctuation">.</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  self<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span><span class="token punctuation">{</span> id<span class="token operator">:</span> e<span class="token punctuation">.</span>data<span class="token punctuation">.</span>id<span class="token punctuation">,</span> result <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>This is the result, showing no "output order" is guaranteed.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fweb-workers-react-demo-03.gif&w=3840&q=75" alt="web-workers-react-demo-03"></p>
+<h2>Part 4: Controlling the Order with a Queue</h2>
+<p>To ensure that tasks are executed in the order they were requested, we
+can implement a queue inside our worker:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/workers/fibWorker.ts (part-04-heavy-work-with-workers-queue)</span>
+<span class="token keyword">interface</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+  id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  n<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> queue<span class="token operator">:</span> Task<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> processing <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+
+self<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token punctuation">(</span>e<span class="token operator">:</span> MessageEvent<span class="token operator">&#x3C;</span>Task<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  queue<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>e<span class="token punctuation">.</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>processing<span class="token punctuation">)</span> <span class="token function">processNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">processNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span>length <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	processing <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  processing <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> task <span class="token operator">=</span> queue<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>task<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token function">fib</span><span class="token punctuation">(</span>task<span class="token punctuation">.</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	self<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span><span class="token punctuation">{</span> id<span class="token operator">:</span> task<span class="token punctuation">.</span>id<span class="token punctuation">,</span> result <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span>processNext<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>With this queue, each task is enqueued and executed one at a time,
+ensuring order and control over the workflow.</p>
+<h2>Part 5: Sharing Workers Across Tabs with Shared Workers</h2>
+<p>What if we want to share the same worker across multiple components or
+even multiple browser tabs? That's where <em>Shared Workers</em> come in.</p>
+<p>A Shared Worker can be accessed by different contexts (tabs, iframes,
+etc.) from the same origin. This is ideal for centralized tasks, like
+caching results or managing a WebSocket connection.</p>
+<p>Let's create a Shared Worker with a cache for the Fibonacci results:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/workers/sharedFibWorker.ts (part-05-heavy-work-shared-workers)</span>
+<span class="token keyword">const</span> fibCache <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map<span class="token operator">&#x3C;</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function-variable function">onconnect</span> <span class="token operator">=</span> <span class="token punctuation">(</span>e<span class="token operator">:</span> MessageEvent<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> port <span class="token operator">=</span> e<span class="token punctuation">.</span>ports<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  port<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  port<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token punctuation">(</span>evt<span class="token operator">:</span> MessageEvent<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+	<span class="token comment">// ... (queue logic)</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">fib</span><span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>fibCache<span class="token punctuation">.</span><span class="token function">has</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> fibCache<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token function">rawFib</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  fibCache<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>And in our React component, we connect to the Shared Worker:</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/App.tsx (part-05-heavy-work-shared-workers)</span>
+<span class="token function">useEffect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  sharedWorkerRef<span class="token punctuation">.</span>current <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SharedWorker</span><span class="token punctuation">(</span>
+	<span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span><span class="token string">"./workers/sharedFibWorker.ts"</span><span class="token punctuation">,</span> <span class="token keyword">import</span><span class="token punctuation">.</span>meta<span class="token punctuation">.</span>url<span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">"module"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  sharedWorkerRef<span class="token punctuation">.</span>current<span class="token punctuation">.</span>port<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  sharedWorkerRef<span class="token punctuation">.</span>current<span class="token punctuation">.</span>port<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token punctuation">(</span>e<span class="token operator">:</span> MessageEvent<span class="token operator">&#x3C;</span>Result<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+	<span class="token function">setResults</span><span class="token punctuation">(</span><span class="token punctuation">(</span>prev<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">[</span><span class="token operator">...</span>prev<span class="token punctuation">,</span> e<span class="token punctuation">.</span>data<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Now, if you open the application in two different tabs and calculate
+the same Fibonacci number, the second tab will get the result from the
+cache instantly.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fweb-workers-react-demo-04.gif&w=3840&q=75" alt="web-workers-react-demo-04"></p>
+<h2>Conclusion</h2>
+<p>Web Workers are an incredibly powerful tool for improving the
+performance and responsiveness of web applications. We've seen how:</p>
+<p>➖ <strong>Web Workers</strong> can prevent UI freezing by moving heavy tasks to a
+separate thread.</p>
+<p>➖ A <strong>queue</strong> can be used to control the execution order of tasks in a
+worker.</p>
+<p>➖ <strong>Shared Workers</strong> allow for state sharing and communication between
+different tabs or components.</p>
+<p>It's important to remember that Web Workers do not have access to the
+DOM. Communication with the main thread is done through messages.</p>
+<p>For more complex scenarios, you might want to explore libraries like
+Google's <a href="https://github.com/GoogleChromeLabs/comlink">Comlink</a>, which
+simplifies communication with workers, allowing you to call functions
+in the worker as if they were local functions.</p>
+<h2>A Quick Comparison: Web, Shared, and Service Workers</h2>
+<p>While this guide focused on Web Workers and Shared Workers, it's
+helpful to understand how they differ from Service Workers. Each has a
+distinct purpose.</p>
+<div class="remark-highlight"><pre class="language-markdown"><code class="language-markdown"><span class="token table"><span class="token table-header-row"><span class="token punctuation">|</span><span class="token table-header important"> Feature / Capability            </span><span class="token punctuation">|</span><span class="token table-header important"> Web Worker              </span><span class="token punctuation">|</span><span class="token table-header important"> Shared Worker                    </span><span class="token punctuation">|</span><span class="token table-header important"> Service Worker                               </span><span class="token punctuation">|</span>
+</span><span class="token table-line"><span class="token punctuation">|</span> <span class="token punctuation">-------------------------------</span> <span class="token punctuation">|</span> <span class="token punctuation">-----------------------</span> <span class="token punctuation">|</span> <span class="token punctuation">--------------------------------</span> <span class="token punctuation">|</span> <span class="token punctuation">--------------------------------------------</span> <span class="token punctuation">|</span>
+</span><span class="token table-data-rows"><span class="token punctuation">|</span><span class="token table-data"> Scope                           </span><span class="token punctuation">|</span><span class="token table-data"> Single page/tab         </span><span class="token punctuation">|</span><span class="token table-data"> Shared across tabs (same origin) </span><span class="token punctuation">|</span><span class="token table-data"> Global (site-wide, independent of tabs)      </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Shared across tabs              </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> Yes                              </span><span class="token punctuation">|</span><span class="token table-data"> Yes                                          </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Communication                   </span><span class="token punctuation">|</span><span class="token table-data"> <span class="token code-snippet code keyword">`postMessage`</span> (1:1)     </span><span class="token punctuation">|</span><span class="token table-data"> <span class="token code-snippet code keyword">`port.postMessage`</span> (many:1)      </span><span class="token punctuation">|</span><span class="token table-data"> <span class="token code-snippet code keyword">`postMessage`</span>, <span class="token code-snippet code keyword">`fetch`</span>, Push API, etc.       </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Persists after tab closes       </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> Yes (managed by browser)                     </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Use case                        </span><span class="token punctuation">|</span><span class="token table-data"> Offload CPU-heavy tasks </span><span class="token punctuation">|</span><span class="token table-data"> Coordinate logic across tabs     </span><span class="token punctuation">|</span><span class="token table-data"> Background sync, caching, push notifications </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> DOM access                      </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> No                                           </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Network interception            </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> Yes (<span class="token code-snippet code keyword">`fetch`</span> interception)                   </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Requires secure context (HTTPS) </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> Yes (HTTPS required)                         </span><span class="token punctuation">|</span></span></span>
+</code></pre></div>
+<h3>Key Observations</h3>
+<p>➖ <strong>Web Workers</strong> are the simplest and most common choice. Their goal
+is to take a specific, computationally intensive task off the
+main thread to keep a single page responsive. Think of them as
+temporary helpers for a single view.</p>
+<p>➖ <strong>Shared Workers</strong> are all about coordination. Use them when
+multiple tabs or windows of your application need to share a
+single resource, like a WebSocket connection, a shared cache (as
+in our example), or a centralized state.</p>
+<p>➖ <strong>Service Workers</strong> are fundamentally different. They act as a
+network proxy for your entire site and are the foundation of
+Progressive Web Apps (PWAs). While they also run on a separate
+thread, their primary role is not to perform calculations for a
+specific page. Instead, they handle tasks that require a longer
+lifecycle, such as enabling offline functionality by
+intercepting network requests and serving cached assets, or
+managing push notifications even when the user doesn't have your
+site open.</p>
+<p>So, while we didn't build a Service Worker today, it's a crucial tool
+for creating modern, resilient, and engaging web applications. For
+CPU-bound tasks, stick with Web Workers; for cross-tab communication,
+use Shared Workers; and for offline capabilities and push
+notifications, the Service Worker is your go-to.</p>
+<p>I hope this guide has been helpful! Feel free to explore the <a href="https://github.com/LionyxML/web-workers-react-talk">code on
+GitHub</a> and try it
+out for yourself.</p>

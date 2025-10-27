@@ -1,0 +1,202 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Are you interested in running a local AI companion within Emacs? If
+so, you're in the right place! In this article, we'll guide you
+through setting up an Ollama server to run Llama2, Code Llama, and
+other AI models. This way, you'll have the power to seamlessly
+integrate these models into your Emacs workflow.</p>
+<h2>How to Install Ollama</h2>
+<p>Installing Ollama on your system is a straightforward process.</p>
+<p>To get started, visit <a href="https://ollama.ai/download">https://ollama.ai/download</a>
+and follow the provided instructions.</p>
+<p>It's essential not to blindly execute commands and scripts. Instead,
+take the time to review the source code and ensure it aligns with your
+requirements. You can modify the code to suit your needs or make
+adjustments after installation.</p>
+<p>For a quick installation via the command line, you can use the following command:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> https://ollama.ai/install.sh <span class="token operator">|</span> <span class="token function">sh</span>
+</code></pre></div>
+<p>This command not only installs Ollama but also sets it up as a service
+that runs by default on your system. While it consumes minimal system
+resources when idle, it's a good practice to inspect the script's
+source code, make any necessary modifications, and configure it
+according to your preferences.</p>
+<p>You can find the current installation script's source code:
+<a href="https://github.com/jmorganca/ollama/blob/main/scripts/install.sh">Current ollama install script</a>.</p>
+<p>Once you've set up Ollama, you can easily initiate interactions like these:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">ollama run codelamma <span class="token string">"Write me a function in Javascript that outputs the fibonacci sequence"</span>
+</code></pre></div>
+<p>Or if you prefer a command-line chat interface:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">olama run codelamma
+</code></pre></div>
+<p>During the initial run, the codellama model will be downloaded. This
+model is just one of the many offered by the Ollama project, so you
+have the flexibility to choose your favorite model based on your
+preferences. Keep in mind that each model may have varying hardware
+requirements.</p>
+<p>As of today, Ollama supports the following models, as indicated on their
+<a href="https://github.com/jmorganca/ollama">Github Page</a>.</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">| Model              | Parameters | Size  |
+| ------------------ | ---------- | ----- |
+| Mistral            | 7B         | 4.1GB |
+| Llama 2            | 7B         | 3.8GB |
+| Code Llama         | 7B         | 3.8GB |
+| Llama 2 Uncensored | 7B         | 3.8GB |
+| Llama 2 13B        | 13B        | 7.3GB |
+| Llama 2 70B        | 70B        | 39GB  |
+| Orca Mini          | 3B         | 1.9GB |
+| Vicuna             | 7B         | 3.8GB |</code></pre></div>
+<p>Please note that you should have at least 8 GB of RAM to run the 3B
+models, 16 GB for the 7B models, and 32 GB for the 13B models.</p>
+<p>If you're interested in exploring more models, you can find a
+comprehensive library <a href="https://ollama.ai/library">here</a>.</p>
+<p>For the purposes of this article, we'll be using the <code>codellama</code> model.</p>
+<h2>Installing Ellama</h2>
+<p>Ellama is a very nice assembled package by Sergey Kostyaev, built on
+the foundation of the llm library package. It offers a set of powerful
+functions designed to seamlessly integrate Emacs and Ollama, enhancing
+your workflow and productivity.</p>
+<p>For a closer look at Ellama and to stay updated on the project's
+current status, you can visit the official repository on GitHub:
+<a href="https://github.com/s-kostyaev/ellama">https://github.com/s-kostyaev/ellama</a>.</p>
+<p>You can install it via <code>package-install</code> or simply set <code>use-package</code>
+on your <code>init.el</code>, like:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token keyword">use-package</span> ellama
+  <span class="token lisp-property property">:init</span>
+  <span class="token punctuation">(</span><span class="token car">setopt</span> ellama-language <span class="token string">"English"</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">require</span> <span class="token quoted-symbol variable symbol">'llm-ollama</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">setopt</span> ellama-provider
+		  <span class="token punctuation">(</span><span class="token car">make-llm-ollama</span>
+		   <span class="token lisp-property property">:chat-model</span> <span class="token string">"codellama"</span> <span class="token lisp-property property">:embedding-model</span> <span class="token string">"codellama"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>You're almost there! To activate these new features, simply evaluate
+this region or reset your Emacs.</p>
+<p>Once you've done this, you can use the <code>M-x</code> command to access a
+wealth of handy functions for querying your local Ollama server
+directly from within Emacs. This will greatly enhance your workflow
+and make your interaction with Ollama more seamless and efficient.</p>
+<h2>Using Ellama</h2>
+<p>Commands:</p>
+<p>- <strong>ellama-chat</strong>: Initiate a conversation with Ellama by entering prompts in an interactive buffer.</p>
+<p>- <strong>ellama-ask</strong> (Alias for ellama-chat): Ask questions and converse with Ellama.</p>
+<p>- <strong>ellama-ask-about</strong>: Ask Ellama about a selected region or the current buffer's content.</p>
+<p>- <strong>ellama-translate</strong>: Request Ellama to translate a selected region or word at the cursor.</p>
+<p>- <strong>ellama-define-word</strong>: Find definitions for the current word using Ellama.</p>
+<p>- <strong>ellama-summarize</strong>: Generate a summary for a selected region or the current buffer.</p>
+<p>- <strong>ellama-code-review</strong>: Review code in a selected region or the current buffer with Ellama.</p>
+<p>- <strong>ellama-change</strong>: Modify text in a selected region or the current buffer according to a provided change.</p>
+<p>- <strong>ellama-enhance-grammar-spelling</strong>: Improve grammar and spelling in the selected region or buffer using Ellama.</p>
+<p>- <strong>ellama-enhance-wording</strong>: Enhance wording in the selected region or buffer.</p>
+<p>- <strong>ellama-make-concise</strong>: Simplify and make the text in the selected region or buffer more concise.</p>
+<p>- <strong>ellama-change-code</strong>: Change selected code according to a provided change.</p>
+<p>- <strong>ellama-enhance-code</strong>: Enhance selected code according to a provided change.</p>
+<p>- <strong>ellama-complete-code</strong>: Complete selected code according to a provided change.</p>
+<p>- <strong>ellama-add-code</strong>: Add new code based on a description, generated with provided context.</p>
+<p>- <strong>ellama-render</strong>: Convert selected text or the text in the current buffer to a specified format.</p>
+<p>- <strong>ellama-make-list</strong>: Create a markdown list from the selected region or the current buffer.</p>
+<p>- <strong>ellama-make-table</strong>: Generate a markdown table from the selected region or the current buffer.</p>
+<p>- <strong>ellama-summarize-webpage</strong>: Summarize a webpage fetched from a URL using Ellama.</p>
+<p>You can check the full documentation on the <a href="https://github.com/s-kostyaev/ellama">Ellama Github
+Page</a>.</p>
+<h2>Some special Ellama customizations</h2>
+<p>While this project already offers fantastic functions for seamless
+integration of Ollama into Emacs, I discovered the need for some
+additional keybindings to further boost my productivity.</p>
+<p>As a result, I've developed a customization that introduces two
+valuable features:</p>
+<p><strong>1.</strong> Global Keybinding Prefix: I've created a global keybinding prefix
+<code>C-x e</code>, which can serve as a host for a wide range of commands
+related to Ellama. To explore the full list of available commands,
+you can simply use <code>C-x e ?</code> or take advantage of the which-key
+package to receive hints for command completion.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fellama-1.png&w=3840&q=75" alt="cx-e"></p>
+<p>These features, including the toggle and the keybinding prefix, are
+fully configurable through the <code>customize-group ellama</code>. This allows you
+to tailor your Ellama integration in Emacs to suit your unique
+workflow and preferences.</p>
+<p><strong>2.</strong> Visual-Line Mode for All <code>*ellama*</code> Buffers: I've introduced a
+straightforward customization that automatically applies the
+visual-line mode to all <code>*ellama*</code> buffers. This mode ensures that lines
+are wrapped for improved readability.</p>
+<p>Additionally, I've included an option in <code>customize-group</code> ellama that
+allows you to switch this feature on or off based on your
+preference. As a result, a buffer like the one depicted below:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fellama-2.png&w=3840&q=75" alt="non-wrapped-lines"></p>
+<p>Will be displayed as follows:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fellama-3.png&w=3840&q=75" alt="wrapped-lines"></p>
+<p>This enhancement simplifies the reading experience within
+Ellama-related buffers, making it more user-friendly and adaptable to
+your needs.</p>
+<p>As mentioned earlier, invoking <code>customize-group ellama</code> grants access to these
+settings:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fellama-4.png&w=3840&q=75" alt="customizations"></p>
+<p>To make this functionality easily accessible, you can incorporate the
+following into your configuration:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">ellama-setup-keymap</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+	  <span class="token string">"Set up the Ellama keymap and bindings."</span>
+	  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defvar</span> <span class="token variable">ellama-keymap</span></span> <span class="token punctuation">(</span><span class="token car">make-sparse-keymap</span><span class="token punctuation">)</span>
+      <span class="token string">"Keymap for Ellama Commands"</span><span class="token punctuation">)</span>
+
+	  <span class="token punctuation">(</span><span class="token car">define-key</span> global-map <span class="token punctuation">(</span><span class="token car">kbd</span> ellama-keymap-prefix<span class="token punctuation">)</span> ellama-keymap<span class="token punctuation">)</span>
+
+	  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">key-commands</span>
+            <span class="token punctuation">'(</span><span class="token punctuation">(</span><span class="token string">"a"</span> ellama-ask-about <span class="token string">"Ask about selected region"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"b"</span> ellama-make-concise <span class="token string">"Better text"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"c"</span> ellama-chat <span class="token string">"Chat with Ellama"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"d"</span> ellama-define-word <span class="token string">"Define selected word"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"r"</span> ellama-code-review <span class="token string">"Code-review selected code"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"s"</span> ellama-summarize <span class="token string">"Summarize selected text"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"t"</span> ellama-translate <span class="token string">"Translate the selected region"</span><span class="token punctuation">)</span>
+			         <span class="token punctuation">(</span><span class="token string">"w"</span> ellama-summarize-webpage <span class="token string">"Summarize a web page"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token car">dolist</span> <span class="token punctuation">(</span><span class="token car">key-command</span> key-commands<span class="token punctuation">)</span>
+		    <span class="token punctuation">(</span><span class="token car">define-key</span> ellama-keymap <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token punctuation">(</span><span class="token car">car</span> key-command<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">cadr</span> key-command<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+
+  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">ellama-keymap-prefix</span></span> <span class="token string">"C-x e"</span>
+	  <span class="token string">"Key sequence for Ellama Commands."</span>
+	  <span class="token lisp-property property">:type</span> <span class="token quoted-symbol variable symbol">'string</span>
+	  <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'ellama</span><span class="token punctuation">)</span>
+
+  <span class="token punctuation">(</span><span class="token defvar"><span class="token keyword">defcustom</span> <span class="token variable">ellama-enable-keymap</span></span> <span class="token boolean">t</span>
+	  <span class="token string">"Enable or disable Ellama keymap."</span>
+	  <span class="token lisp-property property">:type</span> <span class="token quoted-symbol variable symbol">'boolean</span>
+	  <span class="token lisp-property property">:group</span> <span class="token quoted-symbol variable symbol">'ellama</span>
+	  <span class="token lisp-property property">:set</span> <span class="token punctuation">(</span><span class="token lambda"><span class="token keyword">lambda</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token argument variable">symbol</span> <span class="token argument variable">value</span></span><span class="token punctuation">)</span></span>
+           <span class="token punctuation">(</span><span class="token car">set</span> symbol value<span class="token punctuation">)</span>
+           <span class="token punctuation">(</span><span class="token keyword">if</span> value
+             <span class="token punctuation">(</span><span class="token car">ellama-setup-keymap</span><span class="token punctuation">)</span>
+			       <span class="token comment">;; If ellama-enable-keymap is nil, remove the key bindings</span>
+			       <span class="token punctuation">(</span><span class="token car">define-key</span> global-map <span class="token punctuation">(</span><span class="token car">kbd</span> ellama-keymap-prefix<span class="token punctuation">)</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span>
+</code></pre></div>
+<p>I proposed these enhancements in a
+<a href="https://github.com/s-kostyaev/ellama/pull/7">PR</a>. As you read this
+post, it might have been accepted and integrated into the core
+package, or perhaps it wasn't accepted, partially accepted, or it's
+already old news. Nevertheless, you have access to these functions for
+customizing as you see fit.</p>
+<h2>Dealing with hanging requests</h2>
+<p>If you, like me, sometimes find yourself running commands only to
+later realize that your AI is overthinking or stuck, it's valuable to
+know how to "cancel" a request.</p>
+<p>While there wasn't an apparent cancel feature for AI requests, Emacs
+offers a way to promptly terminate its internal processes.</p>
+<p>So, in case your request is taking too long or you suspect an error,
+and you wish to cancel it, you can follow these steps:</p>
+<p><strong>1.</strong> Execute <code>M-x list-processes</code> to display a list of all processes
+currently running in Emacs.</p>
+<p><strong>2.</strong> Locate the line corresponding to the process you want to terminate.</p>
+<p><strong>3.</strong> Press <code>d</code> to kill that specific process.</p>
+<p>This quick and effective method allows you to regain control and
+manage your processes efficiently within Emacs.</p>
+<h2>Conclusion</h2>
+<p>In conclusion, we've explored the exciting world of integrating Ollama with
+Emacs, enhancing our workflow and productivity. While the core package offers
+impressive functionality, we've taken customization a step further, introducing
+global keybindings and visual-line mode for ellama buffers.</p>
+<p>These features not only simplify your interactions but also put you in the
+driver's seat when it comes to fine-tuning your Emacs-Ollama
+integration. Whether you're reading this with these enhancements already
+integrated, in anticipation of their acceptance, or as a source of inspiration
+for your own customizations, the tools are here for you to wield.</p>

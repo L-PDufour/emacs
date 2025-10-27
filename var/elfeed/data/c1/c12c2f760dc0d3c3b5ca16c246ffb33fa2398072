@@ -1,0 +1,195 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Join me as I revisit a ReactJS and TypeScript project I created two
+years ago: an interactive version of Conway's Game of Life. This
+journey started as a personal challenge where I wrote the entire code
+off the top of my head without any refactoring. In this blog post,
+I'll walk you through the technical aspects of the project and reflect
+on the growth I've experienced as a developer since then. Let's dive
+into the fascinating world of cellular automata and see how this
+project evolved.</p>
+<h2>Introduction</h2>
+<p>Welcome to my (not so) latest creation: a ReactJS application that
+brings Conway's Game of Life to your screen! This project,
+bootstrapped with Vite and written in TypeScript, was originally
+created about two years ago as a personal challenge. My goal was to
+write it off the top of my head without refactoring anything
+later. This led to some peculiar choices, such as the usage of Ramda,
+which I initially thought would be useful for a different
+implementation, and well, I regret.</p>
+<p>I've opted to keep the code "as is," even though I would most
+certainly write it differently today. This is a good indicator of a
+programmer's evolution: looking at past code and thinking, "What was I
+thinking? This should be completely different." For our 'fun,' let's
+see what is in this code.</p>
+<h2>Motivation</h2>
+<p>The Game of Life is a zero-player game developed by John Conway
+in 1970. It consists of a grid of cells that can be either alive or
+dead. The game evolves through generations based on simple rules: a
+living cell with fewer than two or more than three living neighbors
+dies, while a dead cell with exactly three living neighbors becomes
+alive. Despite these simple rules, the Game of Life produces
+remarkably complex and beautiful patterns.</p>
+<p>This project demonstrates how React's component-based architecture and
+TypeScript's type safety can be leveraged to build a dynamic and
+visually appealing application. Creating a modern, interactive version
+using these technologies was both a personal challenge and an
+opportunity to provide a fun and educational tool for others.</p>
+<p>A quick preview of the project running:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fgame_of_life_demo.gif&w=3840&q=75" alt="Game_of_Life"></p>
+<h2>Technical Aspects</h2>
+<p>Here's a breakdown of the technical aspects of the project:</p>
+<h3>Setup</h3>
+<p>The project is bootstrapped with Vite, which provides a fast and lean
+development environment. We use TypeScript for type safety and
+improved developer experience. Key dependencies include:</p>
+<p>• React: For building the user interface.</p>
+<p>• echarts-for-react: For visualizing the number of living cells over generations.</p>
+<p>• Ramda: For functional programming utilities.</p>
+<h3>Components and State Management</h3>
+<p>The application consists of the following main components:</p>
+<p>• <strong>App Component</strong>: The root component managing the overall state and
+rendering the UI.</p>
+<p>• <strong>LifeGrid</strong>: A 2D array representing the grid of cells, where each
+cell can be alive or dead.</p>
+<p>• <strong>Controls</strong>: Buttons and checkboxes for user interactions, such as
+starting/stopping the simulation, randomizing the grid, and toggling
+border constraints.</p>
+<p>We use React's <code>useState</code> and <code>useEffect</code> hooks to manage state and
+lifecycle events, ensuring a responsive and interactive experience.</p>
+<h3>Game Logic</h3>
+<p>The core logic of the Game of Life involves:</p>
+<p>• <strong>Generating the Grid</strong>: Creating a grid with a specified number of
+rows and columns, optionally randomizing the initial state of cells.</p>
+<p>• <strong>Counting Neighbors</strong>: Determining the number of alive neighbors
+for each cell, considering border constraints.</p>
+<p>• <strong>Updating the Grid</strong>: Applying the rules of the Game of Life to
+update the state of each cell based on its neighbors.</p>
+<h4>Generating the Grid</h4>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> generateLifeGrid <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+  lines <span class="token operator">=</span> <span class="token constant">DEFAULT_LINES</span><span class="token punctuation">,</span>
+  columns <span class="token operator">=</span> <span class="token constant">DEFAULT_COLS</span><span class="token punctuation">,</span>
+  randomize <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token operator">:</span> ILifeGridProps<span class="token punctuation">)</span><span class="token operator">:</span> LifeGrid <span class="token operator">=></span>
+  <span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token function">Array</span><span class="token punctuation">(</span>lines<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">fill</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">Array</span><span class="token punctuation">(</span>columns<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">fill</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>line<span class="token punctuation">,</span> lineIndex<span class="token punctuation">)</span> <span class="token operator">=></span>
+    line<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>_col<span class="token punctuation">,</span> colIndex<span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token function">generateLifeCell</span><span class="token punctuation">(</span>
+        lineIndex<span class="token punctuation">,</span>
+        colIndex<span class="token punctuation">,</span>
+        randomize <span class="token operator">?</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&#x3C;</span> <span class="token constant">DEFAULT_RANDOM_PROBABILITY_OF_LIFE</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h4>Counting Neighbors</h4>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> countCellNeighbors <span class="token operator">=</span> <span class="token punctuation">(</span>
+  line<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span>
+  col<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span>
+  lifeGrid<span class="token operator">:</span> LifeGrid<span class="token punctuation">,</span>
+  isBorderLimited<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> lastLine <span class="token operator">=</span> lifeGrid<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> lastCol <span class="token operator">=</span> lifeGrid<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+    isBorderLimited
+      <span class="token operator">?</span> <span class="token punctuation">[</span>
+          line <span class="token operator">!==</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> col <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+          line <span class="token operator">!==</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> col<span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+          line <span class="token operator">!==</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> col <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+          col <span class="token operator">!==</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line<span class="token punctuation">,</span> col <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line<span class="token punctuation">,</span> col <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          col <span class="token operator">!==</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> col <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> col<span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> col <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">]</span>
+      <span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> line <span class="token operator">-</span> <span class="token number">1</span> <span class="token operator">:</span> lastLine<span class="token punctuation">,</span> col <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> line <span class="token operator">-</span> <span class="token number">1</span> <span class="token operator">:</span> lastLine<span class="token punctuation">,</span> col<span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span>
+            <span class="token boolean">false</span><span class="token punctuation">,</span>
+            <span class="token punctuation">[</span>line <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> line <span class="token operator">-</span> <span class="token number">1</span> <span class="token operator">:</span> lastLine<span class="token punctuation">,</span> col <span class="token operator">&#x3C;</span> lastCol <span class="token operator">?</span> col <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+            lifeGrid<span class="token punctuation">,</span>
+          <span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line<span class="token punctuation">,</span> col <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> col <span class="token operator">-</span> <span class="token number">1</span> <span class="token operator">:</span> lastCol<span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line<span class="token punctuation">,</span> col <span class="token operator">&#x3C;</span> lastCol <span class="token operator">?</span> col <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span>
+            <span class="token boolean">false</span><span class="token punctuation">,</span>
+            <span class="token punctuation">[</span>line <span class="token operator">&#x3C;</span> lastLine <span class="token operator">?</span> line <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> col <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> col <span class="token operator">-</span> <span class="token number">1</span> <span class="token operator">:</span> lastCol<span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+            lifeGrid<span class="token punctuation">,</span>
+          <span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>line <span class="token operator">&#x3C;</span> lastLine <span class="token operator">?</span> line <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> col<span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> lifeGrid<span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">pathOr</span><span class="token punctuation">(</span>
+            <span class="token boolean">false</span><span class="token punctuation">,</span>
+            <span class="token punctuation">[</span>line <span class="token operator">&#x3C;</span> lastLine <span class="token operator">?</span> line <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> col <span class="token operator">&#x3C;</span> lastCol <span class="token operator">?</span> col <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"isAlive"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+            lifeGrid<span class="token punctuation">,</span>
+          <span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">]</span>
+  <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=></span> x<span class="token punctuation">)</span><span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h4>Upgrading the Grid</h4>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> updateLifeGrid <span class="token operator">=</span> <span class="token punctuation">(</span>lifeGrid<span class="token operator">:</span> LifeGrid<span class="token punctuation">,</span> isBorderLimited<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> LifeGrid <span class="token operator">=></span>
+  lifeGrid<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>line<span class="token punctuation">,</span> lineIndex<span class="token punctuation">)</span> <span class="token operator">=></span>
+    line<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>cell<span class="token punctuation">,</span> colIndex<span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token function">generateLifeCell</span><span class="token punctuation">(</span>
+        lineIndex<span class="token punctuation">,</span>
+        colIndex<span class="token punctuation">,</span>
+        <span class="token function">generateFutureAliviness</span><span class="token punctuation">(</span>
+          cell<span class="token punctuation">.</span>isAlive<span class="token punctuation">,</span>
+          <span class="token function">countCellNeighbors</span><span class="token punctuation">(</span>lineIndex<span class="token punctuation">,</span> colIndex<span class="token punctuation">,</span> lifeGrid<span class="token punctuation">,</span> isBorderLimited<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h4>Evolution Visualization</h4>
+<p>We use echarts-for-react to display a line chart tracking the number
+of living cells over generations. This provides a visual
+representation of the simulation's progress and helps users understand
+the dynamics of the cellular automaton.</p>
+<div class="remark-highlight"><pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> initialChartOptions <span class="token operator">=</span> <span class="token punctuation">{</span>
+  xAxis<span class="token operator">:</span> <span class="token punctuation">{</span>
+    type<span class="token operator">:</span> <span class="token string">"category"</span><span class="token punctuation">,</span>
+    show<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    color<span class="token operator">:</span> <span class="token string">"red"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  yAxis<span class="token operator">:</span> <span class="token punctuation">{</span>
+    type<span class="token operator">:</span> <span class="token string">"value"</span><span class="token punctuation">,</span>
+    show<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  tooltip<span class="token operator">:</span> <span class="token punctuation">{</span>
+    axisPointer<span class="token operator">:</span> <span class="token punctuation">{</span>
+      type<span class="token operator">:</span> <span class="token string">"cross"</span><span class="token punctuation">,</span>
+      snap<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  series<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      data<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      showSymbol<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+      type<span class="token operator">:</span> <span class="token string">"line"</span><span class="token punctuation">,</span>
+      lineStyle<span class="token operator">:</span> <span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token string">"rgba(0, 200, 200, 1)"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h2>Conclusion</h2>
+<p>Creating Conway's Game of Life using React and TypeScript was an
+exciting and educational journey. The project demonstrates how modern
+web development tools can be used to create interactive and visually
+appealing applications quite quickly. I hope this project inspires you
+to explore the fascinating world of cellular automata and build your
+own creations.</p>
+<p>Also, revisiting old code can be a valuable exercise for any
+developer. Looking back at this project, I see many areas where I
+would take a different approach today. This reflection highlights my
+growth and development as a programmer. It's a good sign when you can
+look at your past work and think, "What was I thinking? This should be
+completely different." It means you are continually learning and
+improving.</p>
+<p><a href="https://lionyxml.github.io/react-game-of-life/">Play the Game of Life
+here!</a></p>
+<p>Feel free to check out the <a href="https://github.com/LionyxML/react-game-of-life">source code on
+GitHub</a> for more
+details and to contribute to the project.</p>

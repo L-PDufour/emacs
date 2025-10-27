@@ -1,0 +1,74 @@
+<html><head></head><body><figure><div class="wp-block-embed__wrapper">
+<div class="github_readme_md"><p><img src="https://github.com/jamescherti/enhanced-evil-paredit.el/actions/workflows/ci.yml/badge.svg" alt="Build Status">
+<a href="https://melpa.org/#/enhanced-evil-paredit"><img src="https://melpa.org/packages/enhanced-evil-paredit-badge.svg" alt="MELPA"></a>
+<a href="https://stable.melpa.org/#/enhanced-evil-paredit"><img src="https://stable.melpa.org/packages/enhanced-evil-paredit-badge.svg" alt="MELPA Stable"></a>
+<img src="https://img.shields.io/github/license/jamescherti/enhanced-evil-paredit.el" alt="License">
+<img src="https://jamescherti.com/misc/made-for-gnu-emacs.svg" alt=""></p>
+<p>The <strong><a href="https://github.com/jamescherti/enhanced-evil-paredit.el">enhanced-evil-paredit</a></strong> package prevents parenthesis imbalance when using <em>evil-mode</em> with <em>paredit</em>. It intercepts <em>evil-mode</em> commands such as delete, change, and paste, blocking their execution if they would break the parenthetical structure. This guarantees that your Lisp code remains syntactically correct while retaining the editing features of <em>evil-mode</em>.</p>
+<p>If this enhances your workflow, please show your support by <strong><img src="https://s.w.org/images/core/emoji/16.0.1/72x72/2b50.png" alt="⭐"> starring enhanced-evil-paredit-mode on GitHub</strong> to help more Emacs users discover its benefits.</p>
+<h2>Installation</h2>
+<p>To install <em>enhanced-evil-paredit</em> from MELPA:</p>
+<ol>
+<li>If you haven’t already done so, <a href="https://melpa.org/#/getting-started">add MELPA repository to your Emacs configuration</a>.</li>
+<li>Add the following code to the Emacs init file to install <em>enhanced-evil-paredit</em>:<pre><code class="language-emacs-lisp">(use-package enhanced-evil-paredit
+:ensure t
+:config
+(add-hook 'paredit-mode-hook #'enhanced-evil-paredit-mode))</code></pre>
+</li>
+</ol>
+<h2>Frequently asked questions</h2>
+<h3>What are the differences between enhanced-evil-paredit and evil-paredit?</h3>
+<p>The <code>enhanced-evil-paredit</code> package is a modernized version of <code>evil-paredit</code>. It has been enhanced and fully functions in recent versions of Emacs (Emacs &gt;= 28). The author decided to develop <code>enhanced-evil-paredit</code> because the <code>evil-paredit</code> package is no longer maintained and does not function in recent versions of Emacs and Evil.</p>
+<p>Here are the enhancements in <code>enhanced-evil-paredit</code>:</p>
+<ul>
+<li>Handles paste using <code>p</code> and <code>P</code>, ensuring that the pasted text has balanced parentheses.</li>
+<li>Fix call to a non-existent function <code>(evil-called-interactively-p)</code>, which has been replaced by <code>(called-interactively-p 'any)</code>.</li>
+<li>Add new functions: <code>enhanced-evil-paredit-backward-delete</code> and <code>enhanced-evil-paredit-forward-delete</code>.</li>
+<li><code>enhanced-evil-paredit-mode</code> only uses the paredit functions when paredit is enabled. Otherwise, <code>enhanced-evil-paredit-mode</code> uses Evil functions.</li>
+<li>Add lexical binding with <code>lexical-binding: t</code>.</li>
+<li>Suppress Emacs Lisp warnings and add Melpa tests.</li>
+<li>Refactor and improve <code>enhanced-evil-paredit</code>.</li>
+<li>Create a <code>enhanced-evil-paredit</code> customization group for user configuration.</li>
+<li>Remove Evil state change from <code>enhanced-evil-paredit-mode</code>.</li>
+<li>Improve error handling in <code>enhanced-evil-paredit-check-region</code>.</li>
+<li>Enhance docstrings.</li>
+<li>Remove keymap bindings that are reserved by Emacs.</li>
+<li>Add <code>&amp;optional</code> after the <code>end</code> argument to make it similar to Evil functions.</li>
+</ul>
+<ul>
+<li><code>dd</code> restores the column when there is a parentheses mismatch.</li>
+</ul>
+<h2>Author and License</h2>
+<p>The <code>enhanced-evil-paredit</code> Emacs package has been written by Roman Gonzalez and <a href="https://www.jamescherti.com/">James Cherti</a>. It is distributed under terms of the GNU General Public License version 3, or, at your choice, any later version.</p>
+<p>Copyright (C) 2024-2025 James Cherti</p>
+<p>Copyright (C) 2012-2015 Roman Gonzalez</p>
+<p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program.</p>
+<h2>Links</h2>
+<ul>
+<li><a href="https://github.com/jamescherti/enhanced-evil-paredit.el">enhanced-evil-paredit.el @GitHub</a></li>
+<li><a href="https://melpa.org/#/enhanced-evil-paredit">enhanced-evil-paredit.el @MELPA</a></li>
+</ul>
+<p>Other Emacs packages by the same author:</p>
+<ul>
+<li><a href="https://github.com/jamescherti/minimal-emacs.d">minimal-emacs.d</a>: This repository hosts a minimal Emacs configuration designed to serve as a foundation for your vanilla Emacs setup and provide a solid base for an enhanced Emacs experience.</li>
+<li><a href="https://github.com/jamescherti/compile-angel.el">compile-angel.el</a>: <strong>Speed up Emacs!</strong> This package guarantees that all .el files are both byte-compiled and native-compiled, which significantly speeds up Emacs.</li>
+<li><a href="https://github.com/jamescherti/easysession.el">easysession.el</a>: Easysession is lightweight Emacs session manager that can persist and restore file editing buffers, indirect buffers/clones, Dired buffers, the tab-bar, and the Emacs frames (with or without the Emacs frames size, width, and height).</li>
+<li><a href="https://github.com/jamescherti/vim-tab-bar.el">vim-tab-bar.el</a>: Make the Emacs tab-bar Look Like Vim’s Tab Bar.</li>
+<li><a href="https://github.com/jamescherti/elispcomp">elispcomp</a>: A command line tool that allows compiling Elisp code directly from the terminal or from a shell script. It facilitates the generation of optimized .elc (byte-compiled) and .eln (native-compiled) files.</li>
+<li><a href="https://github.com/jamescherti/tomorrow-night-deepblue-theme.el">tomorrow-night-deepblue-theme.el</a>: The Tomorrow Night Deepblue Emacs theme is a beautiful deep blue variant of the Tomorrow Night theme, which is renowned for its elegant color palette that is pleasing to the eyes. It features a deep blue background color that creates a calming atmosphere. The theme is also a great choice for those who miss the blue themes that were trendy a few years ago.</li>
+<li><a href="https://github.com/jamescherti/ultyas/">Ultyas</a>: A command-line tool designed to simplify the process of converting code snippets from UltiSnips to YASnippet format.</li>
+<li><a href="https://github.com/jamescherti/dir-config.el">dir-config.el</a>: Automatically find and evaluate .dir-config.el Elisp files to configure directory-specific settings.</li>
+<li><a href="https://github.com/jamescherti/flymake-bashate.el">flymake-bashate.el</a>: A package that provides a Flymake backend for the bashate Bash script style checker.</li>
+<li><a href="https://github.com/jamescherti/flymake-ansible-lint.el">flymake-ansible-lint.el</a>: An Emacs package that offers a Flymake backend for <code>ansible-lint</code>.</li>
+<li><a href="https://github.com/jamescherti/inhibit-mouse.el">inhibit-mouse.el</a>: A package that disables mouse input in Emacs, offering a simpler and faster alternative to the <code>disable-mouse</code> package.</li>
+<li><a href="https://github.com/jamescherti/quick-sdcv.el">quick-sdcv.el</a>: This package enables Emacs to function as an offline dictionary by using the sdcv command-line tool directly within Emacs.</li>
+<li><a href="https://github.com/jamescherti/enhanced-evil-paredit.el">enhanced-evil-paredit.el</a>: An Emacs package that prevents parenthesis imbalance when
+using <em>evil-mode</em> with <em>paredit</em>. It intercepts <em>evil-mode</em> commands such as
+delete, change, and paste, blocking their execution if they would break the
+parenthetical structure.</li>
+<li><a href="https://github.com/jamescherti/stripspace.el">stripspace.el</a>: Ensure Emacs Automatically removes trailing whitespace before saving a buffer, with an option to preserve the cursor column.</li>
+<li><a href="https://github.com/jamescherti/persist-text-scale.el">persist-text-scale.el</a>: Ensure that all adjustments made with text-scale-increase and text-scale-decrease are persisted and restored across sessions.</li>
+<li><a href="https://github.com/jamescherti/pathaction.el">pathaction.el</a>: Execute the pathaction command-line tool from Emacs. The pathaction command-line tool enables the execution of specific commands on targeted files or directories. Its key advantage lies in its flexibility, allowing users to handle various types of files simply by passing the file or directory as an argument to the pathaction tool. The tool uses a .pathaction.yaml rule-set file to determine which command to execute. Additionally, Jinja2 templating can be employed in the rule-set file to further customize the commands.</li>
+</ul></div>
+</div></figure>
+</body></html>

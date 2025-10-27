@@ -59,7 +59,7 @@ Uses position instead of index field."
   ;;; --- TURNS ON BY DEFAULT
   (tab-bar-mode 1))
 
-
+(use-package devdocs)
 
 (use-package elfeed
   :custom

@@ -1,0 +1,12 @@
+The <a
+href="https://comsec.ethz.ch/research/microarch/vmscape-exposing-and-exploiting-incomplete-branch-predictor-isolation-in-cloud-environments/">VMScape</a>
+vulnerability is a Spectre variant that "<q>allows a malicious KVM guest to
+leak sensitive information such as encryption/decryption keys from a
+userspace hypervisor such as QEMU</q>".  Greg Kroah-Hartman has announced
+the <a href="https://lwn.net/Articles/1037790/">6.16.7</a>, <a
+href="https://lwn.net/Articles/1037791/">6.12.47</a>, <a
+href="https://lwn.net/Articles/1037792/">6.6.106</a>, <a
+href="https://lwn.net/Articles/1037793/">6.1.152</a>, <a
+href="https://lwn.net/Articles/1037794/">5.15.193</a>, and <a
+href="https://lwn.net/Articles/1037795/">5.10.244</a> stable kernels, which add a
+mitigation for the hardware bug.

@@ -1,0 +1,29 @@
+<p>I am working on two new themes for my minimalist <code class="language-plaintext highlighter-rouge">doric-themes</code>
+collection. Both explore the woody, earthly, chthonic motif. Here they
+are:</p>
+
+<p><a href="https://protesilaos.com/assets/images/doric/doric-oak.png"><img alt="doric-oak theme sample" src="https://protesilaos.com/assets/images/doric/doric-oak.png" /></a></p>
+
+<p><a href="https://protesilaos.com/assets/images/doric/doric-pine.png"><img alt="doric-pine theme sample" src="https://protesilaos.com/assets/images/doric/doric-pine.png" /></a></p>
+
+<p>I may still make further refinements, though the character of the
+themes is set. Once I am done, I will publish them as part of version
+<code class="language-plaintext highlighter-rouge">0.3.0</code> of the package.</p>
+
+<h2>About the Doric themes</h2>
+
+<p>The Doric themes use few colours and will appear monochromatic in many
+contexts. They are my most minimalist themes. Styles involve the
+careful use of typographic features and subtleties in colour gradients
+to establish a consistent rhythm.</p>
+
+<p>If you want maximalist themes in terms of colour, check my <code class="language-plaintext highlighter-rouge">ef-themes</code>
+package. For something in-between, which I would consider the best
+“default theme” for a text editor, opt for my <code class="language-plaintext highlighter-rouge">modus-themes</code>.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">doric-themes</code></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/emacs/doric-themes-pictures">https://protesilaos.com/emacs/doric-themes-pictures</a></li>
+  <li>Git repository: <a href="https://github.com/protesilaos/doric-themes">https://github.com/protesilaos/doric-themes</a></li>
+  <li>Backronym: Doric Only Really Intensifies Conservatively … themes.</li>
+</ul>

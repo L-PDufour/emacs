@@ -1,0 +1,124 @@
+
+                                <p>This week, Symfony development activity focused on merging new features for the upcoming Symfony 7.4 and 8.0 versions: added a <a href="https://github.com/symfony/symfony/commit/95f0098cbb9861531acc860e69e578dfcef82359">Video constraint</a>, introduced an <a href="https://github.com/symfony/symfony/commit/4919062b51bcad7ad18a3f8062ce6fc36a15ff6c">access_decision() Twig function</a> to get the security voter decision details, and added <a href="https://github.com/symfony/symfony/commit/ae256f91a9cacc470fe77eca87aedd81c65ca55e">support for DTOs in Input attributes</a> for invokable commands. We also announced that Symfony will provide <a href="https://symfony.com/blog/symfony-to-provide-the-official-mcp-sdk">the official MCP SDK for PHP</a>, announced the first talks of the <a href="https://live.symfony.com/2025-amsterdam-con/">SymfonyCon Amsterdam 2025</a> conference and continued <a href="https://symfony.com/blog/celebrating-ryan-weaver-through-his-talks">celebrating the legacy of Ryan Weaver</a>.</p>
+
+<h2>Symfony development highlights</h2>
+
+<p>This week, 76 pull requests were merged (59 in code and 17 in docs) and 44 issues were closed (35 in code and 9 in docs). Excluding merges, 37 authors made 18,757 additions and 6,253 deletions. See details for <a href="https://github.com/symfony/symfony/pulse">code</a> and <a href="https://github.com/symfony/symfony-docs/pulse">docs</a>.</p>
+
+<p><a href="https://github.com/symfony/symfony/commits/6.4">6.4 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/d33a8867ef6bda98742aac975e0e1ebcf874f9c7">d33a886</a>: &#91;Inflector, String&#93; fix edge cases</li>
+<li><a href="https://github.com/symfony/symfony/commit/bbfcf84e35e1fe69cf0082c240bbea584bdd87b6">bbfcf84</a>: &#91;Serializer&#93; fix dealing with asymmetric visilibity for properties</li>
+<li><a href="https://github.com/symfony/symfony/commit/e6dfb3dda2079fd16b983161d3c1504f9a89d7ba">e6dfb3d</a>: &#91;HttpFoundation&#93; change session column type from TEXT to STRING in SQL Server</li>
+<li><a href="https://github.com/symfony/symfony/commit/1dd5bd143a8a88f8347e23d540ee7c497bbf3f8c">1dd5bd1</a>: &#91;Messenger&#93; fix incompatibility with expected lowercase columns in Firebird database</li>
+<li><a href="https://github.com/symfony/symfony/commit/2205b62431c42ddfb46a163a7312fd8a9f26b719">2205b62</a>: &#91;Security&#93; pass attributes to nested ChainUserProviders</li>
+<li><a href="https://github.com/symfony/symfony/commit/3cd859f924e743444a51e72b5d0458da6781e3fc">3cd859f</a>: &#91;Cache&#93; make TagAwareAdapter registrable as a service</li>
+<li><a href="https://github.com/symfony/symfony/commit/e3b664d7d5fe81308bcaa181aa394f251888ba5f">e3b664d</a>: &#91;Cache&#93; fix internal representation of non-static values</li>
+<li><a href="https://github.com/symfony/symfony/commit/1ff83e0548128115190a4eb3d2757c3b1c73581b">1ff83e0</a>: &#91;SecurityBundle&#93; prevent accessing the tracked token storage when collecting data</li>
+<li><a href="https://github.com/symfony/symfony/commit/a57c946d3b8d477964da5303fa693a9b7c4e6227">a57c946</a>: &#91;Serializer&#93; fix normalizing objects with accessors having the same name as a property</li>
+<li><a href="https://github.com/symfony/symfony/commit/713f09983e2311b2b38f17959af84a6c277e8dcc">713f099</a>: &#91;PHPUnit Bridge&#93; replace backtick operator, deprecated in PHP 8.5, with shell_exec()</li>
+<li><a href="https://github.com/symfony/symfony/commit/c5ac44048e5cd48a31cb4d76796117c5c89ff339">c5ac440</a>: &#91;Security&#93; fix HttpUtils::createRequest() when the base request is forwarded</li>
+<li><a href="https://github.com/symfony/symfony/commit/a143fa2ec19aaa4da43c305b9d4cc3fe0e82bb56">a143fa2</a>:  use the empty string instead of null as an array offset</li>
+</ul>
+
+<p><a href="https://github.com/symfony/symfony/commits/7.3">7.3 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/6e42b3659d2590fffdbb5262e13ff53326fc846b">6e42b36</a>: &#91;JsonStreamer&#93; fix decoding iterable lists</li>
+<li><a href="https://github.com/symfony/symfony/commit/5ff7e23ed0db8db31a795b9935266be8d49048fd">5ff7e23</a>: &#91;DependencyInjection&#93; respect original service class when a proxy is defined</li>
+<li><a href="https://github.com/symfony/symfony/commit/acb2027b982869f0bcea0cd9c0bdb316952d5d2b">acb2027</a>: &#91;JsonStreamer&#93; fix encoding iterable lists</li>
+<li><a href="https://github.com/symfony/symfony/commit/87ba5d86b5d7704990b95da4548fb7712f6768e9">87ba5d8</a>: &#91;Config&#93; fix ReflectionClassResource hash validation</li>
+<li><a href="https://github.com/symfony/symfony/commit/177881159c46427504a309c1424419abeb1494c9">1778811</a>: &#91;DependencyInjection&#93; fix optimizing ClassExistenceResource</li>
+<li><a href="https://github.com/symfony/symfony/commit/e7c41fe0635bd1e76767452cffdc7374ad26179b">e7c41fe</a>: &#91;Validator&#93; fall back to legacy options handling if configured named arguments do not match</li>
+<li><a href="https://github.com/symfony/symfony/commit/9157094f846366609fcc859dd5cb475b650c6c24">9157094</a>: &#91;Routing&#93; don't rebuild cache when controller action body changes</li>
+<li><a href="https://github.com/symfony/symfony/commit/e265f33a78943294901795a31a0ceec4fa19a534">e265f33</a>: &#91;Messenger&#93; map legacy options to the "sentinel" key when parsing DSNs</li>
+</ul>
+
+<p><a href="https://github.com/symfony/symfony/commits/7.4">7.4 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/67016b9d13d0aa164bcca122c978b2c1e1098dd6">67016b9</a>: &#91;Serializer, Validator&#93; add JSON schema for validating and autocompleting YAML config files</li>
+<li><a href="https://github.com/symfony/symfony/commit/7278aa035af69b83d398b7220669ecb61be5a639">7278aa0</a>: &#91;DependencyInjection&#93; parse attributes found on abstract classes for resource definitions</li>
+<li><a href="https://github.com/symfony/symfony/commit/145abacb951cee7bbb3f25ca1ace89d1044f9515">145abac</a>: &#91;Runtime&#93; expose the runtime class in $_SERVER['APP_RUNTIME']</li>
+<li><a href="https://github.com/symfony/symfony/commit/18d76685235c43ad82245e298cdf8d2b385d33a8">18d7668</a>: &#91;DependencyInjection&#93; allow multiple #[AsDecorator] attributes</li>
+<li><a href="https://github.com/symfony/symfony/commit/95f0098cbb9861531acc860e69e578dfcef82359">95f0098</a>: &#91;Validator&#93; add Video constraint for validating video files</li>
+<li><a href="https://github.com/symfony/symfony/commit/bae2c06d9ab8bff7d4548b171bceab28c8c525ac">bae2c06</a>: &#91;DependencyInjection&#93; optimize AutowireRequiredMethodsPass</li>
+<li><a href="https://github.com/symfony/symfony/commit/4919062b51bcad7ad18a3f8062ce6fc36a15ff6c">4919062</a>: &#91;Security, TwigBridge&#93; add access_decision() and access_decision_for_user()</li>
+<li><a href="https://github.com/symfony/symfony/commit/d052b75a21d4d30bf3ec23ee5ab6f9080b76094e">d052b75</a>: &#91;DoctrineBridge&#93; use a single table in isSameDatabaseChecker</li>
+<li><a href="https://github.com/symfony/symfony/commit/c539c77a949bc9ab464abdd4cb9c941f4474d18a">c539c77</a>: &#91;Validator&#93; allow using attributes to declare compile-time constraint metadata</li>
+<li><a href="https://github.com/symfony/symfony/commit/bde5221a2b34f53ca9ecde4f72bf08f488b2ad5a">bde5221</a>: &#91;Serializer&#93; allow using attributes to declare compile-time serialization metadata</li>
+<li><a href="https://github.com/symfony/symfony/commit/c1021595cf59909dcb9aff3822553a99be46b0d1">c102159</a>: &#91;FrameworkBundle&#93; do not parse attributes on abstract classes with DI &lt; 7.4</li>
+<li><a href="https://github.com/symfony/symfony/commit/a9dcea4a7ca45e68585255e8e3ce38a773e21e20">a9dcea4</a>: &#91;VarExporter&#93; add support for exporting named closures</li>
+<li><a href="https://github.com/symfony/symfony/commit/75935f8494c737539f6dd9d1d260272b39b5cbbe">75935f8</a>: &#91;DependencyInjection&#93; allow Class::function(...) and global_function(...) closures in PHP DSL for factories</li>
+<li><a href="https://github.com/symfony/symfony/commit/eedf441d3fe150323b66f7cbc44ab559f47665a4">eedf441</a>: &#91;Security, SecurityBundle&#93; dump role hierarchy as mermaid chart</li>
+<li><a href="https://github.com/symfony/symfony/commit/ae256f91a9cacc470fe77eca87aedd81c65ca55e">ae256f9</a>: &#91;Console&#93; add #[Input] attribute to support DTOs in invokable commands</li>
+</ul>
+
+<p><a href="https://github.com/symfony/symfony/commits/8.0">8.0 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/1d6ac7918c9c0357916369f916da69b04a00a351">1d6ac79</a>: &#91;Security&#93; make UserChainProvider implement AttributesBasedUserProvider</li>
+<li><a href="https://github.com/symfony/symfony/commit/f7e16f185100aee304b928e6c314301d448241aa">f7e16f1</a>:  remove ClassMetadataFactoryCompiler and other legacy cleanups</li>
+</ul>
+
+<h2>Newest issues and pull requests</h2>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/issues/61576">Support bitwise operations with PHP constants in YAML configuration files</a></li>
+<li><a href="https://github.com/symfony/symfony/issues/61603">[Webhook] Add subscriber id to the subscriber class when sending webhooks </a></li>
+</ul>
+
+<h2>Symfony Jobs</h2>
+
+<p>These are some of the most recent Symfony job offers:</p>
+
+<ul>
+<li><strong>Lead Symfony Developer</strong> at Buddy &amp; Selly<br>
+Full-time - €70,000 – €80,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/f35bca6">View details</a></li>
+<li><strong>Lead Symfony Developer</strong> at A-Cube API<br>
+Full-time - €54,000 – €72,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/9c8eec5">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Spyrit<br>
+Full-time - €40,000 – €55,000 / year<br>
+Remote + part-time onsite (Versailles, France)<br>
+<a href="https://symfony.com/jobs/186e258">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Evergrowth<br>
+Full-time - €60,000 – €72,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/ee526ac">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Eneba<br>
+Full-time - €55,000 – €66,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/3bd882f">View details</a></li>
+</ul>
+
+<p>You can <a href="https://symfony.com/jobs">publish a Symfony job offer for free</a> on symfony.com.</p>
+
+<h2>They talked about us</h2>
+
+<ul>
+<li><a href="https://symfonystation.mobileatom.net/weekly-communiques/symfony-station-communique-05-september-2025">Symfony Station Communiqué - Stardate: ✦ 05 September 2025 ✦</a></li>
+<li><a href="https://dev.to/mykola_vantukh/ddd-in-symfony-7-clean-architecture-and-deptrac-enforced-boundaries-120a">DDD with Symfony 7: Clean Architecture and Deptrac boundaries</a></li>
+<li><a href="https://browsely.ai/blog/symfony-as-jwt-provider">Symfony as JWT provider</a></li>
+<li><a href="https://dev.to/mattleads/ai-on-autopilot-automating-your-ai-agents-with-symfony-scheduler-55f9">AI on Autopilot: Automating Your AI Agents with Symfony Scheduler</a></li>
+<li><a href="https://dev.to/sebk69/small-resource-server-symfony-client-bundle-1481">Small Resource Server &amp; Symfony Client Bundle</a></li>
+<li><a href="https://dev.to/mattleads/simplify-ai-agent-deployment-dockerizing-symfony-for-scalable-28pp">Simplify AI-Agent Deployment: Dockerizing Symfony for Scalable</a></li>
+<li><a href="https://developpeur-freelance.io/cloudflare-turnstile-turbo/">Turnstile et Turbo, comment on fait ? (un peu d'aide de stimulus ?)</a></li>
+</ul>
+
+<h2>Call to Action</h2>
+
+<ul>
+<li>Follow Symfony <a href="https://x.com/symfony">on X</a>, <a href="https://mastodon.social/@symfony">on Mastodon</a>, <a href="https://bsky.app/profile/symfony.com">on Bluesky</a> and <a href="https://www.threads.net/@symfony">on Threads</a> and share this article.</li>
+<li><a href="https://feeds.feedburner.com/symfony/blog">Subscribe to the Symfony blog RSS</a> and never miss a Symfony story again.</li>
+</ul>
+
+                <hr style="margin-bottom: 5px" />
+                <div style="font-size: 90%">
+                    <a href="https://symfony.com/sponsor">Sponsor</a> the Symfony project.
+                </div>
+            

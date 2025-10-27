@@ -1,0 +1,146 @@
+<html><head></head><body><div class="update">
+<p>
+<span class="timestamp-wrapper"><time>[2025-10-02 Thu]</time></span>: Fixed title for RDF editor
+</p>
+
+</div>
+
+<p>
+Very niche, but I'm happy to see that <a href="https://github.com/Feyorsh/nethack-el">nethack-el</a>
+is actively being worked on again. I remember
+having a lot of fun with that. =)
+</p>
+
+<p>
+Also, the theme for October's Emacs Carnival is
+<a href="https://plaindrops.de/blog/2025/emacscarnival/">maintenance</a>. Check out the posts for September's
+theme of <a href="https://goritskov.com/posts/obscure_packages.html">obscure packages</a>, too!
+</p>
+
+<ul>
+<li>Upcoming events (<a href="https://emacslife.com/calendar/emacs-calendar.ics">iCal file</a>, <a href="https://emacslife.com/calendar/">Org</a>):
+<ul>
+<li>EmacsATX: Emacs Social <a href="https://www.meetup.com/emacsatx/events/310983729/">https://www.meetup.com/emacsatx/events/310983729/</a> Thu Oct 2 1600 America/Vancouver - 1800 America/Chicago - 1900 America/Toronto - 2300 Etc/GMT – Fri Oct 3 0100 Europe/Berlin - 0430 Asia/Kolkata - 0700 Asia/Singapore</li>
+<li>M-x Research: TBA <a href="https://m-x-research.github.io/">https://m-x-research.github.io/</a> Fri Oct 3 0800 America/Vancouver - 1000 America/Chicago - 1100 America/Toronto - 1500 Etc/GMT - 1700 Europe/Berlin - 2030 Asia/Kolkata - 2300 Asia/Singapore</li>
+<li>OrgMeetup (virtual) <a href="https://orgmode.org/worg/orgmeetup.html">https://orgmode.org/worg/orgmeetup.html</a> Wed Oct 8 0900 America/Vancouver - 1100 America/Chicago - 1200 America/Toronto - 1600 Etc/GMT - 1800 Europe/Berlin - 2130 Asia/Kolkata – Thu Oct 9 0000 Asia/Singapore</li>
+<li>Atelier Emacs Montpellier (in person) <a href="https://lebib.org/date/atelier-emacs">https://lebib.org/date/atelier-emacs</a> Fri Oct 10 1800 Europe/Paris</li>
+</ul></li>
+<li>Emacs configuration:
+<ul>
+<li><a href="https://codeberg.org/ZeniesQis/rrepo">ZeniesQis/rrepo: Remote repository tracking and management. An exploration and discovery tool for Emacs configurations. - Codeberg.org</a> (<a href="https://piaille.fr/@Zenie/115276938332189258">@Zenie@piaille.fr</a>)</li>
+</ul></li>
+<li>Appearance:
+<ul>
+<li><a href="https://stebalien.com/blog/dim-minibuffer-prompt-when-unfocused/">Steven Allen: Dim Unfocused Minibuffer Prompts</a></li>
+<li><a href="https://protesilaos.com/codelog/2025-09-27-emacs-next-ef-themes-built-on-modus/">Protesilaos Stavrou: Emacs: the next ‘ef-themes’ will build on top of the ‘modus-themes’</a></li>
+<li><a href="https://protesilaos.com/codelog/2025-09-25-emacs-ef-themes-1-11-0/">Protesilaos Stavrou: Emacs: ef-themes version 1.11.0</a></li>
+</ul></li>
+<li>Writing:
+<ul>
+<li><a href="https://chrismaiorana.com/efw-version2/">Chris Maiorana: Emacs For Writers Version 2 Has Arrived</a></li>
+<li><a href="https://youtu.be/hDvnX7RJojc">Emacs as a Microsoft Word killer</a> (<a href="https://www.reddit.com/r/emacs/comments/1no4i2b/emacs_as_a_microsoft_word_killer/">Reddit</a>)</li>
+<li><a href="https://sachachua.com/blog/2025/09/emacs-cycle-through-different-paragraph-formats-all-on-one-line-wrapped-max-one-sentence-per-line-one-sentence-per-line/">Sacha Chua: Emacs: Cycle through different paragraph formats: all on one line, wrapped, max one sentence per line, one sentence per line</a> (<a href="https://irreal.org/blog/?p=13290">Irreal</a>)</li>
+<li><a href="http://yummymelon.com/devnull/announcing-casual-bibtex.html">Announcing Casual BibTeX</a> (<a href="https://www.reddit.com/r/emacs/comments/1npqyhv/announcing_casual_bibtex/">Reddit</a>)</li>
+<li><a href="http://yummymelon.com/devnull/storing-a-link-from-your-web-browser-to-bibtex-using-org-protocol.html">Storing a Link from your Web Browser to BibTeX using Org protocol</a> (<a href="https://irreal.org/blog/?p=13298">Irreal</a>)</li>
+</ul></li>
+<li>Org Mode:
+<ul>
+<li><a href="https://mbork.pl/2025-09-22_Faking_today's_date_in_Org">Marcin Borkowski: Faking today's date in Org</a></li>
+<li><a href="https://www.reddit.com/r/orgmode/comments/1nt9mqa/update_orgsupertag_support_tag_inheritance_extends/">(update) org-supertag: support tag inheritance (extends)</a> (<a href="https://www.reddit.com/r/emacs/comments/1nt9mx5/update_orgsupertag_support_tag_inheritance_extends/">Reddit</a>)</li>
+<li><a href="https://www.reddit.com/r/orgmode/comments/1nt7ixf/update_orgworkbench_add_export_and_help_fix_id/">(update) org-workbench: Add export and help, fix ID detection</a></li>
+<li><a href="https://sachachua.com/blog/2025/09/org-mode-a-latex-letter-that-includes-pdfs-and-hyperlinked-page-numbers/">Sacha Chua: Org Mode: a LaTeX letter that includes PDFs and hyperlinked page numbers</a></li>
+<li><a href="https://en.andros.dev/blog/8c640241/why-org-social-when-you-can-use-anything/">Why Org Social when you can use… anything? | Andros Fenollosa</a> (<a href="https://activity.andros.dev/@andros/statuses/01K603K7VZSB5F6ZFHTVVQDQC6">@andros@activity.andros.dev</a>)</li>
+<li><a href="https://jan-iversen.de/2025/09/24/orgroamui-oder-wie-wurde-die.html">Org-Roam-UI… oder: Wie wurde die Notizvorschau repariert. | Jan Iversen</a> (<a href="https://nerdculture.de/@razorback/115260568931960158">@razorback@nerdculture.de</a>)</li>
+<li><a href="https://www.reddit.com/r/orgmode/comments/1nqx9vg/iana_adopts_textorg_mime_type/">IANA adopts text/org MIME type</a></li>
+<li>Org development:
+<ul>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs/org-mode.git/commit/etc/ORG-NEWS?id=e0641ef3e89fd6b04644c7cc2f5093918a01c672">org-id: Implement org-insert-link completion for ID links</a></li>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs/org-mode.git/commit/etc/ORG-NEWS?id=87074a0cac3d66cf398e23d612afd784b8dd5ca1">org-refile: Allow matching "all headings" in org-refile-targets</a></li>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs/org-mode.git/commit/etc/ORG-NEWS?id=b0f793ff0a31adb520fc5989b0399786663192ea">Support arrow keys and mouse wheel in export dispatcher</a></li>
+</ul></li>
+</ul></li>
+<li>Denote:
+<ul>
+<li><a href="https://protesilaos.com/codelog/2025-09-24-emacs-example-denote-custom-identifier/">Protesilaos Stavrou: Emacs: example of a custom Denote identifier to include day of week data</a></li>
+</ul></li>
+<li>Completion:
+<ul>
+<li><a href="https://randyridenour.net/posts/2025-09-21-obscure-emacs-package-yankpad.html">Randy Ridenour: An Obscure Emacs Package: Yankpad</a> (<a href="https://irreal.org/blog/?p=13294">Irreal</a>)</li>
+</ul></li>
+<li>Coding:
+<ul>
+<li><a href="https://kisaragi-hiu.com/2025-09-25-emacs-cmake/">Kisaragi Hiu: How I currently (2025) set up Emacs for C++ and CMake</a></li>
+<li><a href="http://ag91.github.io/blog/2025/09/27/how-to-make-ob-python-and-uv-work-together">Andrea: How to make ob-python and UV work together</a> (<a href="https://www.reddit.com/r/emacs/comments/1nrgbey/obpython_uv_for_org_blocks_with_deps/">Reddit</a>)</li>
+<li><a href="https://www.jamescherti.com/emacs-enhanced-evil-paredit/">James Cherti: Emacs enhanced-evil-paredit.el package: Preventing Parenthesis Imbalance when Using Evil-mode with Paredit</a></li>
+<li><a href="https://www.jamescherti.com/emacs-flymake-ansible-lint/">James Cherti: Emacs flymake-ansible-lint.el – A Flymake backend for ansible-lint</a></li>
+<li><a href="https://www.jamescherti.com/emacs-flymake-bashate-bash/">James Cherti: Emacs flymake-bashate.el – A Flymake backend for bashate that provides style checking for Bash shell scripts within Emacs</a></li>
+<li><a href="https://iam.travishartwell.net/mycmd/blog/2025-09-26-mycmd-and-myproject-weekly-progress-report:-2025-week-39/">2025-09-26 MyCmd and MyProject Weekly Progress Report: 2025 Week 39</a> (<a href="https://mastodon.social/@travisbhartwell/115273852774500619">@travisbhartwell@mastodon.social</a>)</li>
+<li><a href="https://www.youtube.com/watch?v=eHCQa55U3gw">Emacs tree sitter integration AND it's published</a> (04:39)</li>
+</ul></li>
+<li>Shells:
+<ul>
+<li><a href="https://www.reddit.com/r/emacs/comments/1nrajzi/icymi_emacs_29_termmode_supports_ansi_256color/">ICYMI: Emacs 29+ term-mode supports ANSI 256-color and 24-bit color!</a></li>
+</ul></li>
+<li>Fun:
+<ul>
+<li><a href="https://github.com/progfolio/wordel">progfolio/wordel: Wordle in Emacs</a> (<a href="https://social.vivaldi.net/@XLBilly/115273604702650989">@XLBilly@social.vivaldi.net</a>)</li>
+</ul></li>
+<li>AI:
+<ul>
+<li><a href="https://www.reddit.com/r/emacs/comments/1nrjbew/release_emacs_frontend_integrating_multiple_ai/">(Release) Emacs front-end integrating multiple AI coding CLI tools, ai-code-interface.el</a></li>
+<li><a href="https://inlandcursor.bearblog.dev/vibe-coding-an-emacs-package/">Vibe Coding an Emacs Package</a> (<a href="https://www.reddit.com/r/emacs/comments/1npuuln/vibe_coding_an_emacs_package/">Reddit</a>, <a href="https://news.ycombinator.com/item?id=45361023">HN</a>)</li>
+<li><a href="https://www.reddit.com/r/emacs/comments/1nnkgd1/my_experience_using_llms_for_checking_elisp/">My experience using LLM's for checking ELisp</a></li>
+<li><a href="https://xenodium.com/introducing-agent-shell">Alvaro Ramirez: Introducing Emacs agent-shell (powered by ACP)</a> (<a href="https://www.reddit.com/gallery/1nq0lb8">Reddit</a>)</li>
+<li><a href="https://www.reddit.com/r/emacs/comments/1npax7k/for_claude_code_writing_elisp_add_a_hook_blocking/">For Claude Code writing Elisp, add a hook blocking unbalanced parens</a></li>
+<li><a href="https://lars.ingebrigtsen.no/2025/09/24/who-is-that-actor-on-the-screen-emacs-llm-fun-redux/">Lars Ingebrigtsen: Who is that actor on the screen? Emacs/LLM/Fun Redux</a></li>
+<li><a href="https://www.youtube.com/watch?v=6jd1uYEGLDs">Emacs + GPTel: A Scientist's AI Notebook</a> (14:44)</li>
+<li><a href="https://www.youtube.com/watch?v=RVjGAbQKuCk">Studying Strategy (in Emacs (for writing an OS))</a> (44:30)</li>
+</ul></li>
+<li>Community:
+<ul>
+<li><a href="https://www.reddit.com/r/emacs/comments/1no6dq7/fortnightly_tips_tricks_and_questions_20250923/">Fortnightly Tips, Tricks, and Questions — 2025-09-23 / week 38</a></li>
+<li><a href="https://plaindrops.de/blog/2025/emacscarnival/">EmacsWiki Blog Carnival "Maintenance" | Plain DrOps</a> (<a href="https://masto.plaindrops.de/@spacecadet/115286673059816862">@spacecadet@masto.plaindrops.de</a>)</li>
+<li><a href="https://macadie.info/2025/09/25/2024-09-austin-emacs-meetup/">Eric MacAdie: 2024-09 Austin Emacs Meetup</a></li>
+<li><a href="https://protesilaos.com/codelog/2025-09-24-prot-asks-ekaitz-guix-bootstrapability-foss-basque/">Protesilaos Stavrou: Prot Asks: Ekaitz about Guix, bootstrapability, FOSS advocacy, and the Basque country</a></li>
+<li><a href="https://blog.sgawolf.com/post/2025-09-28-emacs/">Emacs?</a> (<a href="https://social.sgawolf.com/@simon/115282726784122274">@simon@social.sgawolf.com</a>)</li>
+</ul></li>
+<li>Other:
+<ul>
+<li><a href="http://gja.freeshell.org/rdf-editor.html">RDF-editor: viewing, understanding and editing linked data in emacs (a work in progress)</a></li>
+<li><a href="https://emacs.dyerdwelling.family/emacs/20250926100543-emacs--planning-my-weekly-meals-in-emacs/">James Dyer: Planning my Weekly Meals in Emacs!</a></li>
+<li><a href="https://duncanbritt.com/blog/tags-not-taxonomies/tags-not-taxonomies.html">Tags, Not Taxonomies</a></li>
+<li><a href="https://www.cyan.sh/blog/posts/obscure-package-tmr.html">Jakub Nowak: Obscure Package (?): tmr</a> - timer</li>
+<li><a href="https://ryan.freumh.org/caledonia.html">Caledonia</a>: command-line and Emacs calendar client</li>
+<li><a href="https://michal.sapka.pl/2025/software-philosophy/">Michal Sapka: My Software philosophy</a> (<a href="https://irreal.org/blog/?p=13292">Irreal</a>)</li>
+<li><a href="https://www.reddit.com/r/emacs/comments/1nry15t/guys_updates_from_eldocmouse_display_document_on/">Guys, updates from eldoc-mouse, display document on a popup for mouse hover.</a></li>
+<li><a href="https://www.jamescherti.com/emacs-inhibit-mouse-disable-mouse/">James Cherti: inhibit-mouse.el – Deactivate mouse input in Emacs (Alternative to disable-mouse)</a></li>
+<li><a href="https://www.masteringemacs.org/article/thoughts-on-mechanical-keyboards-zsa-moonlander">Thoughts on Mechanical Keyboards and the ZSA Moonlander</a> (<a href="https://www.reddit.com/r/emacs/comments/1nqynkr/thoughts_on_mechanical_keyboards_and_the_zsa/">Reddit</a>)</li>
+</ul></li>
+<li>Emacs development:
+<ul>
+<li>emacs-devel: <a href="https://lists.gnu.org/archive/html/emacs-devel/2025-09/msg00726.html">Incremental garbage collector feature in the works for Emacs on MS Windows</a> (<a href="https://www.reddit.com/r/emacs/comments/1nrutih/incremental_garbage_collector_feature_in_the/">Reddit</a>)
+<ul>
+<li><a href="https://onlisp.co.uk/Use-a-more-responsive-Emacs-by-testing-the-IGC-development-branch.html">J.e.r.e.m.y B.r.y.a.n.t: Use a more responsive Emacs by testing the IGC development branch</a></li>
+</ul></li>
+<li>emacs-devel: <a href="https://lists.gnu.org/archive/html/emacs-devel/2025-09/msg00279.html">Re: Should accept-process-output reliably return early?</a> (long discussion)</li>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs.git/commit/etc/NEWS?id=3f230d84656156c3bf5296f618e1bfe1bb8866ad">Detect suspicious email addresses in Rmail and Sendmail</a></li>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs.git/commit/etc/NEWS?id=b60e0f42941cf7db2dd396029437a1cbeec74d69">Restore mouse line dragging in character increments (Bug#79351)</a></li>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs.git/commit/etc/NEWS?id=06d87e44cb614b846f37eb25ccafce2065e2e9d2">(electric-indent-actions): Add missing NEWS</a></li>
+<li><a href="https://git.savannah.gnu.org/cgit/emacs.git/commit/etc/NEWS?id=77ca60b48d018425c95c110b4c736cddd2d1d336">Navigate <b>Completions</b> buffer based on 'completions-format'</a></li>
+</ul></li>
+<li>New packages:
+<ul>
+<li><a target="_blank" href="https://melpa.org/#/elchacha">elchacha</a>: Elisp ChaCha20 implementation (MELPA)</li>
+<li><a target="_blank" href="https://melpa.org/#/git-bug">git-bug</a>: Conviences for git-bug local-first issues (MELPA)</li>
+<li><a target="_blank" href="https://melpa.org/#/insta-pocket">insta-pocket</a>: Instapaper client (MELPA)</li>
+<li><a target="_blank" href="https://melpa.org/#/kaomel">kaomel</a>: A snappy kaomoji picker (MELPA)</li>
+<li><a target="_blank" href="https://melpa.org/#/nethack">nethack</a>: Run Nethack as a subprocess (MELPA)</li>
+<li><a target="_blank" href="https://melpa.org/#/procress">procress</a>: Process progress (MELPA)</li>
+<li><a target="_blank" href="https://melpa.org/#/tabbymacs">tabbymacs</a>: Inline AI code completions via Tabby LSP (MELPA)</li>
+</ul></li>
+</ul>
+
+<p>
+Links from <a href="https://www.reddit.com/r/emacs">reddit.com/r/emacs</a>, <a href="https://www.reddit.com/r/orgmode">r/orgmode</a>, <a href="https://www.reddit.com/r/spacemacs">r/spacemacs</a>, <a href="https://mastodon.social/tags/emacs">Mastodon #emacs</a>, <a href="https://bsky.app/hashtag/emacs">Bluesky #emacs</a>, <a href="https://hn.algolia.com/?query=emacs&amp;sort=byDate&amp;prefix&amp;page=0&amp;dateRange=all&amp;type=story">Hacker News</a>, <a href="https://lobste.rs/search?q=emacs&amp;what=stories&amp;order=newest">lobste.rs</a>, <a href="https://programming.dev/c/emacs?dataType=Post&amp;page=1&amp;sort=New">programming.dev</a>, <a href="https://lemmy.world/c/emacs">lemmy.world</a>, <a href="https://lemmy.ml/c/emacs?dataType=Post&amp;page=1&amp;sort=New">lemmy.ml</a>, <a href="https://planet.emacslife.com">planet.emacslife.com</a>, <a href="https://www.youtube.com/playlist?list=PL4th0AZixyREOtvxDpdxC9oMuX7Ar7Sdt">YouTube</a>, <a href="http://git.savannah.gnu.org/cgit/emacs.git/log/etc/NEWS">the Emacs NEWS file</a>, <a href="https://emacslife.com/calendar/">Emacs Calendar</a>, and <a href="https://lists.gnu.org/archive/html/emacs-devel/2025-09">emacs-devel</a>. Thanks to Andrés Ramírez for emacs-devel links. Do you have an Emacs-related link or announcement? Please e-mail me at <a href="mailto:sacha@sachachua.com">sacha@sachachua.com</a>. Thank you!</p>
+<div><a href="https://sachachua.com/blog/2025/09/2025-09-29-emacs-news/index.org">View org source for this post</a></div>
+<p>You can <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F09%2F2025-09-29-emacs-news%2F&amp;body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p></body></html>

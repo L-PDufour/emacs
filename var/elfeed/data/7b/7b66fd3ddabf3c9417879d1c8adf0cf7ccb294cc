@@ -1,0 +1,14 @@
+<p>
+Álvaro Ramírez is trying a different way of communicating his ideas and projects to us. He has a <a href="https://www.youtube.com/@xenodium">new YouTube channel</a> for this and has posted his first video, <a href="https://xenodium.com/bending-emacs-episode-1">Bending Emacs &#8211; Episode 1</a>.
+</p>
+<p>
+It&rsquo;s a very nice step-by-step explication of how to use his <a href="https://github.com/xenodium/dwim-shell-command">DWIM shell command</a> to translate one or more video files to animated GIFs. I first <a href="https://irreal.org/blog/?p=10653">wrote about DWIM shell command three years ago</a> and have mentioned it several times since.
+</p>
+<p>
+This problem was just what DWIM shell command was developed for: getting a handle on the complexity and confusion of <a href="https://ffmpeg.org/">FFmpeg</a> command line options. Even though Ramírez does this sort of thing all the time, he has trouble remembering all the FFmpeg options. For this particular project he fell back on relying on an LLM to give him the magic formula but if you&rsquo;re not an AI user, you can always read through the documentation.
+</p>
+<p>
+After that, it&rsquo;s a simple matter of using DWIM to capture the process. Ramírez also shows how to capture the process as an Elisp function so that it can be invoked seamlessly from Emacs whenever it&rsquo;s needed.
+</p>
+<p>
+Those of you who like to get your tech hits visually will enjoy this video. The blog post has a good précis of the video and the video itself is only 6 minutes, 15 seconds long so it&rsquo;s easy to fit into your schedule.</p>

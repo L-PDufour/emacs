@@ -1,0 +1,20 @@
+<p>
+JTR over at <a href="https://taonaw.com">The Art Of Not Asking Why</a> has an interesting post on how <a href="https://taonaw.com/2025/08/28/a-quick-overiew-about-how.html">how he writes instruction manuals</a>. The post was in response to a question from someone on Reddit.
+</p>
+<p>
+As for Org Mode itself, he doesn&rsquo;t have a lot to say. He sets some metadata to get rid of the table of contents, enable inline images, and turn off section numbering. He also sets <code>org-export-with-broken-links</code> to <code>t</code> so that he can still export his document even if the link has changed. He doesn&rsquo;t worry about the links until it&rsquo;s time to publish because—in his environment—they tend to change often.
+</p>
+<p>
+JTR uses <a href="https://github.com/protesilaos/denote">Denote</a> as a sort of front end to Org Mode. He uses some of its features to organize and associate his files and to keep track of when they were written. He also uses Pandoc for export because of its support for Word templates. Again, that&rsquo;s something required in his environment.
+</p>
+<p>
+The rest of his post talks about the procedures he uses for writing his documentation. For example, he uses the <a href="https://learn.microsoft.com/en-us/style-guide/welcome/">Microsoft Style Guide</a>—even though he doesn&rsquo;t like Microsoft—because it ensures consistency in his documents and because most of his users are on a Microsoft platform.
+</p>
+<p>
+Interestingly, he&rsquo;s parsimonious with the depth of his sections. He feels that a depth of more than two is an indication of an overly complicated set of instructions and a signal that they should be rewritten.
+</p>
+<p>
+One thing I learned from his post was the use of <code>target=blank</code> (<code>target=_blank</code> is probably better; see <a href="https://andycarter.dev/blog/the-difference-between-target-blank-and-target-blank">this post</a> for the difference) to force a link to open in another tab. Sadly, Org Mode does not have support for this so you have to add it manually.
+</p>
+<p>
+If you have to write documentation and you&rsquo;re an Emacs user, take a look at JTR&rsquo;s post. It may have some useful ideas for you.</p>

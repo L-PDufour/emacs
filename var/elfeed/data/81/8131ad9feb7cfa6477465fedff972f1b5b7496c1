@@ -1,0 +1,814 @@
+<p>In the past two years or so, I really got back into tabletop and role playing hobby. While it was always a part of my life, and I was always reading and writing about it, for quite some time I wasn&#8217;t actually playing much of anything. It was a hobby &#8220;on paper&#8221;: one that I experienced vicariously through battle reports, podcasts and forum discussions. But that has changed.</p>
+<p>I briefly got back into Warhammer, <a href=/blog/2015/07/04/age-of-sigmar-and-the-end-of-warhammer/">only to see it destroyed</a>, and rebound really hard with <a href="/blog/2015/10/10/warmachine-resources/">Warmachine</a>. If you follow me on Twitter, you probably also know that I have went through a Magic The Gathering phase (circa Dragons of Tarkir) which seems to be mercifully over now. I&#8217;m also part of a semi-regular D&#038;D campaign.</p>
+<p>You might have actually heard of it. It was <a href="https://redd.it/43p4r0">briefly trending on reddit</a> because our DM loves to make amazingly detailed terrain props. Due to DM prep overhead, and general state of &#8220;adulting&#8221; we finds ourselves in, we only have time to play once or twice a month (if we&#8217;re lucky). But it&#8217;s fun.</p>
+<p>If you are wondering why I haven&#8217;t been very active on this blog lately, this is part of the reason. Other hobbies have temporarily superseded, and became more important to me than my blogging hobby. Among other things.</p>
+<p>At one point I was even prepping to run my own <cite>FATE Core</cite> campaign. If you are not familiar with <a href="http://amzn.to/1M5Go3c">FATE Core</a> it, is a narrative RPG system loosely based on <a href="https://en.wikipedia.org/wiki/Fudge_%28role-playing_game_system%29">FUDGE</a>. I like it because it is a really solid implementation of FUDGE, that really rewards role-playing and pro-active narration from players. It allows them to take part in creation and shaping of the game worlds, but puts limits on it, by making it a resource based mechanic.</p>
+<p>Players have FATE points they can spend to gain mechanical bonuses (+2 to any roll), or to narrate something into a scene. They gain said points by allowing their characters to be &#8220;compelled&#8221; by the GM and giving into their weaknesses, or flaws or by indulging their vices. In other words, they are immediately rewarded for &#8220;good role-playing&#8221; or for simply following the GM&#8217;s rails when he needs them too, with a resource they can spend to get their way.</p>
+<p>It makes for a really dynamic, and interesting play, and something very, very different from the very encounter heavy D&#038;D game we&#8217;ve been playing lately. So I really wanted to try running a short campaign. Alas, nothing has panned out as of yet. But I did get some nice dice and tokens just in case:</p>
+<div id="attachment_18786" style="width: 650px" class="wp-caption aligncenter"><a href="http://www.terminally-incoherent.com/blog/wp-content/uploads/2016/03/File-Mar-08-8-55-22-PM.jpeg" rel="attachment wp-att-18786"><img src="http://www.terminally-incoherent.com/blog/wp-content/uploads/2016/03/File-Mar-08-8-55-22-PM-640x493.jpeg" alt="Fate Tokens" width="640" height="493" class="size-large wp-image-18786" srcset="http://www.terminally-incoherent.com/blog/wp-content/uploads/2016/03/File-Mar-08-8-55-22-PM-640x493.jpeg 640w, http://www.terminally-incoherent.com/blog/wp-content/uploads/2016/03/File-Mar-08-8-55-22-PM-480x369.jpeg 480w, http://www.terminally-incoherent.com/blog/wp-content/uploads/2016/03/File-Mar-08-8-55-22-PM-768x591.jpeg 768w, http://www.terminally-incoherent.com/blog/wp-content/uploads/2016/03/File-Mar-08-8-55-22-PM.jpeg 1024w" sizes="(max-width: 640px) 100vw, 640px" /></a><p class="wp-caption-text">FATE Core Tokens and Dice</p></div>
+<p>And of course, because I&#8217;m me, I have made tons of notes for the campaign setting. In FATE you are kinda supposed to get players involved in the world building process, and iron out the details during the first session. But, I figured it can&#8217;t hunt to jot down some ideas on paper, and to photo-shop some images to give players an idea as to what I was getting at.</p>
+<p>The basic idea was based on my <a href="/blog/2010/09/13/can-we-invent-retro-sf-space-punk/">retro SF</a> essay from 2010. I just expanded upon it to make it in a rough draft of a game setting. Below, you can find precisely that: a very rough sketch of the proposed setting, along with some of the mechanics and system tweaks I planned to include. The document was originally designed to be a player hand-out that would be distributed before a session, which is why I&#8217;m not breaking it up into parts the way I did with <a href="/blog/tag/ravenflight/">Ravenflight</a>.</p>
+<p>I&#8217;m putting the &#8220;living&#8221; document here for the time being: <a href="http://terminally-incoherent.com/rockets-n-rayguns/">Rockets and Rayguns</a>.</p>
+<p>After the break, you can read the entire set of campaign notes, as it was in March of 2016 in the form of a blog post. As always, let me know what you think in the comments below.</p>
+<p><span id="more-18752"></span></p>
+<div id="story">
+<h3 id="rockets-rayguns">Rockets &amp; Rayguns</h3>
+<div id="TOC" style="font-size: 16px;">
+<p>Table of contents:</p>
+<ul>
+<li><a href="#rockets-rayguns">Rockets &amp; Rayguns</a></li>
+<li><a href="#setting">Setting</a>
+<ul>
+<li><a href="#language-and-communication">Language and Communication</a></li>
+<li><a href="#planets-as-sovereign-kingdoms">Planets as Sovereign Kingdoms</a>
+<ul>
+<li><a href="#currency-and-trade">Currency and Trade</a></li>
+</ul>
+</li>
+<li><a href="#hyperspace">Hyperspace</a></li>
+<li><a href="#aliens">Aliens</a>
+<ul>
+<li><a href="#arcturians">Arcturians</a></li>
+<li><a href="#slags">Slags</a></li>
+<li><a href="#moravecs">Moravecs</a></li>
+<li><a href="#vegans">Vegans</a></li>
+</ul>
+</li>
+<li><a href="#important-factions">Important Factions</a>
+<ul>
+<li><a href="#colonial-authority">Colonial Authority</a></li>
+<li><a href="#the-interstellar-alliance">The Interstellar Alliance</a></li>
+<li><a href="#the-league-of-free-worlds">The League of Free Worlds</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#mechanics">Mechanics</a>
+<ul>
+<li><a href="#anchors">Anchors</a></li>
+<li><a href="#skill-list">Skill List</a>
+<ul>
+<li><a href="#engineering-skill">Engineering Skill</a></li>
+<li><a href="#pilot-skill">Pilot Skill</a></li>
+<li><a href="#lore-is-now-education">Lore is now Education</a></li>
+</ul>
+</li>
+<li><a href="#zero-gravity">Zero Gravity</a></li>
+</ul>
+</li>
+<li><a href="#crew-roles">Crew Roles</a>
+<ul>
+<li><a href="#captain">Captain</a></li>
+<li><a href="#pilot">Pilot</a></li>
+<li><a href="#engineer">Engineer</a></li>
+<li><a href="#gunner">Gunner</a></li>
+</ul>
+</li>
+<li><a href="#the-ship">The Ship</a>
+<ul>
+<li><a href="#ship-to-ship-combat">Ship to Ship Combat</a></li>
+<li><a href="#the-ship-systems">The Ship Systems</a>
+<ul>
+<li><a href="#atomic-reactor">Atomic Reactor</a></li>
+<li><a href="#rocket-engine">Rocket Engine</a></li>
+<li><a href="#life-support">Life Support</a></li>
+<li><a href="#hyperspace-drive">Hyperspace Drive</a></li>
+<li><a href="#force-field">Force Field</a></li>
+<li><a href="#med-bay">Med Bay</a></li>
+<li><a href="#lidar">Lidar</a></li>
+<li><a href="#shortwave-radio">Shortwave Radio</a></li>
+<li><a href="#ansible">Ansible</a></li>
+<li><a href="#laser-turret">Laser Turret</a></li>
+</ul>
+</li>
+<li><a href="#ship-upgrades">Ship Upgrades</a></li>
+<li><a href="#the-ship-decks">The Ship Decks</a></li>
+</ul>
+</li>
+<li><a href="#rockets">Rockets</a></li>
+<li><a href="#other-technology">Other Technology</a>
+<ul>
+<li><a href="#computers">Computers</a></li>
+<li><a href="#ansible-1">Ansible</a></li>
+<li><a href="#space-suit">Space Suit</a></li>
+<li><a href="#ray-gun">Ray Gun</a></li>
+<li><a href="#portable-radio">Portable Radio</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h3>Introduction</h3>
+<p>This is a game setting designed to be used with FATE Core rule set. This means you will need FATE Rulebook, character sheets, and some FATE Dice and tokens. All the resources can be downloaded for free from the <a href="http://www.evilhat.com/home/fate-core-downloads/">official website</a>.</p>
+<div class="figure">
+<img src="/img/rnr/fate.jpg" /></p>
+</div>
+<p>The setting is based on retro pulp SF from the 40&#8217;s and 50&#8217;s. Sleek rocket ships with giant fins, space suits with bubble helmets, ray guns, giant computers that take up the entire room, programming done on punch cards or patch cables are the core aesthetic.</p>
+<h3 id="setting">Setting</h3>
+<p>It&#8217;s the year 3,000 and humanity has colonized the galaxy. There are over two hundred known human inhabited worlds and many more that have yet to be settled and colonized. Space travel is inexpensive, accessible and affordable and interstellar trade is booming. The primary mode of travel between worlds are small rockets that require 4-5 person crew, and can ferry both passengers as well as cargo across vast distances.</p>
+<p>While some people never leave their home world, many choose to travel the galaxy seeking better career opportunities, better education, or simply looking for adventures.</p>
+<div class="figure">
+<img src="/img/rnr/future.jpg" /></p>
+</div>
+<p>Owning a Starship is considered to be romantic ideal: being the master of your own fate, not beholden to any local power structure, not tied to a single planet, and being able to pick up and leave at any time. Space Adventurers often get fabulously rich by discovering new habitable planets, scavenging alien technology, or finding pirate treasures buried on some barren asteroid.</p>
+<p>The technology, while allowing humans to travel between stars, is still stuck in the past. Rockets and ray guns are common sight, but computer networks are unheard of, even on most advanced planets. Computers do exist, and are indispensable, but they are large, slow and programmed via punch cards or patch cables. Space travel is basically all humans got going for it, and it shows. Space Ports are like parking lots: every town has at least one, and major cities have dozens if not hundred of them.</p>
+<div class="figure">
+<img src="/img/rnr/spaceports.png" /></p>
+</div>
+<p>Humanity shares the galaxy with at least three other sentient races: the green skinned Arcturians, the reptilian Slags and the mechanical Centaurians.</p>
+<h4 id="language-and-communication">Language and Communication</h4>
+<p>The common language used throughout the galaxy is Esperanto. Individual worlds will often have dominant local language that is spoken by most of the inhabitants, but everyone is expected to learn Esperanto at a young age, and it is used as the official, neutral, common language.</p>
+<p>Player characters are considered to be fluent in Esperanto. They may also pick another language that is spoken on their home world. This can be an existing language (Spanish, English and French are especially common) or an original language unique to that particular planet, and/or region.</p>
+<p>Communication between worlds is done via the wondrous invention known as Ansible, which is capable of transmitting data instantaneously across vast distances. The transmission rate is flat 3 Bytes per minute, and it does not change based on distance. Because of the slow transmission speed, Ansibles are used mostly like telegraph: text mode only.</p>
+<p>Audio-visual and other data is typically recorded onto magnetic tape and transmitted via courier aboard an interstellar rocket.</p>
+<h4 id="planets-as-sovereign-kingdoms">Planets as Sovereign Kingdoms</h4>
+<p>Most of the inhabited worlds are sovereign states with their own local government, own military, and own rules. While many worlds resemble the 50&#8217;s &quot;world of tomorrow&quot; ideals, some are feudal kingdoms, empires, despotic regimes or even strange theocracies lead by religious cults. While there exist large alliances and multi-world factions, they are far from being homogeneous with respect to culture and customs.</p>
+<div class="figure">
+<img src="/img/rnr/city.png" /></p>
+</div>
+<p>Think of planets as islands separated by vast distances. Most are weeks, if not months away from their closest neighbor. Even though interstellar trade is possible, and hugely profitable, all worlds tend to be self-sufficient, self-reliant and self governed. This lends itself to an incredible variety of cultures, and ways of life.</p>
+<p>The three main interstellar factions (The Colonial Authority, The Alliance and The League) usually adopt a hands-off policy with regards to local culture and attitudes. They are mostly military and trade compacts. Some impose their own culture and ideals on the member worlds more than the others. They all know full well, that people&#8217;s loyalty is almost always to their home worlds.</p>
+<div class="figure">
+<img src="/img/rnr/adventure-6.jpg" /></p>
+</div>
+<p>On some planets most of the population may live in fully automated, modern cities, with flying cars and robot servants, other worlds may be almost entirely rural and backwards. There exist planets that have almost no advanced technology save for one or two major cities or castles.</p>
+<h5 id="currency-and-trade">Currency and Trade</h5>
+<p>Most worlds use their local currencies, and many have more than one. Interstellar traders, typically use one of the three faction currencies:</p>
+<ul>
+<li>
+<p><strong>Colonial Credits</strong> (¢¢) are backed by the Colonial Authority and respected almost everywhere. Even alliance and alien traders will accept the credits, because of favorable exchange rates, and ubiquity. It is a very strong and stable currency, and preferred method of payment for most travelers. Colonial Credits are rectangular plastic chips, about the size of a credit card, with their value laser engraved on the surface.</p>
+</li>
+<li>
+<p><strong>Alliance Trade Notes</strong> (atb) are backed by The Alliance and is the second most popular currency in the galaxy. It fluctuates more than Colonial Credits, and tends to be less durable. It takes form of banknotes printed on postcard sized sheets of paper. They are mostly red, with intricate artwork covering the entire surface of the paper.</p>
+</li>
+<li>
+<p><strong>Ducat</strong> (d) is the official currency of the League and is the third most popular currency in the galaxy. The Ducat are made out of platinum and gold and their value corresponds in large part to the value of the precious metal from which they were made. This also makes them rather impractical as currency, since large sums tend to be heavy and impractical to carry around. Ducat are usually distributed as coins of various sizes. Small denominations are usually round coins or rings, while larger denominations are rectangular bars designed to be stacked in neat rows. Some merchants prefer this currency because it can be traded as raw materials without incurring much loss.</p>
+</li>
+</ul>
+<p>Additionally, most worlds issue <strong>Common Trade Bonds</strong> which are backed by their central governing authority. In theory, you should be able to redeem these anywhere in the Galaxy for local currency, but in practice they tend to only be honored on worlds that have standing trade agreements. They typically take form of 8&#215;11&quot; paper documents.</p>
+<h4 id="hyperspace">Hyperspace</h4>
+<p>Most space ship in the setting are cylindrical, nuclear powered rockets. They take off and land in vertical position, and typically balance on three to four fins and/or external engines when they land. The engines on most rockets are capable of accelerations that would produce enough G-forces to make the crew black out, or even instantly kill them so Pilots must exercise caution. That said, they are still conventional engines that cannot get anywhere close to the speed of light.</p>
+<p>Interstellar travel is accomplished via Hyperspace which is an alternate dimension in which time and space work differently providing shortcuts between points in our universe. Hyperspace is often described as a non-void: an emptiness that is very much unlike the void of space. It is impossible to measure it&#8217;s temperature, pressure or acceleration in Hyperspace because these concepts do not seem to exist there.</p>
+<p>A traveler looking outside their ship will see an endless expanse that is devoid of color and any kind of illumination, which somehow still appears &quot;white&quot;. Those who have seen it, describe it as deeply unsettling. Most travelers never get exposed to that sight however since ships rarely enter Hyperspace without active Force Field. While ship fields are invisible to the naked eye in our universe, in Hyperspace they strobe and pulsate with vivid color, seemingly at random.</p>
+<p>The Force Field is maintained mostly for the comfort of the crew. Without it, most people feel queasy, nauseous, experience sense of vertigo, and suffer from various other sensory distortions. Most people suffer from blurred vision, ringing in their ears and skin numbness. Symptoms such as strange (neither pleasant nor unpleasant) taste in one&#8217;s mouth, and hard to describe sharp, but inoffensive odor are also not uncommon. It is not know whether long term exposure has long lasting health effects.</p>
+<p>A low powered field surrounding the ship seems to block out all of these side effects.</p>
+<p>Once a ship enters the Hyperspace, it winks out of the existence in the standard universe. There is no way to follow or track a ship that is in Hyperspace, and it is not possible for ships to communicate while they remain there. It is theorized (though it was never proven) that each ship enters a slightly different version of the Hyperspace dimension, which is why no two ships were ever able to meet, or transmit messages while traveling.</p>
+<p>That said, a skilled Navigator can potentially deduce where a ship was going based on their entry point. The topography of Hyperspace is bizarre and abstract, but stable and unchanging, and specific points within correspond to points in the standard universe. Picking an optimal entry point into Hyperspace allows to shorten the trip considerably. Common inbound and outbound transit points in each system are known to anyone with even Medicore Navigation skill.</p>
+<h4 id="aliens">Aliens</h4>
+<p>There is a plethora of alien species out there, and almost every inhabited world has some unique indigenous species. Most of them are not sentient. While many planets have, or had in the past, been a home to an intelligent species, most are not technologically advanced. Humans do not have qualms about colonizing planets that already have intelligent life. Indigenous populations are either assimilated into the human society and forced to adopt human culture and often existence as second class citizens. Those less fortunate are displaced from their home lands to make way for human cities and sometimes completely eradicated.</p>
+<p>There are only three sentient species that humanity can&#8217;t simply brush away, because of their considerable technological and military power.</p>
+<p><strong>Racial Aspects</strong>: each race has two or three racial aspects, which describes how the race as a whole is viewed by others. These aspects can be invoked against, or by any members of the species, but it must be in the context of a group as perceived by outsiders.</p>
+<p>Consider these aspects represent generalizations, stereotypes and preconceived notions about each species. They can be taken as role-playing cues, but characters and NPC&#8217;s can, and should subvert these expectations. In fact, some of the racial aspects will be contradictory. This is by design, to represent conflicting beliefs and prejudices people may feel about this or that race.</p>
+<h5 id="arcturians">Arcturians</h5>
+<p>Arcturians are sometimes referred to as &quot;the little green men&quot; because of their skin shade and short stature. They typically stand a 4&#8217;5&quot; and few of them ever grow to be taller than 5&#8242;. There is no significant height difference between their men and women. Their skin is typically some shade of green, though there is some variation between individuals. Most have uniform, light green carnation, but individuals with deep dark green skin as well as those with cyan tinge have been observed. Freckles are not uncommon. The most common hair colors are silver or white, though individuals with various shades of red, blue and black hair shades have been seen,</p>
+<div class="figure">
+<img src="/img/rnr/alien-1.png" /></p>
+</div>
+<p>Arcturians are bipedal, and their body plan resembles that of humans. Their faces are almost human-like, with the exception of lacking visible nose or ears. Their eyes are typically black, without visible whites, or a distinctive iris. Their most distinctive feature are two wriggling antennas growing out of the top of their head which seem to double up as bout olfactory and auricular organs.</p>
+<p>Arcturians are similar to humans in their temperament. They have similar track record of colonizing worlds and displacing local populations, being aggressively expansive and endlessly adaptable. Their society is similarly fractured into hundreds of small, locally governed planet-states that trade and war with each other. Because of these similarities both races seem to get along reasonably well. Arcturians often trade with humans, and some even choose to live in human colonies. That said, it is not uncommon for Human and Arcturians to go to war over local resources, or various diplomatic disputes.</p>
+<p>Arcturians can learn to speak Esperanto fluently. Most of their own languages are difficult for humans to grasp because it includes sounds inaudible to human ears.</p>
+<p>Arcturian technology is slightly more advanced. They seem to have mastered anti-gravitational technology, and cold fusion. Their flying saucers require no loud rocket engines, and use safe and clean reactors. Human scientists have yet to replicate similar technology.</p>
+<p>Arcturian Aspects:</p>
+<ul>
+<li><em>Little green people</em></li>
+<li><em>Sly and cunning space merchants</em></li>
+<li><em>Their saucers have been seen steeling cattle and abducting humans</em></li>
+</ul>
+<h6 id="playing-an-arcturian">Playing an Arcturian</h6>
+<p>Arcturian characters may require specially fitted space suits, though they can usually get away with using a child-sized human suit if one is available. Standard bubble helmets usually have enough room to fit their head stalks.</p>
+<p>An Arcturian player character will be assumed to be fluent in Esperanto, as well as Arcturian Common language, and another language spoken on their home world. They are assumed to have lived long enough among humans to have very good grasp of their norms, customs and taboos. Players do not need to feel the need to use their aspects to establish those facts.</p>
+<h5 id="slags">Slags</h5>
+<p>Slags is somewhat derogatory name given to the race of red skinned, space-faring reptilian humanoids. Slags are roughly human sized, and they have hard, scaly skin and large, round black eyes. Their scales are usually a uniform shade of red, though some have a striped pattern running along their backs. They are obligate carnivores, and their mouths have sharp needle-like teeth. Their hands and feet have large, gripping claws which are used while eating. Most individuals file down the tips, to prevent them from getting caught on clothing. Despite a popular human belief, Slags do not possess tails.</p>
+<div class="figure">
+<img src="/img/rnr/slags.jpg" /></p>
+</div>
+<p>Slags do not have external sexual characteristics that can be distinguished by humans. While they reproduce sexually, and their women lay eggs, there is virtually no way for a human to distinguish a male from a female member of the species just by casual interaction. Most other species have no such trouble and can distinguish Slag sex without any issues.</p>
+<p>Despite their reptilian looks, Slags are warm-blooded, and highly energetic. Their though, but flexible scales are excellent thermo regulators which allow them to survive in very low, and very high temperatures, and withstand a lot of radiation. Slags do not need a full space suit to work in vacuum of space. They may spend up to an hour in hard vacuum without suffering any adverse consequences, provided they have a steady supply of oxygen to breathe. They are also extremely hardy, and their skin seems to be particularly resistant to ray gun fire on lower settings.</p>
+<p>Slag technology is on par with human, though their ships tend to be much more heavily armored, and have very powerful rocket engines. They typically don&#8217;t install any sound dampeners, or emission filters on their engines, and frequently use chemical boosters. Because of that Slag ships are extremely loud, and can often be seen leaving thick, black smoke trails behind them. Their huyperspace drives on the other hand, tend to be sub-par, and significantly slower than human.</p>
+<p>The name they use for themselves is unpronounceable by humans. Some members of the species who have learned Esperanto, claimed that they found the word Salamander as a good stand-in, being evocative of fire-spitting lizards. Others disagreed, and there is no consensus on what Humans should call them.</p>
+<p>The Slags that are encountered most often in the human space are hostile marauders, raiders or space pirates, who attack human ships or human settlements. Furthermore, their lizard-like appearance is considered to be intimidating, or even frightening by some. In some societies they function as the space bogeymen used by politician or demagogues to rally support.</p>
+<p>Humans unaccustomed to dealing with Slags tend to find them unnerving and intimidating.</p>
+<p>Slag Aspects:</p>
+<ul>
+<li><em>Tough and ugly reptile brutes</em></li>
+<li><em>Smarter and more cunning than than they look</em></li>
+<li><em>Savage, bloodthirsty marauders and space pirates.</em></li>
+</ul>
+<h6 id="playing-a-slag">Playing a Slag</h6>
+<p>Players wishing to play a Slag must meet the following requirements:</p>
+<ul>
+<li>Their character&#8217;s <em>Physique</em> skill must be <em>Fair (+2)</em> or better</li>
+</ul>
+<p>Slags do not fit in human sized space suits, and do not need them. They simply need a respirator that can fit over their mouth and nose, along with a tank of air to survive in the vacuum of space for up to an hour. Longer periods may result in them suffering from standard ailments related to decompression and exposure.</p>
+<p>Player characters are considered to be fluent in Esperanto, as well as the Slag Common language. They may also know a local language spoken on their home world.</p>
+<h5 id="moravecs">Moravecs</h5>
+<p>The Alpha Centauri Moravecs are one of the most unique races in the entire galaxy due to the fact they are entirely mechanical. Their ancestral species was likely organic, but there is precious little known about them. In their current form, they are robotic, without even a trace of organic material.</p>
+<p>They reproduce in a way that is entirely unique to their species: two or more individuals collaborate together, building a brand new individual from parts. Some individuals are simply built from spare parts that are available at the time of creation, while others are built to a specific plan or with a specific purpose in mind, using custom manufactured components. Because of this, no two Moravecs look the same. Most however use a bipedal body with two legs, and two manipulator arms, and sensory modules installed roughly where humans would expect a head to be.</p>
+<div class="figure">
+<img src="/img/rnr/centaurian.png" /></p>
+</div>
+<p>Moravecs have highly advanced technology that is ahead of any other space faring race. Their greatest advancements are in computing and machine engineering. No other race has ever even came close to replicating the technology behind the Moravec brain, and few races can build mechanical sensors as accurate as they do.</p>
+<p>Their ships have incredibly fast hyperspace drives, and their rocket engines are tuned to run at accelerations way beyond the tolerances of organic species. Because of this, they are incredibly hard to out-maneuver or chase.</p>
+<p>Their ships often have leaky, un-shielded reactors that are unsafe for organic passengers, but do not affect Moravecs at all. They are usually not allowed to park their rockets on residential landing pads, and get re-routed to industrial space ports.</p>
+<p>They typically do not install any life support on their vessels because it is not needed. They do not require air or food, and space travelers typically modify their feet to include electro-magnets that allow them to move efficiently in zero gravity. They also do not experience any discomfort while traversing Hyperspace without force fields.</p>
+<p>Moravec language is incomprehensible to humans, consisting of beeps and mechanical sounds. Humans can learn to understand it, but can&#8217;t readily speak it. Individuals who expect to interact a lot with humans or other species typically install a set of speakers somewhere on their chassis.</p>
+<p>Moravec Aspects:</p>
+<ul>
+<li><em>Soulless automatons with no respect for organic life</em></li>
+<li><em>Logical and literal to a fault</em></li>
+<li><em>Each one is a priceless mechanical wonder</em></li>
+</ul>
+<h6 id="playing-a-moravec">Playing a Moravec</h6>
+<p>Players wishing to play a Moravec must meet the following requirements:</p>
+<ul>
+<li>Their character&#8217;s <em>Engineering</em> skill must be <em>Fair (+2)</em> or better.</li>
+<li>They must take the following extra <em><strong>Made out of Steel:</strong> Armor Rating 2 (Cost: 1 Refresh)</em></li>
+</ul>
+<p>Moravecs do not need space suits and can operate in vacuum for indefinite amount of time. They can also operate under water, but their bodies are not designed to withstand deep water pressures. Their bodies are hermetically sealed against vacuum, but extended exposure to water pressure may rupture said seals and cause them to short out and effectively drown just like organics would.</p>
+<p>Player character Moravecs are assumed to have speaker mod, and are fluent in Esperanto, as well as the Moravec Machine Language.</p>
+<h5 id="vegans">Vegans</h5>
+<p>Vegans are bipedal humanoids that typically stand 7-8 feet tall. Most have thin and wiry build, though obesity is not entirely uncommon among them. They do appear to be less prone to it than Humans or Arcturians. They have a smooth, hairless light blue skin and white, pupil-less eyes that emit soft glow in the dark. Most individuals have light or dark freckle like spots on the top of their head, their back and sides of their arms and legs. The pattern and coloration is unique to an individual.</p>
+<p>Similarly to Arcturians, they posses no nose, but do have ears similar to those of humans. Their olfactory senses are located in their mouth and they typically smell things by &quot;tasting the air&quot; with their mouth and tongue.</p>
+<div class="figure">
+<img src="/img/rnr/vegans.png" /></p>
+</div>
+<p>Vegans evolved from herbivorous herd animals and their stomachs cannot digest meat. While they can subside on food rations designed for Humans or Arcturians by just eating around the meat, it is not healthy for them. They typically need more varied plant based diet to stay healthy.</p>
+<p>Their original home planet had much weaker gravity than Earth, and they tend to prefer low gravity planets. The standard gravity that feels comfortable to humans is strenuous and tiring to Vegans. It makes them tire easily, and make them seem sluggish and lazy, compared to other species. Despite their large size, Veagans are not significantly stronger than humans because their muscles are designed for much weaker gravity.</p>
+<p>Vegan technology is on par with Human or Slag civilizations. They use atomic powered rockets and standard hyperspace drives. By necessity, their vessels tend to be larger, and more spacious to accommodate their large bodies. They usually have a distinctive bulbous shape, with engines mounted on fins.</p>
+<p>Vegans have reputation for being peaceful and neutral race. Their worlds typically choose to stay out of armed conflicts, major wars or even territorial disputes. This is by no means universal across all their worlds of course. They do not hesitate to fight when attacked, and will launch attacks at perceived threats when needed. They simply prefer not to enter into interstellar military alliances. They prefer to maintain friendly relations with all their neighbors if possible.</p>
+<p>Vegans have reputation for being level headed, and hard to shake or provoke. They can stay calm even under extreme pressure, and rarely lose their laid back and easy going attitudes. Some species find their unshakable will and unfaltering smiles to be rather unsettling, while others enjoy their company precisely because if that.</p>
+<p>Vegan Common language has a song-like qualities to it, and is fairly easy for humans to master.</p>
+<p>Vegan aspects:</p>
+<ul>
+<li><em>Gentle, friendly giants</em></li>
+<li><em>Laid back and easy going but lazy</em></li>
+<li><em>Affraid to ever take a stand on important issues</em></li>
+</ul>
+<h6 id="playing-a-vegan">Playing a Vegan</h6>
+<p>Players wishing to play a Moravec must meet the following requirements:</p>
+<ul>
+<li>Their character&#8217;s <em>Will</em> skill must be <em>Fair (+2)</em> or better.</li>
+</ul>
+<p>Vegans do not fit in human sized space suits. They are also not comfortable in chairs designed for humans.</p>
+<p>Player character Vegans are considered to be fluent in Esperanto, Vegan Common language and one local language spoken on their home world.</p>
+<h4 id="important-factions">Important Factions</h4>
+<p>There are three major human factions that operate on a galactic scale, rather than on a planetary scale.</p>
+<h5 id="colonial-authority">Colonial Authority</h5>
+<p>Colonial Authority is a military superpower with an enormous fleet, and many worlds under it&#8217;s control. Their mission statement is to protect human life, human culture, and human interests throughout the galaxy. They seek to &quot;prepare&quot; new worlds for human colonization, which almost invariably involves exterminating indigenous alien life and supplanting it with Earth-like ecosystem.</p>
+<p>Colonials also often choose to &quot;protect&quot; sovereign human worlds by making them part of their territories. The wishes of the local populace are irrelevant, and few worlds are able to face the Colonial Invasion Fleet in an open space battle. Fortunately the Authority allows the worlds it controls govern themselves asking only for three things.</p>
+<p>First, is taxation. Second is providing the Colonial Fleet with soldiers on an annual basis. Third is the ability to build Colonial Bases on the surface of the planet, and govern them as they see fit, without them being subject to local laws. Of course local rulers still must answer to the Colonial Authority, and the local military must be disarmed and dismantled.</p>
+<div class="figure">
+<img src="/img/rnr/colonial-flag.png" /></p>
+</div>
+<p>Colonial Authority is commonly referred to as &quot;The Colonies&quot;. The people living on Colonial worlds are typically not referred to as &quot;Colonials&quot;. That title is usually reserved to members of the Colonial Fleet, or high ranking diplomatic officials who represent the authority.</p>
+<p>Faction Aspects:</p>
+<ul>
+<li><em>&quot;Enemies of the Colonial Authority are enemies of Humanity&quot;</em></li>
+<li><em>&quot;Only good aliens are dead aliens&quot;</em></li>
+<li><em>&quot;Colonial fleet has no peers, join us or perish&quot;</em></li>
+</ul>
+<h5 id="the-interstellar-alliance">The Interstellar Alliance</h5>
+<p>The Interstellar Alliance originally consisted of the Fomalhaut, Betelgeuse and Aldebaran systems, each of which is represented by a stripe on the flag. The stripes converge together to represent how these systems banded together in a close knit alliance, to protect their citizens from outside threats which include Slag marauders, Colonial Authority, League of Free Worlds and Arcturian invasion fleets. Since it&#8217;s inception, dozens more worlds were formally inducted into the organization.</p>
+<div class="figure">
+<img src="/img/rnr/commonwealth-flag.png" /></p>
+</div>
+<p>Modeled after the Collonial Fleet, the Allied Fleet is funded and recruited from the member worlds. Unlike the Ahority however, membership in the Alliance is voluntary, and there are no tithes or mandatory draft. That said, member states are expected to pull their own weight and contribute. Worlds that do not donate funds, supplies or troops will often be expelled from the alliance. New member states must go through a rigorous vetting process, during which they are expected to take on all the responsibilities of a member, without actually gaining any benefits.</p>
+<p>Alliance does not officially meddle in the local affairs of member states, but it does have a published set of standards, and model laws which members are encouraged to implement. These standards proscribe both legal, cultural and economic norms. For example, member worlds with democratic governments are instructed to ensure that aliens cannot vote on matters that pertain to human citizens. Some of the standards proscribe dietary restrictions (only Earth based foods, no indigenous plants or animals) or mode of dress (no hats or head-wear allowed on Alliance ships or alliance controlled lands). Original members are free to ignore these standards, but newly inducted members may be voted out if they don&#8217;t make every attempt to conform to all the suggested standards.</p>
+<p>Alliance fleet is smaller than than the Colonial Fleet, but highly motivated and well trained.</p>
+<p>Faction traits:</p>
+<ul>
+<li><em>&quot;Not nearly as bad as the Colonials&quot;</em></li>
+<li><em>&quot;You are free to conform or leave&quot;</em></li>
+<li><em>&quot;Humanity first!&quot;</em></li>
+</ul>
+<h5 id="the-league-of-free-worlds">The League of Free Worlds</h5>
+<p>The third biggest faction in the known space, is the League of Free Worlds. It is feared and despised by both the Colonials and the Alliance alike. Unlike those highly organized factions, the League is a loose association of worlds united under a single banner. Each of said worlds is ruled by a local despot, who holds an absolute power over their domain, and maintains a personal army to defend their holdings. Alliances between the members of the League are based on personal martial or trade agreements between the ruling dynasties and tend to be fickle and impermanent.</p>
+<p>The actual power of the faction waxes and wanes as the internal alliances are broken, wars are caught, and personal vendettas are being carried out. That said, there is a kind of strong &quot;us vs them&quot; mentality among the League planet lords, and they will usually put aside their quarrels to when threatened by an external force.</p>
+<div class="figure">
+<img src="/img/rnr/league-flag.png" /></p>
+</div>
+<p>The League&#8217;s official leader is known as the Lord of Lords (or The Overlord for short). This is not a hereditary title, but rather an elected office with a twenty year term, which can only be served once. The Overlord is selected by majority vote at the Grand Landsmeet: a gathering of Planet Lords that happens once per two decades. It is a very festive occasion, and one fraught with danger and court intrigue. There hasn&#8217;t been a single Grand Landsmeet without at least one assassination attempt, and some kind of scandal or political spectacle. At Landsmeet new alliances are forged, old alliances are broken, duels between lords are fought, planets, riches and power changes hands in unpredictable ways, until a new status quo emerges. Usually the most powerful, or most charismatic of Planet Lords emerges as the new Overlord. The office itself grants authority over the other Planet Lords, but that authority must always be backed up by actual power: either in terms of a strong personal army, or good network of allies that can discourage dissent.</p>
+<p>The cultures of the League worlds vary, and are usually dictated by tastes, beliefs and convictions of the ruling dynasty. On most of them governance resembles a class driven feudal system. Others may be run as corporate structures, or even faux democracies with mock senate, and meaningless elections. Some Planet Lords are despised by their subjects, while others are beloved local celebrities. All of them however wield absolute power of life and death over the inhabitants of their worlds.</p>
+<ul>
+<li><em>&quot;Space Aristocrats&quot;</em></li>
+<li><em>&quot;Yield to the strongest and the mightiest&quot;</em></li>
+<li><em>&quot;Kneel and you will be allowed to live and serve&quot;</em></li>
+</ul>
+<hr />
+<h3 id="mechanics">Mechanics</h3>
+<p>Below are additional skills and mechanics that extend the set of rules found in the FATE Core rulebook.</p>
+<h4 id="anchors">Anchors</h4>
+<p>This campaign will use the idea of <a href="http://walkingmind.evilhat.com/2013/10/11/anchors/">Anchors as outlined by Rob Donoghue</a>. To put it simply, an Anchor is an object, place or person connected to an Aspect that provides a concrete, tangible cue for invoking and compelling that Aspect.</p>
+<p>When creating their characters, players should define one Anchor for each of their Aspects. They can be small trinkets or items (favorite hat, good luck coin, a locket with a picture), a meaningful person (mentor, teacher, parent, old friend, dependable associate) or place (your childhood home, a place you wish to visit, a prison where you served a sentence). Players should try to choose Anchors that both help to flesh out their character, provide &quot;visual&quot; cues as to who they are, and have a reasonable probability to come up in play.</p>
+<p>The Anchors then provide an additional, and conceptually easy way to invoke or compel Aspects. For example, a <em>Grizzled war veteran</em> may be wearing a jacket with their former unit insignia, giving the GM an easy way to compel that aspect by having an NPC recognize the patch and try to start a fight because were on the opposite side of a recent war. The patch acts as a convenient hook to hang the compel on.</p>
+<h4 id="skill-list">Skill List</h4>
+<p>There are 20 skills to choose from. You get the 18 standard FATE Core skills and two new skills renamed below. Additionally, some of the standard skills have been renamed to fit the setting better (see table below).</p>
+<table style="font-size: 14px; width: 85%;">
+<thead>
+<tr class="header">
+<th align="left">Skill</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Athletics</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Burglary</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Contacts</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Crafts</td>
+<td align="left">Covers arts and crafts. Ron Swanson type shit here.</td>
+</tr>
+<tr class="odd">
+<td align="left">Deceive</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Drive</td>
+<td align="left">Covers all ground vehicles and other non flying machines.</td>
+</tr>
+<tr class="odd">
+<td align="left">Empathy</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left"><em>Education <sup>renamed</sup></em></td>
+<td align="left">Replaces Lore.</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Engineering <sup>new</sup></em></td>
+<td align="left">Used to repair machinery, program computers and operate starship shields.</td>
+</tr>
+<tr class="even">
+<td align="left">Fight</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Investigate</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left"><del>Lore</del></td>
+<td align="left">Replaced by Education</td>
+</tr>
+<tr class="odd">
+<td align="left">Notice</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Physique</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Pilot <sup>new</sup></em></td>
+<td align="left">Covers spacecrafts, and flying machines.</td>
+</tr>
+<tr class="even">
+<td align="left">Provoke</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Rapport</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Resources</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Shoot</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Stealth</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Will</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h5 id="engineering-skill">Engineering Skill</h5>
+<p>I made a decision to break Engineering out of Crafts skill, because it represent a slightly different skill set. Along with the Pilot skill, it allowed me to round up the skill list to an even 20, so that works out just fine.</p>
+<p>Crafts skill is still around, but is mostly focused on manual craftsmanship and artistry. With Crafts you can build a nice mahogany desk, reinforce a wall, weave ceramic plating into your space suit and etc.. It can also be used for architecture &#8211; you can build a shack in the woods, a floating raft, or a magnificent shed.</p>
+<p>Engineering works similar to Crafts with exception that it is focused on technology specifically. Your character is good with machines, and mechanical devices of all sorts. You can repair your space ship, fix your ray gun, rig a robot to explode and etc..</p>
+<p>This skill is also used for computer programming, reading and writing computer programs. As a rule of thumb, if something is mechanical, or plugs into power source, Engineering is the skill to use with it.</p>
+<p>There is some degree of overlap between the two skills. Engineering skill could potentially be used to build a structurally sound raft for example. It may not be the best looking or most comfortable raft, but it will probably float just fine. Similarly, Craft can be used to open an electronic door lock, by simply cutting around it, and shorting the wires at random until something happens. As a general rule of thumb, in such cases the solution lacks the finesse and more of a temporary fix than a permanent solution.</p>
+<p><i class='fate fate-overcome'></i> <strong>Overcome</strong>: Engineering allows you to build, break, or fix machinery, presuming you have the time and tools you need. It can also be used to create computer programs. It can also be used to heal and repair robotic characters, such as the alien Moravecs.</p>
+<p><i class='fate fate-create-advantage'></i> <strong>Create an Advantage</strong>: You can use Engineering to create aspects representing features of a piece of machinery, pointing out useful features or strengths you can use to your advantage (<em>Supercharged Battery</em>, <em>Finely Calibrated Gyroscopes</em>) or a vulnerability for you to exploit.</p>
+<p>Creating Crafts advantages can also take the form of quick and dirty sabotage or jury-rigging on mechanical objects in the scene. For example, you might create a Makeshift Pulley to help you get to the platform above you, open an electronic door lock and etc..</p>
+<p><i class='fate fate-defend'></i> <strong>Defend</strong>: When on a ship with force fields, you may attempt to defend from attacks from enemy ships. To do so, you must first ensure your shields are at maximum combat capacity by routing power to them. Once that is done, you may use your Engineering skill to defend any Shoot attacks directed at your ship. This represents you modulating the field intensity to adapt to the incoming shots in order to deflect them.</p>
+<h6 id="engineering-stunts">Engineering Stunts</h6>
+<ul>
+<li>
+<p><strong><em>McGuyver</em></strong>: you can improvise and build simple gadgets or tools using things that just happen to be around (paper-clips, chewing gum and shoelaces for example). You always count as having the right tools for the job.</p>
+</li>
+<li>
+<p><strong><em>Computer Programmer</em></strong>: +2 to engineering rolls when programming, reading computer programs, or trying to solve problems using a computer.</p>
+</li>
+</ul>
+<h5 id="pilot-skill">Pilot Skill</h5>
+<p>Piloting a rocket ship is not an easy task. It requires a lot of special training and good grasp of orbital mechanics and how gravity fields and atmosphere affect a space craft. Because of this it is broken out into a separate skill from Drive which now pertains to non-flying vehicles only.</p>
+<p>Pilot skill behaves similar to Drive</p>
+<p><i class='fate fate-overcome'></i> <strong>Overcome</strong>: Use Pilot whenever performing difficult maneuvers, such as trying to land on difficult terrain, weaving in between obstacles, trying to enter world&#8217;s atmosphere at a dangerous speed and etc&#8230;</p>
+<p><i class='fate fate-create-advantage'></i> <strong>Create Advantage</strong>: You can create an advantage for the Gunner by skillful maneuvering.</p>
+<p><i class='fate fate-attack'></i> <strong>Attack</strong>: Pilot skill can be used to ram the enemy ship similar to the way Drive skill works.</p>
+<p><i class='fate fate-defend'></i> <strong>Defend</strong>: You can use the skill to actively try to dodge the incoming attacks by performing evasive maneuvers.</p>
+<h6 id="pilot-stunts">Pilot Stunts</h6>
+<ul>
+<li>
+<p><strong><em>Dogfighter</em></strong>: gain +2 on active Defend rolls using the Pilot skill when in combat with a single enemy ship.</p>
+</li>
+<li>
+<p><strong><em>Push the Limit</em></strong>: you can withstand high acceleration better than the others. When your engines are overcharged you can out-run, overtake or shake off any ship of similar size as yours if you can make successful Pilot roll. The downside is that most of your crew will black out from high-G stress.</p>
+</li>
+<li>
+<p><strong><em>Stunt Pilot</em></strong>: gain +2 on Overcome rolls when performing difficult stunts such as barrel rolls.</p>
+</li>
+<li>
+<p><strong><em>Thread the Needle:</em></strong> gain +2 on Overcome rolls when flying the ship through extremely tight spaces.</p>
+</li>
+</ul>
+<h5 id="lore-is-now-education">Lore is now Education</h5>
+<p>Lore sounds a bit archaic or supernatural for this setting, so it was renamed. Education may refer to formal academic background, training or being self taught expert.</p>
+<p>This is also the skill used for reading star charts, and plotting hyperspace jumps.</p>
+<p>You can take Stunts to specialize in a specific field. For example:</p>
+<ul>
+<li><strong><em>Medical Doctor</em></strong>: +2 on Overcome or Create Advantage rolls pertaining to first aid, medical aid, or general knowledge of medicine and pharmacology.</li>
+<li><strong><em>Navigator</em></strong>: +2 on Overcome or Create Advantage rolls pertaining to hyperspace navigation, reading star charts and etc..</li>
+</ul>
+<h4 id="zero-gravity">Zero Gravity</h4>
+<p>Your ship&#8217;s Life Support system has a built in artificial gravity support. This is true for most rocket ships, and as a result very few pace travelers ever need to learn how to handle themselves in zero gravity. It is a skill that only comes up when the on-board Life Support fails, or when a person needs to go outside of the spaceship to perform repairs.</p>
+<p>For an average person, working without gravity is rather challenging. People tend to bump into walls a lot, get themselves stuck in a middle of the room, and tend to get disoriented or even nauseous.</p>
+<p><em><i class='fate fate-die-minus'></i> <i class='fate fate-die-minus'></i> In zero gravity all physical actions have a -2 penalty, regardless of skill level</em>.</p>
+<p>This penalty applies to all skills that have physical component, including Engineering and Pilot tasks. It does not apply to non-physical skills such as using Rapport or Empathy.</p>
+<div class="figure">
+<img src="/img/rnr/space-walk.jpg" /></p>
+</div>
+<p>Player characters may take the following stand-alone stunt to represent their expertise as seasoned spacers.</p>
+<ul>
+<li><strong><em>Astronaut:</em></strong> ignore penalties for working in zero gravity.</li>
+</ul>
+<p>Taking the above stunt gives a character access to a whole stunt family:</p>
+<ul>
+<li>
+<p><strong><em>Space Walking:</em></strong> (requires Astronaut) gain +2 to Athlethic rolls while out of spaceship in vacuum of space.</p>
+</li>
+<li>
+<p><strong><em>Zero-G Combat:</em></strong> (requires Astronaut) gain +2 to any Fight rolls while in zero gravity.</p>
+</li>
+<li>
+<p><strong><em>Zero-G Marskman:</em></strong> (requires Astronaut) gain +2 to Shoot rolls when using personal side-arms in zero gravity.</p>
+</li>
+</ul>
+<h3 id="crew-roles">Crew Roles</h3>
+<p>Crew roles listed below describe the jobs characters will have on the ship. The players should try to build their characters so that they can fulfil one, or several of these roles. You won&#8217;t need all of them, but it&#8217;s good to have at least few.</p>
+<div class="figure">
+<img src="/img/rnr/crew.jpg" /></p>
+</div>
+<p>To run a ship effectively, you will need one character with Pilot skill, one with Engineering just to be able to take off and land. Computers and Navigation will be necessary to get between systems via Hyperspace. A crew without someone with a good Shoot skill will be in trouble if it runs into any ship-to-ship combat.</p>
+<p>That said, if one or more players want to create off-beat characters that do not conform to any of the roles below, they can certainly do so. In such case, the crew should simply hire a number of NPC crew mates with the missing skills.</p>
+<p>Please note that a Crew Role should not be used as your High Concept Aspect. It can however be used as a starting point. For example a Pilot may take <em>&quot;the best damn pilot in the Colonies&quot;</em> as their High Concept. This is not a requirement though. As a counter example, you may have a Captain who is a <em>&quot;scoundrel with a heart of gold&quot;</em> or a Gunner who is a <em>&quot;disgraced war hero&quot;</em>.</p>
+<h4 id="captain">Captain</h4>
+<p>As a Captain you are the leader of the crew. You represent your crew mates when interacting with others, and anything you say or do reflects on your crew and vice versa. It is your job to find new jobs, passengers, negotiate prices and ensure your ship is stocked with provisions for long trips.</p>
+<p>While on planet, you are responsible for the conduct and actions of your crew mates. If they get in trouble, it is your job to appease the locals, talk to the authorities and make things right. During combat it is your job to negotiate with the hostiles, accept their surrender, or make the decision to concede in conflict to save your ship and your crew.</p>
+<div class="figure">
+<img src="/img/rnr/crew-captain.jpg" /></p>
+</div>
+<p>You are, by far, the most important member of the crew because you hired all the other crew members and you own the ship.</p>
+<p>Important Skills:</p>
+<ul>
+<li>Notice, Will, Rapport</li>
+</ul>
+<h4 id="pilot">Pilot</h4>
+<p>You are responsible for piloting the ship and making sure you take off and land in one piece. During combat, your skill may be called upon to doge incoming shots or to out-maneuver the enemy and create good firing situations.</p>
+<div class="figure">
+<img src="/img/rnr/crew-pilot.jpg" /></p>
+</div>
+<p>You are, by far the most important crew member because without you, the ship will not fly.</p>
+<p>Important Skills:</p>
+<ul>
+<li>Pilot, Engineering, Education</li>
+</ul>
+<h4 id="engineer">Engineer</h4>
+<p>Your job is to maintain the ship, and repair it when it becomes damaged. You can be usually found calibrating the engines, tinkering with the hyperspace drive or making new modifications to the turret. Without you, the ship would fall apart. During combat, you will be routing power to various ship subsystems, and operating the Force Fields, deflecting enemy shots.</p>
+<div class="figure">
+<img src="/img/rnr/crew-mechanic.jpg" /></p>
+</div>
+<p>You are by far the most important crew member, because without you the ship would fall apart.</p>
+<p>Important Skills:</p>
+<ul>
+<li>Engineering, Crafts, Education</li>
+</ul>
+<h4 id="gunner">Gunner</h4>
+<p>You are the ship&#8217;s muscle. You are in charge of loading and unloading the cargo, making sure everything is strapped down tight, and prepared for the flight. You are handy in a bar fight, or street brawl. But it&#8217;s space combat when your skills really shine. You are a crack shot, both with a ray gun and with the heavy laser turret. You can alway line up a perfect shot.</p>
+<div class="figure">
+<img src="/img/rnr/crew-gunner.jpg" /></p>
+</div>
+<p>You are by far, the most important crew member, because without you, they&#8217;d be sitting ducks to be plucked by Space Pirates.</p>
+<p>Important Skills:</p>
+<ul>
+<li>Shoot, Fight, Physique</li>
+</ul>
+<h3 id="the-ship">The Ship</h3>
+<p>Your ship is Advanced Astronautics Dauntless 600 Interstellar Rocket Ship (AA D-600). It&#8217;s designated as a light cargo hauler / passenger carrier. Your ship was modified with a military issue Heavy Laser Turret installed in the Observation Deck.</p>
+<div class="figure">
+<img src="/img/rnr/the-ship.png" /></p>
+</div>
+<p>The ship is a character that the players will create along side their characters.</p>
+<p>When creating the ship:</p>
+<ul>
+<li>Give it 3 aspects as to a regular character (High Aspect, Trouble and one aspect related to it&#8217;s past owner, or how the crew obtained it)</li>
+<li>Leave space for two additional aspects to be gained during play</li>
+<li>Assign the ship no skills or stunts. All rolls will depend on crew skills.</li>
+<li>Give the ship Recharge of 2.</li>
+<li>Give the ship 1 stunt that can be useful in combat, that makes this ship unique</li>
+</ul>
+<p>The ship has two stress tracks:</p>
+<ul>
+<li>Hull Stress works like physical stress for a character. Your ship starts with two boxes and may gain more.</li>
+<li>Shield Capacity starts with two boxes.</li>
+</ul>
+<p>The Shield stress track is to be used only when actively defending via Shields. If damage is taken in excess of Shield Capacity, the Shield is Taken Out for the remainder of the scene. It must cool off, and be re-calibrated before it&#8217;s used again, but no repair roll is necessary.</p>
+<p>If shields are powered down, or in cruise mode when hit, you must use the Hull Stress track.</p>
+<p>You can use this modified character sheet:</p>
+<div class="figure">
+<img src="/img/rnr/ship-sheet.jpg" /></p>
+</div>
+<p>The ship may gain two additional aspects (to a total of 5) during game play.</p>
+<p>During the game players may invoke the aspects of their ship by using the ship&#8217;s own FATE points.</p>
+<h4 id="ship-to-ship-combat">Ship to Ship Combat</h4>
+<p>Ship to Ship Combat counts as Physical Conflict. Treat each ship involved in combat as a single character.</p>
+<p>Use Cpatain&#8217;s Notice skill to determine the turn order, and break any ties by using Pilot&#8217;s, Gunner&#8217;s and then Engineer&#8217;s skill (in that specific sequence)</p>
+<p>During each Exchange each crew member may perform one action. The following special actions affect the ship as a whole:</p>
+<p><i class='fate fate-create-advantage'></i> <strong>Create Advantage</strong>: Pilot may attempt to create an advantage over the enemy ship(s) by carefully maneuvering the rocket into an advantageous position. This should be rolled against the enemy pilot skill. A captain may also attempt to create advantage by observing the enemy ship via Lidar to find weak spots, maneuvering patterns that could be exploited.</p>
+<p><i class='fate fate-attack'></i> <strong>Attack</strong>: the Gunner may use their Shoot skill to attack the enemy ship.</p>
+<p><i class='fate fate-defend'></i> <strong>Defend:</strong> If attacked, the Pilot or the Engineer may use an appropriate skill to defend against an incoming attack. If Pilot chooses to Defend we call it Evading. If Engineer chooses to defend, we call it Blocking.</p>
+<ul>
+<li>When <strong>Evading</strong> use Piloting skill to defend. If damage is taken, use Hull Stress track.</li>
+<li>When <strong>Blocking</strong> use Engineering skill to defend. If damage is taken, use Shields Capacity stress track.</li>
+</ul>
+<p>The Captain may also try to perform mental Attack actions using the Shortwave Radio. In that case, they will be rolling against the enemy Capitan, and the damage and consequences are applied to said character rather than the ship.</p>
+<h4 id="the-ship-systems">The Ship Systems</h4>
+<p>Your D-600 has an old, aging reactor, which does not yield enough power to run all the ship systems at the same time. To represent this, you can use the optional power management mini-game in ship-to-ship combat to make it more interesting.</p>
+<p>Power management works as follows:</p>
+<ul>
+<li>Ship&#8217;s reactor generates a fixed number of Power Points (PP) which should be represented by appropriate tokens</li>
+<li>Each of the ship&#8217;s systems consumes a set number of PP per Exchange to operate</li>
+<li>At the start of an Exchange all the tokens are placed on the Reactor system on the Ship&#8217;s character chart</li>
+<li>Before any actions are declared, Engineers assign the tokens to ship systems in secret, then reveal them at the same time</li>
+<li>From that point on the Exchange proceeds as normal, but systems that have not been assigned enough PP to meet their minimum, cannot be used</li>
+</ul>
+<p><strong>Overcharging:</strong> in order to perform stunts, relevant ship system must be supplied with extra power. Place an extra token on said system to pay for stunt use.</p>
+<p>The resource management should only be used during Conflict resolution, and can be ignored during regular (boring) ship use, when the party just wants to get from point A to point B.</p>
+<h5 id="atomic-reactor">Atomic Reactor</h5>
+<p>Your D-600 is powered by a standard nuclear power source for that model. If the reactor is damaged, the ship is completely out of power and is considered adrift.</p>
+<ul>
+<li>The reactor output: <strong><em>8 PP per Exchange</em></strong></li>
+</ul>
+<h5 id="rocket-engine">Rocket Engine</h5>
+<p>The Rocket engine is used for normal space flight, take-offs, landing and docking operations. During combat, it is required to perform any actions that require ship to move or change position. It also allows to use the Pilot skill for Active defense against shots or ram attempts.</p>
+<ul>
+<li>Minimum power required: <strong><em>3 PP per Exchagne</em></strong></li>
+</ul>
+<h5 id="life-support">Life Support</h5>
+<p>Life Support system covers air, water, waste recycling as well as artificial gravity on the ship. It requires a constant supply of power while the ship is in outer space, but can be temporarily disabled if PP are needed elsewhere.</p>
+<p>The immediate consequence of disabling this system is that it cuts the artificial gravity. This means anything not strapped down starts to float and bound around. Crew members without the Astronaut stunt face penalties for working in Zero-G.</p>
+<p>The long term effect is that ship&#8217;s air is no longer recycled, so the crew has about 20 minutes before they start suffocating.</p>
+<ul>
+<li>Minimum power required: <strong><em>1 PP per Exchange</em></strong></li>
+</ul>
+<h5 id="hyperspace-drive">Hyperspace Drive</h5>
+<p>Your D-600 is fitted with a standard Hyperdrive that allows you to perform hyperspace jumps. It has no obvious utility in combat, except for when the ship&#8217;s crew is trying to make a quick escape.</p>
+<p>In a Conflict the Hyperdrive must operate for at least 4 consecutive Exchanges without interruption in order to successfully initiate a hyperspace jump. A Crew member must be assigned to operate and program in the course into it over that period and they may not do anything else. If they are interrupted, or the power is cut before the 4 Exchanges have elapsed then the process must be restarted from the beginning.</p>
+<ul>
+<li>Minimum power required: <strong><em>5 PP per Exchagne</em></strong></li>
+</ul>
+<h5 id="force-field">Force Field</h5>
+<p>Force Field (also referred to as Shields) is mainly used for deflecting laser shots or space debris that would otherwise damage your ship&#8217;s hull. When the ship is Attacked, a Crew member operating the Force Field system (usually the Engineer) may use their Engineering skill to Defend from the attack.</p>
+<p>If the Force Field is active, damage can be recorded on the Shields stress track, rather than on the Hull stress track.</p>
+<p>The Force Field is also used during Hyperspace travel, but it can usually be run in low power mode where the drain on reactor is negligible. This feature has no combat utility and can be safely ignored (assume Shields are on while in Hyperspace at all times) unless the system is damaged.</p>
+<ul>
+<li>Minimum power required: <strong><em>3 PP per Exchagne</em></strong></li>
+</ul>
+<h5 id="med-bay">Med Bay</h5>
+<p>A small medical room is tucked into the corner of the Cargo Bay next to the Life Support systems. It contains a fully stocked medicine cabinet, surgical tools, one surgery table and three stasis chambers that can stabilize a patient in critical condition. The chambers may also be used to enter suspended sleep state if the Hyperdrive is broken and the ship is adrift.</p>
+<p>In Combat the med bay can be shut off, unless you need the Stasis Chambers to be running: for example if transporting a patient in a critical condition.</p>
+<p>If the power is cut, the chambers gracefully shuts down and wake up the patients. Each chamber can be connected to an external power supply, and placed on a dolly for transport to a hospital.</p>
+<ul>
+<li>Minimum power required: <strong><em>1 PP per Exchagne</em></strong></li>
+</ul>
+<h5 id="lidar">Lidar</h5>
+<p>The AA D-600 has limited visibility out of the Bridge canopy and uses a Lidar array for sensor readings. Lidar works by illuminating targets with laser light and reading the reflected beams. It works like a sonar but can provide a lot more information and works at the speed of light.</p>
+<p>Lidar is located on the Bridge and looks a bit like a bulky submarine periscope. It is typically used by the Captain who can use it&#8217;s readings to instruct the Pilot.</p>
+<p>Lidar has two modes: passive and active. In passive mode it will detect any objects that generate or deflect light. It can also be used to detect heat from rocket engines, and systems. If a rocket shuts off it&#8217;s engines, and there is no nearby source of strong light (like a sun) it may be very hard to distinguish from a space debris.</p>
+<p>In Active Scanning Mode the Lidar can be used to make long range scans by illuminating targets with various wavelengths of laser light. It can be used to identify the exact model of the enemy ship, see if it has active force fields, detect presence of a working reactor, scan for life signs and etc. When a ship uses Lidar in active mode it lights up like a Christmas tree and reveals ship&#8217;s position.</p>
+<p>During combat, Lidar can be used to identify enemy weaknesses, and used for Create Advantage action.</p>
+<ul>
+<li>Minimum power required: <strong><em>1 PP per Exchagne in Active Scanning Mode</em></strong></li>
+</ul>
+<h5 id="shortwave-radio">Shortwave Radio</h5>
+<p>Used for ship-to-ship or ship-to-planet communication. Uses standard analog radio wave and has rather limited range. Players will have to use to request permission to land or coordinate docking with another ship or space station.</p>
+<p>All rooms have wired communications that require negligible power, and will work as long as the reactor is running. They do not depend on the Shortwave Radio subsystem.</p>
+<p>In combat, the Radio is mainly used for Ship to Ship communication. If the Capitan wanted to Provoke the enemy Crew, this system would have to be on</p>
+<ul>
+<li>Minimum power required: <strong><em>1 PP per Exchagne</em></strong></li>
+</ul>
+<h5 id="ansible">Ansible</h5>
+<p>Standard Ansible allowing for instant interstellar communication at roughly 3 Bytes per minute. It allows one to send a message to any other Ansible in the universe, provided you know it&#8217;s unique routing number.</p>
+<p>Ansible must be powered on to send out messages. In combat assume you are able to send one written word per Exchange.</p>
+<ul>
+<li>Minimum power required: <strong><em>1 PP per Exchagne while Sending</em></strong></li>
+</ul>
+<h5 id="laser-turret">Laser Turret</h5>
+<p>Military equipment, retro-fitted to work with D-600. It can sustain 3 second high intensity beam that can be used to damage another ship, clear space debris out of the way and etc.</p>
+<p>The turret can be used once per Exchange. During combat it will almost exclusively be used to make Attack actions. It can also be used to Defend from a projectile weapon (eg. a torpedo) or to blast space junk or debris to Create Advantage. In all the above cases, the Gunner&#8217;s Shoot skill would be used.</p>
+<ul>
+<li>Minimum power required: <strong><em>4 PP per Shot</em></strong></li>
+</ul>
+<h4 id="ship-upgrades">Ship Upgrades</h4>
+<p>The ship is expected to gain new Aspects and Stunts as the campaign goes by, and that is it&#8217;s main progression. Unlike characters, it does not have skills it could improve. The crew could however choose to upgrade some of the ship systems, or install new modules.</p>
+<p>An obvious upgrade is a better reactor that generates few more PP per Exchange. Other possible upgrades to consider:</p>
+<ul>
+<li>Better Force Field (add stress boxes to the Shields track)</li>
+<li>Better Turret (add a Weapon Rating extra)</li>
+<li>Armor Plating (add stress boxes to the Hull track)</li>
+<li>A whole new Systems module with unique functionality</li>
+</ul>
+<p>Eventually the Crew could even upgrade to a new ship with a new set of aspects and different module slots.</p>
+<h4 id="the-ship-decks">The Ship Decks</h4>
+<p>All decks are air tight, and connected via two hatches to the deck above and two hatches the deck below. The primary hatches are all aligned into a column that allow a person to freely climb up and down between decks. There are also maintenance hatches that are in different places (but clearly marked by hazard stripes). Maintenance hatches are usually closed while not in use. All hatches are sealed manually.</p>
+<p>All rooms and sections within a deck can be sealed individually via air tight door. The seals on all doors are manual.</p>
+<ul>
+<li>
+<p><strong>Deck 1: Engines</strong> &#8211; Sits on top of the rocket exhaust. Divided into Reactor Room and Engine Room. Reactor Room is sealed off, and accessible via a air-lock door and requires a radiation suit to enter. Engine room has the Engineering Station that allows the Engineer to shut down and power up ship systems at will. It also houses the Hyperdrive Engine.</p>
+<p>Systems:</p>
+<ul>
+<li>Rocket Engines</li>
+<li>Hyperspace Drive</li>
+<li>Frorce Fields</li>
+<li>Atomic Reactor</li>
+</ul>
+</li>
+<li>
+<p><strong>Deck 2: Cargo Bay</strong> &#8211; Used for storing hauled cargo. Also includes external air lock, automated ladder, and a crane system for pulling up large boxes off the ground. The crane must be operated by a crew member. The air-lock can be wide open when the ship has landed, but at all other times, only one set of doors can be open. The air-lock doors are automatic and controlled via a panel inside the Cargo Bay. There is a manual override on the outside which uses a gear box to close and seal inside door and open the outside door via a crank shaft. It is usually hidden behind a reinforced panel that requires a key carried by the Capitan. Within the Air Lock there are 3 lockers with one Space Suit each.</p>
+<p>Small section of the huge Cargo Bay space is sectioned off to house Life Support systems. The machinery simply did not fit in the Engie Deck. The emergency hatch to the Engineering Deck actually opens into the Life Support toom. Some Engineers like to keep that hatck open, and lock the Life Support room from the rest of Cargo Bay.</p>
+<p>Right next to the Life Support there is a tiny Med Bay with three stasis chambers. It was placed here to avoid taking sick crew up to the living quarters deck to minimize contamination. The room has a small air-lock entrance with a decontamination shower. There is a locker with a single hazmat suit outside.</p>
+<p>Systems:</p>
+<ul>
+<li>Life Support</li>
+<li>Med Bay</li>
+</ul>
+</li>
+<li>
+<p><strong>Decks 3: Living Quarters</strong> &#8211; Seven rooms for crew and passengers, connected by a common area in the middle. The common area has a small kitchen, large conference/dining table, as well as a shared restroom with a stall, sink and a shower.</p>
+</li>
+<li>
+<p><strong>Deck 4: Bridge</strong> &#8211; contains pilot station, Captain&#8217;s chair, and Lidar. The other half of the deck is the Observatory which was retro-fitted to house the Heavy Laser Turret which takes up most of it.</p>
+<p>Systems:</p>
+<ul>
+<li>Lidar</li>
+<li>Shortwave Radio</li>
+<li>Laser Turret</li>
+</ul>
+</li>
+<li>
+<p><strong>Deck 5</strong> &#8211; tip of the rocket. Houses the Ansible, the radio equipment and antennas. It also houses the Captain&#8217;s Cabin.</p>
+<p>Systems:</p>
+<ul>
+<li>Ansible</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="rockets">Rockets</h3>
+<p>Rockets are iconic and important to the setting. Your D-600 is special and unique ship, because it belongs to your party. Similarly, important NPC ships may also have unique aspects and features. There are however going to be dozens of other ships you may encounter, which are not going to be important enough to warrant a character sheet.</p>
+<p>Below you can find brief descriptions of popular ship models you might encounter during your adventures. Each model will have an aspect (in italics) and sometimes a stunt or an extra associated with it.</p>
+<div class="figure">
+<img src="/img/rnr/rocket-ships.png" /></p>
+</div>
+<ul>
+<li><strong>Enduring</strong> class ships are <em>fast but cheep and not very durable</em>.</li>
+<li><strong>Mercurial</strong> class ships have been <em>built for speed and comfort, not for combat</em>.</li>
+<li><strong>Dilligent</strong> class ship is a <em>dependable workhorse favored by space merchants</em></li>
+<li><strong>Divergent</strong> class ships are <em>light, well armed military crafts</em> usually used by planetary defense or law enforcement (<em>Weapon Class: 1</em>)</li>
+</ul>
+<div class="figure">
+<img src="/img/rnr/rocket-ships-commercial.png" /></p>
+</div>
+<ul>
+<li><strong>Dauntless</strong> class ship <em>may be slow and does not look like much, but its dependable</em></li>
+<li><strong>Intrepid</strong> class ships are <em>cargo haulers that are built like race cars</em></li>
+<li><strong>Peerless</strong> class ship is a <em>piece of junk that belongs in a museum</em></li>
+</ul>
+<div class="figure">
+<img src="/img/rnr/rocket-ships-colonial.png" /></p>
+</div>
+<ul>
+<li><strong>Falcon</strong> class ship was <em>built for fast atmospheric dogfighting</em> used for planetary invasions</li>
+<li><strong>Swift</strong> class ships are <em>blindingly fast, hard hitting glass cannon</em> and are mainly used as deep space interceptors</li>
+<li><strong>Wasp</strong> class ships are <em>slow but steady, colonial workhorse</em> used as military transports or cargo haulers (<em>Armor Class: 1</em>)</li>
+</ul>
+<div class="figure">
+<img src="/img/rnr/rocket-ships-arcturian.png" /></p>
+</div>
+<p>On average, even the slowest Arcturian saucer is more maneuverable than the fastest rocket. They do however are at a disadvantage in deep interstellar space where their anti-gravity engines can&#8217;t provide enough thrust.</p>
+<ul>
+<li><strong>Traveler</strong> class saucers are <em>agile but fragile</em></li>
+<li><strong>Vanquisher</strong> class saucers are <em>frighteningly maneuverable, light military warships</em></li>
+<li><strong>Observer</strong> class ship is <em>sluggish for a saucer, but surprisingly tough and durable</em></li>
+</ul>
+<div class="figure">
+<img src="/img/rnr/rocket-ships-slag.png" /></p>
+</div>
+<p>Slag ships are heavily armored, and all have <em>Armor Class: 1</em> unless specified otherwise.</p>
+<ul>
+<li><strong>Armadillo</strong> class ship is a <em>flying fortress</em></li>
+<li><strong>Razorspine</strong> class ships <em>bristle with weaponary</em></li>
+<li><strong>Thunderstrike</strong> ships are <em>nothing but engines</em></li>
+</ul>
+<div class="figure">
+<img src="/img/rnr/rocket-ships-moravec.png" /></p>
+</div>
+<p>Moravec ships have no Life Support or Artificial Gravity.</p>
+<ul>
+<li><strong>Moonstrider</strong> class ships are <em>solid cargo haulers, with fragile landing struts</em></li>
+<li><strong>Stargazer</strong> class ships have <em>vulnerable hull but powerful force field</em></li>
+<li><strong>Triton</strong> class ships are <em>faster than they look, but not very maneuverable</em></li>
+</ul>
+<div class="figure">
+<img src="/img/rnr/rocket-ships-vegan.png" /></p>
+</div>
+<p>Vegan ships have their Artificial Gravity turned down to a fraction of what Humans consider comfortable.</p>
+<ul>
+<li><strong>Starstrider</strong> class ship <em>turns on a dime</em></li>
+<li><strong>Moonraker</strong> class ships have <em>powerful engines, lots of weapons but little cargo space</em></li>
+<li><strong>Sunspot</strong> class ships are <em>built for speed at the cost of armor</em></li>
+</ul>
+<h3 id="other-technology">Other Technology</h3>
+<h4 id="computers">Computers</h4>
+<p>Computers do exist in this setting but they are huge, unwieldy and expensive machines that take up an entire room. They require high Engineering skill to operate properly.</p>
+<div class="figure">
+<img src="/img/rnr/programming.jpg" /></p>
+</div>
+<p>Most computers are programmed via patch cables, or punch cards. A portable computer that will fit on a space ship, will take up almost entire upper deck, and will be programmed via patch cables and manual switches. Computers used in research facilities are almost universally punch-card driven.</p>
+<p>Punch card decks (pictured above) are the default programming medium, while large magnetic spool tapes are used for data storage. Both can be used as McGuffins or objectives. Punch cards are portable but fragile. Messing up their order will destroy the program, unless the author took time to number the cards. A deck can be read directly and require at least a Fair (+2) or better Engineering roll.</p>
+<p>Magnetic spools are about the size of a spare tire for a medium size passenger car, and weigh about as much. They require special hardware to read.</p>
+<h4 id="ansible-1">Ansible</h4>
+<p>Ansibles are used for instantaneous interstellar communication. They are able to transmit data at the constant, uninterrupted rate of 3 bytes per minute, regardless of distance.</p>
+<p>A standalone Ansible is a machine about the size of a small work desk, that contains a teletype device with a keyboard. Typed text is buffered in temporary memory that can hold up to 256 Bytes of data. Received output is printed directly onto the paper spool.</p>
+<div class="figure">
+<img src="/img/rnr/ansible.png" /></p>
+</div>
+<p>Because of the limitations of technology, most Ansibles work in text only mode and are used much like telegraph was back in the day. There exist versions of this device that can be used as general purpose computer modems but they are much bigger and more expensive since they require much more buffering memory.</p>
+<p>Ansibles are fairly simple to use, and do not require Computers skill to operate.</p>
+<h4 id="space-suit">Space Suit</h4>
+<p>A standard space suit is made out of thin, flexible space age material that provides perfect thermo-regulation. It will protect you from the extreme cold of outer space, and can withstand the heat of a ray weapon. The material is stretchy and flexible, but very difficult to tear or puncture. Most modern space suits are thin and form fitting, but bulkier, multi-layer, old suits are still in use in some places.</p>
+<p>Each suit comes with a reinforced glass bubble helmet that offers full peripheral vision, and a shoulder harness that mounts air tanks.</p>
+<div class="figure">
+<img src="/img/rnr/space-suit.png" /></p>
+</div>
+<p>Most suits also come with a utility belt with array of pouches and a number of attachment points for tools or weapons. The helmet has a built in radio unit, with a very short range. It can be sued to communicate with the ship while working outside of it but it is very low powered and maximum range is only about 5 miles. The radio uses a battery is carried in a pouch attached to the belt, and it can sustain 20 minutes of continuous use which is usually enough for most space walks. The suit also has a small speaker on the front of the collar that can be also used for close proximity communication.</p>
+<p>Each suit comes with a utility belt that has a pouch for the battery, a small length of elastic rope with few hooks and carbiners, a foldable multi-tool as well as patch kit that can be used to seal the suit if it&#8217;s torn, or fix cracks in the helmet.</p>
+<p>Some space suits may have special features: for example protective ceramic plating, better radio, bigger tanks. A better suit should be taken as an Extra for a character.</p>
+<h4 id="ray-gun">Ray Gun</h4>
+<p>Ray guns are the most commonly used type of fire-arms. The gun itself is a small pistol, which is useless without the large battery pack to which it is attached by a coiled cable. The battery pack usually comes with a shoulder strap, and worn at the hip. Some space suits come with a dedicated mount for the battery pack.</p>
+<p>When the user squeezes the trigger the gun starts emitting a laser beam until the trigger is released.</p>
+<div class="figure">
+<img src="/img/rnr/ray-gun.jpg" /></p>
+</div>
+<p>The battery pack has a few dials and switches which require at least Average Shoot skill to operate properly. The analog dials and switches allow the user to set beam intensity, power cap, automatic cut-off and etc. In game terms all of this is simplified to 3 settings:</p>
+<ul>
+<li>
+<p><strong>Low</strong> &#8211; is a non-lethal setting. The beam can be sustained for up to 3 seconds and it will burn through clothing and damage electronic equipment but will not melt through solid walls. A person shot by a ray gun on Low settings will suffer nasty 3rd degree burns but won&#8217;t suffer major internal damage. A standard space suit can usually protect from one or two direct hits. <em>Weapon Rating: -1</em></p>
+</li>
+<li>
+<p><strong>Medium</strong> &#8211; can be sustained for up to 2 seconds. Will burn a hole straight through flesh damaging internal organs. A person wearing standard space suit will suffer burns as if hit by a Low beam. It is possible to hit up to two people with the same beam if they are lined up, in which case the second person suffers damage as if hit by Low beam. Medium beam will damage electronics and machinery and will burn through wood, but won&#8217;t pierce metal or concrete walls. Space suits offer no protection, but ceramic armor does. <em>Weapon Rating: 1</em></p>
+</li>
+<li>
+<p><strong>High</strong> &#8211; can be sustained for up to 1 second. High beam will burn right through metal and concrete. If shot on board of a space ship, it will likely cause a hull breach and decompression. It is possible to hit multiple targets, or targets behind cover by simply shooting right through them. Ceramic Armor offers adequate protection. <em>Weapon Rating: 3</em></p>
+</li>
+</ul>
+<p>A battery pack has 60 units of power. Power usage depends on beam intensity:</p>
+<ul>
+<li>Low Beam: 1 unit per second (60 pin point shots, 30 two seconds sweeps, 20 three second sweeps)</li>
+<li>Medium Beam: 2 units per second (30 pin point shots, 15 two second sweeps)</li>
+<li>High Beam: 5 units per second (12 pin point shots)</li>
+</ul>
+<p>The gun will automatically cut-off when it starts to over-heat. Players with high Shoot skill may take Stunts that allow them over-heat the Ray Gun for longer sweeps, or additional effects.</p>
+<h4 id="portable-radio">Portable Radio</h4>
+<p>A battery powered, portable radio that can be used to communicate between a planet surface and a ship in orbit. The device weighs about 80lbs and has a battery that allows for about an hour of continuous use.</p>
+<div class="figure">
+<img src="/img/rnr/radio.png" /></p>
+</div>
+<p>The ship should have at least one of these available in the Cargo Bay. The radio can be tuned to a number of frequencies, but should be pre-set on a channel that will connect it with the Ship&#8217;s radio array. Anyone who can overcome a Medicore difficulty Engineering test can tune it to another ship&#8217;s channel.</p>
+<p></body>
+</div>

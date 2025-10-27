@@ -1,0 +1,102 @@
+
+                                <p>This week, we celebrated <a href="https://symfony.com/blog/remembering-ryan-weaver-teacher-core-team-member-friend">the life and legacy of Ryan Weaver</a>, a beloved teacher, contributor, and friend whose work at SymfonyCasts helped thousands discover the joy of Symfony. His kindness, humor, and dedication to lifting others up made our community stronger, and his spirit will continue to inspire everything we build. To honor Ryan, we encourage the community to keep learning, keep sharing, and <a href="https://symfony.com/blog/remembering-ryan-weaver-teacher-core-team-member-friend">support SymfonyCasts and his family</a>.</p>
+
+<h2>Symfony development highlights</h2>
+
+<p>This week, 28 pull requests were merged (26 in code and 2 in docs) and 19 issues were closed (15 in code and 4 in docs). Excluding merges, 18 authors made 10,219 additions and 5,782 deletions. See details for <a href="https://github.com/symfony/symfony/pulse">code</a> and <a href="https://github.com/symfony/symfony-docs/pulse">docs</a>.</p>
+
+<p><a href="https://github.com/symfony/symfony/commits/6.4">6.4 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/179b553559228b2cdf6e6078ff39fb8567e81d80">179b553</a>: &#91;FrameworkBundle&#93; don't collect CLI profiles if the profiler is disabled</li>
+<li><a href="https://github.com/symfony/symfony/commit/1fc42d8233534cdf86b405f565e88b60e851e384">1fc42d8</a>: &#91;HttpClient&#93; fix PHP 8.5 deprecation using str_increment()</li>
+<li><a href="https://github.com/symfony/symfony/commit/89c03604281f302de0d3e7c894112bc749f633da">89c0360</a>: &#91;Yaml&#93; fix scope resolution operator in flow mapping keys</li>
+<li><a href="https://github.com/symfony/symfony/commit/8a54b6e8b27ad57b5215d2608c345afd1346e617">8a54b6e</a>: &#91;Intl&#93; add metadata about currencies' validity dates</li>
+<li><a href="https://github.com/symfony/symfony/commit/ece4f3ed51722b245484ed14f49b353544629335">ece4f3e</a>: &#91;Security&#93; fix attribute-based chained user providers</li>
+</ul>
+
+<p><a href="https://github.com/symfony/symfony/commits/7.3">7.3 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/8ec0d38c60ea248c3197dab6b1b3c058ffe80eff">8ec0d38</a>: &#91;Serializer&#93; don't fallback to default serializer if tags specify a named one</li>
+<li><a href="https://github.com/symfony/symfony/commit/62eb0191bb2b4f61cc2d32b701742d4cfcdba3f2">62eb019</a>: &#91;TypeInfo&#93; prevent interfaces extending BackedEnum to be treated as BackedEnums</li>
+</ul>
+
+<p><a href="https://github.com/symfony/symfony/commits/7.4">7.4 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/3ab58a47ea72c72a6a087bdfe080021f50bd32a2">3ab58a4</a>: &#91;Routing&#93; make RoutingControllerPass and AttributeServicesLoader final</li>
+<li><a href="https://github.com/symfony/symfony/commit/b0f0bdf0b9946cb159c0941b34593277e23f2cc8">b0f0bdf</a>: &#91;DependencyInjection&#93; add routing.controller to the list of known DI tags</li>
+<li><a href="https://github.com/symfony/symfony/commit/c228caaafabeb327bcfaf55b224c72e6106f5d87">c228caa</a>: &#91;Runtime&#93; support runtime options as a string</li>
+<li><a href="https://github.com/symfony/symfony/commit/07273dffe4a7ac605f0ce979d5ac9ccddac34080">07273df</a>: &#91;ObjectMapper&#93; cache attributes in memory</li>
+</ul>
+
+<p><a href="https://github.com/symfony/symfony/commits/8.0">8.0 changelog</a>:</p>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/commit/cbcb165247cf90407dd99f2984c052e1dcd94ab4">cbcb165</a>: &#91;DependencyInjection&#93; throw when a service's id a non-existing FQCN</li>
+<li><a href="https://github.com/symfony/symfony/commit/bff881147c6e9dea6bfe7fac9e40cbb0427f5338">bff8811</a>: &#91;Validator&#93; require a top-level domain by default in the Url constraint</li>
+</ul>
+
+<h2>Newest issues and pull requests</h2>
+
+<ul>
+<li><a href="https://github.com/symfony/symfony/pull/61517">[FrameworkBundle][JsonPath] Add support for custom JsonPath functions</a></li>
+<li><a href="https://github.com/symfony/symfony/issues/61549">Allow TagAwareCacheInterface to get cached items by tag </a></li>
+<li><a href="https://github.com/symfony/symfony/pull/61515">[ObjectMapper] dump mapping code</a></li>
+<li><a href="https://github.com/symfony/symfony/pull/61528">[Validator] Allow using attributes to declare compile-time constraint metadata</a></li>
+<li><a href="https://github.com/symfony/symfony/pull/61545">[Validator] Add #[ExtendsValidationFor] to declare new constraints for a class</a></li>
+<li><a href="https://github.com/symfony/symfony/pull/61563">[Serializer] Add #[ExtendsSerializationFor] to declare new serialization attributes for a class</a></li>
+</ul>
+
+<h2>Symfony Jobs</h2>
+
+<p>These are some of the most recent Symfony job offers:</p>
+
+<ul>
+<li><strong>Lead Symfony Developer</strong> at A-Cube API<br>
+Full-time - €54,000 – €72,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/9c8eec5">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Spyrit<br>
+Full-time - €40,000 – €55,000 / year<br>
+Remote + part-time onsite (Versailles, France)<br>
+<a href="https://symfony.com/jobs/186e258">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Evergrowth<br>
+Full-time - €60,000 – €72,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/ee526ac">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Eneba<br>
+Full-time - €55,000 – €66,000 / year<br>
+Full remote<br>
+<a href="https://symfony.com/jobs/3bd882f">View details</a></li>
+<li><strong>Backend Symfony Developer</strong> at Citrus Systems<br>
+Full-time - €3,000 – €6,000 / month<br>
+Remote + part-time onsite (Belgrade, Serbia)<br>
+<a href="https://symfony.com/jobs/2315aa1">View details</a></li>
+</ul>
+
+<p>You can <a href="https://symfony.com/jobs">publish a Symfony job offer for free</a> on symfony.com.</p>
+
+<h2>They talked about us</h2>
+
+<ul>
+<li><a href="https://symfonystation.mobileatom.net/weekly-communiques/symfony-station-communique-22-august-2025">Symfony Station Communiqué - Stardate: ✦ 22 August 2025 ✦</a></li>
+<li><a href="https://dev.to/mattleads/crafting-your-own-ai-agent-with-symfony-a-11-minute-guide-86i">Crafting Your Own AI Agent with Symfony: A 11-Minute Guide</a></li>
+<li><a href="https://dev.to/tbeaumont79/implement-multi-tenant-architecture-in-symfony-4l1l">Implement Multi Tenant Architecture in Symfony</a></li>
+<li><a href="https://dev.to/mattleads/turbocharging-ai-agents-with-symfonys-async-approach-a-deep-dive-33d7">Turbocharging AI Agents with Symfony’s Async Approach: A Deep Dive</a></li>
+<li><a href="https://jolicode.com/blog/symfony-ai-simplifier-lanalyse-de-similarites-de-textes-et-linteraction-avec-vos-llms-favoris">Symfony AI : simplifier l’analyse de similarités de textes et l’interaction avec vos LLMs favoris</a></li>
+</ul>
+
+<h2>Call to Action</h2>
+
+<ul>
+<li>Follow Symfony <a href="https://x.com/symfony">on X</a>, <a href="https://mastodon.social/@symfony">on Mastodon</a>, <a href="https://bsky.app/profile/symfony.com">on Bluesky</a> and <a href="https://www.threads.net/@symfony">on Threads</a> and share this article.</li>
+<li><a href="https://feeds.feedburner.com/symfony/blog">Subscribe to the Symfony blog RSS</a> and never miss a Symfony story again.</li>
+</ul>
+
+                <hr style="margin-bottom: 5px" />
+                <div style="font-size: 90%">
+                    <a href="https://symfony.com/sponsor">Sponsor</a> the Symfony project.
+                </div>
+            

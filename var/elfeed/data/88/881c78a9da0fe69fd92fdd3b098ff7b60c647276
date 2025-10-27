@@ -1,0 +1,11 @@
+<p>As a rule, if a package is shipped with a Debian release, users can
+count on it being available, and updated, for the entire
+life of the release. If package <em>foo</em> is included in the stable
+<span class="nobreak">release&mdash;currently</span> Debian&#160;13
+<span class="nobreak">("trixie")&mdash;a</span> user can
+reasonably expect that it will continue to be available with security
+backports as long as that release is supported, though it may not be
+included in Debian&#160;14 ("forky"). However, it is likely that the
+<a href="https://guix.gnu.org/en/">Guix</a> package manager will soon
+be removed from the repositories for Debian&#160;13 and
+Debian&#160;12 ("bookworm", also called oldstable).</p>

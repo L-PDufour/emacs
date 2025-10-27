@@ -1,0 +1,20 @@
+<html><head></head><body><p>
+One day in the last few weeks, I had a need to set a couple of timers of different lengths. My phone was out of battery, so I pulled out ol' reliable (typing "5 minute timer" into DuckDuckGo). Just as soon as it had started running, I thought "wow, it seems dumb to open a whole new browser tab for a timer". Then I thought that surely I'm not the first Emacs user to need a timer, and that something must exist here already.
+</p>
+
+<p>
+Obscured by search results of Emacs Lisp and <code>org-mode</code> timers, I came upon <a href="https://github.com/protesilaos/tmr">tmr</a>, from Prot. You might be surprised that it exceeded my expectations, purely just because of the tabulated view. It fits cleanly into my setup with the below snippet. I recommend you give it a try.
+</p>
+
+<div class="org-src-container">
+<pre>(<span class="org-keyword">use-package</span> tmr)
+
+(add-to-list 'display-buffer-alist
+           '(<span class="org-string">"\\\\*tmr-tabulated-view\\\\*"</span>
+             (display-buffer-in-side-window)
+             (side . top)
+             (slot . 4)
+             (window-height . 0.1)))
+</pre>
+</div>
+</body></html>

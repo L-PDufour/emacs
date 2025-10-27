@@ -1,0 +1,11 @@
+<p>
+Charles Choi is at it again. He has a new addition to his <a href="https://github.com/kickingvegas/casual">Casual suite</a>. This time it&rsquo;s for handling BibTeX files. As you probably know, BibTeX files are essentially plain text databases of bibliographic data. They&rsquo;re deeply integrated with LaTeX but are also supported by Emacs and Org mode.
+</p>
+<p>
+The problem is that, being a database, the BibTeX file has a schema that must be adhered to in order to ensure proper operation with LaTeX and Org mode. Emacs, of course, has a mode to handle all that but Choi finds it less than adequate. The commands are hard to discover and remember and Choi believes they are insufficiently opinionated in enforcing the BibTeX schema.
+</p>
+<p>
+His newest Casual app, <a href="http://yummymelon.com/devnull/announcing-casual-bibtex.html">Casual BibTeX</a>, aims to fix this in the same way that the other Casual apps have addressed their domains. The app provides a <a href="https://www.gnu.org/software/emacs/manual/html_mono/transient.html">Transient</a> menu that makes remembering the Emacs commands easy and also enforces the BibTeX schema with a forms based interface.
+</p>
+<p>
+If you find yourself routinely adding and editing BibTeX entries you should take a look at Choi&rsquo;s latest Casual app. Even more to the point, if you only occasionally deal with BibTeX files, you have even more reason to embrace Casual BibTeX because you probably won&rsquo;t remember the BibTeX mode commands or the format of the BibTeX schema.</p>

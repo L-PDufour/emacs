@@ -1,0 +1,139 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>As much as anyone else, I love and use <strong>MAGIT</strong>. It’s an incredibly
+powerful tool, and I’ve spent countless hours relying on it for my Git
+workflow. However, from time to time, I find myself trying to stick to
+Emacs internals and avoid relying on external packages. This is where
+my <code>emacs-solo</code> config comes in (you can find it at
+<a href="https://github.com/lionyxml/emacs-solo">https://github.com/lionyxml/emacs-solo</a>). The
+functions I’m sharing today are part of this config, hence the
+<code>emacs-solo/</code> prefix in their names.</p>
+<p>These functions are meant to be quick copy/paste snippets that anyone
+can tweak to suit their needs. They’re not complete, beautifully
+tailored packages but rather "quick tips and ideas" that I’ve found
+useful in my daily workflow. If you know a bit of Elisp, you can
+easily adapt them to your preferences.</p>
+<p>Here’s a quick overview of the keybindings and what each function
+does:</p>
+<ul>
+<li>
+<p><strong><code>C-x v R</code></strong> - Show Git reflog with ANSI colors and custom keybindings.</p>
+</li>
+<li>
+<p><strong><code>C-x v B</code></strong> - Browse the repository’s remote URL in the browser.</p>
+</li>
+<li>
+<p><strong><code>C-u C-x v B</code></strong> - Browse the repository’s remote URL and point to the current branch, file, and line.</p>
+</li>
+<li>
+<p><strong><code>C-x v =</code></strong> - Show the diff for the current file and jump to the hunk containing the current line.</p>
+</li>
+</ul>
+<p>Let’s dive into each function in detail!</p>
+<hr>
+<h2>1. <code>emacs-solo/vc-git-reflog</code> (<code>C-x v R</code>)</h2>
+<p>This function allows you to view the Git reflog in a new buffer with
+ANSI colors and custom keybindings. It’s a great way to quickly
+inspect the history of your Git repository.</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/vc-git-reflog</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Show git reflog in a new buffer with <span class="token argument">ANSI</span> colors and custom keybindings."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">root</span> <span class="token punctuation">(</span><span class="token car">vc-root-dir</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		 <span class="token punctuation">(</span><span class="token car">buffer</span> <span class="token punctuation">(</span><span class="token car">get-buffer-create</span> <span class="token string">"*vc-git-reflog*"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token car">with-current-buffer</span> buffer
+	  <span class="token punctuation">(</span><span class="token car">setq-local</span> vc-git-reflog-root root<span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">inhibit-read-only</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">erase-buffer</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">vc-git-command</span> buffer <span class="token boolean">nil</span> <span class="token boolean">nil</span>
+					  <span class="token string">"reflog"</span>
+					  <span class="token string">"--color=always"</span>
+					  <span class="token string">"--pretty=format:%C(yellow)%h%Creset %C(auto)%d%Creset %Cgreen%gd%Creset %s %Cblue(%cr)%Creset"</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">goto-char</span> <span class="token punctuation">(</span><span class="token car">point-min</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">ansi-color-apply-on-region</span> <span class="token punctuation">(</span><span class="token car">point-min</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">point-max</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+	<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">map</span> <span class="token punctuation">(</span><span class="token car">make-sparse-keymap</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">define-key</span> map <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"/"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'isearch-forward</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">define-key</span> map <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"p"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'previous-line</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">define-key</span> map <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"n"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'next-line</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token car">define-key</span> map <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"q"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'kill-buffer-and-window</span><span class="token punctuation">)</span>
+
+	  <span class="token punctuation">(</span><span class="token car">use-local-map</span> map<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> buffer-read-only <span class="token boolean">t</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> mode-name <span class="token string">"Git-Reflog"</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">setq</span> major-mode <span class="token quoted-symbol variable symbol">'special-mode</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token car">pop-to-buffer</span> buffer<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x v R"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">'emacs-solo/vc-git-reflog</span><span class="token punctuation">)</span>
+</code></pre></div>
+<hr>
+<h2>2. <code>emacs-solo/vc-browse-remote</code> (<code>C-x v B</code> and <code>C-u C-x v B</code>)</h2>
+<p>This function opens the repository’s remote URL in the browser. If
+<code>CURRENT-LINE</code> is non-nil, it points to the current branch, file, and
+line. Otherwise, it opens the repository’s main page.</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/vc-browse-remote</span> <span class="token punctuation">(</span><span class="token arguments"><span class="token other-marker-vars"><span class="token lisp-marker">&optional</span> <span class="token argument variable">current-line</span></span></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Open the repository's remote <span class="token argument">URL</span> in the browser.
+If <span class="token argument">CURRENT-LINE</span> is non-nil, point to the current branch, file, and line.
+Otherwise, open the repository's main page."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span> <span class="token string">"P"</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">remote-url</span> <span class="token punctuation">(</span><span class="token car">string-trim</span> <span class="token punctuation">(</span><span class="token car">vc-git--run-command-string</span> <span class="token boolean">nil</span> <span class="token string">"config"</span> <span class="token string">"--get"</span> <span class="token string">"remote.origin.url"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		 <span class="token punctuation">(</span><span class="token car">branch</span> <span class="token punctuation">(</span><span class="token car">string-trim</span> <span class="token punctuation">(</span><span class="token car">vc-git--run-command-string</span> <span class="token boolean">nil</span> <span class="token string">"rev-parse"</span> <span class="token string">"--abbrev-ref"</span> <span class="token string">"HEAD"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		 <span class="token punctuation">(</span><span class="token car">file</span> <span class="token punctuation">(</span><span class="token car">string-trim</span> <span class="token punctuation">(</span><span class="token car">file-relative-name</span> <span class="token punctuation">(</span><span class="token car">buffer-file-name</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token car">vc-root-dir</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		 <span class="token punctuation">(</span><span class="token car">line</span> <span class="token punctuation">(</span><span class="token car">line-number-at-pos</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Opening remote on browser: %s"</span> remote-url<span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">and</span> remote-url <span class="token punctuation">(</span><span class="token car">string-match</span> <span class="token string">"\\(?:git@\\|https://\\)\\([^:/]+\\)[:/]\\(.+?\\)\\(?:\\.git\\)?$"</span> remote-url<span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">host</span> <span class="token punctuation">(</span><span class="token car">match-string</span> <span class="token number">1</span> remote-url<span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">path</span> <span class="token punctuation">(</span><span class="token car">match-string</span> <span class="token number">2</span> remote-url<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		  <span class="token comment">;; Convert SSH URLs to HTTPS (e.g., git@github.com:user/repo.git -> https://github.com/user/repo)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token car">string-prefix-p</span> <span class="token string">"git@"</span> host<span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">setq</span> host <span class="token punctuation">(</span><span class="token car">replace-regexp-in-string</span> <span class="token string">"^git@"</span> <span class="token string">""</span> host<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		  <span class="token comment">;; Construct the appropriate URL based on CURRENT-LINE</span>
+		  <span class="token punctuation">(</span><span class="token car">browse-url</span>
+		   <span class="token punctuation">(</span><span class="token keyword">if</span> current-line
+			   <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"https://%s/%s/blob/%s/%s#L%d"</span> host path branch file line<span class="token punctuation">)</span>
+			 <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"https://%s/%s"</span> host path<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Could not determine repository URL"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x v B"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">'emacs-solo/vc-browse-remote</span><span class="token punctuation">)</span>
+
+</code></pre></div>
+<p>If you use the univeral argument <code>C-u</code> before <code>C-x v B</code> it browses the
+current line.</p>
+<hr>
+<h2>3. <code>emacs-solo/vc-diff-on-current-hunk</code> (<code>C-x v =</code>)</h2>
+<p>This function extends the default functionality, meaning it shows the
+diff for the current file, but also jumps to the hunk containing the current
+line. It’s a handy tool for reviewing changes on large files.</p>
+<div class="remark-highlight"><pre class="language-emacs-lisp"><code class="language-emacs-lisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">emacs-solo/vc-diff-on-current-hunk</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Show the diff for the current file and jump to the hunk containing the current line."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">current-line</span> <span class="token punctuation">(</span><span class="token car">line-number-at-pos</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Current line in file: %d"</span> current-line<span class="token punctuation">)</span>
+	<span class="token punctuation">(</span><span class="token car">vc-diff</span><span class="token punctuation">)</span> <span class="token comment">; Generate the diff buffer</span>
+	<span class="token punctuation">(</span><span class="token car">with-current-buffer</span> <span class="token string">"*vc-diff*"</span>
+	  <span class="token punctuation">(</span><span class="token car">goto-char</span> <span class="token punctuation">(</span><span class="token car">point-min</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">found-hunk</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token keyword">not</span> found-hunk<span class="token punctuation">)</span>
+					<span class="token punctuation">(</span><span class="token car">re-search-forward</span> <span class="token string">"^@@ -\\([0-9]+\\), *[0-9]+ \\+\\([0-9]+\\), *\\([0-9]+\\) @@"</span> <span class="token boolean">nil</span> <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">start-line</span> <span class="token punctuation">(</span><span class="token car">string-to-number</span> <span class="token punctuation">(</span><span class="token car">match-string</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				   <span class="token punctuation">(</span><span class="token car">line-count</span> <span class="token punctuation">(</span><span class="token car">string-to-number</span> <span class="token punctuation">(</span><span class="token car">match-string</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+				   <span class="token punctuation">(</span><span class="token car">end-line</span> <span class="token punctuation">(</span><span class="token car">+</span> start-line line-count<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Found hunk: %d to %d"</span> start-line end-line<span class="token punctuation">)</span>
+			<span class="token punctuation">(</span><span class="token keyword">when</span> <span class="token punctuation">(</span><span class="token keyword">and</span> <span class="token punctuation">(</span><span class="token car">>=</span> current-line start-line<span class="token punctuation">)</span>
+						 <span class="token punctuation">(</span><span class="token car">&#x3C;=</span> current-line end-line<span class="token punctuation">)</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Current line %d is within hunk range %d to %d"</span> current-line start-line end-line<span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token keyword">setq</span> found-hunk <span class="token boolean">t</span><span class="token punctuation">)</span>
+			  <span class="token punctuation">(</span><span class="token car">goto-char</span> <span class="token punctuation">(</span><span class="token car">match-beginning</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token punctuation">(</span><span class="token keyword">unless</span> found-hunk
+		  <span class="token punctuation">(</span><span class="token keyword">message</span> <span class="token string">"Current line %d is not within any hunk range."</span> current-line<span class="token punctuation">)</span>
+		  <span class="token punctuation">(</span><span class="token car">goto-char</span> <span class="token punctuation">(</span><span class="token car">point-min</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">(</span><span class="token car">global-set-key</span> <span class="token punctuation">(</span><span class="token car">kbd</span> <span class="token string">"C-x v ="</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">'emacs-solo/vc-diff-on-current-hunk</span><span class="token punctuation">)</span>
+</code></pre></div>
+<hr>
+<h2>Wrapping Up</h2>
+<p>These custom VC-focused Emacs functions have become essential tools in
+my Git workflow, and I hope they can be useful to others as
+well. Whether you’re inspecting the reflog, browsing remote
+repositories, or reviewing diffs, these functions are designed to make
+your workflow smoother and more efficient. Happy coding! 🚀</p>

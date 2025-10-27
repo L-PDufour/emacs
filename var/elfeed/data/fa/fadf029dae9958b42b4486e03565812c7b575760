@@ -1,0 +1,121 @@
+
+<p>I have a lot in the works for the this month's <a href="https://leanpub.com/logic/" target="_blank">Logic for Programmers</a> release. Among other things, I'm completely rewriting the chapter on Logic Programming Languages. </p>
+<p>I originally showcased the paradigm with puzzle solvers, like <a href="https://swish.swi-prolog.org/example/queens.pl" target="_blank">eight queens</a> or <a href="https://saksagan.ceng.metu.edu.tr/courses/ceng242/documents/prolog/jrfisher/2_1.html" target="_blank">four-coloring</a>. Lots of other demos do this too! It takes creativity and insight for humans to solve them, so a program doing it feels magical. But I'm trying to write a book about practical techniques and I want everything I talk about to be <em>useful</em>. So in v0.9 I'll be replacing these examples with a couple of new programs that might get people thinking that Prolog could help them in their day-to-day work.</p>
+<p>On the other hand, for a newsletter, showcasing a puzzle solver is pretty cool. And recently I stumbled into <a href="https://morepablo.com/2010/09/some-professor-layton-prolog.html" target="_blank">this post</a> by my friend <a href="https://morepablo.com/" target="_blank">Pablo Meier</a>, where he solves a videogame puzzle with Prolog:<sup id="fnref:path"><a class="footnote-ref" href="#fn:path">1</a></sup></p>
+<p><img alt="See description below" class="newsletter-image" src="https://assets.buttondown.email/images/a4ee8689-bbce-4dc9-8175-a1de3bd8f2db.png?w=960&amp;fit=max"/></p>
+<p>Summary for the text-only readers: We have a test with 10 true/false questions (denoted <code>a/b</code>) and four student attempts. Given the scores of the first three students, we have to figure out the fourth student's score.</p>
+<div class="codehilite"><pre><span></span><code>bbababbabb = 7
+baaababaaa = 5
+baaabbbaba = 3
+bbaaabbaaa = ???
+</code></pre></div>
+<p>You can see Pablo's solution <a href="https://morepablo.com/2010/09/some-professor-layton-prolog.html" target="_blank">here</a>, and try it in SWI-prolog <a href="https://swish.swi-prolog.org/p/Some%20Professor%20Layton%20Prolog.pl" target="_blank">here</a>. Pretty cool! But after way too long studying Prolog just to write this dang book chapter, I wanted to see if I could do it more elegantly than him. Code and puzzle spoilers to follow.</p>
+<p>(Normally here's where I'd link to a gentler introduction I wrote but I think this is my first time writing about Prolog online? Uh here's a <a href="https://www.hillelwayne.com/post/picat/" target="_blank">Picat intro</a> instead)</p>
+<h3>The Program</h3>
+<p>You can try this all online at <a href="https://swish.swi-prolog.org/p/" target="_blank">SWISH</a> or just jump to my final version <a href="https://swish.swi-prolog.org/p/layton_prolog_puzzle.pl" target="_blank">here</a>.</p>
+<div class="codehilite"><pre><span></span><code><span class="p">:-</span> <span class="nf">use_module</span><span class="p">(</span><span class="nf">library</span><span class="p">(</span><span class="s s-Atom">dif</span><span class="p">)).</span>    <span class="c1">% Sound inequality</span>
+<span class="p">:-</span> <span class="nf">use_module</span><span class="p">(</span><span class="nf">library</span><span class="p">(</span><span class="s s-Atom">clpfd</span><span class="p">)).</span>  <span class="c1">% Finite domain constraints</span>
+</code></pre></div>
+<p>First some imports. <code>dif</code> lets us write <code>dif(A, B)</code>, which is true if <code>A</code> and <code>B</code> are <em>not</em> equal. <code>clpfd</code> lets us write <code>A #= B + 1</code> to say "A is 1 more than B".<sup id="fnref:superior"><a class="footnote-ref" href="#fn:superior">2</a></sup></p>
+<p>We'll say both the student submission and the key will be lists, where each value is <code>a</code> or <code>b</code>. In Prolog, lowercase identifiers are <strong>atoms</strong> (like symbols in other languages) and identifiers that start with a capital are <strong>variables</strong>. Prolog finds values for variables that match equations (<strong>unification</strong>). The pattern matching is real real good.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">% ?- means query</span>
+<span class="s s-Atom">?-</span> <span class="nv">L</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">a</span><span class="p">,</span><span class="nv">B</span><span class="p">,</span><span class="s s-Atom">c</span><span class="p">],</span> <span class="p">[</span><span class="nv">Y</span><span class="p">|</span><span class="nv">X</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">|</span><span class="nv">L</span><span class="p">],</span> <span class="nv">B</span> <span class="o">+</span> <span class="mi">1</span> <span class="s s-Atom">#=</span> <span class="mf">7.</span>
+
+<span class="nv">B</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+<span class="nv">L</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s s-Atom">c</span><span class="p">],</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s s-Atom">c</span><span class="p">],</span>
+<span class="nv">Y</span> <span class="o">=</span> <span class="mi">1</span>
+</code></pre></div>
+<p>Next, we define <code>score/3</code><sup id="fnref:arity"><a class="footnote-ref" href="#fn:arity">3</a></sup> recursively. </p>
+<div class="codehilite"><pre><span></span><code><span class="c1">% The student's test score</span>
+<span class="c1">% score(student answers, answer key, score)</span>
+<span class="nf">score</span><span class="p">([],</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">).</span>
+<span class="nf">score</span><span class="p">([</span><span class="nv">A</span><span class="p">|</span><span class="nv">As</span><span class="p">],</span> <span class="p">[</span><span class="nv">A</span><span class="p">|</span><span class="nv">Ks</span><span class="p">],</span> <span class="nv">N</span><span class="p">)</span> <span class="p">:-</span>
+   <span class="nv">N</span> <span class="s s-Atom">#=</span> <span class="nv">M</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">score</span><span class="p">(</span><span class="nv">As</span><span class="p">,</span> <span class="nv">Ks</span><span class="p">,</span> <span class="nv">M</span><span class="p">).</span>
+<span class="nf">score</span><span class="p">([</span><span class="nv">A</span><span class="p">|</span><span class="nv">As</span><span class="p">],</span> <span class="p">[</span><span class="nv">K</span><span class="p">|</span><span class="nv">Ks</span><span class="p">],</span> <span class="nv">N</span><span class="p">)</span> <span class="p">:-</span> 
+    <span class="nf">dif</span><span class="p">(</span><span class="nv">A</span><span class="p">,</span> <span class="nv">K</span><span class="p">),</span> <span class="nf">score</span><span class="p">(</span><span class="nv">As</span><span class="p">,</span> <span class="nv">Ks</span><span class="p">,</span> <span class="nv">N</span><span class="p">).</span>
+</code></pre></div>
+<p>First key is the student's answers, second is the answer key, third is the final score. The base case is the empty test, which has score 0. Otherwise, we take the head values of each list and compare them. If they're the same, we add one to the score, otherwise we keep the same score. </p>
+<p>Notice we couldn't write <code>if x then y else z</code>, we instead used pattern matching to effectively express <code>(x &amp;&amp; y) || (!x &amp;&amp; z)</code>. Prolog does have a conditional operator, but it prevents backtracking so what's the point???</p>
+<p class="empty-line" style="height:16px; margin:0px !important;"></p>
+<h3>A quick break about bidirectionality</h3>
+<p>One of the coolest things about Prolog: all purely logical predicates are bidirectional. We can use <code>score</code> to check if our expected score is correct:</p>
+<div class="codehilite"><pre><span></span><code><span class="s s-Atom">?-</span> <span class="nf">score</span><span class="p">([</span><span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span> <span class="mi">2</span><span class="p">).</span>
+<span class="s s-Atom">true</span>
+</code></pre></div>
+<p>But we can also give it answers and a key and ask it for the score:</p>
+<div class="codehilite"><pre><span></span><code><span class="s s-Atom">?-</span> <span class="nf">score</span><span class="p">([</span><span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span> <span class="nv">X</span><span class="p">).</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="mi">2</span>
+</code></pre></div>
+<p><em>Or</em> we could give it a key and a score and ask "what test answers would have this score?"</p>
+<div class="codehilite"><pre><span></span><code><span class="s s-Atom">?-</span> <span class="nf">score</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span> <span class="mi">2</span><span class="p">).</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="k">_</span><span class="nv">A</span><span class="p">],</span>
+<span class="nf">dif</span><span class="p">(</span><span class="k">_</span><span class="nv">A</span><span class="p">,</span><span class="s s-Atom">b</span><span class="p">)</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="k">_</span><span class="nv">A</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span>
+<span class="nf">dif</span><span class="p">(</span><span class="k">_</span><span class="nv">A</span><span class="p">,</span><span class="s s-Atom">b</span><span class="p">)</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="p">[</span><span class="k">_</span><span class="nv">A</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span>
+<span class="nf">dif</span><span class="p">(</span><span class="k">_</span><span class="nv">A</span><span class="p">,</span><span class="s s-Atom">b</span><span class="p">)</span>
+</code></pre></div>
+<p>The different value is written <code>_A</code> because we never told Prolog that the array can <em>only</em> contain <code>a</code> and <code>b</code>. We'll fix this later.</p>
+<h3>Okay back to the program</h3>
+<p>Now that we have a way of computing scores, we want to find a possible answer key that matches all of our observations, ie gives everybody the correct scores.</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">key</span><span class="p">(</span><span class="nv">Key</span><span class="p">)</span> <span class="p">:-</span>
+    <span class="c1">% Figure it out</span>
+    <span class="nf">score</span><span class="p">([</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">],</span> <span class="nv">Key</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="nf">score</span><span class="p">([</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">],</span> <span class="nv">Key</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="nf">score</span><span class="p">([</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">],</span> <span class="nv">Key</span><span class="p">,</span> <span class="mi">3</span><span class="p">).</span>
+</code></pre></div>
+<p>So far we haven't explicitly said that the <code>Key</code> length matches the student answer lengths. This is implicitly verified by <code>score</code> (both lists need to be empty at the same time) but it's a good idea to explicitly add <code>length(Key, 10)</code> as a clause of <code>key/1</code>. We should also explicitly say that every element of <code>Key</code> is either <code>a</code> or <code>b</code>.<sup id="fnref:explicit"><a class="footnote-ref" href="#fn:explicit">4</a></sup> Now we <em>could</em> write a second predicate saying <code>Key</code> had the right 'type': </p>
+<div class="codehilite"><pre><span></span><code>keytype([]).
+keytype([K|Ks]) :- member(K, [a, b]), keytype(Ks).
+</code></pre></div>
+<p>But "generating lists that match a constraint" is a thing that comes up often enough that we don't want to write a separate predicate for each constraint! So after some digging, I found a more elegant solution: <code>maplist</code>. Let <code>L=[l1, l2]</code>. Then <code>maplist(p, L)</code> is equivalent to the clause <code>p(l1), p(l2)</code>. It also accepts partial predicates: <code>maplist(p(x), L)</code> is equivalent to <code>p(x, l1), p(x, l2)</code>. So we could write<sup id="fnref:yall"><a class="footnote-ref" href="#fn:yall">5</a></sup></p>
+<div class="codehilite"><pre><span></span><code><span class="nf">contains</span><span class="p">(</span><span class="nv">L</span><span class="p">,</span> <span class="nv">X</span><span class="p">)</span> <span class="p">:-</span> <span class="nf">member</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">L</span><span class="p">).</span>
+
+<span class="nf">key</span><span class="p">(</span><span class="nv">Key</span><span class="p">)</span> <span class="p">:-</span>
+    <span class="nf">length</span><span class="p">(</span><span class="nv">Key</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="nf">maplist</span><span class="p">(</span><span class="nf">contains</span><span class="p">([</span><span class="s s-Atom">a</span><span class="p">,</span><span class="s s-Atom">b</span><span class="p">]),</span> <span class="nv">L</span><span class="p">),</span>
+    <span class="c1">% the score stuff</span>
+</code></pre></div>
+<p>Now, let's query for the Key:</p>
+<div class="codehilite"><pre><span></span><code><span class="s s-Atom">?-</span> <span class="nf">key</span><span class="p">(</span><span class="nv">Key</span><span class="p">)</span>
+<span class="nv">Key</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">]</span>
+<span class="nv">Key</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">]</span>
+<span class="nv">Key</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">]</span>
+<span class="nv">Key</span> <span class="o">=</span> <span class="p">[</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">]</span>
+</code></pre></div>
+<p>So there are actually four <em>different</em> keys that all explain our data. Does this mean the puzzle is broken and has multiple different answers?</p>
+<h3>Nope</h3>
+<p>The puzzle wasn't to find out what the answer key was, the point was to find the fourth student's score. And if we query for it, we see all four solutions give him the same score:</p>
+<div class="codehilite"><pre><span></span><code><span class="s s-Atom">?-</span> <span class="nf">key</span><span class="p">(</span><span class="nv">Key</span><span class="p">),</span> <span class="nf">score</span><span class="p">([</span><span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">b</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">,</span> <span class="s s-Atom">a</span><span class="p">],</span> <span class="nv">Key</span><span class="p">,</span> <span class="nv">X</span><span class="p">).</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="nv">X</span> <span class="o">=</span> <span class="mi">6</span>
+</code></pre></div>
+<p>Huh! I really like it when puzzles look like they're broken, but every "alternate" solution still gives the same puzzle answer.</p>
+<p>Total program length: 15 lines of code, compared to the original's 80 lines. <em>Suck it, Pablo.</em></p>
+<p>(Incidentally, you can get all of the answer at once by writing <code>findall(X, (key(Key), score($answer-array, Key, X)), L).</code>) </p>
+<p class="empty-line" style="height:16px; margin:0px !important;"></p>
+<h3>I still don't like puzzles for teaching</h3>
+<p>The actual examples I'm using in <a href="https://leanpub.com/logic/" target="_blank">the book</a> are "analyzing a version control commit graph" and "planning a sequence of infrastructure changes", which are somewhat more likely to occur at work than needing to solve a puzzle. You'll see them in the next release!</p>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:path">
+<p>I found it because he wrote <a href="https://morepablo.com/2025/04/gamer-games-for-lite-gamers.html" target="_blank">Gamer Games for Lite Gamers</a> as a response to my <a href="https://www.hillelwayne.com/post/vidja-games/" target="_blank">Gamer Games for Non-Gamers</a>. <a class="footnote-backref" href="#fnref:path" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:superior">
+<p>These are better versions of the core Prolog expressions <code>\+ (A = B)</code> and <code>A is B + 1</code>, because they can <a href="https://eu.swi-prolog.org/pldoc/man?predicate=dif/2" target="_blank">defer unification</a>. <a class="footnote-backref" href="#fnref:superior" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+<li id="fn:arity">
+<p>Prolog-descendants have a convention of writing the arity of the function after its name, so <code>score/3</code> means "score has three parameters". I think they do this because you can overload predicates with multiple different arities. Also Joe Armstrong used Prolog for prototyping, so Erlang and Elixir follow the same convention. <a class="footnote-backref" href="#fnref:arity" title="Jump back to footnote 3 in the text">↩</a></p>
+</li>
+<li id="fn:explicit">
+<p>It <em>still</em> gets the right answers without this type restriction, but I had no idea it did until I checked for myself. Probably better not to rely on this! <a class="footnote-backref" href="#fnref:explicit" title="Jump back to footnote 4 in the text">↩</a></p>
+</li>
+<li id="fn:yall">
+<p>We could make this even more compact by using a lambda function. First import module <code>yall</code>, then write <code>maplist([X]&gt;&gt;member(X, [a,b]), Key)</code>. But (1) it's not a shorter program because you replace the extra definition with an extra module import, and (2) <code>yall</code> is SWI-Prolog specific and not an ISO-standard prolog module. Using <code>contains</code> is more portable. <a class="footnote-backref" href="#fnref:yall" title="Jump back to footnote 5 in the text">↩</a></p>
+</li>
+</ol>
+</div>

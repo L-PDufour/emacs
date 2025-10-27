@@ -1,0 +1,343 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Hey everyone! Following up on my last post about <a href="https://www.rahuljuliato.com/posts/react-workers">Web Workers with
+React</a>, I'm excited to dive
+into another powerful browser API: <strong>Service Workers</strong>.</p>
+<p>In this guide, we'll explore how Service Workers can make our React
+applications more resilient and engaging. We'll start with a basic online-only
+app and progressively enhance it with offline capabilities, background data
+synchronization, and real push notifications.</p>
+<p>The complete source code for each step is available in <a href="https://github.com/LionyxML/service-workers-react-talk">my GitHub
+repository</a>.</p>
+<h2>Part 1: The Problem - The App That Needs a Connection</h2>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-09.png&w=3840&q=75" alt="service-workers-react-demo-09"></p>
+<p>Let's start with a standard React application. It's a simple app that fetches a
+random joke from an API and displays it.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/01-react-no-sw/src/App.jsx</span>
+<span class="token keyword">function</span> <span class="token function"><span class="token maybe-class-name">App</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>quote<span class="token punctuation">,</span> setQuote<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">"Loading..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">useEffect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">"https://official-joke-api.appspot.com/random_joke"</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> r<span class="token punctuation">.</span><span class="token method function property-access">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">j</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token function">setQuote</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>j<span class="token operator">?.</span>setup<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> - </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>j<span class="token operator">?.</span>punchline<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token keyword control-flow">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token function">setQuote</span><span class="token punctuation">(</span><span class="token string">"❌ Error fetching quote."</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword control-flow">return</span> <span class="token punctuation">(</span>
+    <span class="token operator">&#x3C;</span><span class="token operator">></span>
+      <span class="token operator">&#x3C;</span>h1<span class="token operator">></span><span class="token maybe-class-name">App1</span> <span class="token operator">-</span> <span class="token maybe-class-name">Common</span> <span class="token maybe-class-name">React</span> <span class="token maybe-class-name">App</span><span class="token operator">&#x3C;</span><span class="token operator">/</span>h1<span class="token operator">></span>
+      <span class="token operator">&#x3C;</span>div className<span class="token operator">=</span><span class="token string">"card"</span><span class="token operator">></span>
+        <span class="token operator">&#x3C;</span>p<span class="token operator">></span><span class="token punctuation">{</span>quote<span class="token punctuation">}</span><span class="token operator">&#x3C;</span><span class="token operator">/</span>p<span class="token operator">></span>
+      <span class="token operator">&#x3C;</span><span class="token operator">/</span>div<span class="token operator">></span>
+      <span class="token operator">&#x3C;</span>button onClick<span class="token operator">=</span><span class="token punctuation">{</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token dom variable">window</span><span class="token punctuation">.</span><span class="token property-access">location</span><span class="token punctuation">.</span><span class="token method function property-access">reload</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token operator">></span><span class="token maybe-class-name">Reload</span> <span class="token maybe-class-name">Page</span><span class="token operator">&#x3C;</span><span class="token operator">/</span>button<span class="token operator">></span>
+    <span class="token operator">&#x3C;</span><span class="token operator">/</span><span class="token operator">></span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>A quick note: you might notice we're fetching data directly inside <code>useEffect</code>.
+For this guide, I've simplified some patterns to keep the focus squarely on the
+Service Worker implementations themselves, avoiding more complex state
+management or data-fetching abstractions. Now, back to business.</p>
+<p>This fetch works perfectly fine... as long as you're online. If you open your
+browser's DevTools, go to the "Network" tab, and simulate being offline, the
+app breaks completely upon reload. This is because it can't fetch its own
+assets or the joke from the API.</p>
+<p>Hello dinosaur friend:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-10.png&w=3840&q=75" alt="service-workers-react-demo-10"></p>
+<h2>Part 2: The Solution - A Manual Service Worker</h2>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-01.png&w=3840&q=75" alt="service-workers-react-demo-01"></p>
+<p>To solve the offline problem, we introduce a Service Worker. It acts as a proxy
+between our application and the network, allowing us to cache resources and
+serve them even when there's no internet connection.</p>
+<p>First, we need to register the Service Worker. We do this in our application's
+entry point.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/src/sw-register.js</span>
+<span class="token keyword module">export</span> <span class="token keyword">function</span> <span class="token function">registerSW</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span><span class="token string">"serviceWorker"</span> <span class="token keyword">in</span> <span class="token dom variable">navigator</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token dom variable">window</span><span class="token punctuation">.</span><span class="token method function property-access">addEventListener</span><span class="token punctuation">(</span><span class="token string">"load"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+      <span class="token dom variable">navigator</span><span class="token punctuation">.</span><span class="token property-access">serviceWorker</span>
+        <span class="token punctuation">.</span><span class="token method function property-access">register</span><span class="token punctuation">(</span><span class="token string">"/service-worker.js"</span><span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">reg</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token string">" 🟢 Registered SW:"</span><span class="token punctuation">,</span> reg<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token keyword control-flow">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">err</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">error</span><span class="token punctuation">(</span><span class="token string">" 🔴 Error registering SW:"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>Next, we define the Service Worker's behavior. In the <code>install</code> event, we cache
+our application's shell, the essential files needed for it to run. In the
+<code>activate</code> event, we clean up old caches.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/public/service-worker.js</span>
+<span class="token keyword">const</span> <span class="token constant">CACHE_NAME</span> <span class="token operator">=</span> <span class="token string">"app-cache-v1"</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token constant">URLS_TO_PRECACHE</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">"/"</span><span class="token punctuation">,</span> <span class="token string">"vite.svg"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+self<span class="token punctuation">.</span><span class="token method function property-access">addEventListener</span><span class="token punctuation">(</span><span class="token string">"install"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+  <span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token string">"🔧 [SW] install"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  event<span class="token punctuation">.</span><span class="token method function property-access">waitUntil</span><span class="token punctuation">(</span>
+    caches<span class="token punctuation">.</span><span class="token method function property-access">open</span><span class="token punctuation">(</span><span class="token constant">CACHE_NAME</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">cache</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> cache<span class="token punctuation">.</span><span class="token method function property-access">addAll</span><span class="token punctuation">(</span><span class="token constant">URLS_TO_PRECACHE</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  self<span class="token punctuation">.</span><span class="token method function property-access">skipWaiting</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+self<span class="token punctuation">.</span><span class="token method function property-access">addEventListener</span><span class="token punctuation">(</span><span class="token string">"activate"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+  <span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token string">"🔧 [SW] activate"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  event<span class="token punctuation">.</span><span class="token method function property-access">waitUntil</span><span class="token punctuation">(</span>
+    caches
+      <span class="token punctuation">.</span><span class="token method function property-access">keys</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">names</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span>
+        <span class="token known-class-name class-name">Promise</span><span class="token punctuation">.</span><span class="token method function property-access">all</span><span class="token punctuation">(</span>
+          names<span class="token punctuation">.</span><span class="token method function property-access">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">n</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> n <span class="token operator">!==</span> <span class="token constant">CACHE_NAME</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">n</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> caches<span class="token punctuation">.</span><span class="token method function property-access">delete</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  self<span class="token punctuation">.</span><span class="token property-access">clients</span><span class="token punctuation">.</span><span class="token method function property-access">claim</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<h3>❗Important! Be friends with Dev Tools, you'll need them a lot!</h3>
+<p>With Dev Tools, you can view the Service Worker's status, inspect the cache,
+and perform manual resets or overrides. When working with Service Workers,
+you'll often need to manually clear loaded services and caches. Also, when
+following the examples in this post, make sure to start with a clean cache and
+no registered workers before testing.</p>
+<p>Service Worker DevTools here:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-02.png&w=3840&q=75" alt="service-workers-react-demo-02"></p>
+<p>Cache DevTools here:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-03.png&w=3840&q=75" alt="service-workers-react-demo-03"></p>
+<h3>Now back to business</h3>
+<p>The real magic happens in the <code>fetch</code> event. Here, we intercept every network
+request and implement a "cache-first" strategy.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/public/service-worker.js</span>
+self<span class="token punctuation">.</span><span class="token method function property-access">addEventListener</span><span class="token punctuation">(</span><span class="token string">"fetch"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> req <span class="token operator">=</span> event<span class="token punctuation">.</span><span class="token property-access">request</span><span class="token punctuation">;</span>
+  event<span class="token punctuation">.</span><span class="token method function property-access">respondWith</span><span class="token punctuation">(</span>
+    caches<span class="token punctuation">.</span><span class="token method function property-access">match</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">cachedResp</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+      <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span>cachedResp<span class="token punctuation">)</span> <span class="token keyword control-flow">return</span> cachedResp<span class="token punctuation">;</span> <span class="token comment">// Return from cache if found</span>
+      <span class="token keyword control-flow">return</span> <span class="token function">fetch</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span> <span class="token comment">// Otherwise, fetch from network</span>
+        <span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">networkResp</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+          <span class="token comment">// If the request is for our own origin, cache the response</span>
+          <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span>
+            req<span class="token punctuation">.</span><span class="token property-access">method</span> <span class="token operator">===</span> <span class="token string">"GET"</span> <span class="token operator">&&</span>
+            networkResp <span class="token operator">&&</span>
+            networkResp<span class="token punctuation">.</span><span class="token property-access">status</span> <span class="token operator">===</span> <span class="token number">200</span> <span class="token operator">&&</span>
+            req<span class="token punctuation">.</span><span class="token property-access">url</span><span class="token punctuation">.</span><span class="token method function property-access">startsWith</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span><span class="token property-access">location</span><span class="token punctuation">.</span><span class="token property-access">origin</span><span class="token punctuation">)</span>
+          <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> copy <span class="token operator">=</span> networkResp<span class="token punctuation">.</span><span class="token method function property-access">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            caches<span class="token punctuation">.</span><span class="token method function property-access">open</span><span class="token punctuation">(</span><span class="token constant">CACHE_NAME</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">cache</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> cache<span class="token punctuation">.</span><span class="token method function property-access">put</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> copy<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token punctuation">}</span>
+          <span class="token keyword control-flow">return</span> networkResp<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token keyword control-flow">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+          <span class="token comment">// If network fails, provide a fallback</span>
+          <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span>req<span class="token punctuation">.</span><span class="token property-access">headers</span><span class="token punctuation">.</span><span class="token method function property-access">get</span><span class="token punctuation">(</span><span class="token string">"accept"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">includes</span><span class="token punctuation">(</span><span class="token string">"text/html"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword control-flow">return</span> caches<span class="token punctuation">.</span><span class="token method function property-access">match</span><span class="token punctuation">(</span><span class="token string">"/index.html"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>With this in place, our app now works offline! The app shell is served from the
+cache, and while the external API call might fail, the app itself remains
+functional.</p>
+<p>Try changing the network status and then refresh the page:
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-04.png&w=3840&q=75" alt="service-workers-react-demo-04"></p>
+<p>This should be our new result!
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-05.png&w=3840&q=75" alt="service-workers-react-demo-05"></p>
+<p>You might notice how everything is served from the Network tab:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-06.png&w=3840&q=75" alt="service-workers-react-demo-06"></p>
+<h2>Part 3: Going Further with Background Sync and Push</h2>
+<p>Service Workers unlock more than just offline caching.</p>
+<h3>Background Sync</h3>
+<p>What if a user tries to submit a form while offline? With Background Sync, we
+can defer the action until the connection is restored.</p>
+<p>In our app, we register a <code>sync</code> event:</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/src/App.jsx</span>
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">scheduleSendData</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span><span class="token string">"serviceWorker"</span> <span class="token keyword">in</span> <span class="token dom variable">navigator</span> <span class="token operator">&&</span> <span class="token string">"SyncManager"</span> <span class="token keyword">in</span> <span class="token dom variable">window</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> reg <span class="token operator">=</span> <span class="token keyword control-flow">await</span> <span class="token dom variable">navigator</span><span class="token punctuation">.</span><span class="token property-access">serviceWorker</span><span class="token punctuation">.</span><span class="token property-access">ready</span><span class="token punctuation">;</span>
+    <span class="token keyword control-flow">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword control-flow">await</span> reg<span class="token punctuation">.</span><span class="token property-access">sync</span><span class="token punctuation">.</span><span class="token method function property-access">register</span><span class="token punctuation">(</span><span class="token string">"send-form"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"Scheduled sending. Will be executed when back online."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword control-flow">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"Error scheduling: "</span> <span class="token operator">+</span> err<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>The Service Worker listens for this event and executes the task when the
+network is available.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/public/service-worker.js</span>
+self<span class="token punctuation">.</span><span class="token method function property-access">addEventListener</span><span class="token punctuation">(</span><span class="token string">"sync"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token property-access">tag</span> <span class="token operator">===</span> <span class="token string">"send-form"</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    event<span class="token punctuation">.</span><span class="token method function property-access">waitUntil</span><span class="token punctuation">(</span><span class="token function">sendPendingData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">sendPendingData</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword control-flow">return</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">"/api/save"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">method</span><span class="token operator">:</span> <span class="token string">"POST"</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">body</span><span class="token operator">:</span> <span class="token known-class-name class-name">JSON</span><span class="token punctuation">.</span><span class="token method function property-access">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"Example data!!!!"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">headers</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"Content-Type"</span><span class="token operator">:</span> <span class="token string">"application/json"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-08.png&w=3840&q=75" alt="service-workers-react-demo-08"></p>
+<h3>Push Notifications</h3>
+<p>Service Workers can also receive push notifications from a server, even when
+the app's tab is closed. First, the app must request permission.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/src/App.jsx</span>
+<span class="token keyword">function</span> <span class="token function">askPermission</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span><span class="token string">"Notification"</span> <span class="token keyword">in</span> <span class="token dom variable">window</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token maybe-class-name">Notification</span><span class="token punctuation">.</span><span class="token method function property-access">requestPermission</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">perm</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+      <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span>perm <span class="token operator">===</span> <span class="token string">"granted"</span><span class="token punctuation">)</span> <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"Notifications permission granted!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword control-flow">else</span> <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"Notifications permissions denied."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>Then, the Service Worker handles the <code>push</code> event to display the notification.</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/02-react-sw-manual/public/service-worker.js</span>
+self<span class="token punctuation">.</span><span class="token method function property-access">addEventListener</span><span class="token punctuation">(</span><span class="token string">"push"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> title <span class="token operator">=</span> <span class="token string">"Default title"</span><span class="token punctuation">;</span>
+  <span class="token keyword">let</span> body <span class="token operator">=</span> <span class="token string">"Hello from fake push"</span><span class="token punctuation">;</span>
+
+  <span class="token keyword control-flow">if</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token property-access">data</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword control-flow">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token known-class-name class-name">JSON</span><span class="token punctuation">.</span><span class="token method function property-access">parse</span><span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token property-access">data</span><span class="token punctuation">.</span><span class="token method function property-access">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      title <span class="token operator">=</span> parsed<span class="token punctuation">.</span><span class="token property-access">title</span> <span class="token operator">||</span> title<span class="token punctuation">;</span>
+      body <span class="token operator">=</span> parsed<span class="token punctuation">.</span><span class="token property-access">body</span> <span class="token operator">||</span> body<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword control-flow">catch</span> <span class="token punctuation">{</span>
+      body <span class="token operator">=</span> event<span class="token punctuation">.</span><span class="token property-access">data</span><span class="token punctuation">.</span><span class="token method function property-access">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">const</span> options <span class="token operator">=</span> <span class="token punctuation">{</span> body<span class="token punctuation">,</span> <span class="token literal-property property">icon</span><span class="token operator">:</span> <span class="token string">"/vite.svg"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  event<span class="token punctuation">.</span><span class="token method function property-access">waitUntil</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span><span class="token property-access">registration</span><span class="token punctuation">.</span><span class="token method function property-access">showNotification</span><span class="token punctuation">(</span>title<span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>You can now simulate a push event from the browser's DevTools:
+<img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-02.png&w=3840&q=75" alt="service-workers-react-demo-02"></p>
+<p>Note that not only you need permission you grant in your browser, but your OS
+should also grant permission. This means you might need to mess around giving
+your browser permission to send notifications before this step works.</p>
+<p>This means the showing behaviour is also controlled by your OS, there's no
+guarantee it will work the same across every browser/OS combination, implement
+your icons, or even show the full message. This is what I get on macOS in my
+machine:</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Freact-service-workers-07.png&w=3840&q=75" alt="service-workers-react-demo-07"></p>
+<h2>Part 4: Simplifying with Workbox</h2>
+<p>Writing a Service Worker from scratch can be verbose and error-prone.
+<strong>Workbox</strong>, a library from Google, simplifies this by providing
+production-ready strategies for caching and background tasks.</p>
+<p>Here's how the <code>fetch</code> logic looks with Workbox:</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/03-react-sw-workbox/public/sw.js</span>
+<span class="token comment">/* global workbox importScripts */</span>
+<span class="token function">importScripts</span><span class="token punctuation">(</span>
+  <span class="token string">"https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js"</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// SPA navigation route (NetworkFirst)</span>
+workbox<span class="token punctuation">.</span><span class="token property-access">routing</span><span class="token punctuation">.</span><span class="token method function property-access">registerRoute</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> request <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> request<span class="token punctuation">.</span><span class="token property-access">mode</span> <span class="token operator">===</span> <span class="token string">"navigate"</span><span class="token punctuation">,</span>
+  <span class="token keyword">new</span> <span class="token class-name">workbox<span class="token punctuation">.</span>strategies<span class="token punctuation">.</span>NetworkFirst</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">cacheName</span><span class="token operator">:</span> <span class="token string">"html-shell"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Jokes API: StaleWhileRevalidate</span>
+workbox<span class="token punctuation">.</span><span class="token property-access">routing</span><span class="token punctuation">.</span><span class="token method function property-access">registerRoute</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> url <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> url<span class="token punctuation">.</span><span class="token property-access">origin</span> <span class="token operator">===</span> <span class="token string">"https://official-joke-api.appspot.com"</span><span class="token punctuation">,</span>
+  <span class="token keyword">new</span> <span class="token class-name">workbox<span class="token punctuation">.</span>strategies<span class="token punctuation">.</span>StaleWhileRevalidate</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">cacheName</span><span class="token operator">:</span> <span class="token string">"api-jokes-cache"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Static assets: StaleWhileRevalidate</span>
+workbox<span class="token punctuation">.</span><span class="token property-access">routing</span><span class="token punctuation">.</span><span class="token method function property-access">registerRoute</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> request <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">[</span><span class="token string">"style"</span><span class="token punctuation">,</span> <span class="token string">"script"</span><span class="token punctuation">,</span> <span class="token string">"worker"</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token method function property-access">includes</span><span class="token punctuation">(</span>request<span class="token punctuation">.</span><span class="token property-access">destination</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token keyword">new</span> <span class="token class-name">workbox<span class="token punctuation">.</span>strategies<span class="token punctuation">.</span>StaleWhileRevalidate</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">cacheName</span><span class="token operator">:</span> <span class="token string">"static-resources"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Background Sync with a plugin</span>
+<span class="token keyword">const</span> bgSyncPlugin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">workbox<span class="token punctuation">.</span>backgroundSync<span class="token punctuation">.</span>BackgroundSyncPlugin</span><span class="token punctuation">(</span>
+  <span class="token string">"form-queue"</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+workbox<span class="token punctuation">.</span><span class="token property-access">routing</span><span class="token punctuation">.</span><span class="token method function property-access">registerRoute</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> url<span class="token punctuation">,</span> request <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> request<span class="token punctuation">.</span><span class="token property-access">method</span> <span class="token operator">===</span> <span class="token string">"POST"</span><span class="token punctuation">,</span>
+  <span class="token keyword">new</span> <span class="token class-name">workbox<span class="token punctuation">.</span>strategies<span class="token punctuation">.</span>NetworkOnly</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">plugins</span><span class="token operator">:</span> <span class="token punctuation">[</span>bgSyncPlugin<span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token string">"POST"</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Workbox makes the code much more declarative and less boilerplate, while
+providing robust, battle-tested caching strategies.</p>
+<h2>Part 5: Real Push Notifications with VAPID</h2>
+<p>To send real push notifications, our server needs to identify itself to the
+browser's push service. We use the VAPID protocol for this.</p>
+<p>The flow is:</p>
+<p>➖ The client requests a <code>PushSubscription</code> and sends it to our server.</p>
+<p>➖ The server stores this subscription.</p>
+<p>➖ The server uses the <code>web-push</code> library to send a message to the push
+service, which then delivers it to the correct Service Worker.</p>
+<p>Here's the client-side code to subscribe:</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/04-push-example/client/src/App.jsx</span>
+<span class="token keyword">const</span> <span class="token constant">PUBLIC_VAPID_KEY</span> <span class="token operator">=</span> <span class="token string">"same as server"</span><span class="token punctuation">;</span> <span class="token comment">// This should be your public VAPID key</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">subscribeUser</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> reg <span class="token operator">=</span> <span class="token keyword control-flow">await</span> <span class="token dom variable">navigator</span><span class="token punctuation">.</span><span class="token property-access">serviceWorker</span><span class="token punctuation">.</span><span class="token method function property-access">register</span><span class="token punctuation">(</span><span class="token string">"/sw-push.js"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> sub <span class="token operator">=</span> <span class="token keyword control-flow">await</span> reg<span class="token punctuation">.</span><span class="token property-access">pushManager</span><span class="token punctuation">.</span><span class="token method function property-access">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">userVisibleOnly</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">applicationServerKey</span><span class="token operator">:</span> <span class="token function">urlBase64ToUint8Array</span><span class="token punctuation">(</span><span class="token constant">PUBLIC_VAPID_KEY</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Send subscription to the server</span>
+  <span class="token keyword control-flow">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">"http://localhost:4000/subscribe"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">method</span><span class="token operator">:</span> <span class="token string">"POST"</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">body</span><span class="token operator">:</span> <span class="token known-class-name class-name">JSON</span><span class="token punctuation">.</span><span class="token method function property-access">stringify</span><span class="token punctuation">(</span>sub<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">headers</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"Content-Type"</span><span class="token operator">:</span> <span class="token string">"application/json"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>And the Node.js server that sends the push:</p>
+<div class="remark-highlight"><pre class="language-javascript"><code class="language-javascript"><span class="token comment">// service-workers-demos/04-push-example/server/server.js</span>
+<span class="token keyword">const</span> webpush <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"web-push"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// ... configure VAPID keys ...</span>
+
+<span class="token keyword">let</span> subscriptions <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+app<span class="token punctuation">.</span><span class="token method function property-access">post</span><span class="token punctuation">(</span><span class="token string">"/subscribe"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> sub <span class="token operator">=</span> req<span class="token punctuation">.</span><span class="token property-access">body</span><span class="token punctuation">;</span>
+  subscriptions<span class="token punctuation">.</span><span class="token method function property-access">push</span><span class="token punctuation">(</span>sub<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  res<span class="token punctuation">.</span><span class="token method function property-access">status</span><span class="token punctuation">(</span><span class="token number">201</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">ok</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Send a push to all subscribers</span>
+<span class="token keyword">function</span> <span class="token function">sendToAll</span><span class="token punctuation">(</span><span class="token parameter">payload</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  subscriptions<span class="token punctuation">.</span><span class="token method function property-access">forEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">sub</span><span class="token punctuation">)</span> <span class="token arrow operator">=></span> <span class="token punctuation">{</span>
+    webpush<span class="token punctuation">.</span><span class="token method function property-access">sendNotification</span><span class="token punctuation">(</span>sub<span class="token punctuation">,</span> <span class="token known-class-name class-name">JSON</span><span class="token punctuation">.</span><span class="token method function property-access">stringify</span><span class="token punctuation">(</span>payload<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword control-flow">catch</span><span class="token punctuation">(</span><span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token property-access">error</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
+<p>This setup provides a complete end-to-end push notification system.</p>
+<h2>Conclusion</h2>
+<p>Service Workers are a cornerstone of modern web development, enabling
+Progressive Web Apps (PWAs) that are reliable, fast, and engaging. We've seen
+how they can:</p>
+<p>➖ Provide a seamless <strong>offline experience</strong> by caching resources.</p>
+<p>➖ Defer actions until the network is available with <strong>Background Sync</strong>.</p>
+<p>➖ Re-engage users with <strong>Push Notifications</strong>.</p>
+<p>While manual implementation is possible, libraries like <strong>Workbox</strong> are highly
+recommended to simplify development and avoid common pitfalls.</p>
+<h2>A Quick Comparison: Web, Shared, and Service Workers</h2>
+<p>To recap, here's how the different types of workers compare:</p>
+<div class="remark-highlight"><pre class="language-markdown"><code class="language-markdown"><span class="token table"><span class="token table-header-row"><span class="token punctuation">|</span><span class="token table-header important"> Feature / Capability            </span><span class="token punctuation">|</span><span class="token table-header important"> Web Worker              </span><span class="token punctuation">|</span><span class="token table-header important"> Shared Worker                    </span><span class="token punctuation">|</span><span class="token table-header important"> Service Worker                               </span><span class="token punctuation">|</span>
+</span><span class="token table-line"><span class="token punctuation">|</span> <span class="token punctuation">-------------------------------</span> <span class="token punctuation">|</span> <span class="token punctuation">-----------------------</span> <span class="token punctuation">|</span> <span class="token punctuation">--------------------------------</span> <span class="token punctuation">|</span> <span class="token punctuation">--------------------------------------------</span> <span class="token punctuation">|</span>
+</span><span class="token table-data-rows"><span class="token punctuation">|</span><span class="token table-data"> Scope                           </span><span class="token punctuation">|</span><span class="token table-data"> Single page/tab         </span><span class="token punctuation">|</span><span class="token table-data"> Shared across tabs (same origin) </span><span class="token punctuation">|</span><span class="token table-data"> Global (site-wide, independent of tabs)      </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Shared across tabs              </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> Yes                              </span><span class="token punctuation">|</span><span class="token table-data"> Yes                                          </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Communication                   </span><span class="token punctuation">|</span><span class="token table-data"> <span class="token code-snippet code keyword">`postMessage`</span> (1:1)     </span><span class="token punctuation">|</span><span class="token table-data"> <span class="token code-snippet code keyword">`port.postMessage`</span> (many:1)      </span><span class="token punctuation">|</span><span class="token table-data"> <span class="token code-snippet code keyword">`postMessage`</span>, <span class="token code-snippet code keyword">`fetch`</span>, Push API, etc.       </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Persists after tab closes       </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> Yes (managed by browser)                     </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Use case                        </span><span class="token punctuation">|</span><span class="token table-data"> Offload CPU-heavy tasks </span><span class="token punctuation">|</span><span class="token table-data"> Coordinate logic across tabs     </span><span class="token punctuation">|</span><span class="token table-data"> Background sync, caching, push notifications </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> DOM access                      </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> No                                           </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Network interception            </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> Yes (<span class="token code-snippet code keyword">`fetch`</span> interception)                   </span><span class="token punctuation">|</span>
+<span class="token punctuation">|</span><span class="token table-data"> Requires secure context (HTTPS) </span><span class="token punctuation">|</span><span class="token table-data"> No                      </span><span class="token punctuation">|</span><span class="token table-data"> No                               </span><span class="token punctuation">|</span><span class="token table-data"> Yes (HTTPS required)                         </span><span class="token punctuation">|</span></span></span>
+</code></pre></div>
+<p>I hope this guide has been a helpful introduction to using Service Workers with
+React! Feel free to explore the <a href="https://github.com/LionyxML/service-workers-react-talk">code on
+GitHub</a> and experiment
+with these powerful features.</p>

@@ -1,0 +1,14 @@
+<p>
+Over at the OrgRoam subreddit, thephatmaster asks for <a href="https://www.reddit.com/r/OrgRoam/comments/1nv4qey/workflow_suggestions_for_pulling_together_writing/">some help in using org-roam to organize and write his research</a>. As of this writing, he hasn&rsquo;t gotten much response but there is a comment that recommends he take a look at <a href="https://github.com/nobiot/org-transclusion?tab=readme-ov-file">org-transclusion</a>. I hadn&rsquo;t heard of it so I took a look.
+</p>
+<p>
+The idea is that you can include content from another file in an org document by means of a link. It&rsquo;s sort of like a <code># INCLUDE:</code> but a bit more flexible. You can, for example, make changes in the destination file and have them reflected back to the source file.
+</p>
+<p>
+You can also specify which lines you want from the source file and have only those imported. There&rsquo;s also a nice integration with code blocks that the author, nobiot, talks about in <a href="https://www.youtube.com/watch?v=ueaPiA622wA">this video</a> (9 minutes, 45 seconds).
+</p>
+<p>
+This looks like a mature package that&rsquo;s been around for at least 4 years and is still be maintained with the last update 9 months ago. There&rsquo;s a <a href="https://nobiot.github.io/org-transclusion/">comprehensive manual</a> available online as well as an info file. The software is available from GNU ELPA and so is easy to install.
+</p>
+<p>
+This seems like a really good package that can help organize research and serve as a way of reusing research notes. Take a look at the <a href="https://github.com/nobiot/org-transclusion?tab=readme-ov-file">GitHub repository</a> for a list of ways you can use it.</p>

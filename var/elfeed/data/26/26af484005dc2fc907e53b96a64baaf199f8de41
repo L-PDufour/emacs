@@ -1,0 +1,36 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>As you might recall from my previous post, where I delved into the
+intricacies of launching Emacs "like a pro," I must confess that my
+muscle memory sometimes leads me down peculiar paths when I'm not in
+full "code development" mode, but rather tinkering with and
+configuring my operating system.</p>
+<p>You see, both <code>vim</code> and <code>emacs</code> have become ingrained in my muscle memory
+over the years. However, there are moments when I don't want to open
+up a quick configuration file like <code>.bashrc</code> or <code>.tmux.conf</code> and clutter
+my buffer list. Sometimes, all I need is a simple <code>open -> edit -> close</code> workflow without the worry of every single package being
+loaded, and more importantly, without the wait associated with it.</p>
+<p>With this in mind, I stumbled upon a nifty alias for streamlining the
+process while catering to muscle memory. I added the following line to
+my <code>.bashrc</code>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">emacs</span><span class="token operator">=</span><span class="token string">"emacs -Q -nw --eval <span title="\&#x22;" class="token entity">\"</span>(load-theme 'wombat t)<span title="\&#x22;" class="token entity">\"</span>"</span>
+</code></pre></div>
+<p>That's all there is to it. This alias launches Emacs with no
+additional configurations, enforces a terminal interface, and loads a
+sleek, default dark theme—perfect for those moments I just described.</p>
+<p>To further integrate this streamlined Emacs setup into your workflow,
+you can also consider setting the <code>$EDITOR</code> environment variable in your
+.bashrc to point to this customized Emacs alias. This way, you'll
+seamlessly use Emacs as your editor of choice across various
+command-line tools and utilities.</p>
+<p>In your <code>.bashrc</code>, you can add:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">EDITOR</span><span class="token operator">=</span><span class="token string">"emacs -Q -nw --eval <span title="\&#x22;" class="token entity">\"</span>(load-theme 'wombat t)<span title="\&#x22;" class="token entity">\"</span>"</span>
+</code></pre></div>
+<p>This ensures that whenever you invoke <code>$EDITOR</code>, you'll launch Emacs
+with the specified configuration, providing a consistent and efficient
+editing experience.</p>
+<p>With this approach, you can harness the power of Emacs for quick edits
+and configurations without the overhead of loading extensive
+configurations. It's a versatile addition to your toolkit, ensuring
+you're always equipped for both focused coding sessions and casual
+system tweaking. Happy editing!</p>

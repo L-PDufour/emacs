@@ -1,0 +1,54 @@
+
+                                <p><a href="https://github.com/symfony/symfony/pull/61554" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony 7.3.3</a> has just been released.</p>
+<p>Read the <a href="https://symfony.com/doc/current/setup/upgrade_major.html" class="reference external">Symfony upgrade guide</a> to learn more about upgrading Symfony
+and use the <a href="https://insight.symfony.com/" class="reference external">SymfonyInsight upgrade reports</a> to detect the code you will
+need to change in your project.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Want to be notified whenever a new Symfony release is published? Or when a
+version is not maintained anymore? Or only when a security issue is fixed?
+Consider <a href="https://symfony.com/account/notifications" class="reference external">subscribing to the Symfony Roadmap Notifications</a>.</p>
+</div>
+<div class="section">
+<h2 id="changelog-since-symfony-7-3-2"><a class="headerlink" href="#changelog-since-symfony-7-3-2" title="Permalink to this headline">Changelog Since Symfony 7.3.2</a></h2>
+<ul>
+    <li>bug <a href="https://github.com/symfony/symfony/pull/61543" class="reference external" rel="external noopener noreferrer" target="_blank">#61543</a> [TypeInfo] Prevent interfaces extending BackedEnum to be treated as BackedEnums (@ettoredn)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61520" class="reference external" rel="external noopener noreferrer" target="_blank">#61520</a> [Yaml] Fix scope resolution operator in flow mapping keys (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61534" class="reference external" rel="external noopener noreferrer" target="_blank">#61534</a> [HttpClient] Fix PHP 8.5 deprecation using str_increment() (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61529" class="reference external" rel="external noopener noreferrer" target="_blank">#61529</a> [FrameworkBundle] Don’t collect CLI profiles if the profiler is disabled (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61526" class="reference external" rel="external noopener noreferrer" target="_blank">#61526</a> [Serializer] Don't fallback to default serializer if tags specify a named one (@HypeMC)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/60211" class="reference external" rel="external noopener noreferrer" target="_blank">#60211</a> [Messenger] Fix Oracle errors 'ORA-00955: Name is already used by an existing object' with Doctrine transport (@atgitwk)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61033" class="reference external" rel="external noopener noreferrer" target="_blank">#61033</a> [Console] Restore SHELL_VERBOSITY after a command is ran (@lyrixx)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61501" class="reference external" rel="external noopener noreferrer" target="_blank">#61501</a> [Console] Fix testing multiline question (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61503" class="reference external" rel="external noopener noreferrer" target="_blank">#61503</a> [String] Fix nodes singular (@ruudk)</li>
+<li>feature <a href="https://github.com/symfony/symfony/pull/61486" class="reference external" rel="external noopener noreferrer" target="_blank">#61486</a> [Security] Ignore target route when exiting impersonation (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61459" class="reference external" rel="external noopener noreferrer" target="_blank">#61459</a> [String] Fix issues singular (@ruudk)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61426" class="reference external" rel="external noopener noreferrer" target="_blank">#61426</a> [Intl] Take timezoneTypes’ ianaMap into account (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61422" class="reference external" rel="external noopener noreferrer" target="_blank">#61422</a> [WebProfilerBundle] Hide WDT clearer when it is hidden (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61381" class="reference external" rel="external noopener noreferrer" target="_blank">#61381</a> [HttpKernel] #[MapUploadedFile] throws http exception on empty files array if argument not nullable nor has default value (@hwawshy)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61453" class="reference external" rel="external noopener noreferrer" target="_blank">#61453</a> [VarExporter] Fix serializing classes with __serialize() returning unprefixed private properties (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61447" class="reference external" rel="external noopener noreferrer" target="_blank">#61447</a> [String] specific fix to avoid 'outag' when inflecting 'outages' (@PhilETaylor)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61115" class="reference external" rel="external noopener noreferrer" target="_blank">#61115</a> [FrameworkBundle] Make <a href="cache:warmup" class="reference internal">cache:warmup</a> warm up read-only caches (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61411" class="reference external" rel="external noopener noreferrer" target="_blank">#61411</a> [DependencyInjection] Don’t autowire excluded services (@MatTheCat)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61401" class="reference external" rel="external noopener noreferrer" target="_blank">#61401</a> [Process] Enhance hasSystemCallBeenInterrupted function for non-english locale (@christianseel)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61405" class="reference external" rel="external noopener noreferrer" target="_blank">#61405</a>  Remove calls to no-op functions, deprecated in PHP 8.5 (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61402" class="reference external" rel="external noopener noreferrer" target="_blank">#61402</a>  Remove calls to deprecated methods of SplObjectStorage (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61375" class="reference external" rel="external noopener noreferrer" target="_blank">#61375</a> [TypeInfo] Fix converting list to string (@ruudk)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61310" class="reference external" rel="external noopener noreferrer" target="_blank">#61310</a> [ObjectMapper] read source metadata before transform (@soyuka, @rvanlaak)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61355" class="reference external" rel="external noopener noreferrer" target="_blank">#61355</a> [WebProfilerBundle] Fix toolbar not rendering after replacing it (@aleho)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/58547" class="reference external" rel="external noopener noreferrer" target="_blank">#58547</a> [HtmlSanitizer] Fix force_attributes not replacing existing attribute in initial data (@tgalopin)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61335" class="reference external" rel="external noopener noreferrer" target="_blank">#61335</a> [Mailer] [Resend] Add friendly name in the to field (@antalaron)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61351" class="reference external" rel="external noopener noreferrer" target="_blank">#61351</a> [VarDumper] Fix dumping objects from the DOM extension (@nicolas-grekas)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61291" class="reference external" rel="external noopener noreferrer" target="_blank">#61291</a> [Messenger] Remove fix NoAutoAckStamp handling in Worker::flush() (@wazum)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61307" class="reference external" rel="external noopener noreferrer" target="_blank">#61307</a> [Scheduler] Fix scheduler.task tag arguments optionality (Jan Pintr)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61304" class="reference external" rel="external noopener noreferrer" target="_blank">#61304</a> [PhpUnitBridge] Call Reflection*::setAccessible() only for PHP &lt; 8.1 (@W0rma)</li>
+<li>bug <a href="https://github.com/symfony/symfony/pull/61319" class="reference external" rel="external noopener noreferrer" target="_blank">#61319</a> [Console] [Table] Don't split grapheme clusters (@schlndh)</li>
+</ul>
+</div>
+                <hr style="margin-bottom: 5px" />
+                <div style="font-size: 90%">
+                    <a href="https://symfony.com/sponsor">Sponsor</a> the Symfony project.
+                </div>
+            

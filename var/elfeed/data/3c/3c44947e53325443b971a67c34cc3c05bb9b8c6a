@@ -1,0 +1,14 @@
+<p>
+Over at the Emacs subreddit, emacff wants to know how he can eliminate Emacs &ldquo;bloat&rdquo;. It&rsquo;s a harmless question and if it&rsquo;s purpose was trolling, it largely failed as emacff received reasonable answers to his question. Still, it&rsquo;s annoying. We see this sort of question all the time. Someone is in a tizzy because Emacs includes the <code>doctor</code> or <code>tetris</code> commands or something else the complainer doesn&rsquo;t see the point of.
+</p>
+<p>
+There are two answers to these complaints. The general answer is that Emacs is best thought of as a modern day Lisp Machine so of course it has functions not related to editing just as the original Lisp Machines did. The editor is just one function of many.
+</p>
+<p>
+The specific answers is that these functions—and, indeed, many others—use virtually no resources except for a tiny bit of disk space. That&rsquo;s because many Emacs functions aren&rsquo;t loaded until they&rsquo;re called so the only resources they&rsquo;re using is the disk space that holds their code. On a modern computer that&rsquo;s literally in the noise as far as disk space is concerned.
+</p>
+<p>
+Emacs users are famous for spending a huge number of cycles fiddling with their editor configuration and I suppose worrying about removing unwanted functionality is another example of that. Except users tweak their configuration to improve their workflow. Eliminating <code>tetris</code> from your Emacs build doesn&rsquo;t improve anything. It just wastes your time. To my mind, it&rsquo;s like complaining about some application your OS provides but that you don&rsquo;t use. Sure, you can get rid of it. Until the next OS update. Similarly with Emacs. All you&rsquo;re doing is introducing a reoccurring task to be performed every time you update your editor.
+</p>
+<p>
+It is, of course, possible to do what emacff wants but it&rsquo;s a <i>lot</i> of work and requires technical skill that many users—especially those who ask questions like this—are unlikely to have.</p>

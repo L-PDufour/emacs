@@ -1,0 +1,115 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <h2>Emacs-Kick: A Neovim User’s Friendly Start to Emacs</h2>
+<p><img src="https://raw.githubusercontent.com/LionyxML/emacs-kick/refs/heads/master/doc/demo01.png" alt="demo"></p>
+<p>-- Get it on Github: <a href="https://github.com/LionyxML/emacs-kick/">https://github.com/LionyxML/emacs-kick/</a></p>
+<h3>Introduction</h3>
+<p>As an Emacs enthusiast who has also spent significant time with Neovim,
+I wanted to create something that would bridge the gap between these two
+powerful tools. After exploring both ecosystems, I felt there was a need
+for a configuration that would allow Vim/Neovim users to get acquainted with
+Emacs without feeling overwhelmed.</p>
+<p>Enter <strong>Emacs-Kick</strong>—a lightweight, minimal configuration for Emacs
+that caters specifically to Vim/Neovim users who want to experiment with
+Emacs without completely committing to a new workflow.</p>
+<h3>The Inspiration: Kickstart for Neovim</h3>
+<p>Neovim has its own lightweight configuration starter kit,
+<strong>kickstart.nvim</strong>, which is incredibly popular. It offers a quick and
+easy way to get started with Neovim, providing users a minimal yet powerful
+setup to build upon.</p>
+<p><strong>Emacs-Kick</strong> takes a similar approach but for Emacs users. It aims to
+provide the essentials for Vim/Neovim users who want to try out Emacs
+without needing to dive deep into complex configurations like Doom Emacs or
+Spacemacs.</p>
+<h3>What Makes Emacs-Kick Special?</h3>
+<p>There are plenty of starter configurations out there, but <strong>Emacs-Kick</strong>
+is designed with a specific audience in mind: people who are already comfortable
+with Vim/Neovim. Here are a few standout features:</p>
+<h4>1. Terminal-First Approach</h4>
+<p>For users who spend most of their time in the terminal, <strong>Emacs-Kick</strong> allows
+you to work within <strong>tmux</strong>, <strong>Zellij</strong>, and other terminal-based tools.
+There's no need to switch to a graphical interface, making it easy for
+terminal enthusiasts to integrate Emacs into their existing workflow.</p>
+<h4>2. Vim Bindings by Default</h4>
+<p>If you're coming from Vim/Neovim, you probably have years of muscle memory
+associated with their keybindings. <strong>Emacs-Kick</strong> respects that by setting
+up Vim keybindings by default, so you don’t have to spend time relearning
+how to navigate.</p>
+<h4>3. Pre-configured Tree-sitter and LSP</h4>
+<p>Modern development workflows demand advanced code parsing, syntax highlighting,
+and language server support. <strong>Emacs-Kick</strong> comes pre-configured with <strong>Tree-sitter</strong>
+and <strong>LSP</strong> to give you these features right out of the box, making it ideal
+for developers who want to hit the ground running.</p>
+<h4>4. Minimal Defaults with Room to Grow</h4>
+<p>While Emacs can be complex and overwhelming, <strong>Emacs-Kick</strong> keeps things simple.
+It provides a minimal configuration that’s easy to expand as you become more
+comfortable. You can start small and only add the features you need over time.</p>
+<h3>Installation and Setup</h3>
+<p>Here’s how you can get started with <strong>Emacs-Kick</strong>. The installation process
+is straightforward, and you'll be up and running in no time.</p>
+<h3>Step 1: Backup Your Existing Configuration</h3>
+<p>If you already have an existing Emacs configuration, it's a good idea to back
+it up before proceeding:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">mv</span> ~/.emacs.d ~/.emacs.d.backup
+</code></pre></div>
+<h3>Step 2: Clone the Repository</h3>
+<p>Clone the <strong>Emacs-Kick</strong> repository from GitHub:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">git</span> clone https://github.com/LionyxML/emacs-kick.git ~/.emacs.d
+</code></pre></div>
+<h3>Step 3: Run the Installation</h3>
+<p>After cloning, run the installation process by executing:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">emacs <span class="token parameter variable">-nw</span> <span class="token parameter variable">--eval</span><span class="token operator">=</span><span class="token string">"(ek/first-install)"</span>
+</code></pre></div>
+<p>Alternatively, you can run the provided script:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> ~/.emacs.d/ <span class="token operator">&&</span> ./ek-reinstall.sh
+</code></pre></div>
+<h4>Step 4: Set Terminal Mode by Default</h4>
+<p>If you want to always use Emacs in terminal mode, add the following alias to
+your <code>.bashrc</code> or <code>.zshrc</code>:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">emacs</span><span class="token operator">=</span><span class="token string">'emacs -nw'</span>
+</code></pre></div>
+<p>Then reload your shell configuration:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">source</span> ~/.bashrc  <span class="token comment"># for bash</span>
+<span class="token builtin class-name">source</span> ~/.zshrc   <span class="token comment"># for zsh</span>
+</code></pre></div>
+<h4>Step 5: Start Emacs</h4>
+<p>Now you can launch Emacs by simply typing:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">emacs
+</code></pre></div>
+<h3>Exploring Emacs with Familiar Keybindings</h3>
+<p><strong>Emacs-Kick</strong> is designed to be intuitive for users coming from Vim/Neovim.
+Here are some keybindings you’ll find useful:</p>
+<ul>
+<li><strong>Leader Key</strong>: The leader key is set to <code>SPC</code> (spacebar), similar to
+many Vim configurations.</li>
+<li><strong>File Navigation</strong>: Use <code>&#x3C;leader> s f</code> to find files and <code>&#x3C;leader> p f</code>
+to search within projects.</li>
+<li><strong>Search</strong>: <code>&#x3C;leader> s g</code> for grep, <code>&#x3C;leader> s r</code> for ripgrep.</li>
+</ul>
+<p>With <strong>which-key</strong> enabled, discovering more keybindings becomes easy
+as they are dynamically displayed as you type.</p>
+<h3>Why Should a Neovim User Try Emacs?</h3>
+<p>If you're already happy with Neovim, you may wonder why you should
+bother trying Emacs at all. Here’s why:</p>
+<ul>
+<li><strong>Org Mode</strong>: Emacs’ Org Mode is one of its most famous features—an incredible
+tool for note-taking, to-do lists, and project management.</li>
+<li><strong>Magit</strong>: A powerful Git interface that many users find faster and
+more intuitive than command-line Git.</li>
+<li><strong>Customization</strong>: The possibilities with Emacs are endless. You can build
+your own workflow or even turn Emacs into a programming IDE, personal
+organizer, or anything else you can imagine.</li>
+</ul>
+<p><strong>Emacs-Kick</strong> provides a gateway into these features without forcing
+you to abandon your familiar Neovim tools or habits.</p>
+<h3>Contributing to Emacs-Kick</h3>
+<p><strong>Emacs-Kick</strong> is a work in progress, and I welcome contributions from
+the community. While I have a particular vision for this project, I
+appreciate feedback and ideas on how to make it even better.</p>
+<p>If you'd like to contribute, feel free to open issues or submit pull
+requests on GitHub. Let’s continue to build a configuration that makes
+it easy for Vim/Neovim users to explore the power of Emacs.</p>
+<hr>
+<p><strong>Ready to give Emacs a try?</strong> Download <a href="https://github.com/LionyxML/emacs-kick/">Emacs-Kick</a>
+from GitHub and start experimenting with Emacs today, using the same
+keybindings and tools you’re already familiar with.</p>

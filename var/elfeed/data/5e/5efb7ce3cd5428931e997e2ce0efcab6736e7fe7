@@ -1,0 +1,199 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>In the world of programming, where every character counts and
+readability is paramount, the choice of font may seem like a minor
+detail. Yet, for those who spend countless hours staring at code
+editors, terminals, and documentation, the right font can make a
+significant difference in productivity and comfort. Enter Nerd Fonts –
+the unsung heroes of the programming world.</p>
+<p>In this blog post, we'll explore how this installer simplifies the
+process of selecting and installing Nerd Fonts, revolutionizing the
+way programmers customize their coding environments.</p>
+<h2>A quick word about the motivation for this little project</h2>
+<p>I was hanging out in the <code>#systemcrafters</code> IRC channel on
+<code>libera.chat</code> when <code>David Wilson</code> shared a cool idea: building slides
+from scratch using Guile Scheme. The slides looked pretty slick, and
+they were using the Iosevka font. Remembering my past fondness for
+Iosevka and similar fonts geared towards programming, I thought it
+might be time for a reunion.</p>
+<p>Curious about what fonts others were into, I asked in the channel. The
+folks there, whose names I unfortunately didn't jot down (my bad for
+not saving the chat), mentioned they were big fans of Hack, Source
+Code Pro, and, of course, Iosevka.</p>
+<p>Eager to get Iosevka back on my main machine, I started on a mission,
+only to hit a snag: there was no Debian 12 package available. After
+some thought and briefly considering creating my own Debian package,
+it hit me: Nerd Fonts! A collection of patched fonts I've relied on
+across all my apps.</p>
+<p>And so, this project was born — a handy solution for grabbing,
+installing, and showcasing a range of fonts with minimal hassle.</p>
+<h2>Step 1: Obtain the Nerd Fonts Installer</h2>
+<p>To begin, download the Nerd Fonts Installer script from its official
+<a href="https://github.com/LionyxML/nerd-installer">GitHub repository</a> or the
+provided <a href="https://codeberg.org/LionyxML/nerd-installer">mirror
+link</a>. This script
+serves as a gateway to effortlessly install the entire collection of
+Nerd Fonts onto your system.</p>
+<h2>Step 2: Review Dependencies</h2>
+<p>Before running the installer script, ensure that your system meets the
+necessary dependencies. These include:</p>
+<ul>
+<li><strong>bash</strong>: The Bourne Again Shell, required to execute the script.</li>
+<li><strong>wget</strong>: Used to download font files from the internet.</li>
+<li><strong>unzip</strong>: Used to extract downloaded zip files.</li>
+</ul>
+<p>You can install these dependencies using your system's package
+manager. For instance, on Debian-based systems like Ubuntu, execute
+the following commands:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token function">bash</span> <span class="token function">wget</span> <span class="token function">unzip</span>
+</code></pre></div>
+<p>Or on MacOS with the brew package manager:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">brew update
+brew <span class="token function">install</span> <span class="token function">bash</span> <span class="token function">wget</span> <span class="token function">unzip</span>
+</code></pre></div>
+<h2>Step 3: Customize Font Selection (Optional)</h2>
+<p>The Nerd Fonts Installer comes pre-configured with a list of fonts to
+install. However, if you wish to customize your font selection, you
+can do so by modifying the installer script. Simply comment out or
+remove the fonts you don't want to install and save the changes.</p>
+<p>Please note each font have its own LICENSE, read it on the official
+NerdFonts repository, and mark only those you agree with. Also,
+marking more fonts, will take more time and disk space, so, be
+mindful.</p>
+<h2>Step 4: Run the Installer</h2>
+<p>Execute the installer script by navigating to the directory where it's
+located and running the following command:</p>
+<div class="remark-highlight"><pre class="language-bash"><code class="language-bash">./nerd-installer.sh
+</code></pre></div>
+<p>The script will download and install the complete Nerd Fonts
+collection effortlessly. Sit back and relax as it automates the
+process for you.</p>
+<h2>Step 5: Verify Installation</h2>
+<p>Once the installation is complete, verify that the fonts have been
+successfully installed on your system. You can do this by checking
+your system's font directory or using font management tools provided
+by your operating system.</p>
+<h2>Step 6: Integrate with Your IDE or Text Editor</h2>
+<p>Now that you've got Nerd Fonts installed, it's time to seamlessly
+integrate them into your preferred Integrated Development Environment
+(IDE) or text editor. Most modern IDEs and text editors offer
+customizable font settings. Simply navigate to the settings menu,
+select your desired Nerd Font from the list of available fonts, and
+apply the changes.</p>
+<p>Here's an additional tip for GUI Emacs users: You can easily list all
+available fonts for Emacs using its own font as a reference line with
+a custom Elisp function:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token defun"><span class="token keyword">defun</span> <span class="token function">lemacs/all-available-fonts</span> <span class="token punctuation">(</span><span class="token arguments"></span><span class="token punctuation">)</span></span>
+  <span class="token string">"Create and visit a buffer containing a sorted list of available fonts."</span>
+  <span class="token punctuation">(</span><span class="token interactive keyword">interactive</span><span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">font-list</span> <span class="token punctuation">(</span><span class="token car">sort</span> <span class="token punctuation">(</span><span class="token car">x-list-fonts</span> <span class="token string">"*"</span><span class="token punctuation">)</span> <span class="token quoted-symbol variable symbol">#'string&#x3C;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token car">font-buffer</span> <span class="token punctuation">(</span><span class="token car">generate-new-buffer</span> <span class="token string">"*Font List*"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">(</span><span class="token car">with-current-buffer</span> font-buffer
+      <span class="token punctuation">(</span><span class="token car">dolist</span> <span class="token punctuation">(</span><span class="token car">font</span> font-list<span class="token punctuation">)</span>
+        <span class="token punctuation">(</span><span class="token keyword">let*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token car">font-family</span> <span class="token punctuation">(</span><span class="token car">nth</span> <span class="token number">2</span> <span class="token punctuation">(</span><span class="token car">split-string</span> font <span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token punctuation">(</span><span class="token car">insert</span> <span class="token punctuation">(</span><span class="token car">format</span> <span class="token string">"%s\n"</span> <span class="token punctuation">(</span><span class="token car">propertize</span> font <span class="token quoted-symbol variable symbol">'face</span> <span class="token punctuation">`(</span><span class="token lisp-property property">:family</span> <span class="token splice symbol variable">,font-family</span> <span class="token lisp-property property">:height</span> <span class="token number">110</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token car">goto-char</span> <span class="token punctuation">(</span><span class="token car">point-min</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">(</span><span class="token keyword">setq</span> buffer-read-only <span class="token boolean">t</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">(</span><span class="token car">pop-to-buffer</span> font-buffer<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>Evaluating and calling this function will generate a buffer displaying
+all available fonts, providing a visual reference for your font
+selection process.</p>
+<p><img src="https://rahuljuliato.com/_next/image?url=%2Fassets%2Fblog%2Fposts%2Fnerd-emacs-list.png&w=3840&q=75" alt="wrapped-lines"></p>
+<p>However, if you've ever found yourself on a font hunt before, you know
+that nothing beats actually seeing how a new font looks in your
+codebase. Some fonts offer more vertical space, others provide better
+horizontal alignment, and some may contrast better with your color
+scheme or monitor settings. Additionally, fonts may have varying
+heights, even if set to the same "height."</p>
+<p>So, experimentation is key.</p>
+<p>If you'd like to try font changes on the fly within Emacs, you can
+evaluate something like this:</p>
+<div class="remark-highlight"><pre class="language-elisp"><code class="language-elisp"><span class="token punctuation">(</span><span class="token car">set-face-attribute</span> <span class="token quoted-symbol variable symbol">'default</span> <span class="token boolean">nil</span> <span class="token lisp-property property">:family</span> <span class="token string">"JetBrainsMono Nerd Font"</span> <span class="token lisp-property property">:height</span> <span class="token number">100</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>Notice how the font name seems a bit odd? That's because patched Nerd
+Fonts have slightly altered names. Feeling confused? Check out the
+next section for a handy table detailing the names you'll need to use
+for your font settings.</p>
+<h2>Additional Resources</h2>
+<p>For more information about Nerd Fonts and to explore the available
+fonts, visit the official website: <a href="https://www.nerdfonts.com/">Nerd
+Fonts</a>.</p>
+<p>Below is a correlation table between the Nerd Font names and their
+corresponding Original Font Names and Repositories:</p>
+<div class="remark-highlight"><pre class="language-txt"><code class="language-txt">| Font Name                   | Original Font Name                     |
+|-----------------------------|----------------------------------------|
+| 0xProto Nerd Font           | 0xProto                                |
+| 3270 Nerd Font              | 3270                                   |
+| Agave Nerd Font             | Agave                                  |
+| AnonymicePro Nerd Font      | Anonymous Pro                          |
+| Arimo Nerd Font             | Arimo                                  |
+| AurulentSansMono Nerd Font  | Aurulent Sans Mono (Stephen G. Hartke) |
+| BigBlueTerminal Nerd Font   | BigBlueTerminal (VileR)                |
+| BitstromWera Nerd Font      | Vera Sans Mono (Bitstream Inc)         |
+| BlexMono Nerd Font          | IBM Plex Mono                          |
+| CaskaydiaCove Nerd Font     | Cascadia Code                          |
+| CaskaydiaMono Nerd Font     | Cascadia Mono                          |
+| CodeNewRoman Nerd Font      | Code New Roman (Sam Radian)            |
+| ComicShannsMono Nerd Font   | Comic Shanns Mono                      |
+| CommitMono Nerd Font        | Commit Mono                            |
+| Cousine Nerd Font           | Cousine                                |
+| D2Coding Nerd Font          | D2Coding                               |
+| DaddyTimeMono Nerd Font     | DaddyTimeMono                          |
+| DejaVuSansMono Nerd Font    | DejaVu                                 |
+| DroidSansMono Nerd Font     | Droid Sans Mono (Ascender Corp)        |
+| EnvyCodeR Nerd Font         | Envy Code R                            |
+| FantasqueSansMono Nerd Font | Fantasque Sans Mono                    |
+| FiraCode Nerd Font          | Fira Code                              |
+| FiraMono Nerd Font          | Fira Mono                              |
+| GeistMono Nerd Font         | Geist Mono                             |
+| GoMono Nerd Font            | Go-Mono                                |
+| Gohu Nerd Font              | Gohu TTF, Gohu                         |
+| Hack Nerd Font              | Hack                                   |
+| Hasklug Nerd Font           | Hasklig                                |
+| HeavyDataMono Nerd Font     | HeavyData (Vic Fieger)                 |
+| Hurmit Nerd Font            | Hermit                                 |
+| iM-Writing Nerd Font        | iA-Writer                              |
+| Inconsolata Nerd Font       | Inconsolata                            |
+| InconsolataGo Nerd Font     | InconsolataGo                          |
+| Inconsolata LGC Nerd Font   | Inconsolata LGC                        |
+| IntoneMono Nerd Font        | Intel One Mono                         |
+| Iosevka Nerd Font           | Iosevka                                |
+| IosevkaTerm Nerd Font       | Iosevka Term                           |
+| IosevkaTermSlab Nerd Font   | Iosevka Term Slab                      |
+| JetBrainsMono Nerd Font     | JetBrains Mono                         |
+| Lekton Nerd Font            | Lekton                                 |
+| Literation Nerd Font        | Liberation                             |
+| Lilex Nerd Font             | Lilex                                  |
+| MartianMono Nerd Font       | MartianMono                            |
+| Meslo Nerd Font             | Meslo                                  |
+| Monaspice Nerd Font         | Monaspace                              |
+| Monofur Nerd Font           | Monofur (Tobias B Koehler)             |
+| Monoid Nerd Font            | Monoid                                 |
+| Mononoki Nerd Font          | Mononoki                               |
+| M+ Nerd Font                | MPlus Fonts                            |
+| Noto Nerd Font              | Noto                                   |
+| OpenDyslexic Nerd Font      | OpenDyslexic                           |
+| Overpass Nerd Font          | Overpass                               |
+| ProFont Nerd Font           | ProFont                                |
+| ProggyClean Nerd Font       | ProggyClean (Tristan Grimmer)          |
+| RecMono Nerd Font           | Recursive Mono                         |
+| RobotoMono Nerd Font        | Roboto Mono                            |
+| SauceCodePro Nerd Font      | Source Code Pro                        |
+| ShureTechMono Nerd Font     | Share Tech Mono                        |
+| SpaceMono Nerd Font         | Space Mono                             |
+| Terminess Nerd Font         | Terminus TTF                           |
+| Tinos Nerd Font             | Tinos                                  |
+| Ubuntu Nerd Font            | Ubuntu Font                            |
+| UbuntuMono Nerd Font        | Ubuntu Font                            |
+| UbuntuSans Nerd Font        | Ubuntu Sans                            |
+| VictorMono Nerd Font        | Victor Mono                            |
+| ZedMono Nerd Font           | Zed Mono                               |</code></pre></div>
+<h2>Conclusion</h2>
+<p>Integrating Nerd Fonts into your development environment opens up a
+world of customization and aesthetic enhancement. Whether you're
+coding in your favorite IDE or text editor, experimenting with
+different fonts can greatly impact your coding experience.</p>
+<p>So, dive in, explore different fonts, and elevate your coding
+experience with Nerd Fonts today!</p>

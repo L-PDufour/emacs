@@ -1,0 +1,87 @@
+<p>I just published the latest stable release of <a href="https://protesilaos.com/emacs/modus-themes">the Modus
+themes</a>. The change log
+entry is reproduced further below. For any questions, you are welcome
+to <a href="https://protesilaos.com/contact/">contact me</a>. I will now work to
+apply these same changes to emacs.git, so please wait a little longer
+for the updates to trickle down to you.</p>
+
+<ul>
+  <li>Package name (GNU ELPA): <code class="language-plaintext highlighter-rouge">modus-themes</code> (also built into Emacs 28+)</li>
+  <li>Official manual: <a href="https://protesilaos.com/emacs/modus-themes">https://protesilaos.com/emacs/modus-themes</a></li>
+  <li>Change log: <a href="https://protesilaos.com/emacs/modus-themes-changelog">https://protesilaos.com/emacs/modus-themes-changelog</a></li>
+  <li>Colour palette: <a href="https://protesilaos.com/emacs/modus-themes-colors">https://protesilaos.com/emacs/modus-themes-colors</a></li>
+  <li>Sample pictures: <a href="https://protesilaos.com/emacs/modus-themes-pictures">https://protesilaos.com/emacs/modus-themes-pictures</a></li>
+  <li>Git repositories:
+    <ul>
+      <li>GitHub: <a href="https://github.com/protesilaos/modus-themes">https://github.com/protesilaos/modus-themes</a></li>
+      <li>GitLab: <a href="https://gitlab.com/protesilaos/modus-themes">https://gitlab.com/protesilaos/modus-themes</a></li>
+    </ul>
+  </li>
+  <li>Backronym: My Old Display Unexpectedly Sharpened … themes.</li>
+</ul>
+
+<hr />
+
+<h2>4.8.0 on 2025-06-11</h2>
+
+<p>This is a small release that corrects a mistake I made in the previous
+version. It also introduces some minor refinements.</p>
+
+<h3>Matching parentheses are easy to spot</h3>
+
+<p>In version <code class="language-plaintext highlighter-rouge">4.7.0</code>, I made the mistake of merging some stylistic
+tweaks to <code class="language-plaintext highlighter-rouge">show-paren-mode</code> that I was experimenting with. The idea
+was to get a feel for how the subtle colouration of matching
+delimiters affects the usability of the themes. In short, it is not a
+good default for our purposes (though users have the option to
+override the applicable colours, as explained in the Modus themes
+manual).</p>
+
+<p>Thanks to Morgan Willcock for reporting the unwanted change in issue
+139: <a href="https://github.com/protesilaos/modus-themes/issues/139">https://github.com/protesilaos/modus-themes/issues/139</a>.</p>
+
+<h3>The <code class="language-plaintext highlighter-rouge">bg-paren-match</code> of <code class="language-plaintext highlighter-rouge">modus-vivendi-tinted</code> is a bit greener</h3>
+
+<p>We go from <code class="language-plaintext highlighter-rouge">#5f789f</code> to <code class="language-plaintext highlighter-rouge">#4f7f9f</code>. The latter fits better with the
+rest of the theme.</p>
+
+<h3>Refined the “mail” semantic mappings of the tinted themes</h3>
+
+<p>This concerns <code class="language-plaintext highlighter-rouge">message.el</code> and anything building on top of it, like
+Gnus, Mu4e, and Notmuch. I made <code class="language-plaintext highlighter-rouge">modus-operandi-tinted</code> and
+<code class="language-plaintext highlighter-rouge">modus-vivendi-tinted</code> use two colours that are more in line with the
+established patterns of their respective theme. The changes are small,
+but contribute to a more consistent experience.</p>
+
+<h3>A new <code class="language-plaintext highlighter-rouge">property</code> semantic mapping is available</h3>
+
+<p>By default, it uses the same colour as the <code class="language-plaintext highlighter-rouge">variable</code>. Users who want
+to have more refined colouration in supported modes (typically
+involving tree-sitter), can change the relevant “palette overrides”
+user option we provide, such as <code class="language-plaintext highlighter-rouge">modus-themes-common-palette-overrides</code>
+or <code class="language-plaintext highlighter-rouge">modus-operandi-palette-overrides</code> and related.</p>
+
+<p>Thanks to Alexandr Semenov for requesting this in issue 141:
+<a href="https://github.com/protesilaos/modus-themes/issues/141">https://github.com/protesilaos/modus-themes/issues/141</a>.</p>
+
+<h3>My <code class="language-plaintext highlighter-rouge">tmr</code> package is now supported</h3>
+
+<p>Its faces were already consistent with the Modus themes, though now I
+cover them at the theme level to subject them to palette overrides.</p>
+
+<h3>The “ancient” Gnus messages are styled properly</h3>
+
+<p>Those are only ever seen if the user configures Gnus in a certain way
+and follows a specific workflow. They now get a subtle foreground
+value. This is in response to the issue 119 by sivaramn:
+<a href="https://github.com/protesilaos/modus-themes/issues/119">https://github.com/protesilaos/modus-themes/issues/119</a>.</p>
+
+<h3>The <code class="language-plaintext highlighter-rouge">modus-themes-rotate</code> command can now go backwards</h3>
+
+<p>When called with a prefix argument (<code class="language-plaintext highlighter-rouge">C-u</code> by default), this command
+will rotate the <code class="language-plaintext highlighter-rouge">modus-themes-to-rotate</code> from right to left.
+Otherwise, it goes from left to right.</p>
+
+<p>Thanks to Jacob S. Gordon for the contribution. It was sent as a
+patch as part of issue 143:
+<a href="https://github.com/protesilaos/modus-themes/issues/143">https://github.com/protesilaos/modus-themes/issues/143</a>.</p>

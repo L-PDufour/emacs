@@ -1,0 +1,31 @@
+<p>The <em>Emacs Writing Studio</em> (EWS) by Peter Prevos is a configuration
+for Emacs designed for writers, researchers, and scientists. It
+provides an integrated environment to express one’s thoughts and
+publish them in multiple formats. The book, which is produced using
+EWS, documents the setup, describes relevant methods or workflows, and
+explains how everything is pieced together. I contributed the foreword.</p>
+
+<p>This morning, I got the paperback version of the book. It is a thing
+of beauty!</p>
+
+<p><a href="https://protesilaos.com/assets/images/attachments/2025-08-06-ews-front-cover.jpg"><img alt="EWS front cover" src="https://protesilaos.com/assets/images/attachments/2025-08-06-ews-front-cover.jpg" /></a></p>
+
+<p><a href="https://protesilaos.com/assets/images/attachments/2025-08-06-ews-dedication.jpg"><img alt="EWS dedication" src="https://protesilaos.com/assets/images/attachments/2025-08-06-ews-dedication.jpg" /></a></p>
+
+<p>Thanks to Peter for working on this and for showing how Emacs can also
+be used as a professional publishing tool.</p>
+
+<h2>Emacs Writing Studio sources</h2>
+
+<p>Buy the book, check the source code, and watch the videos:</p>
+
+<ul>
+  <li>Payhip: <a href="https://payhip.com/b/alhIJ">https://payhip.com/b/alhIJ</a></li>
+  <li>e-readers: <a href="https://books2read.com/u/4NpgQ9?format=ebook">https://books2read.com/u/4NpgQ9?format=ebook</a></li>
+  <li>Paperback: <a href="https://books2read.com/u/4NpgQ9?format=print">https://books2read.com/u/4NpgQ9?format=print</a></li>
+  <li>LeanPub: <a href="https://leanpub.com/emacswritingstudio">https://leanpub.com/emacswritingstudio</a></li>
+  <li>GitHub: <a href="https://github.com/pprevos/emacs-writing-studio/">https://github.com/pprevos/emacs-writing-studio/</a></li>
+  <li>YouTube: <a href="https://www.youtube.com/playlist?list=PLGx4TR_jvOQDIT878vGDe1ElUlij3UEKI">https://www.youtube.com/playlist?list=PLGx4TR_jvOQDIT878vGDe1ElUlij3UEKI</a></li>
+</ul>
+
+<p>Also read the <em>Why Use Emacs</em> essay on Peter’s website: <a href="https://lucidmanager.org/productivity/why-use-emacs/">https://lucidmanager.org/productivity/why-use-emacs/</a>.</p>

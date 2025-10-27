@@ -1,0 +1,381 @@
+<html><head></head><body><p><em>Note: This article series was written by me, with LLMs helping to refine the style and structure.</em></p>
+<p>In <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part1-pain-points">Part 1</a> I described the pain points of working with multiple LLM sessions. <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part2-ergonomics">Part 2</a> covered the ergonomics layer that made individual sessions manageable.</p>
+<p>But ergonomics alone isn’t enough when you’re running 5-10 parallel Claude sessions. You need <strong>coordination</strong>, <strong>quality enforcement</strong>, and <strong>shared context</strong>. This article covers the higher-level abstractions that make LLM teams actually work.</p>
+<p><strong>Series Navigation:</strong> <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part2-ergonomics">← Part 2: Ergonomics</a> | <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part4-experiments">Part 4: Rapid Evolution →</a></p>
+<h2>
+  The Smoke Test Paradigm: Designing Software for Rapid Iteration
+  <a href="#the-smoke-test-paradigm-designing-software-for-rapid-iteration">
+    <i></i>
+  </a>
+</h2>
+<p>Here’s the key insight: <strong>software design principles that help human developers also help LLMs</strong>. The same things that trip up human coders—complex interfaces, tight coupling, unclear contracts—trip up LLMs too.</p>
+<p>When building software that LLMs will write and modify, the classic principles still apply:</p>
+<ul>
+<li><strong>Modular code</strong>: Small, well-defined components</li>
+<li><strong>Simple interfaces</strong>: Clear inputs and outputs</li>
+<li><strong>Loose coupling</strong>: Changes in one area don’t cascade</li>
+<li><strong>Fast feedback</strong>: Know immediately when something breaks</li>
+</ul>
+<p>The difference is velocity. LLMs can iterate 10x faster than humans—but only if the feedback loop is tight. That’s where <strong>smoke tests</strong> become critical.</p>
+<h3>
+  Why Smoke Tests Over Unit Tests?
+  <a href="#why-smoke-tests-over-unit-tests">
+    <i></i>
+  </a>
+</h3>
+<p>I tried comprehensive unit test suites. They worked, but the overhead was crushing:</p>
+<ul>
+<li>Writing tests took longer than writing features</li>
+<li>Tests became brittle as code evolved</li>
+<li>Mocking and fixtures added complexity</li>
+<li>False positives made me ignore failures</li>
+</ul>
+<p>The problem: unit tests are designed for human-paced development. When Claude can refactor an entire module in 30 seconds, waiting 5 minutes for a full test suite kills momentum.</p>
+<p>Instead, I adopted <strong>smoke tests</strong>: simple, end-to-end checks that verify the system works. Run in seconds. Clear pass/fail. No ambiguity.</p>
+<p>Example from my flashcards project (<code>test/smoke_test.sh</code>):</p>
+<div class="highlight"><pre><code class="language-bash"><span><span><span>#!/bin/bash
+</span></span></span><span><span><span></span><span># Smoke test: Does the basic workflow work?</span>
+</span></span><span><span>
+</span></span><span><span><span># Create a flashcard</span>
+</span></span><span><span>./flashcards create <span>\
+</span></span></span><span><span><span></span>    --question <span>"What is 2+2?"</span> <span>\
+</span></span></span><span><span><span></span>    --answer <span>"4"</span> <span>\
+</span></span></span><span><span><span></span>    --project <span>"math"</span>
+</span></span><span><span>
+</span></span><span><span><span># Get quiz items</span>
+</span></span><span><span>./flashcards quiz --limit <span>1</span> | grep <span>"What is 2+2?"</span>
+</span></span><span><span>
+</span></span><span><span><span># Review it</span>
+</span></span><span><span>./flashcards review &lt;id&gt; --confidence <span>5</span>
+</span></span><span><span>
+</span></span><span><span><span># Check it's in the list</span>
+</span></span><span><span>./flashcards list | grep <span>"What is 2+2?"</span>
+</span></span><span><span>
+</span></span><span><span><span>echo</span> <span>"✅ Smoke test passed!"</span>
+</span></span></code></pre></div><p>That’s it. No mocking. No fixtures. No complex assertions. Just: <strong>Does it work end-to-end?</strong></p>
+<h3>
+  The Make Test Convention
+  <a href="#the-make-test-convention">
+    <i></i>
+  </a>
+</h3>
+<p>Every project has a <code>Makefile</code> with a <code>test</code> target:</p>
+<div class="highlight"><pre><code class="language-makefile"><span><span><span>test</span><span>:</span>
+</span></span><span><span>	@echo <span>"Running smoke tests..."</span>
+</span></span><span><span>	@./test/smoke_test.sh
+</span></span><span><span>	@echo <span>"✅ All tests passed"</span>
+</span></span></code></pre></div><p>Claude knows this convention. After every code change, it automatically runs <code>make test</code>. If tests fail, Claude must fix them before continuing.</p>
+<p>This simple pattern has caught hundreds of regressions. Claude refactors a function? Tests catch it. Claude renames a variable? Tests catch it. Claude adds a feature? Tests verify it.</p>
+<h3>
+  Why This Works
+  <a href="#why-this-works">
+    <i></i>
+  </a>
+</h3>
+<p>Smoke tests have unique advantages for LLM workflows:</p>
+<ol>
+<li><strong>Fast</strong>: Run in seconds, not minutes</li>
+<li><strong>Clear failures</strong>: “Command failed” is unambiguous</li>
+<li><strong>Self-documenting</strong>: Reading the test shows how the system should work</li>
+<li><strong>Easy to maintain</strong>: When features change, tests are obvious to update</li>
+<li><strong>Catches real issues</strong>: Integration problems that unit tests miss</li>
+</ol>
+<p>The trade-off: you don’t get fine-grained coverage. But in my experience, that’s fine. I’d rather have 90% confidence in 5 seconds than 99% confidence after 5 minutes of test runs.</p>
+<h2>
+  Memento: Shared Context Between Sessions
+  <a href="#memento-shared-context-between-sessions">
+    <i></i>
+  </a>
+</h2>
+<p>The core challenge of parallel LLM sessions: they don’t know about each other.</p>
+<p>Session A refactors the authentication system. Session B adds a new feature that uses authentication. Session A’s changes break Session B’s code—but Session B has no idea until tests fail.</p>
+<p>I needed a shared knowledge base. Enter <strong>memento</strong>.</p>
+<h3>
+  What Is Memento?
+  <a href="#what-is-memento">
+    <i></i>
+  </a>
+</h3>
+<p>Memento is my note-taking system built on <a href="https://www.orgroam.com/">org-roam</a>, which implements the <a href="https://zettelkasten.de/introduction/">Zettelkasten method</a> for networked thought. I expose it to Claude via MCP (Model Context Protocol).</p>
+<p>Think of it as a shared brain for all Claude sessions—a personal knowledge graph where notes link to each other, concepts build on each other, and every LLM session can read and contribute to the collective knowledge.</p>
+<p><img src="https://blog.laurentcharignon.com/images/memento.png" alt="Memento note system showing interconnected knowledge graph"></p>
+<p>Key features:</p>
+<ul>
+<li><strong>Public notes</strong> tagged with <code>PUBLIC</code> are accessible via MCP</li>
+<li><strong>Searchable</strong> with full-text search</li>
+<li><strong>Structured</strong> with org-mode properties and tags</li>
+<li><strong>Version controlled</strong> in git</li>
+<li><strong>Persistent</strong> across sessions</li>
+</ul>
+<h3>
+  The Global Context Pattern
+  <a href="#the-global-context-pattern">
+    <i></i>
+  </a>
+</h3>
+<p>Every Claude session starts by reading the <code>claude-global-context</code> note:</p>
+<div class="highlight"><pre><code class="language-elisp"><span><span><span>;; Automatically loaded by Claude at session start</span>
+</span></span><span><span>(<span>mcp__memento__note_get</span> <span>:note_id</span> <span>"claude-global-context"</span>)
+</span></span></code></pre></div><p>This note contains:</p>
+<ul>
+<li>My coding preferences</li>
+<li>Project structure</li>
+<li>Common pitfalls</li>
+<li>Tools available (memento, MCP servers, custom scripts)</li>
+<li>Reminders (never access <code>~/.roam</code> directly, always use MCP)</li>
+</ul>
+<p>As I discover patterns, I add them to this note. Every future Claude session gets that knowledge automatically.</p>
+<p>Example from my global context:</p>
+<div class="highlight"><pre><code class="language-markdown"><span><span><span>## 🧪 Testing Approach:
+</span></span></span><span><span><span></span><span>-</span> Write tests for new features
+</span></span><span><span><span>-</span> Rely on smoke tests for projects (trigger with <span>`make test`</span>)
+</span></span><span><span><span>-</span> **Whenever all tests pass after a change, make a commit with a descriptive message**
+</span></span><span><span>
+</span></span><span><span><span>## 🔧 ELISP DEVELOPMENT WITH DOOMSCRIPT:
+</span></span></span><span><span><span></span>See the note tagged <span>`elisp`</span> for patterns and testing approaches
+</span></span></code></pre></div><h3>
+  Session-Specific Context
+  <a href="#session-specific-context">
+    <i></i>
+  </a>
+</h3>
+<p>For complex projects, I create dedicated notes:</p>
+<ul>
+<li><code>memento-clojure-patterns</code>: Clojure idioms and anti-patterns</li>
+<li><code>appdaemon-testing-guide</code>: How to test Home Assistant automations</li>
+<li><code>mcp-server-patterns</code>: How to build reliable MCP servers</li>
+</ul>
+<p>When Claude works on these projects, I explicitly reference the notes:</p>
+<pre><code>Read the note `mcp-server-patterns` and apply those patterns
+to this new server implementation.
+</code></pre><p>Claude reads the note, absorbs the context, and applies it. The next Claude session working on the same project does the same thing—they’re building on shared knowledge.</p>
+<h3>
+  Coordination Patterns (Experimental)
+  <a href="#coordination-patterns-experimental">
+    <i></i>
+  </a>
+</h3>
+<p>I’m experimenting with explicit coordination notes for parallel sessions:</p>
+<div class="highlight"><pre><code class="language-markdown"><span><span><span># working-on-memento-refactor
+</span></span></span><span><span><span></span>
+</span></span><span><span><span>## Current State
+</span></span></span><span><span><span></span><span>-</span> Session A: Refactoring CLI argument parsing (IN PROGRESS)
+</span></span><span><span><span>-</span> Session B: Adding new <span>`bulk-update`</span> command (WAITING)
+</span></span><span><span><span>-</span> Session C: Updating tests (COMPLETED)
+</span></span><span><span>
+</span></span><span><span><span>## Decisions Made
+</span></span></span><span><span><span></span><span>-</span> Use argparse instead of manual parsing (Session A, 2025-09-28)
+</span></span><span><span><span>-</span> All commands must support JSON output (Session B, 2025-09-27)
+</span></span><span><span>
+</span></span><span><span><span>## Upcoming Work
+</span></span></span><span><span><span></span><span>- [ ]</span> Migrate all commands to new arg structure
+</span></span><span><span><span>- [ ]</span> Add integration tests
+</span></span><span><span><span>- [ ]</span> Update documentation
+</span></span></code></pre></div><p>Each session reads this note before starting work. Session A updates its status when done. Session B sees that and can proceed safely.</p>
+<p>This is <strong>informal</strong> right now—I’m still exploring better patterns. Some ideas:</p>
+<ul>
+<li><strong>Barrier functionality</strong>: Session B blocks until Session A completes</li>
+<li><strong>Lock mechanism</strong>: Only one session can modify a file at once</li>
+<li><strong>Dependency tracking</strong>: Session C depends on Session A and Session B</li>
+</ul>
+<p>I’m considering building an MCP server specifically for project coordination. Something like:</p>
+<div class="highlight"><pre><code class="language-python"><span><span><span># Hypothetical coordination MCP server</span>
+</span></span><span><span>mcp_coordinator<span>.</span>claim_file(<span>"src/parser.py"</span>, session_id<span>=</span><span>"A"</span>)
+</span></span><span><span><span># Other sessions get an error if they try to edit it</span>
+</span></span><span><span>mcp_coordinator<span>.</span>add_barrier(<span>"refactor-complete"</span>, required_sessions<span>=</span>[<span>"A"</span>, <span>"B"</span>])
+</span></span><span><span>mcp_coordinator<span>.</span>wait_for_barrier(<span>"refactor-complete"</span>)  <span># Blocks until A and B finish</span>
+</span></span></code></pre></div><h2>
+  The Supervisor Pattern: Orchestrating LLM Teams
+  <a href="#the-supervisor-pattern-orchestrating-llm-teams">
+    <i></i>
+  </a>
+</h2>
+<p>When I need major changes, I run multiple Claude sessions in parallel:</p>
+<ul>
+<li><strong>Session A</strong>: Implements feature X</li>
+<li><strong>Session B</strong>: Writes tests for feature X</li>
+<li><strong>Session C</strong>: Updates documentation</li>
+<li><strong>Session D</strong>: Reviews changes from A, B, and C</li>
+</ul>
+<p>This is the <strong>supervisor pattern</strong>—but instead of manually coordinating, I use <strong>an LLM to generate prompts for other LLMs</strong>.</p>
+<h3>
+  The Meta-LLM Approach
+  <a href="#the-meta-llm-approach">
+    <i></i>
+  </a>
+</h3>
+<p>Planning parallel work is itself an LLM task. I have Claude generate the work breakdown and individual prompts:</p>
+<ol>
+<li><strong>I describe the goal</strong> to a planning session: “Implement feature X with tests and docs”</li>
+<li><strong>The planner LLM creates</strong>:
+<ul>
+<li>A work plan broken into phases (represented as a DAG)</li>
+<li>Individual prompt files for each parallel task</li>
+<li>Memento-based coordination scheme</li>
+<li>A supervisor prompt for monitoring progress</li>
+</ul>
+</li>
+<li><strong>I review and launch</strong> using my automation tools</li>
+</ol>
+<p>This meta-approach scales much better than manual coordination. The planner understands dependencies, estimates complexity, and generates consistent prompt structures.</p>
+<h3>
+  The Tooling: claude-parallel
+  <a href="#the-tooling-claude-parallel">
+    <i></i>
+  </a>
+</h3>
+<p>I built <code>claude-parallel</code> to automate the workflow:</p>
+<div class="highlight"><pre><code class="language-bash"><span><span><span># Step 1: Generate the plan</span>
+</span></span><span><span>claude-parallel plan -P myproject -p <span>"requirements.txt"</span>
+</span></span><span><span>
+</span></span><span><span><span># This launches a planning Claude session that:</span>
+</span></span><span><span><span># - Breaks work into phases and tasks</span>
+</span></span><span><span><span># - Creates prompt files in ~/.projects/myproject/prompts/</span>
+</span></span><span><span><span># - Generates plan.json with the dependency DAG</span>
+</span></span><span><span><span># - Creates a supervisor.txt prompt for monitoring</span>
+</span></span><span><span>
+</span></span><span><span><span># Step 2: Dispatch work to parallel sessions</span>
+</span></span><span><span>claude-parallel dispatch -p prompts/phase-1-task-auth.txt src/auth.py
+</span></span><span><span>claude-parallel dispatch -p prompts/phase-1-task-tests.txt tests/test_auth.py
+</span></span></code></pre></div><p>The <code>dispatch</code> command automatically:</p>
+<ul>
+<li>Creates a new tmux window</li>
+<li>Changes to the file’s directory</li>
+<li>Launches Claude with the prompt</li>
+<li>Monitors completion via memento notes</li>
+</ul>
+<h3>
+  Tmux Automation
+  <a href="#tmux-automation">
+    <i></i>
+  </a>
+</h3>
+<p>For complex projects with many parallel sessions, I use <code>generate_tmuxinator_config</code>:</p>
+<div class="highlight"><pre><code class="language-bash"><span><span><span># Generate tmuxinator config from prompt files</span>
+</span></span><span><span>generate_tmuxinator_config -n myproject prompts/*.txt &gt; ~/.config/tmuxinator/myproject.yml
+</span></span><span><span>
+</span></span><span><span><span># Launch all sessions at once</span>
+</span></span><span><span>tmuxinator start myproject
+</span></span></code></pre></div><p>This creates a tmux session with:</p>
+<ul>
+<li>One window per prompt file</li>
+<li>Proper window naming for easy navigation</li>
+<li>All sessions starting in the correct directory</li>
+</ul>
+<h3>
+  How I Do It Today
+  <a href="#how-i-do-it-today">
+    <i></i>
+  </a>
+</h3>
+<ol>
+<li><strong>Write high-level requirements</strong> in a text file</li>
+<li><strong>Run <code>claude-parallel plan</code></strong> to generate work breakdown</li>
+<li><strong>Review the generated prompts</strong> (adjust if needed)</li>
+<li><strong>Launch sessions</strong> via <code>claude-parallel dispatch</code> or <code>tmuxinator</code></li>
+<li><strong>Use memento for coordination</strong> (automatically set up by the planner):
+<ul>
+<li>Sessions read/write status notes</li>
+<li>Sessions check phase completion before starting</li>
+<li>Blocker notes communicate issues</li>
+</ul>
+</li>
+<li><strong>Rely on smoke tests</strong> to catch integration issues</li>
+<li><strong>Monitor via tmux status indicators</strong> (see Part 2) or run the supervisor prompt</li>
+</ol>
+<h3>
+  Persona-Driven Architecture
+  <a href="#persona-driven-architecture">
+    <i></i>
+  </a>
+</h3>
+<p>Assigning roles to sessions improves output quality, but I use personas differently than you might expect.</p>
+<p>I use Robert C. Martin (Uncle Bob) as the <strong>planner and architect</strong>. When breaking down a complex feature into parallel tasks, I ask the planner session:</p>
+<pre><code>You are Robert C. Martin (Uncle Bob). Review this feature request and break it
+down into clean, well-separated tasks for parallel implementation. Focus on
+SOLID principles and clear interfaces between components.
+</code></pre><p>This gives me a work breakdown that follows clean architecture principles: small, focused components with clear responsibilities.</p>
+<p>Then for the <strong>worker sessions</strong> (the ones actually implementing the tasks), I experiment with different prompts. Sometimes specific personas help:</p>
+<ul>
+<li>“You are obsessed with performance and correctness” for algorithm-heavy code</li>
+<li>“You are paranoid about edge cases and defensive programming” for input validation</li>
+<li>“You value simplicity above all else, avoid any unnecessary complexity” for utility functions</li>
+</ul>
+<p>Other times, I just use the task description from the planner without additional persona framing. I’m still experimenting with what works best for different types of work.</p>
+<h3>
+  What’s Missing
+  <a href="#whats-missing">
+    <i></i>
+  </a>
+</h3>
+<p>Current gaps in my supervisor pattern:</p>
+<ol>
+<li><strong>No automatic conflict detection</strong>: I manually ensure sessions don’t edit the same files</li>
+<li><strong>No rollback mechanism</strong>: If Session A breaks tests, I manually revert</li>
+<li><strong>No progress tracking</strong>: I eyeball tmux windows instead of having a dashboard</li>
+<li><strong>No automatic merging</strong>: I manually integrate changes from parallel sessions</li>
+</ol>
+<p>These are ripe for automation. The MCP coordination server would solve 1-3. Number 4 might need a specialized “merger” session that reads changes from all other sessions and integrates them.</p>
+<h2>
+  Knowledge Accumulation Over Time
+  <a href="#knowledge-accumulation-over-time">
+    <i></i>
+  </a>
+</h2>
+<p>Traditional LLM conversations are ephemeral. Each session starts fresh. But with memento, knowledge compounds.</p>
+<p>Example workflow:</p>
+<ol>
+<li><strong>Week 1</strong>: I discover that MCP servers should validate input strictly</li>
+<li><strong>I add to global context</strong>: “MCP servers must validate all inputs and return clear error messages”</li>
+<li><strong>Week 2</strong>: Claude builds a new MCP server, automatically applies that pattern</li>
+<li><strong>Week 3</strong>: I discover another pattern (connection pooling), add it to global context</li>
+<li><strong>Future sessions</strong>: Apply both patterns automatically</li>
+</ol>
+<p>Over months, my global context evolved from 50 lines to 500+ lines of hard-won knowledge. New Claude sessions are more productive from day one.</p>
+<h3>
+  The Memento Notes Index
+  <a href="#the-memento-notes-index">
+    <i></i>
+  </a>
+</h3>
+<p>To make knowledge discoverable, I maintain a <code>memento-notes-index</code>:</p>
+<div class="highlight"><pre><code class="language-markdown"><span><span><span>## Development &amp; Technical Guides
+</span></span></span><span><span><span></span>
+</span></span><span><span><span>-</span> **mcp-server-patterns**: Patterns for building reliable MCP servers
+</span></span><span><span><span>-</span> **smoke-test-paradigm**: Why smoke tests work better than unit tests
+</span></span><span><span><span>-</span> **elisp-testing-guide**: Fast testing with doomscript
+</span></span><span><span><span>-</span> **code-review-guide**: How to review code and log issues for AI
+</span></span><span><span>
+</span></span><span><span><span>## Quick Lookup by Use Case
+</span></span></span><span><span><span></span>
+</span></span><span><span><span>-</span> Building MCP servers → <span>`mcp-server-patterns`</span>
+</span></span><span><span><span>-</span> Emacs development → <span>`elisp-testing-guide`</span>
+</span></span><span><span><span>-</span> Testing frameworks → <span>`smoke-test-paradigm`</span>
+</span></span></code></pre></div><p>When Claude asks “How should I structure this?”, I can say: “Check the notes index for relevant guides.”</p>
+<h2>
+  Key Learnings
+  <a href="#key-learnings">
+    <i></i>
+  </a>
+</h2>
+<ul>
+<li>Smoke tests catch 90% of issues with 10% of the effort</li>
+<li>Shared context prevents reinventing the wheel</li>
+<li>Personas improve output quality</li>
+<li>Informal coordination works for 3-5 sessions</li>
+<li>Capture every discovery in memento</li>
+</ul>
+<h2>
+  What’s Next
+  <a href="#whats-next">
+    <i></i>
+  </a>
+</h2>
+<p>The patterns in this article work but aren’t fully automated. I’m manually coordinating sessions, manually managing shared context, manually merging changes.</p>
+<p><strong>Part 4</strong> covers experiments and works-in-progress: the project explorer tool, Emacs integration for code review, diff workflows, and ideas that didn’t quite work out.</p>
+<p><strong>Part 5</strong> shifts to learning: using Claude to generate flashcards, worksheets, and annotated code for studying complex topics.</p>
+<hr>
+<p><strong>Continue Reading:</strong> <a href="https://blog.laurentcharignon.com/post/2025-09-30-llm-workflow-part4-experiments">Part 4: The Way We Build Software Is Rapidly Evolving →</a></p>
+<hr>
+<p><em>If you’re interested in any of the tools or patterns mentioned in this series, feel free to reach out. I’m happy to discuss what you find compelling and share more details.</em></p>
+</body></html>

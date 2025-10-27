@@ -1,0 +1,9 @@
+Greg Kroah-Hartman has announced the release of the <a
+href="https://lwn.net/Articles/1036786/">6.16.5</a>, <a
+href="https://lwn.net/Articles/1036787/">6.12.45</a>, <a
+href="https://lwn.net/Articles/1036788/">6.6.104</a>, <a
+href="https://lwn.net/Articles/1036789/">6.1.150</a>, <a
+href="https://lwn.net/Articles/1036790/">5.15.191</a>, <a
+href="https://lwn.net/Articles/1036791/">5.10.242</a>, and <a
+href="https://lwn.net/Articles/1036792/">5.4.298</a> stable kernels.  Each contains
+important fixes throughout the kernel tree; users should upgrade.

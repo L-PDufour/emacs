@@ -1,0 +1,110 @@
+
+        <link rel="stylesheet" type="text/css" href="https://rahuljuliato.com/rss-styles.css">
+        <p>Compile Emacs 29.2 from source with a recent bug-fix release
+highlighted by Eli Zaretskii. This Debian 12-focused tutorial
+simplifies the process, covering downloading, signature verification,
+and configuration. With an emphasis on ease, Debian's build
+dependencies are leveraged, allowing users to quickly build, install,
+and even uninstall Emacs for a seamless experience.</p>
+<h2>Compiling Emacs 29.2 from the source</h2>
+<p>Some days ago the Emacs community received a really nice message from
+Eli Zaretskii, which currently is a co-maintainer of GNU Emacs.</p>
+<p>You can read it here:
+<a href="">https://lists.gnu.org/archive/html/emacs-devel/2024-01/msg00666.html</a>.</p>
+<p>This is a bug-fix release, that means no new features were added.</p>
+<p>That said, this gives us the opportunity of building Emacs from the source (which I
+usually prefer, since I like to toggle some switches).</p>
+<p>The next steps in this short tutorial will take in consideration you
+have the latest Debian release, in my case:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">(Linux debian 6.1.0-17-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.69-1 (2023-12-30) x86_64 GNU/Linux).</code></pre></div>
+<h2>Downloading Emacs Source-Code</h2>
+<p>Create a new directory of your liking and cd into it:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">mkdir ~/emacs_build
+cd emacs_build</code></pre></div>
+<p>Download the Emacs source code and the signature file. You can do this
+from
+<a href="https://ftp.gnu.org/gnu/emacs/">https://ftp.gnu.org/gnu/emacs/</a>, by
+accessing it from your web-browser, or:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">wget -c https://ftpmirror.gnu.org/emacs/emacs-29.2.tar.gz
+wget -c https://ftpmirror.gnu.org/emacs/emacs-29.2.tar.gz.sig</code></pre></div>
+<h2>Verifying the tarball Authenticity</h2>
+<p>Now verify the tarball (.tar.gz compressed file) authenticity by running:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">gpg --verify emacs-29.2.tar.gz.sig</code></pre></div>
+<p>If you have some error message, it is possible you haven't yet
+imported Eli Zaretskii public key. You can do So by issuing:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">gpg --keyserver keyserver.ubuntu.com --recv-keys \
+    17E90D521672C04631B1183EE78DAE0F3115E06B</code></pre></div>
+<p>That will return:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">gpg: key E78DAE0F3115E06B: public key &quot;Eli Zaretskii &lt;eliz@gnu.org&gt;&quot; imported
+gpg: Total number processed: 1
+gpg:               imported: 1</code></pre></div>
+<p>Now running <code>gpg --verify emacs-29.2.tar.gz.sig</code> will return something like:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">gpg: assuming signed data in &#39;emacs-29.2.tar.gz&#39;
+gpg: Signature made Thu 18 Jan 2024 07:55:42 AM -03
+gpg:                using RSA key 17E90D521672C04631B1183EE78DAE0F3115E06B
+gpg: Good signature from &quot;Eli Zaretskii &lt;eliz@gnu.org&gt;&quot; [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 17E9 0D52 1672 C046 31B1  183E E78D AE0F 3115 E06B</code></pre></div>
+<p>And you can verify the signature of the package. If something is
+strange, stop here, check the sources and make sure you have an
+authentic copy of Emacs source code.</p>
+<h2>Unpacking the tarball</h2>
+<p>You can now unpack the tarball by running:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">tar xvfz emacs-29.2.tar.gz</code></pre></div>
+<p>After that enter the created folder with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">cd emacs-29.2</code></pre></div>
+<h2>Configuring for the build</h2>
+<p>Usually, building something from source means going trough config and make, several
+times, resolving dependencies and so on.</p>
+<p>Here we're gonna cheat a little bit. Since Debian already ships some
+sort (normally older) of Emacs. We can ask to install the build
+dependencies for Emacs and save us some configure-make loop time.</p>
+<p>Do this with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">sudo apt-get build-dep emacs</code></pre></div>
+<p>After this, it is time to configure things.</p>
+<p>You can check all Emacs flags running <code>./configure --help</code>.</p>
+<p>I usually go with these options:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">./configure --with-native-compilation=aot\
+            --with-tree-sitter\
+			--with-gif\
+			--with-png\
+			--with-jpeg\
+			--with-rsvg\
+			--with-tiff\
+			--with-imagemagick\
+			--with-x-toolkit=lucid\
+			--with-json\
+			--with-mailutils</code></pre></div>
+<p>Customize it to your will.</p>
+<h2>Making and Installing</h2>
+<p>In this step we're actually building the software and installing.</p>
+<p>Start by cleaning any older building with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">make clean</code></pre></div>
+<p>If you had some problem during a previous make, or had to stop it for some reason,
+this will ensure you new "build" is clean and starting from the beginning.</p>
+<p>Now we actually run make with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">make -j8</code></pre></div>
+<p>This will compile Emacs by allowing 8 jobs at once. You can leave make with no <code>-j</code>
+flag for <code>infinite</code> jobs or customize at will.</p>
+<p>If everything runs ok and make exits successfully you can test Emacs with <code>./src/emacs</code>, I recommend just doing a version check with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">./src/emacs --version</code></pre></div>
+<p>That may return:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">GNU Emacs 29.2
+Copyright (C) 2024 Free Software Foundation, Inc.
+GNU Emacs comes with ABSOLUTELY NO WARRANTY.
+You may redistribute copies of GNU Emacs
+under the terms of the GNU General Public License.
+For more information about these matters, see the file named COPYING.</code></pre></div>
+<p>To have your built Emacs readily available, install it to your system with:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">make install</code></pre></div>
+<p>Verify if you have the compiled version to your path by issuing:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">emacs --version</code></pre></div>
+<p>You may have again:</p>
+<div class="remark-highlight"><pre class="language-unknown"><code class="language-unknown">GNU Emacs 29.2
+...</code></pre></div>
+<p>And that's it!</p>
+<h2>Uninstalling Emacs</h2>
+<p>If things go wrong or you need to uninstall a version of Emacs
+before compiling a new one, it is a "necessity practice" to keep the
+folder from where you built your software, so you can run: <code>make uninstall</code> and remove it completely from your system.</p>

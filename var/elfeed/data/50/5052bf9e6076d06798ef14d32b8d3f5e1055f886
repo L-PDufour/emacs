@@ -1,0 +1,100 @@
+<p>
+This is for the <a href="https://takeonrules.com/2025/08/01/emacs-carnival-2025-08-your-elevator-pitch-for-emacs/">Emacs Carnival 2025-08: Your Elevator Pitch for Emacs</a> hosted by Jeremy Friesen. Emacs is a text editor, but people have made it so much more.
+</p>
+
+<p>
+</p><div class="sketch-full"><a class="photoswipe" href="https://sketches.sachachua.com/filename/2025-08-31-01%20Emacs%20elevator%20pitch%20&#45;&#45;%20community%20emacs.jpeg" data-src="https://sketches.sachachua.com/static/2025-08-31-01%20Emacs%20elevator%20pitch%20&#45;&#45;%20community%20emacs.jpeg" data-title="2025-08-31-01 Emacs elevator pitch &#45;&#45; community emacs" data-w="2900" data-h="2050"><picture>
+      <img src="https://sketches.sachachua.com/static/2025-08-31-01%20Emacs%20elevator%20pitch%20&#45;&#45;%20community%20emacs.jpeg" width="2900" height="2050" alt="2025-08-31-01 Emacs elevator pitch &#45;&#45; community emacs" loading="lazy" style="max-height: 90vw; height: auto; width: auto" decoding="async">
+      <figcaption>2025-08-31-01 Emacs elevator pitch &#45;&#45; community emacs</figcaption>
+    </picture></a></div>
+<p></p>
+
+<details class="code-details" style="padding: 1em;
+                 border-radius: 15px;
+                 font-size: 0.9em;
+                 box-shadow: 0.05em 0.1em 5px 0.01em  #00000057;">
+                  <summary><strong>Text and links from sketch</strong></summary>
+<p>
+Emacs elevator pitch
+<a href="https://sach.ac/2025-08-31-01">https://sach.ac/2025-08-31-01</a>
+</p>
+
+<p>
+That's the theme for the <a href="https://takeonrules.com/2025/08/01/emacs-carnival-2025-08-your-elevator-pitch-for-emacs/">August Emacs Carnival</a>.
+</p>
+
+<p>
+I don't spend much time in elevators these days, and I didn't talk much to strangers even during the before-times.
+</p>
+
+<p>
+So let's imagine this is more of, say, a meetup. (Someday I'll get back to going to those.) Could be tech, could be something else. Could be online, could be in person.
+</p>
+
+<p>
+I don't have to convince everyone. I don't even have to convince a single person.
+My goal is to listen for the tinkerers: the ones who like to ask "Why?" and "What if?" and who try things out.
+They're interesting.
+</p>
+
+<p>
+I can find them by:
+</p>
+<ul class="org-ul">
+<li>watching talks (sketchnotes are a great thank-you gift)</li>
+<li>eavesdropping or asking questions</li>
+<li>sharing what I'm tinkering with</li>
+</ul>
+
+<p>
+No: Why would anyone do that?
+Yes: Have you thought of trying xyz?
+</p>
+
+<p>
+For tinkerers, the juice might be worth the squeeze.
+Emacs can be challenging, but it can also pay off. It can even be fun.
+</p>
+
+<p>
+Even when I find a fellow tinkerer, the conversation isn't "Have you tried Emacs? You should try Emacs."
+It'll probably be more like:
+</p>
+
+<p>
+"I'd love to keep hearing about your experiments. Do you have something I can subscribe to or follow?"
+(Side-quest: Try to convince them to blog.)
+</p>
+
+<p>
+and then the conversation can unfold over time:
+</p>
+
+<ul class="org-ul">
+<li>"Ooh, I like that idea. Here's my take on it."</li>
+<li>"How did you do that? What's that?!"</li>
+<li>"Oh, yeah, Emacs. It's very programmable, so I can get it to do all sorts of stuff for me. Wanna see?"</li>
+</ul>
+
+<p>
+&hellip;and sometimes they fall into the rabbit hole themselves, as tinkerers often do.
+But even if they don't try Emacs (or don't stick with it), cross-pollination is great.
+And sometimes Emacs changes their life.
+</p>
+
+
+</details>
+
+<p>
+To get a sense of the kinds of things someone has gotten Emacs to do, check out <a href="https://xenodium.com/emacs-elevator-pitch">Alvaro Ramirez's post</a>. I have a list like that at <a href="https://sachachua.com/topic/emacs">emacs</a>. On the topic of cross-pollination, I like Jeremy Friesen's EmacsConf 2023 talk on <a href="https://emacsconf.org/2023/talks/mentor/">Mentoring VS-Coders as an Emacsian (or How to show not tell people about the wonders of Emacs)</a>.
+</p>
+
+<p>
+It's always fun to come across a fellow <a href="https://chrisdone.com/posts/emacs-users-are-like-igor/">tinkerer</a>. I love seeing what people come up with. Emacs works out really well for tinkerers. It's not just about taking advantage of the technical capabilities (and you can do a surprising amount with text, images, and interaction), it's also about being part of a great community that's in it long-term. Good stuff.
+</p>
+
+<p>
+<i>Feel free to use this sketch under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution License</a>.</i>
+</p>
+<div><a href="https://sachachua.com/blog/2025/08/emacs-elevator-pitch-tinkerers-unite/index.org">View org source for this post</a></div>
+<p>You can <a href="mailto:sacha@sachachua.com?subject=Comment%20on%20https%3A%2F%2Fsachachua.com%2Fblog%2F2025%2F08%2Femacs-elevator-pitch-tinkerers-unite%2F&body=Name%20you%20want%20to%20be%20credited%20by%20(if%20any)%3A%20%0AMessage%3A%20%0ACan%20I%20share%20your%20comment%20so%20other%20people%20can%20learn%20from%20it%3F%20Yes%2FNo%0A">e-mail me at sacha@sachachua.com</a>.</p>
