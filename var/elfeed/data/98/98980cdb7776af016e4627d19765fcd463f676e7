@@ -1,8 +1,0 @@
-<html><head></head><body>We explain how to test a new feature of Emacs, in development, which
-makes Emacs more responsive.
-
-This is a new Garbage Collector which you can try as part of the IGC
-branch, and instructions are provided.
-
-(...)
-    </body></html>
