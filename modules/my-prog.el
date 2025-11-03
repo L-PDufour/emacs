@@ -86,6 +86,14 @@
                       #'cape-dabbrev
                       #'cape-file))))
 
+(use-package eglot-booster
+  :vc (:url "https://github.com/jdtsmith/eglot-booster"
+            :rev :newest)
+  :after eglot
+  :config
+  (setq eglot-booster-io-only t)
+  (eglot-booster-mode))
+
 (use-package eglot
   :ensure nil
   :custom
@@ -99,24 +107,39 @@
   ;;              '(templ-ts-mode . ("lspx" "--lsp" "vscode-html-language-server --stdio " "--lsp" "templ lsp")))
   (add-to-list 'eglot-server-programs
                '(templ-ts-mode . ("templ" "lsp")))
-  ;; (fset 'jsonrpc--log-event #'ignore)  ; massive perf boost---don't log every event
-  (setq-default eglot-workspace-configuration
-                (list
-                 (cons :deno  (list
-                               :enable t
-                               :lint t
-                               :unstable t))
-                 (cons :html  (list :includeLanguages (list :templ "html")
-                                    ))))
-
-  ;; Rest of your configuration...
+  ;; Register Deno LSP with proper language IDs
   (add-to-list 'eglot-server-programs
                '(((js-mode :language-id "javascript")
                   (js-ts-mode :language-id "javascript")
                   (tsx-ts-mode :language-id "typescriptreact")
                   (typescript-ts-mode :language-id "typescript")
                   (typescript-mode :language-id "typescript"))
-                 "deno" "lsp"))
+                 "deno" "lsp"
+                 :initializationOptions
+                 (:enable t
+                          :lint t
+                          :unstable t)))
+
+  ;; Configure workspace settings
+  (setq-default eglot-workspace-configuration
+                '((:deno . ((:enable . t)
+                            (:lint . t)
+                            (:unstable . t)))
+                  (:javascript . ((:inlayHints . ((:parameterNames . ((:enabled . "all")))
+                                                  (:parameterTypes . ((:enabled . t)))
+                                                  (:variableTypes . ((:enabled . t)))
+                                                  (:propertyDeclarationTypes . ((:enabled . t)))
+                                                  (:functionLikeReturnTypes . ((:enabled . t)))
+                                                  (:enumMemberValues . ((:enabled . t)))))
+                                  (:suggest . ((:completeFunctionCalls . t)))))
+                  (:typescript . ((:inlayHints . ((:parameterNames . ((:enabled . "all")))
+                                                  (:parameterTypes . ((:enabled . t)))
+                                                  (:variableTypes . ((:enabled . t)))
+                                                  (:propertyDeclarationTypes . ((:enabled . t)))
+                                                  (:functionLikeReturnTypes . ((:enabled . t)))
+                                                  (:enumMemberValues . ((:enabled . t)))))
+                                  (:suggest . ((:completeFunctionCalls . t)))))
+                  (:html . ((:includeLanguages . ((:templ . "html")))))))
 
   ;; Performance optimizations
   (setq completion-category-overrides '((eglot (styles orderless))

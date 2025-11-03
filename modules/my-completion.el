@@ -178,8 +178,27 @@
       (corfu-insert-separator))))
 
 (use-package corfu
-  :ensure t
-  :ensure t
+  ;; Optional customizations
+  :custom
+  (corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)
+  (corfu-auto-prefix 3)
+  (corfu-quit-no-match 'separator)
+  (corfu-popupinfo-delay 0.5)
+  (corfu-preselect 'directory) ;; Select the first candidate, except for directories
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  ;; Hide commands in M-x which do not apply to the current mode.
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  ;; Disable Ispell completion function. As an alternative try `cape-dict'.
+  (text-mode-ispell-word-completion nil)
+  ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
+  ;; :hook ((prog-mode . corfu-mode)
+  ;;        (shell-mode . corfu-mode)
+  ;;        (eshell-mode . corfu-mode))
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
@@ -190,19 +209,44 @@
   (corfu-history-mode 1)
   (corfu-popupinfo-mode 1)
   (global-corfu-mode)
-  :config
-  (setq corfu-separator 32)
-  :custom
-  (corfu-auto t)
-  (corfu-auto-prefix 1)
-  (corfu-quit-no-match nil)
-  (corfu-quit-at-boundary nil)        ; ADD: Quit at word boundary
-  (corfu-preselect 'directory)      ;; Preselect the prompt
-  (corfu-popupinfo-delay 0.5)
-  ;; Hide commands in M-x which do not apply to the current mode.
-  (read-extended-command-predicate #'command-completion-default-include-p)
-  ;; Disable Ispell completion function. As an alternative try `cape-dict'.
-  (text-mode-ispell-word-completion nil))
+  ;; Enable optional extension modes:
+  (corfu-history-mode)
+  (corfu-popupinfo-mode)
+  )
+
+;; (use-package corfu
+;;   :ensure t
+;;   :ensure t
+
+;;   :init
+;;   (corfu-history-mode 1)
+;;   (corfu-popupinfo-mode 1)
+;;   (global-corfu-mode)
+;;   :config
+;;   (defun my-corfu-combined-sort (candidates)
+;;     "Sort CANDIDATES using both display-sort-function and corfu-sort-function."
+;;     (let ((candidates
+;;            (let ((display-sort-func (corfu--metadata-get 'display-sort-function)))
+;;              (if display-sort-func
+;;                  (funcall display-sort-func candidates)
+;;                candidates))))
+;;       (if corfu-sort-function
+;;           (funcall corfu-sort-function candidates)
+;;         candidates)))
+;; 
+;;   (setq corfu-sort-override-function #'my-corfu-combined-sort)
+;;   (setq corfu-separator 32)
+;;   :custom
+;;   (corfu-auto t)
+;;   (corfu-auto-prefix 1)
+;;   ;; (corfu-quit-no-match nil)
+;;   ;; (corfu-quit-at-boundary nil)        ; ADD: Quit at word boundary
+;;   (corfu-preselect 'directory)      ;; Preselect the prompt
+;;   (corfu-popupinfo-delay 0.5)
+;;   ;; Hide commands in M-x which do not apply to the current mode.
+;;   (read-extended-command-predicate #'command-completion-default-include-p)
+;;   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
+;;   (text-mode-ispell-word-completion nil))
 
 (use-package cape
   :commands (cape-dabbrev cape-file cape-elisp-block)

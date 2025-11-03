@@ -144,7 +144,7 @@ c-mode :when (re-search-backward "^\\S-*$" (line-beginning-position) 'noerror)
 (incc "#include \"" (p (concat (file-name-base (or (buffer-file-name) (buffer-name))) ".h")) "\"")
 
 js-mode js-ts-mode typescript-mode typescript-ts-mode
-(log "console.log('"
+(clog "console.log('"
      (p (save-excursion
           (previous-line)
           (thing-at-point 'symbol)))

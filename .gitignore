@@ -1,7 +1,6 @@
 # Emacs runtime files and caches
 var/*
-!var/devdocs/
-!var/elfeed/
+!var/elfeed.org
 !var/templates
 elpa/
 eln-cache/
