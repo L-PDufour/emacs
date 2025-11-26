@@ -114,12 +114,12 @@
      '("Y" . meow-sync-grab)
      '("z" . meow-pop-selection)
      '("'" . repeat)
-     '("<escape>" . keyboard-escape-quit)))
+     '("<escape>" . ignore)))
   (meow-setup)
   (add-to-list 'meow-mode-state-list '((eat-mode) . insert))
   (add-to-list 'meow-mode-state-list '((magit-status-mode) . insert))
   (meow-setup-indicator)
-  (meow-global-mode 1))
+  (meow-global-mode -1))
 
 (use-package meow-tree-sitter
   :ensure t

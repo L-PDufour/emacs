@@ -80,6 +80,20 @@ Uses position instead of index field."
 
 ;; Easy insertion of weblinks
 (use-package org-web-tools)
+(use-package wgrep)
+(use-package breadcrumb)
+
+(use-package consult-eglot
+  :after eglot
+  :bind (:map eglot-mode-map
+              ([remap xref-find-apropos] . consult-eglot-symbols)))
+
+;; Make embark use consult-eglot-symbols for "a"
+(use-package consult-eglot-embark
+  :after (consult-eglot embark)
+  :demand t
+  :config
+  (consult-eglot-embark-mode 1))
 
 (use-package elfeed-tube
   :ensure t

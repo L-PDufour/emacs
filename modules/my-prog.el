@@ -71,7 +71,7 @@
   :ensure t
   :defer t
   :config
-  (setq eldoc-idle-delay 0)                  ;; Automatically fetch doc help
+  (setq eldoc-idle-delay 0.5)                  ;; Automatically fetch doc help
   (setq eldoc-echo-area-display-truncation-message nil)
   :init
   (global-eldoc-mode))
@@ -82,9 +82,7 @@
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
                 (list #'eglot-completion-at-point
-                      #'tempel-complete
-                      #'cape-dabbrev
-                      #'cape-file))))
+                      #'tempel-complete))))
 
 (use-package eglot-booster
   :vc (:url "https://github.com/jdtsmith/eglot-booster"
@@ -150,7 +148,7 @@
 
   ;; Reduce file watching
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
-
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
@@ -160,13 +158,12 @@
 ;; It draws vertical lines (by default, a character of your choice) at each
 ;; level of indentation, helping to improve readability and navigation within
 ;; the code.
-(use-package indent-guide
-  :defer t
+(use-package highlight-indent-guides
   :ensure t
-  :hook
-  (prog-mode . indent-guide-mode)  ;; Activate indent-guide in programming modes.
+  :hook (prog-mode . highlight-indent-guides-mode)
   :config
-  (setq indent-guide-char "│"))
+  (setq highlight-indent-guides-method 'bitmap)  ; No character issues
+  (setq highlight-indent-guides-responsive 'top))
 
 (use-package flymake
   :ensure nil

@@ -116,14 +116,20 @@
   ;;
   ;; However, the author of minimal-emacs.d uses these parameters to achieve
   ;; immediate feedback from Consult.
-  (setq consult-async-input-debounce 0.02
-        consult-async-input-throttle 0.05
-        consult-async-refresh-delay 0.02)
+  (setq consult-async-input-debounce 0.1
+        consult-narrow-key "<"
+        consult-line-numbers-widen t
+        consult-async-min-input 2
+        consult-fontify-preserve nil
+        consult-async-input-throttle 0.2
+        consult-async-refresh-delay 0.15)
   :config
   (consult-customize
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
+   consult-find consult-xref
+   :preview-key '(:debounce 0.15 any)
+   consult-bookmark consult-recent-file
    consult--source-bookmark consult--source-file-register
    consult--source-recent-file consult--source-project-recent-file
    :preview-key "M-."))
@@ -160,29 +166,14 @@
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
 ;; current candidates, positioned either below or above the point. Candidates
 ;; can be selected by navigating up or down.
-(defun corfu-separate-or-insert ()
-  "Command which acts first as a separator and but if inserted twice will insert"
-  (interactive)
-  (if current-prefix-arg
-      ;;we suppose that we want leave the word like that, so do a space
-      (progn (corfu-quit) (insert " "))
-    (if (and (= (char-before) corfu-separator)
-             (or
-              ;; check if space, return or nothing after
-              (not (char-after))
-              (= (char-after) ?\s)
-              (= (char-after) ?\n)))
-        (progn
-          (corfu-insert)
-          (insert " "))
-      (corfu-insert-separator))))
 
 (use-package corfu
   ;; Optional customizations
   :custom
   (corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)
-  (corfu-auto-prefix 3)
+  (corfu-auto-delay 0.4)
+  (corfu-auto-prefix 2)
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay 0.5)
   (corfu-preselect 'directory) ;; Select the first candidate, except for directories
@@ -190,7 +181,7 @@
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
   ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; Hide commands in M-x which do not apply to the current mode.
   (read-extended-command-predicate #'command-completion-default-include-p)
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
@@ -202,17 +193,16 @@
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
-              ("SPC" . corfu-separate-or-insert)
               ("M-;" . corfu-complete)
               ("RET" . nil))
   :init
   (corfu-history-mode 1)
   (corfu-popupinfo-mode 1)
   (global-corfu-mode)
-  ;; Enable optional extension modes:
-  (corfu-history-mode)
-  (corfu-popupinfo-mode)
-  )
+  :config
+  (with-eval-after-load 'savehist
+    (add-to-list 'savehist-additional-variables 'corfu-history)))
+;; Enable optional extension modes:
 
 ;; (use-package corfu
 ;;   :ensure t

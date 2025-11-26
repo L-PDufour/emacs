@@ -6,12 +6,11 @@
 
 ;;; Code:
 (let ((mono-font "FiraCode Nerd Font")
-	  (sans-font "DejaVu Sans"))
-  ;; Significantly larger font size for 4K screens
-  ;; Values between 180-240 are often good for 4K displays
-  (set-face-attribute 'default nil :family mono-font :weight 'medium :height 200)
-  (set-face-attribute 'fixed-pitch nil :family mono-font :height 200)
-  (set-face-attribute 'variable-pitch nil :family sans-font :height 200))
+      (sans-font "DejaVu Sans"))
+  ;; Semi-bold is usually a good middle ground
+  (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
+  (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
+  (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
 ;; Auto-revert in Emacs is a feature that automatically updates the
 ;; contents of a buffer to reflect changes made to the underlying file
 ;; on disk.
@@ -243,10 +242,15 @@
 (winner-mode 1)
 (repeat-mode 1)
 ;; CHANGE: Remove :ensure nil from packages you want to install via package.el
-                                        ; (use-package diff-hl
-                                        ;   :hook
-                                        ;   ((after-init . global-diff-hl-mode)
-                                        ;    (magit-post-refresh . diff-hl-magit-post-refresh)))
+
+(use-package diff-hl
+  :config
+  (diff-hl-mode)  ; Update on-the-fly
+  (diff-hl-margin-mode)  ; Use margin instead of fringe
+  :hook
+  ((after-init . global-diff-hl-mode)
+   (magit-post-refresh . diff-hl-magit-post-refresh)))
+
 (use-package undo-fu
   :ensure t
 
@@ -267,7 +271,9 @@
   ;; Create the directory if it doesn't exist
   (unless (file-exists-p undo-fu-session-directory)
 	(make-directory undo-fu-session-directory t))
-
+  (setq undo-limit 800000)           ; Default is 160000
+  (setq undo-strong-limit 1200000)   ; Default is 240000
+  (setq undo-outer-limit 12000000)   ; Default is 24000000
   ;; Configure session settings
   (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
   (setq undo-fu-session-global-mode t)
