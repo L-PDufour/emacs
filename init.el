@@ -1,35 +1,76 @@
 ;;; init.el --- Init -*- lexical-binding: t; -*-
+(require 'package)
 
-;; Author: James Cherti
-;; URL: https://github.com/jamescherti/minimal-emacs.d
-;; Package-Requires: ((emacs "29.1"))
-;; Keywords: maint
-;; Version: 1.3.0
-;; SPDX-License-Identifier: GPL-3.0-or-later
+(setq package-archives
+      '(("melpa" . "https://melpa.org/packages/")
+        ("gnu" . "https://elpa.gnu.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 
-;;; Commentary:
-;; The minimal-emacs.d project is a lightweight and optimized Emacs base
-;; (init.el and early-init.el) that gives you full control over your
-;; configuration. It provides better defaults, an optimized startup, and a clean
-;; foundation for building your own vanilla Emacs setup.
-;;
-;; Building the minimal-emacs.d init.el and early-init.el was the result of
-;; extensive research and testing to fine-tune the best parameters and
-;; optimizations for an Emacs configuration.
-;;
-;; Do not modify this file; instead, modify pre-init.el or post-init.el.
+(setq package-archive-priorities
+      '(("gnu" . 99)
+        ("nongnu" . 80)
+        ("melpa" . 70)))
 
-;;; Code:
+;; Initialize package system
+(package-initialize)
 
-;;; Load pre-init.el
-(if (fboundp 'minimal-emacs-load-user-init)
-	(minimal-emacs-load-user-init "pre-init.el")
-  (error "The early-init.el file failed to loaded"))
+;; Refresh package contents if needed
+(unless package-archive-contents
+  (package-refresh-contents))
 
-;;; Before package
+;; Install use-package if not installed
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
 
-;; Ask the user whether to terminate asynchronous compilations on exit.
-;; This prevents native compilation from leaving temporary files in /tmp.
+(require 'use-package)
+
+;; Configure use-package
+(setq use-package-always-ensure t)  ; Auto-install packages
+(setq use-package-compute-statistics nil)
+(setq use-package-expand-minimally t)
+(setq use-package-enable-imenu-support t)
+(setq use-package-verbose nil)
+
+;;; Load custom-file
+(when (file-exists-p custom-file)
+  (load custom-file :noerror :nomessage))
+
+;;; Set up load paths
+(add-to-list 'load-path (expand-file-name "../lisp" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "../modules" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "../site-lisp" user-emacs-directory))
+
+;; Add all subdirectories of modules/
+(let ((default-directory (expand-file-name "../modules" user-emacs-directory)))
+  (when (file-directory-p default-directory)
+    (normal-top-level-add-subdirs-to-load-path)))
+
+;; Add all subdirectories of site-lisp/
+(let ((default-directory (expand-file-name "../site-lisp" user-emacs-directory)))
+  (when (file-directory-p default-directory)
+    (normal-top-level-add-subdirs-to-load-path)))
+;;; File locations
+(setq auto-save-list-file-prefix (expand-file-name "autosave/" user-emacs-directory))
+(setq tramp-auto-save-directory (expand-file-name "tramp-autosave/" user-emacs-directory))
+(setq backup-directory-alist `(("." . ,(expand-file-name "backup" user-emacs-directory))))
+(setq tramp-backup-directory-alist backup-directory-alist)
+(setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
+(setq recentf-save-file (expand-file-name "recentf" user-emacs-directory))
+(setq save-place-file (expand-file-name "saveplace" user-emacs-directory))
+(setq savehist-file (expand-file-name "history" user-emacs-directory))
+(setq project-list-file (expand-file-name "projects.eld" user-emacs-directory))
+(setq transient-history-file (expand-file-name "transient/history.el" user-emacs-directory))
+(setq transient-levels-file (expand-file-name "transient/levels.el" user-emacs-directory))
+(setq transient-values-file (expand-file-name "transient/values.el" user-emacs-directory))
+
+;;; Native compilation
+(setq native-comp-async-query-on-exit t)
+
+;;; Short answers
+(setq read-answer-short t)
+(if (boundp 'use-short-answers)
+    (setq use-short-answers t)
+  (advice-add 'yes-or-no-p :override #'y-or-n-p))
 (setq native-comp-async-query-on-exit t)
 
 ;; Allow for shorter responses: "y" for yes and "n" for no.
@@ -294,11 +335,6 @@
 
 (setq mouse-yank-at-point nil)
 
-;; Emacs 29
-(when (memq 'context-menu minimal-emacs-ui-features)
-  (when (and (display-graphic-p) (fboundp 'context-menu-mode))
-	(add-hook 'after-init-hook #'context-menu-mode)))
-
 ;;; Cursor
 
 ;; The blinking cursor is distracting and interferes with cursor settings in
@@ -442,59 +478,7 @@
 (setq help-enable-symbol-autoload nil)
 (setq help-window-select t)  ;; Focus new help windows when opened
 
-;;; Eglot
-
-;; A setting of nil or 0 means Eglot will not block the UI at all, allowing
-;; Emacs to remain fully responsive, although LSP features will only become
-;; available once the connection is established in the background.
-(setq eglot-sync-connect 0)
-
-(setq eglot-autoshutdown t)  ; Shut down server after killing last managed buffer
-
-;; Activate Eglot in cross-referenced non-project files
-(setq eglot-extend-to-xref t)
-
-;; Eglot optimization
-(if minimal-emacs-debug
-	(setq eglot-events-buffer-config '(:size 2000000 :format full))
-  ;; This reduces log clutter to improves performance.
-  (setq jsonrpc-event-hook nil)
-  ;; Reduce memory usage and avoid cluttering *EGLOT events* buffer
-  (setq eglot-events-buffer-size 0)  ; Deprecated
-  (setq eglot-events-buffer-config '(:size 0 :format short)))
-
-(setq eglot-report-progress minimal-emacs-debug)  ; Prevent minibuffer spam
-
-;;; Flymake
-
-(setq flymake-show-diagnostics-at-end-of-line nil)
-
-;; Disable wrapping around when navigating Flymake errors.
-(setq flymake-wrap-around nil)
-
-;;; hl-line-mode
-
-;; Restrict `hl-line-mode' highlighting to the current window, reducing visual
-;; clutter and slightly improving `hl-line-mode' performance.
-(setq hl-line-sticky-flag nil)
-(setq global-hl-line-sticky-flag nil)
-
-;;; icomplete
-
-;; Do not delay displaying completion candidates in `fido-mode' or
-;; `fido-vertical-mode'
-(setq icomplete-compute-delay 0.01)
-
-;;; flyspell
-
-(setq flyspell-issue-welcome-flag nil)
-
-;; Improves flyspell performance by preventing messages from being displayed for
-;; each word when checking the entire buffer.
-(setq flyspell-issue-message-flag nil)
-
 ;;; ispell
-
 ;; In Emacs 30 and newer, disable Ispell completion to avoid annotation errors
 ;; when no `ispell' dictionary is set.
 (setq text-mode-ispell-word-completion nil)
@@ -545,11 +529,454 @@
 						   list-threads erase-buffer scroll-left
 						   dired-find-alternate-file))
   (put cmd 'disabled nil))
+(let ((mono-font "FiraCode Nerd Font")
+      (sans-font "DejaVu Sans"))
+  ;; Semi-bold is usually a good middle ground
+  (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
+  (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
+  (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
+;; Auto-revert in Emacs is a feature that automatically updates the
+;; contents of a buffer to reflect changes made to the underlying file
+;; on disk.
+(use-package autorevert
+  :ensure nil
+  :commands (auto-revert-mode global-auto-revert-mode)
+  :hook
+  (after-init . global-auto-revert-mode)
+  :custom
+  (auto-revert-interval 5)
+  (auto-revert-remote-files nil)
+  (auto-revert-use-notify t)
+  (auto-revert-avoid-polling t)
+  (auto-revert-verbose t))
 
-;;; Load post init
-(when (fboundp 'minimal-emacs-load-user-init)
-  (minimal-emacs-load-user-init "post-init.el"))
-(setq minimal-emacs--success t)
+;; Recentf is an Emacs package that maintains a list of recently
+;; accessed files, making it easier to reopen files you have worked on
+;; recently.
+(use-package recentf
+  :ensure nil
+  :commands (recentf-mode recentf-cleanup)
+  :hook
+  (after-init . recentf-mode)
+
+  :custom
+  (recentf-auto-cleanup (if (daemonp) 300 'never))
+  (recentf-exclude
+   (list "\\.tar$" "\\.tbz2$" "\\.tbz$" "\\.tgz$" "\\.bz2$"
+         "\\.bz$" "\\.gz$" "\\.gzip$" "\\.xz$" "\\.zip$"
+         "\\.7z$" "\\.rar$"
+         "COMMIT_EDITMSG\\'"
+         "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+         "-autoloads\\.el$" "autoload\\.el$"))
+
+  :config
+  ;; A cleanup depth of -90 ensures that `recentf-cleanup' runs before
+  ;; `recentf-save-list', allowing stale entries to be removed before the list
+  ;; is saved by `recentf-save-list', which is automatically added to
+  ;; `kill-emacs-hook' by `recentf-mode'.
+  (add-hook 'kill-emacs-hook #'recentf-cleanup -90))
+
+;; savehist is an Emacs feature that preserves the minibuffer history between
+;; sessions. It saves the history of inputs in the minibuffer, such as commands,
+;; search strings, and other prompts, to a file. This allows users to retain
+;; their minibuffer history across Emacs restarts.
+(use-package savehist
+  :ensure nil
+  :commands (savehist-mode savehist-save)
+  :hook
+  (after-init . savehist-mode)
+  :custom
+  (savehist-autosave-interval 600))
+
+;; save-place-mode enables Emacs to remember the last location within a file
+;; upon reopening. This feature is particularly beneficial for resuming work at
+;; the precise point where you previously left off.
+(use-package saveplace
+  :ensure nil
+  :commands (save-place-mode save-place-local-mode)
+  :hook
+  (after-init . save-place-mode)
+  :custom
+  (save-place-limit 400))
+
+;; Enable `auto-save-mode' to prevent data loss. Use `recover-file' or
+;; `recover-session' to restore unsaved changes.
+(setq auto-save-default t)
+
+(setq auto-save-interval 300)
+(setq auto-save-timeout 60)
+
+;; When auto-save-visited-mode is enabled, Emacs will auto-save file-visiting
+;; buffers after a certain amount of idle time if the user forgets to save it
+;; with save-buffer or C-x s for example.
+;;
+;; This is different from auto-save-mode: auto-save-mode periodically saves
+;; all modified buffers, creating backup files, including those not associated
+;; with a file, while auto-save-visited-mode only saves file-visiting buffers
+;; after a period of idle time, directly saving to the file itself without
+;; creating backup files.
+(setq auto-save-visited-interval 30)   ; Save after 5 seconds if inactivity
+(auto-save-visited-mode 1)
+
+;; The built-in outline-minor-mode provides structured code folding in modes
+;; such as Emacs Lisp and Python, allowing users to collapse and expand sections
+;; based on headings or indentation levels. This feature enhances navigation and
+;; improves the management of large files with hierarchical structures.
+(use-package outline
+  :diminish
+  :ensure nil
+  :commands outline-minor-mode
+  :hook
+  ((emacs-lisp-mode . outline-minor-mode)
+   ;; Use " ▼" instead of the default ellipsis "..." for folded text to make
+   ;; folds more visually distinctive and readable.
+   (outline-minor-mode
+    .
+    (lambda()
+      (let* ((display-table (or buffer-display-table (make-display-table)))
+             (face-offset (* (face-id 'shadow) (ash 1 22)))
+             (value (vconcat (mapcar (lambda (c) (+ face-offset c)) " ▼"))))
+        (set-display-table-slot display-table 'selective-display value)
+        (setq buffer-display-table display-table))))))
+
+;; The outline-indent Emacs package provides a minor mode that enables code
+;; folding based on indentation levels.
+;;
+;; In addition to code folding, *outline-indent* allows:
+;; - Moving indented blocks up and down
+;; - Indenting/unindenting to adjust indentation levels
+;; - Inserting a new line with the same indentation level as the current line
+;; - Move backward/forward to the indentation level of the current line
+;; - and other features.
+(use-package outline-indent
+  :ensure t
+  :commands outline-indent-minor-mode
+
+  :custom
+  (outline-indent-ellipsis " ▼")
+
+  :init
+  ;; The minor mode can also be automatically activated for a certain modes.
+  (add-hook 'python-mode-hook #'outline-indent-minor-mode)
+  (add-hook 'python-ts-mode-hook #'outline-indent-minor-mode)
+
+  (add-hook 'yaml-mode-hook #'outline-indent-minor-mode)
+  (add-hook 'yaml-ts-mode-hook #'outline-indent-minor-mode))
+
+;; The stripspace Emacs package provides stripspace-local-mode, a minor mode
+;; that automatically removes trailing whitespace and blank lines at the end of
+;; the buffer when saving.
+                                        ; (use-package stripspace
+;;   :diminish
+;;   :ensure nil
+;;   :commands stripspace-local-mode
+;;
+;;   ;; Enable for prog-mode-hook, text-mode-hook, conf-mode-hook
+;;   :hook ((prog-mode . stripspace-local-mode)
+;;          (text-mode . stripspace-local-mode)
+;;          (conf-mode . stripspace-local-mode))
+;;
+;;   :custom
+;;   ;; The `stripspace-only-if-initially-clean' option:
+;;   ;; - nil to always delete trailing whitespace.
+;;   ;; - Non-nil to only delete whitespace when the buffer is clean initially.
+;;   ;; (The initial cleanliness check is performed when `stripspace-local-mode'
+;;   ;; is enabled.)
+;;   (stripspace-only-if-initially-clean nil)
+;;
+;;   ;; Enabling `stripspace-restore-column' preserves the cursor's column position
+;;   ;; even after stripping spaces. This is useful in scenarios where you add
+;;   ;; extra spaces and then save the file. Although the spaces are removed in the
+;;   ;; saved file, the cursor remains in the same position, ensuring a consistent
+;;   ;; editing experience without affecting cursor placement.
+;;   (stripspace-restore-column t))
+;;
+;; ;; ;; This automates the process of updating installed packages
+;; ;; (use-package auto-package-update
+;; ;;   :ensure t
+;; ;;   :custom
+;; ;;   ;; Set the number of days between automatic updates.
+;; ;;   ;; Here, packages will only be updated if at least 7 days have passed
+;; ;;   ;; since the last successful update.
+;; ;;   (auto-package-update-interval 7)
+;; ;;
+;; ;;   ;; Suppress display of the *auto-package-update results* buffer after updates.
+;; ;;   ;; This keeps the user interface clean and avoids unnecessary interruptions.
+;; ;;   (auto-package-update-hide-results t)
+;; ;;
+;; ;;   ;; Automatically delete old package versions after updates to reduce disk
+;; ;;   ;; usage and keep the package directory clean. This prevents the accumulation
+;; ;;   ;; of outdated files in Emacs’s package directory, which consume
+;; ;;   ;; unnecessary disk space over time.
+;; ;;   (auto-package-update-delete-old-versions t)
+;; ;;
+;; ;;   ;; Uncomment the following line to enable a confirmation prompt
+;; ;;   ;; before applying updates. This can be useful if you want manual control.
+;; ;;   ;; (auto-package-update-prompt-before-update t)
+;; ;;
+;; ;;   :config
+;; ;;   ;; Run package updates automatically at startup, but only if the configured
+;; ;;   ;; interval has elapsed.
+;; ;;   (auto-package-update-maybe)
+;; ;;
+;; ;;   ;; Schedule a background update attempt daily at 10:00 AM.
+;; ;;   ;; This uses Emacs' internal timer system. If Emacs is running at that time,
+;; ;;   ;; the update will be triggered. Otherwise, the update is skipped for that
+;; ;;   ;; day. Note that this scheduled update is independent of
+;; ;;   ;; `auto-package-update-maybe` and can be used as a complementary or
+;; ;;   ;; alternative mechanism.
+;; ;;   (auto-package-update-at-time "10:00"))
+;; ;; Helpful is an alternative to the built-in Emacs help that provides much more
+;; ;; contextual information.
+(use-package helpful
+  :ensure t
+  :commands (helpful-callable
+
+             helpful-variable
+             helpful-key
+             helpful-command
+             helpful-at-point
+             helpful-function)
+  :bind
+  ([remap describe-command] . helpful-command)
+  ([remap describe-function] . helpful-callable)
+  ([remap describe-key] . helpful-key)
+  ([remap describe-symbol] . helpful-symbol)
+  ([remap describe-variable] . helpful-variable)
+  :custom
+  (helpful-max-buffers 7))
+
+;; (use-package buffer-terminator
+;;   :ensure t
+;;   :custom
+;;   ;; Enable/Disable verbose mode to log buffer cleanup events
+;;   (buffer-terminator-verbose nil)
+;;
+;;   ;; Set the inactivity timeout (in seconds) after which buffers are considered
+;;   ;; inactive (default is 30 minutes):
+;;   (buffer-terminator-inactivity-timeout (* 30 60)) ; 30 minutes
+;;
+;;   ;; Define how frequently the cleanup process should run (default is every 10
+;;   ;; minutes):
+;;   (buffer-terminator-interval (* 10 60)) ; 10 minutes
+;;
+;;   :config
+;;   (buffer-terminator-mode 1))
+
+(winner-mode 1)
+(repeat-mode 1)
+;; CHANGE: Remove :ensure nil from packages you want to install via package.el
+
+(use-package diff-hl
+  :config
+  (diff-hl-mode)  ; Update on-the-fly
+  (diff-hl-margin-mode)  ; Use margin instead of fringe
+  :hook
+  ((after-init . global-diff-hl-mode)
+   (magit-post-refresh . diff-hl-magit-post-refresh)))
+
+(use-package undo-fu
+  :ensure t
+
+  :commands (undo-fu-only-undo
+             undo-fu-only-redo
+             undo-fu-only-redo-all
+             undo-fu-disable-checkpoint)
+  :config
+  (global-unset-key (kbd "C-z"))
+  (global-set-key (kbd "C-z") 'undo-fu-only-undo)
+  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+
+(use-package undo-fu-session
+  :config
+  ;; Store undo history files in your Emacs directory
+  (setq undo-fu-session-directory (expand-file-name "undo-fu-session" user-emacs-directory))
+
+  ;; Create the directory if it doesn't exist
+  (unless (file-exists-p undo-fu-session-directory)
+	(make-directory undo-fu-session-directory t))
+  (setq undo-limit 800000)           ; Default is 160000
+  (setq undo-strong-limit 1200000)   ; Default is 240000
+  (setq undo-outer-limit 12000000)   ; Default is 24000000
+  ;; Configure session settings
+  (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+  (setq undo-fu-session-global-mode t)
+
+  ;; Enable globally
+  (global-undo-fu-session-mode))
+
+;;; testing stop
+(use-package vundo
+  ;; :ensure nil  ; Remove this line to install from MELPA
+  :config
+  (global-set-key (kbd "C-x u") 'vundo))
+
+
+(use-package editorconfig
+  :diminish ""
+  ;; :ensure nil  ; Remove this line to install from MELPA
+  :config
+  (editorconfig-mode 1))
+
+
+(use-package diminish
+  ;; :ensure nil  ; Remove this line to install from MELPA
+  :config
+  (diminish 'line-number-mode))
+
+(use-package window
+  :ensure nil       ;; This is built-in, no need to fetch it.
+  :custom
+  (display-buffer-alist
+   '(
+     ("\\*.*e?shell\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . -1))
+
+     ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 0))
+
+     ;; Example configuration for the LSP help buffer,
+     ;; keeps it always on bottom using 25% of the available space:
+     ("\\*\\(lsp-help\\)\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 0))
+
+     ;; Configuration for displaying various diagnostic buffers on
+     ;; bottom 25%:
+     ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 1))
+     )))
+
+
+(use-package dape
+  :preface
+  ;; By default dape shares the same keybinding prefix as `gud'
+  ;; If you do not want to use any prefix, set it to nil.
+  ;; (setq dape-key-prefix "\C-x\C-a")
+
+  :hook
+  ;; Save breakpoints on quit
+  (kill-emacs . dape-breakpoint-save)
+  ;; Load breakpoints on startup
+  (after-init . dape-breakpoint-load)
+
+  :custom
+  ;; Turn on global bindings for setting breakpoints with mouse
+  (dape-breakpoint-global-mode +1)
+
+  ;; Info buffers to the right
+  ;; (dape-buffer-window-arrangement 'right)
+  ;; Info buffers like gud (gdb-mi)
+  (dape-buffer-window-arrangement 'gud)
+  (dape-info-hide-mode-line nil)
+
+  ;; Projectile users
+  ;; (dape-cwd-function #'projectile-project-root)
+
+  :config
+  ;; Pulse source line (performance hit)
+  ;; (add-hook 'dape-display-source-hook #'pulse-momentary-highlight-one-line)
+
+  ;; Save buffers on startup, useful for interpreted languages
+  (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
+
+  ;; Kill compile buffer on build success
+  (add-hook 'dape-compile-hook #'kill-buffer)
+  )
+
+
+;; Personal info
+(setq user-mail-address "leonpierre.dufour@gmail.com"
+      user-full-name "Leon-Pierre Dufour")
+
+;; IMAP settings for reading mail
+(setq gnus-select-method
+      '(nnimap "gmail"
+               (nnimap-address "imap.gmail.com")
+               (nnimap-server-port 993)
+               (nnimap-stream ssl)
+               (nnir-search-engine imap)
+               (nnmail-expiry-target "nnimap+gmail:[Gmail]/Trash")
+               (nnmail-expiry-wait 90)))
+
+;; SMTP settings for sending mail
+(setq message-send-mail-function 'smtpmail-send-it
+      smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587
+      smtpmail-stream-type 'starttls)
+
+;; Store passwords securely
+(setq auth-sources '("~/.authinfo.gpg" "~/.authinfo"))
+
+;; Make Gnus NOT ignore [Gmail] mailboxes
+(setq gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")
+
+;; Store sent mail on Gmail's servers
+(setq gnus-message-archive-group "nnimap+gmail:[Gmail]/Sent Mail")
+
+;; Don't keep message buffers around
+(setq message-kill-buffer-on-exit t)
+
+
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(delete-selection-mode 1)
+(setq compilation-scroll-output t)
+(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+(setq compilation-auto-jump-to-first-error t)
+;; (setq treesit-font-lock-level 4) ;; Use advanced font locking for Treesit mode.
+(global-so-long-mode 1)
+(setq history-length t)                    ; No limit on history length
+(setq history-delete-duplicates nil)       ; Keep duplicates for recency-based sorting
+(setq savehist-save-minibuffer-history 1)  ; Save minibuffer history
+(require 'my-test)
+;; Load completion system first - other modules depend on it
+(require 'my-completion)
+;; Load core utilities and themes early
+(require 'my-themes)
+(require 'my-which-key)
+(require 'my-utils)
+
+;; Load editing enhancements
+(require 'my-editing-utils)
+(require 'my-treesit)
+
+(require 'my-meow)
+;; Load programming support (depends on completion)
+(require 'my-prog)
+(require 'my-elisp)
+(require 'my-lang)
+
+;; Load version control (can be heavy)
+(require 'my-magit)
+
+;; Load applications
+(require 'my-dired)
+(require 'my-shell)
+(require 'my-org)
+
+;; Load modal editing last (affects all modes)
+
+;; Load custom keybindings last
+(require 'my-keybinds)
+
+;; Commented out modules
+(require 'my-llm)
+;; (require 'my-spelling)
+;; (require 'my-evil)
+;; (require 'my-lsp)
+
+
 
 (provide 'init)
 

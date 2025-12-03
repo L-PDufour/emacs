@@ -99,6 +99,13 @@
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
+  ( completion-category-overrides '((eglot (styles orderless))
+                                    (eglot-capf (styles orderless))))
+  (eglot-autoshutdown t)
+  (jsonrpc-event-hook nil)
+  (eglot-events-buffer-size 0) ; Disable event logging
+  (eglot-sync-connect 0)     ; Async connection
+  (eglot-report-progress nil)   ; Disable progress reports
   (eglot-ignored-server-capabilities '(:documentFormattingProvider :documentRangeFormattingProvider))
   :config
   ;; (add-to-list 'eglot-server-programs
@@ -140,11 +147,6 @@
                   (:html . ((:includeLanguages . ((:templ . "html")))))))
 
   ;; Performance optimizations
-  (setq completion-category-overrides '((eglot (styles orderless))
-                                        (eglot-capf (styles orderless))))
-  (setq eglot-autoshutdown t)
-  (setq eglot-events-buffer-size 0) ; Disable event logging
-  (setq eglot-sync-connect nil)     ; Async connection
 
   ;; Reduce file watching
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)

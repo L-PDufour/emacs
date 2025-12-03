@@ -30,6 +30,7 @@
   :hook (go-mode . go-eldoc-setup))
 
 (use-package templ-ts-mode
+  :ensure nil
   :load-path "~/.emacs.d/site-lisp/templ-ts-mode"  ; Clone your fork here
   :mode "\\.templ\\'")
 
