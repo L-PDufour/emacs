@@ -765,14 +765,14 @@
 ;;           - Vim-style C-o/C-i jump navigation
 ;;           - Repeat maps for windows, buffers, pages
 ;;           - Smart enhancements while keeping Emacs feel
-;; (require 'my-vanilla-plus)
+(require 'my-vanilla-plus)
 
 ;; Option 2: Kakoune-style modal editing (Meow)
 ;; (require 'my-meow)
 
 ;; Option 3: Vim-style modal editing (Evil + evil-keypad)
 ;;           Currently active
-(require 'my-evil)
+;; (require 'my-evil)
 
 ;; Windows and UI (should be late)
 (require 'my-windows)
