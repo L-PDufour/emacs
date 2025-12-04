@@ -586,20 +586,6 @@
 ;; - Inserting a new line with the same indentation level as the current line
 ;; - Move backward/forward to the indentation level of the current line
 ;; - and other features.
-(use-package outline-indent
-  :ensure nil
-  :commands outline-indent-minor-mode
-
-  :custom
-  (outline-indent-ellipsis " ▼")
-
-  :init
-  ;; The minor mode can also be automatically activated for a certain modes.
-  (add-hook 'python-mode-hook #'outline-indent-minor-mode)
-  (add-hook 'python-ts-mode-hook #'outline-indent-minor-mode)
-
-  (add-hook 'yaml-mode-hook #'outline-indent-minor-mode)
-  (add-hook 'yaml-ts-mode-hook #'outline-indent-minor-mode))
 
 
 (winner-mode 1)
