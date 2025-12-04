@@ -5,7 +5,7 @@
 ;;; Performance: Garbage Collection
 (setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.6)
-
+(setq debug-on-error t)
 ;; Reset to reasonable values after startup
 (add-hook 'emacs-startup-hook
           (lambda ()

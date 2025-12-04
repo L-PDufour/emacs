@@ -209,8 +209,8 @@
               ("M-;" . corfu-complete)
               ("RET" . nil))
   :init
-  (corfu-history-mode 1)
-  (corfu-popupinfo-mode 1)
+  ; (corfu-history-mode 1)
+  ; (corfu-popupinfo-mode 1)
   (global-corfu-mode)
   :config
   (with-eval-after-load 'savehist
