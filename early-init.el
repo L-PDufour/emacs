@@ -16,7 +16,7 @@
   (make-directory user-emacs-directory t))
 
 ;;; Package Management - ENABLE package.el
-(setq package-enable-at-startup t)  ; Enable package.el
+(setq package-enable-at-startup nil)  ; Enable package.el
 (setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 ;;; Native Compilation

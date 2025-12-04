@@ -26,7 +26,7 @@
   :interpreter "lua")
 
 (use-package go-eldoc
-  :ensure t
+  :ensure nil
   :hook (go-mode . go-eldoc-setup))
 
 (use-package templ-ts-mode

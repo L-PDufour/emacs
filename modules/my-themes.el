@@ -143,25 +143,25 @@
      `(vc-dir-header-value ((,c :foreground "#babbf1"))))))
 
 (use-package nerd-icons
-  :ensure t
+  :ensure nil
   :config
   ;; Ensure nerd-icons is properly loaded before other packages use it
   (require 'nerd-icons))
 
 (use-package nerd-icons-completion
-  :ensure t
+  :ensure nil
   :after (marginalia nerd-icons)
   :config
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 (use-package nerd-icons-corfu
-  :ensure t
+  :ensure nil
   :after (corfu nerd-icons)
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package nerd-icons-dired
-  :ensure t
+  :ensure nil
   :after (dired nerd-icons)
   :hook
   (dired-mode . nerd-icons-dired-mode))

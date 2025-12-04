@@ -122,7 +122,7 @@
   (meow-global-mode -1))
 
 (use-package meow-tree-sitter
-  :ensure t
+  :ensure nil
   :after meow
   :config
   (meow-tree-sitter-register-defaults))

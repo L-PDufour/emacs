@@ -1,35 +1,18 @@
 ;;; init.el --- Init -*- lexical-binding: t; -*-
 (require 'package)
 
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu" . "https://elpa.gnu.org/packages/")
-        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
-
-(setq package-archive-priorities
-      '(("gnu" . 99)
-        ("nongnu" . 80)
-        ("melpa" . 70)))
+(setq package-archives nil)
+(setq package-enable-at-startup nil)
 
 ;; Initialize package system
 (package-initialize)
 
-;; Refresh package contents if needed
-(unless package-archive-contents
-  (package-refresh-contents))
-
-;; Install use-package if not installed
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
 
 (require 'use-package)
 
 ;; Configure use-package
-(setq use-package-always-ensure t)  ; Auto-install packages
-(setq use-package-compute-statistics nil)
-(setq use-package-expand-minimally t)
-(setq use-package-enable-imenu-support t)
-(setq use-package-verbose nil)
+(setq use-package-always-ensure nil)  ; Auto-install packages
+
 
 ;;; Load custom-file
 (when (file-exists-p custom-file)
@@ -649,7 +632,7 @@
 ;; - Move backward/forward to the indentation level of the current line
 ;; - and other features.
 (use-package outline-indent
-  :ensure t
+  :ensure nil
   :commands outline-indent-minor-mode
 
   :custom
@@ -729,7 +712,7 @@
 ;; ;; Helpful is an alternative to the built-in Emacs help that provides much more
 ;; ;; contextual information.
 (use-package helpful
-  :ensure t
+  :ensure nil
   :commands (helpful-callable
 
              helpful-variable
@@ -776,7 +759,7 @@
    (magit-post-refresh . diff-hl-magit-post-refresh)))
 
 (use-package undo-fu
-  :ensure t
+  :ensure nil
 
   :commands (undo-fu-only-undo
              undo-fu-only-redo

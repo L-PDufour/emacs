@@ -68,7 +68,7 @@
 ;;; Eldoc
 (use-package eldoc
   :diminish
-  :ensure t
+  :ensure nil
   :defer t
   :config
   (setq eldoc-idle-delay 0.5)                  ;; Automatically fetch doc help
@@ -161,7 +161,7 @@
 ;; level of indentation, helping to improve readability and navigation within
 ;; the code.
 (use-package highlight-indent-guides
-  :ensure t
+  :ensure nil
   :hook (prog-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guides-method 'bitmap)  ; No character issues

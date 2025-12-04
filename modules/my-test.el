@@ -96,7 +96,7 @@ Uses position instead of index field."
   (consult-eglot-embark-mode 1))
 
 (use-package elfeed-tube
-  :ensure t
+  :ensure nil
   :after elfeed
   :config
   (elfeed-tube-setup))

@@ -34,7 +34,7 @@
 
 (use-package marginalia
   :hook (after-init . marginalia-mode))(use-package marginalia
-  :ensure t
+  :ensure nil
   :commands (marginalia-mode marginalia-cycle)
   :hook (after-init . marginalia-mode))
 
@@ -166,6 +166,7 @@
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
 ;; current candidates, positioned either below or above the point. Candidates
 ;; can be selected by navigating up or down.
+
 
 (use-package corfu
   ;; Optional customizations
