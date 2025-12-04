@@ -41,18 +41,14 @@ Opens consult-buffer with project filtering if in a project."
 (defvar my-search-keymap (make-sparse-keymap) "Keymap for search operations")
 (defvar my-code-keymap (make-sparse-keymap) "Keymap for code operations")
 
-;; Ensure all required packages are loaded before binding
-(require 'consult nil t)
-(require 'project nil t)
-(require 'winner nil t)
-(require 'xref nil t)
-(require 'eglot nil t)
 
 ;; Direct global bindings instead of aliases
 (global-set-key (kbd "C-c f") my-file-keymap)
 ;; (global-set-key (kbd "C-c b") my-buffer-keymap)
 (global-set-key (kbd "C-c w") my-window-keymap)
-(global-set-key (kbd "C-c s") my-search-keymap)
+(global-set-key (kbd "C-c s") search-map)
+(global-set-key (kbd "C-c p") project-prefix-map)
+(global-set-key (kbd "C-c v") project-prefix-map)
 (global-set-key (kbd "C-c l") my-code-keymap)
 
 ;; File operations (C-c f ...)
@@ -76,8 +72,6 @@ Opens consult-buffer with project filtering if in a project."
 (define-key my-window-keymap (kbd "j") #'windmove-down)
 (define-key my-window-keymap (kbd "k") #'windmove-up)
 (define-key my-window-keymap (kbd "l") #'windmove-right)
-(define-key my-window-keymap (kbd "u") #'winner-undo)
-(define-key my-window-keymap (kbd "r") #'winner-redo)
 (define-key my-window-keymap (kbd "q") #'delete-window)
 (define-key my-window-keymap (kbd "o") #'delete-other-windows)
 
@@ -93,14 +87,19 @@ Opens consult-buffer with project filtering if in a project."
 ;; Code operations
 (define-key my-code-keymap (kbd "d") #'xref-find-definitions)
 (define-key my-code-keymap (kbd "r") #'xref-find-references)
-(define-key my-code-keymap (kbd "f") #'apheleia-format-buffer)
 (define-key my-code-keymap (kbd "a") #'eglot-code-actions)
 (define-key my-code-keymap (kbd "h") #'display-local-help)
 (define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)
 ;; Global keys
 ;; (global-set-key (kbd "<escape>") #'keyboard-escape-quit)
 (global-set-key (kbd "C-g") #'prot/keyboard-quit-dwim)
-
+(with-eval-after-load 'which-key
+  (which-key-add-key-based-replacements
+    "C-c f" "files"
+    "C-c w" "windows"
+    "C-c s" "search"
+    "C-c p" "project"
+    "C-c l" "code"))
 ;; Add a debug message to confirm loading
 (message "My keybinds module loaded successfully")
 

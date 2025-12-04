@@ -5,6 +5,7 @@
 ;;;; Nix
 
 (use-package nix-mode
+  :ensure nil
   :mode "\\.nix\\'"
   :config
   ;; Add LSP support via nil (Nix Language Server)
@@ -22,11 +23,12 @@
           'nixpkgs-fmt)))
 
 (use-package lua-mode
+  :ensure nil
   :mode "\\.lua\\'"
   :interpreter "lua")
 
 (use-package go-eldoc
-  :ensure t
+  :ensure nil
   :hook (go-mode . go-eldoc-setup))
 
 (use-package templ-ts-mode
@@ -35,6 +37,7 @@
   :mode "\\.templ\\'")
 
 (use-package markdown-mode
+  :ensure nil
   :commands (gfm-mode
              gfm-view-mode
              markdown-mode
@@ -43,6 +46,30 @@
          ("\\.md\\'" . markdown-mode)
          ("README\\.md\\'" . gfm-mode)))
 
+(use-package geiser
+  :ensure nil
+  :config
+  ;; Set Guile as the default implementation
+  (setq geiser-default-implementation 'guile)
+  
+  ;; Better REPL experience
+  (setq geiser-repl-history-filename "~/.emacs.d/geiser-history")
+  (setq geiser-repl-query-on-kill-p nil)
+  
+  ;; Show more in the REPL
+  (setq geiser-repl-use-other-window t)
+  (setq geiser-repl-query-on-exit-p nil))
+
+(use-package geiser-guile
+  :ensure nil
+  :after geiser
+  :config
+  ;; Specify Guile binary if needed
+  ;; (setq geiser-guile-binary "guile")
+  
+  ;; Load init file in REPL for custom procedures
+  ;; (setq geiser-guile-init-file "~/.guile")
+  )
 
 (provide 'my-lang)
 ;;; my-lang.el ends here

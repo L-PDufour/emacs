@@ -18,6 +18,7 @@
 ;; Enable vertico
 
 (use-package vertico
+  :ensure nil
   :bind (:map vertico-map
 			  ("M-;" . vertico-insert)
 			  ;; Add directory navigation bindings directly here
@@ -33,13 +34,13 @@
 		 (rfn-eshadow-update-overlay . vertico-directory-tidy)))
 
 (use-package marginalia
-  :hook (after-init . marginalia-mode))(use-package marginalia
-  :ensure t
+  :ensure nil
   :commands (marginalia-mode marginalia-cycle)
   :hook (after-init . marginalia-mode))
 
 
 (use-package consult
+  :ensure nil
   ;; Replace bindings. Lazily loaded by `use-package'.
   :bind (;; C-c bindings in `mode-specific-map'
 		 ("C-c M-x" . consult-mode-command)
@@ -116,13 +117,11 @@
   ;;
   ;; However, the author of minimal-emacs.d uses these parameters to achieve
   ;; immediate feedback from Consult.
-  (setq consult-async-input-debounce 0.1
-        consult-narrow-key "<"
-        consult-line-numbers-widen t
-        consult-async-min-input 2
-        consult-fontify-preserve nil
-        consult-async-input-throttle 0.2
-        consult-async-refresh-delay 0.15)
+  (setq         consult-narrow-key "<"
+                consult-line-numbers-widen t
+                consult-async-min-input 2
+                consult-fontify-preserve nil
+                consult-async-refresh-delay 0.15)
   :config
   (consult-customize
    consult-theme :preview-key '(:debounce 0.2 any)
@@ -134,8 +133,22 @@
    consult--source-recent-file consult--source-project-recent-file
    :preview-key "M-."))
 
+(use-package consult-eglot
+  :ensure nil
+  :after eglot
+  :bind (:map eglot-mode-map
+              ([remap xref-find-apropos] . consult-eglot-symbols)))
+
+;; Make embark use consult-eglot-symbols for "a"
+(use-package consult-eglot-embark
+  :ensure nil
+  :after (consult-eglot embark)
+  :demand t
+  :config
+  (consult-eglot-embark-mode 1))
 
 (use-package orderless
+  :ensure nil 
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
@@ -145,6 +158,7 @@
   (completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package embark
+  :ensure nil
   :bind
   (("C-." . embark-act)
    ("M-." . embark-dwim)
@@ -160,6 +174,7 @@
                  (window-parameters (mode-line-format . none)))))
 
 (use-package embark-consult
+  :ensure nil
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
@@ -168,12 +183,10 @@
 ;; can be selected by navigating up or down.
 
 (use-package corfu
+  :ensure nil
   ;; Optional customizations
   :custom
   (corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
-  (corfu-auto t)
-  (corfu-auto-delay 0.4)
-  (corfu-auto-prefix 2)
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay 0.5)
   (corfu-preselect 'directory) ;; Select the first candidate, except for directories
@@ -202,43 +215,9 @@
   :config
   (with-eval-after-load 'savehist
     (add-to-list 'savehist-additional-variables 'corfu-history)))
-;; Enable optional extension modes:
-
-;; (use-package corfu
-;;   :ensure t
-;;   :ensure t
-
-;;   :init
-;;   (corfu-history-mode 1)
-;;   (corfu-popupinfo-mode 1)
-;;   (global-corfu-mode)
-;;   :config
-;;   (defun my-corfu-combined-sort (candidates)
-;;     "Sort CANDIDATES using both display-sort-function and corfu-sort-function."
-;;     (let ((candidates
-;;            (let ((display-sort-func (corfu--metadata-get 'display-sort-function)))
-;;              (if display-sort-func
-;;                  (funcall display-sort-func candidates)
-;;                candidates))))
-;;       (if corfu-sort-function
-;;           (funcall corfu-sort-function candidates)
-;;         candidates)))
-;; 
-;;   (setq corfu-sort-override-function #'my-corfu-combined-sort)
-;;   (setq corfu-separator 32)
-;;   :custom
-;;   (corfu-auto t)
-;;   (corfu-auto-prefix 1)
-;;   ;; (corfu-quit-no-match nil)
-;;   ;; (corfu-quit-at-boundary nil)        ; ADD: Quit at word boundary
-;;   (corfu-preselect 'directory)      ;; Preselect the prompt
-;;   (corfu-popupinfo-delay 0.5)
-;;   ;; Hide commands in M-x which do not apply to the current mode.
-;;   (read-extended-command-predicate #'command-completion-default-include-p)
-;;   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
-;;   (text-mode-ispell-word-completion nil))
 
 (use-package cape
+  :ensure nil
   :commands (cape-dabbrev cape-file cape-elisp-block)
   :bind ("C-c p" . cape-prefix-map)
   :custom

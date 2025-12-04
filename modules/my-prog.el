@@ -65,32 +65,32 @@
   :config                ;; Use :config instead of :init
   (eglot-tempel-mode 1))  ;; Use 1 instead of t for the ode
 
-;;; Eldoc
-(use-package eldoc
-  :diminish
-  :ensure t
-  :defer t
-  :config
-  (setq eldoc-idle-delay 0.5)                  ;; Automatically fetch doc help
-  (setq eldoc-echo-area-display-truncation-message nil)
-  :init
-  (global-eldoc-mode))
 
 (defun my/eglot-capf ()
-  "Set up completion with buffer validation."
+  "Set up completion at point with Eglot and Tempel combined using Super Capf.
+This merges LSP completions with Tempel snippets into one unified list."
   (when (and (buffer-live-p (current-buffer))
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
-                (list #'eglot-completion-at-point
-                      #'tempel-complete))))
+                (list
+                 ;; Option 1: Super Capf - Merges Eglot + Tempel + File into ONE list
+                 ;; All completions appear together, sorted by the completion system
+                 (cape-capf-buster
+                  (cape-capf-super
+                   #'eglot-completion-at-point
+                   #'tempel-complete
+                   #'cape-file))
+                 
+                 ;; Option 2: Fallback - Dabbrev as last resort when nothing else matches
+                 #'cape-dabbrev))))
 
-(use-package eglot-booster
-  :vc (:url "https://github.com/jdtsmith/eglot-booster"
-            :rev :newest)
-  :after eglot
-  :config
-  (setq eglot-booster-io-only t)
-  (eglot-booster-mode))
+;; (use-package eglot-booster
+;;   :vc (:url "https://github.com/jdtsmith/eglot-booster"
+;;             :rev :newest)
+;;   :after eglot
+;;   :config
+;;   (setq eglot-booster-io-only t)
+;;   (eglot-booster-mode))
 
 (use-package eglot
   :ensure nil
@@ -146,11 +146,6 @@
                                   (:suggest . ((:completeFunctionCalls . t)))))
                   (:html . ((:includeLanguages . ((:templ . "html")))))))
 
-  ;; Performance optimizations
-
-  ;; Reduce file watching
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
   :hook
   (eglot-managed-mode . my/eglot-capf))
 
@@ -161,30 +156,13 @@
 ;; level of indentation, helping to improve readability and navigation within
 ;; the code.
 (use-package highlight-indent-guides
-  :ensure t
+  :ensure nil
   :hook (prog-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guides-method 'bitmap)  ; No character issues
   (setq highlight-indent-guides-responsive 'top))
 
-(use-package flymake
-  :ensure nil
-  :defer t
-  :custom
-  (flymake-margin-indicators-string
-   '((error "!»" compilation-error) (warning "»" compilation-warning)
-     (note "»" compilation-info)))
-  :config
-  (defun consult-flymake-project ()
-    "Jump to Flymake diagnostic in project."
-    (interactive)
-    (consult-flymake t))
-  :bind (:map flymake-mode-map
-			  ("C-c e e" . consult-flymake)
-			  ("C-c e l" . consult-flymake-project)
-			  ("C-c e n" . flymake-goto-next-error)
-			  ("C-c e p" . flymake-goto-prev-error))
-  :hook (prog-mode . flymake-mode))
+
 
 (defun eglot-open-link ()
   "Open markdown link at point in the eldoc buffer."
@@ -194,37 +172,6 @@
 		(browse-url url)
 	  (message "No URL found at point"))))
 
-(use-package apheleia
-  :diminish
-  :config
-  (apheleia-global-mode 1)
 
-  ;; Add custom formatters
-  (add-to-list 'apheleia-formatters
-               '(templ-format "templ" "fmt" filepath))
-  (add-to-list 'apheleia-formatters
-               '(deno-format "deno" "fmt" filepath))
-
-  ;; Configure prettierd formatter
-  (setf (alist-get 'prettierd apheleia-formatters)
-		'("prettierd" filepath))
-  (add-to-list 'apheleia-formatters
-               '(gofmt "gofmt"))
-  (add-to-list 'apheleia-mode-alist
-               '(go-mode . gofmt))
-  (add-to-list 'apheleia-mode-alist
-               '(go-ts-mode . gofmt))
-  ;; Update mode associations to use prettierd instead of prettier
-  (setf (alist-get 'js-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'deno-format)
-  (setf (alist-get 'typescript-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'json-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'json-ts-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'css-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'html-mode apheleia-mode-alist) 'prettierd)
-  (setf (alist-get 'web-mode apheleia-mode-alist) 'prettierd))
 (provide 'my-prog)
 ;;; my-prog.el ends here

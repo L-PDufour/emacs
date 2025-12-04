@@ -5,20 +5,6 @@
 ;; Configuration for the Meow modal editing package.
 
 ;;; Code:
-(use-package repeat-fu
-  :commands (repeat-fu-mode repeat-fu-execute)
-
-  :config
-  (setq repeat-fu-preset 'meow)
-
-  :hook
-  ((meow-mode)
-   .
-   (lambda ()
-     (when (and (not (minibufferp)) (not (derived-mode-p 'special-mode)))
-       (repeat-fu-mode)
-       (define-key meow-normal-state-keymap (kbd "C-'") 'repeat-fu-execute)
-       (define-key meow-insert-state-keymap (kbd "C-'") 'repeat-fu-execute)))))
 
 (use-package meow
   :config
@@ -51,7 +37,7 @@
 	 '("0" . meow-digit-argument)
      '("SPC" . consult-buffer)
 	 '("/" . consult-line)
-	 '("?" . meow-cheatsheet))
+     '("?" . meow-cheatsheet))
 
     (meow-normal-define-key
      '("0" . meow-expand-0)
@@ -116,13 +102,19 @@
      '("'" . repeat)
      '("<escape>" . ignore)))
   (meow-setup)
-  (add-to-list 'meow-mode-state-list '((eat-mode) . insert))
-  (add-to-list 'meow-mode-state-list '((magit-status-mode) . insert))
-  (meow-setup-indicator)
-  (meow-global-mode -1))
+  (defun my/maybe-enable-meow ()
+    "Enable Meow in prog-mode but not in special modes."
+    (when (and (derived-mode-p 'prog-mode)
+               (not (minibufferp))
+               (not (derived-mode-p 'special-mode)))
+      (meow-mode 1)))
+  
+  ;; Enable Meow only in prog-mode
+  (add-hook 'prog-mode-hook #'my/maybe-enable-meow)
+  (meow-setup-indicator))
 
 (use-package meow-tree-sitter
-  :ensure t
+  :ensure nil
   :after meow
   :config
   (meow-tree-sitter-register-defaults))

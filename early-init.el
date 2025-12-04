@@ -3,11 +3,19 @@
 ;;; Code:
 
 ;;; Performance: Garbage Collection
-(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6)
 
+;; Reset to reasonable values after startup
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (setq gc-cons-threshold (* 16 1024 1024)))) ; 16MB
+            (setq gc-cons-threshold (* 16 1024 1024)   ; 16MB (reasonable default)
+                  gc-cons-percentage 0.1)))
+
+(setq igc-step-multiplier 2)               ; Adjust IGC aggressiveness
+(setq igc-cons-threshold (* 32 1024 1024))
+;; GC when focus is lost
+(add-hook 'focus-out-hook #'garbage-collect)
 
 ;;; Directory Structure
 (setq user-emacs-directory (expand-file-name "var/" "~/.emacs.d/"))
@@ -15,9 +23,9 @@
 (unless (file-directory-p user-emacs-directory)
   (make-directory user-emacs-directory t))
 
-;;; Package Management - ENABLE package.el
-(setq package-enable-at-startup t)  ; Enable package.el
-(setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
+;;; Package Management - Completely disable package.el for Nix
+(setq package-enable-at-startup nil)
+(setq package-archives nil)
 
 ;;; Native Compilation
 (when (featurep 'native-compile)
@@ -71,7 +79,7 @@
 (setq default-input-method nil)
 
 ;;; Custom File
-(setq custom-file (expand-file-name "../custom.el" user-emacs-directory))
+(setq custom-file (expand-file-name "custom.el" "~/.emacs.d/"))
 
 (provide 'early-init)
 ;;; early-init.el ends here

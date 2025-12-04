@@ -1,55 +1,41 @@
 ;;; init.el --- Init -*- lexical-binding: t; -*-
-(require 'package)
 
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu" . "https://elpa.gnu.org/packages/")
-        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 
-(setq package-archive-priorities
-      '(("gnu" . 99)
-        ("nongnu" . 80)
-        ("melpa" . 70)))
+(setq package-archives nil)
+(setq package-enable-at-startup nil)
 
 ;; Initialize package system
+(require 'package)
 (package-initialize)
 
-;; Refresh package contents if needed
-(unless package-archive-contents
-  (package-refresh-contents))
-
-;; Install use-package if not installed
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
 
 (require 'use-package)
+(setq use-package-always-ensure nil)  ; Auto-install packages
 
-;; Configure use-package
-(setq use-package-always-ensure t)  ; Auto-install packages
-(setq use-package-compute-statistics nil)
-(setq use-package-expand-minimally t)
-(setq use-package-enable-imenu-support t)
-(setq use-package-verbose nil)
 
 ;;; Load custom-file
+(setq custom-file (expand-file-name "custom.el" "~/.emacs.d/"))
 (when (file-exists-p custom-file)
   (load custom-file :noerror :nomessage))
 
 ;;; Set up load paths
-(add-to-list 'load-path (expand-file-name "../lisp" user-emacs-directory))
-(add-to-list 'load-path (expand-file-name "../modules" user-emacs-directory))
-(add-to-list 'load-path (expand-file-name "../site-lisp" user-emacs-directory))
+;; Note: user-emacs-directory is set to var/ in early-init.el
+;; So we need absolute paths relative to the actual .emacs.d
+(let ((emacs-root (file-name-directory
+                   (directory-file-name user-emacs-directory))))
+  (add-to-list 'load-path (expand-file-name "lisp" emacs-root))
+  (add-to-list 'load-path (expand-file-name "modules" emacs-root))
+  (add-to-list 'load-path (expand-file-name "site-lisp" emacs-root))
+  
+  ;; Add all subdirectories
+  (let ((default-directory (expand-file-name "modules" emacs-root)))
+    (when (file-directory-p default-directory)
+      (normal-top-level-add-subdirs-to-load-path)))
+  
+  (let ((default-directory (expand-file-name "site-lisp" emacs-root)))
+    (when (file-directory-p default-directory)
+      (normal-top-level-add-subdirs-to-load-path))))
 
-;; Add all subdirectories of modules/
-(let ((default-directory (expand-file-name "../modules" user-emacs-directory)))
-  (when (file-directory-p default-directory)
-    (normal-top-level-add-subdirs-to-load-path)))
-
-;; Add all subdirectories of site-lisp/
-(let ((default-directory (expand-file-name "../site-lisp" user-emacs-directory)))
-  (when (file-directory-p default-directory)
-    (normal-top-level-add-subdirs-to-load-path)))
-;;; File locations
 (setq auto-save-list-file-prefix (expand-file-name "autosave/" user-emacs-directory))
 (setq tramp-auto-save-directory (expand-file-name "tramp-autosave/" user-emacs-directory))
 (setq backup-directory-alist `(("." . ,(expand-file-name "backup" user-emacs-directory))))
@@ -63,14 +49,7 @@
 (setq transient-levels-file (expand-file-name "transient/levels.el" user-emacs-directory))
 (setq transient-values-file (expand-file-name "transient/values.el" user-emacs-directory))
 
-;;; Native compilation
-(setq native-comp-async-query-on-exit t)
 
-;;; Short answers
-(setq read-answer-short t)
-(if (boundp 'use-short-answers)
-    (setq use-short-answers t)
-  (advice-add 'yes-or-no-p :override #'y-or-n-p))
 (setq native-comp-async-query-on-exit t)
 
 ;; Allow for shorter responses: "y" for yes and "n" for no.
@@ -78,26 +57,6 @@
 (if (boundp 'use-short-answers)
 	(setq use-short-answers t)
   (advice-add 'yes-or-no-p :override #'y-or-n-p))
-
-;;; Undo/redo
-
-(setq undo-limit (* 13 160000)
-	  undo-strong-limit (* 13 240000)
-	  undo-outer-limit (* 13 24000000))
-
-;;; package.el
-
-(when (bound-and-true-p minimal-emacs-package-initialize-and-refresh)
-  ;; Initialize and refresh package contents again if needed
-  (package-initialize)
-  ;; Install use-package if necessary
-  (unless (package-installed-p 'use-package)
-	(unless (seq-empty-p package-archive-contents)
-	  (package-refresh-contents))
-	(package-install 'use-package))
-
-  ;; Ensure use-package is available
-  (require 'use-package))
 
 ;;; Minibuffer
 
@@ -113,7 +72,7 @@
 
 ;; By default, Emacs "updates" its ui more often than it needs to
 (setq which-func-update-delay 1.0)
-(setq idle-update-delay which-func-update-delay)  ;; Obsolete in >= 30.1
+
 
 (defalias #'view-hello-file #'ignore)  ; Never show the hello file
 
@@ -221,14 +180,9 @@
 
 ;;; Auto save
 
-;; Enable auto-save to safeguard against crashes or data loss. The
-;; `recover-file' or `recover-session' functions can be used to restore
-;; auto-saved data.
-(setq auto-save-default nil)
-(setq auto-save-no-message t)
 
-;; Do not auto-disable auto-save after deleting large chunks of
-;; text.
+
+
 (setq auto-save-include-big-deletions t)
 
 (setq auto-save-list-file-prefix
@@ -599,25 +553,9 @@
   :custom
   (save-place-limit 400))
 
-;; Enable `auto-save-mode' to prevent data loss. Use `recover-file' or
-;; `recover-session' to restore unsaved changes.
-(setq auto-save-default t)
-
-(setq auto-save-interval 300)
-(setq auto-save-timeout 60)
-
-;; When auto-save-visited-mode is enabled, Emacs will auto-save file-visiting
-;; buffers after a certain amount of idle time if the user forgets to save it
-;; with save-buffer or C-x s for example.
-;;
-;; This is different from auto-save-mode: auto-save-mode periodically saves
-;; all modified buffers, creating backup files, including those not associated
-;; with a file, while auto-save-visited-mode only saves file-visiting buffers
-;; after a period of idle time, directly saving to the file itself without
-;; creating backup files.
-(setq auto-save-visited-interval 30)   ; Save after 5 seconds if inactivity
-(auto-save-visited-mode 1)
-
+(setq auto-save-default t
+      auto-save-interval 300
+      auto-save-timeout 60)
 ;; The built-in outline-minor-mode provides structured code folding in modes
 ;; such as Emacs Lisp and Python, allowing users to collapse and expand sections
 ;; based on headings or indentation levels. This feature enhances navigation and
@@ -649,7 +587,7 @@
 ;; - Move backward/forward to the indentation level of the current line
 ;; - and other features.
 (use-package outline-indent
-  :ensure t
+  :ensure nil
   :commands outline-indent-minor-mode
 
   :custom
@@ -663,105 +601,6 @@
   (add-hook 'yaml-mode-hook #'outline-indent-minor-mode)
   (add-hook 'yaml-ts-mode-hook #'outline-indent-minor-mode))
 
-;; The stripspace Emacs package provides stripspace-local-mode, a minor mode
-;; that automatically removes trailing whitespace and blank lines at the end of
-;; the buffer when saving.
-                                        ; (use-package stripspace
-;;   :diminish
-;;   :ensure nil
-;;   :commands stripspace-local-mode
-;;
-;;   ;; Enable for prog-mode-hook, text-mode-hook, conf-mode-hook
-;;   :hook ((prog-mode . stripspace-local-mode)
-;;          (text-mode . stripspace-local-mode)
-;;          (conf-mode . stripspace-local-mode))
-;;
-;;   :custom
-;;   ;; The `stripspace-only-if-initially-clean' option:
-;;   ;; - nil to always delete trailing whitespace.
-;;   ;; - Non-nil to only delete whitespace when the buffer is clean initially.
-;;   ;; (The initial cleanliness check is performed when `stripspace-local-mode'
-;;   ;; is enabled.)
-;;   (stripspace-only-if-initially-clean nil)
-;;
-;;   ;; Enabling `stripspace-restore-column' preserves the cursor's column position
-;;   ;; even after stripping spaces. This is useful in scenarios where you add
-;;   ;; extra spaces and then save the file. Although the spaces are removed in the
-;;   ;; saved file, the cursor remains in the same position, ensuring a consistent
-;;   ;; editing experience without affecting cursor placement.
-;;   (stripspace-restore-column t))
-;;
-;; ;; ;; This automates the process of updating installed packages
-;; ;; (use-package auto-package-update
-;; ;;   :ensure t
-;; ;;   :custom
-;; ;;   ;; Set the number of days between automatic updates.
-;; ;;   ;; Here, packages will only be updated if at least 7 days have passed
-;; ;;   ;; since the last successful update.
-;; ;;   (auto-package-update-interval 7)
-;; ;;
-;; ;;   ;; Suppress display of the *auto-package-update results* buffer after updates.
-;; ;;   ;; This keeps the user interface clean and avoids unnecessary interruptions.
-;; ;;   (auto-package-update-hide-results t)
-;; ;;
-;; ;;   ;; Automatically delete old package versions after updates to reduce disk
-;; ;;   ;; usage and keep the package directory clean. This prevents the accumulation
-;; ;;   ;; of outdated files in Emacs’s package directory, which consume
-;; ;;   ;; unnecessary disk space over time.
-;; ;;   (auto-package-update-delete-old-versions t)
-;; ;;
-;; ;;   ;; Uncomment the following line to enable a confirmation prompt
-;; ;;   ;; before applying updates. This can be useful if you want manual control.
-;; ;;   ;; (auto-package-update-prompt-before-update t)
-;; ;;
-;; ;;   :config
-;; ;;   ;; Run package updates automatically at startup, but only if the configured
-;; ;;   ;; interval has elapsed.
-;; ;;   (auto-package-update-maybe)
-;; ;;
-;; ;;   ;; Schedule a background update attempt daily at 10:00 AM.
-;; ;;   ;; This uses Emacs' internal timer system. If Emacs is running at that time,
-;; ;;   ;; the update will be triggered. Otherwise, the update is skipped for that
-;; ;;   ;; day. Note that this scheduled update is independent of
-;; ;;   ;; `auto-package-update-maybe` and can be used as a complementary or
-;; ;;   ;; alternative mechanism.
-;; ;;   (auto-package-update-at-time "10:00"))
-;; ;; Helpful is an alternative to the built-in Emacs help that provides much more
-;; ;; contextual information.
-(use-package helpful
-  :ensure t
-  :commands (helpful-callable
-
-             helpful-variable
-             helpful-key
-             helpful-command
-             helpful-at-point
-             helpful-function)
-  :bind
-  ([remap describe-command] . helpful-command)
-  ([remap describe-function] . helpful-callable)
-  ([remap describe-key] . helpful-key)
-  ([remap describe-symbol] . helpful-symbol)
-  ([remap describe-variable] . helpful-variable)
-  :custom
-  (helpful-max-buffers 7))
-
-;; (use-package buffer-terminator
-;;   :ensure t
-;;   :custom
-;;   ;; Enable/Disable verbose mode to log buffer cleanup events
-;;   (buffer-terminator-verbose nil)
-;;
-;;   ;; Set the inactivity timeout (in seconds) after which buffers are considered
-;;   ;; inactive (default is 30 minutes):
-;;   (buffer-terminator-inactivity-timeout (* 30 60)) ; 30 minutes
-;;
-;;   ;; Define how frequently the cleanup process should run (default is every 10
-;;   ;; minutes):
-;;   (buffer-terminator-interval (* 10 60)) ; 10 minutes
-;;
-;;   :config
-;;   (buffer-terminator-mode 1))
 
 (winner-mode 1)
 (repeat-mode 1)
@@ -776,7 +615,7 @@
    (magit-post-refresh . diff-hl-magit-post-refresh)))
 
 (use-package undo-fu
-  :ensure t
+  :ensure nil
 
   :commands (undo-fu-only-undo
              undo-fu-only-redo
@@ -824,39 +663,7 @@
   :config
   (diminish 'line-number-mode))
 
-(use-package window
-  :ensure nil       ;; This is built-in, no need to fetch it.
-  :custom
-  (display-buffer-alist
-   '(
-     ("\\*.*e?shell\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . -1))
 
-     ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 0))
-
-     ;; Example configuration for the LSP help buffer,
-     ;; keeps it always on bottom using 25% of the available space:
-     ("\\*\\(lsp-help\\)\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 0))
-
-     ;; Configuration for displaying various diagnostic buffers on
-     ;; bottom 25%:
-     ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 1))
-     )))
 
 
 (use-package dape
@@ -934,47 +741,47 @@
 (setq compilation-scroll-output t)
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 (setq compilation-auto-jump-to-first-error t)
-;; (setq treesit-font-lock-level 4) ;; Use advanced font locking for Treesit mode.
+
 (global-so-long-mode 1)
 (setq history-length t)                    ; No limit on history length
 (setq history-delete-duplicates nil)       ; Keep duplicates for recency-based sorting
 (setq savehist-save-minibuffer-history 1)  ; Save minibuffer history
-(require 'my-test)
-;; Load completion system first - other modules depend on it
-(require 'my-completion)
-;; Load core utilities and themes early
-(require 'my-themes)
-(require 'my-which-key)
+;; Core infrastructure
+(require 'my-completion)  ; Needed by many modules
+(require 'my-themes)      ; UI setup
+
+;; Utilities (no dependencies)
 (require 'my-utils)
+(require 'my-which-key)
+(require 'my-avy)
 
-;; Load editing enhancements
-(require 'my-editing-utils)
+;; Major modes and languages
 (require 'my-treesit)
+(require 'my-prog)        ; Depends on completion
+(require 'my-lang)        ; Depends on prog
 
-(require 'my-meow)
-;; Load programming support (depends on completion)
-(require 'my-prog)
-(require 'my-elisp)
-(require 'my-lang)
-
-;; Load version control (can be heavy)
+;; Development tools
+(require 'my-flymake)     ; Depends on prog
+(require 'my-apheleia)    ; Depends on prog
 (require 'my-magit)
 
-;; Load applications
+;; Applications
 (require 'my-dired)
 (require 'my-shell)
 (require 'my-org)
+(require 'my-elfeed)
 
-;; Load modal editing last (affects all modes)
+;; Modal editing (affects everything)
+(require 'my-meow)
 
-;; Load custom keybindings last
+;; Windows and UI (should be late)
+(require 'my-windows)
+
+;; Keybindings last (overrides everything)
 (require 'my-keybinds)
 
-;; Commented out modules
+;; Optional/experimental
 (require 'my-llm)
-;; (require 'my-spelling)
-;; (require 'my-evil)
-;; (require 'my-lsp)
 
 
 

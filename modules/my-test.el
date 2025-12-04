@@ -61,45 +61,12 @@ Uses position instead of index field."
 
 (use-package devdocs)
 
-(use-package elfeed
-  :custom
-  (elfeed-db-directory (expand-file-name "elfeed" user-emacs-directory)))
-
-(use-package elfeed-org
-  :config
-  (elfeed-org)
-  :custom
-  (rmh-elfeed-org-files
-   (list (expand-file-name "elfeed.org" user-emacs-directory)))
-  :hook
-  (after-save . (lambda ()
-                  (when (and (buffer-file-name)
-                             (string-match-p "elfeed\\.org$" (buffer-file-name)))
-                    (elfeed-org)
-                    (message "Elfeed feeds reloaded!")))))
-
 ;; Easy insertion of weblinks
 (use-package org-web-tools)
 (use-package wgrep)
 (use-package breadcrumb)
 
-(use-package consult-eglot
-  :after eglot
-  :bind (:map eglot-mode-map
-              ([remap xref-find-apropos] . consult-eglot-symbols)))
 
-;; Make embark use consult-eglot-symbols for "a"
-(use-package consult-eglot-embark
-  :after (consult-eglot embark)
-  :demand t
-  :config
-  (consult-eglot-embark-mode 1))
-
-(use-package elfeed-tube
-  :ensure t
-  :after elfeed
-  :config
-  (elfeed-tube-setup))
 
 (use-package project
   :ensure nil

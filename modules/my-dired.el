@@ -28,7 +28,7 @@
   (require 'dired-x))
 
 (use-package dired-subtree
-  :ensure t
+  :ensure nil
   :after dired
   :bind
   (:map dired-mode-map
@@ -41,7 +41,7 @@
   (setq dired-subtree-use-backgrounds nil))
 
 (use-package trashed
-  :ensure t
+  :ensure nil
   :commands (trashed)
   :config
   (setq trashed-action-confirmer 'y-or-n-p)

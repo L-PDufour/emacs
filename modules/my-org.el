@@ -2,6 +2,7 @@
 ;;; Commentary: org
 ;;; Code:
 (use-package org-appear
+  :ensure nil
   :hook(org-mode . org-appear-mode))
 
 (use-package org
@@ -27,11 +28,11 @@
   
   (defun my-project-readme ()
     "Get README.org path for current project."
-    (if-let* ((project (project-current))
-              (root (project-root project))
-              (readme (expand-file-name "README.org" root)))
-        readme
-      (error "Not in a project or README.org not found")))
+    (when-let* ((project (project-current))
+                (root (project-root project))
+                (readme (expand-file-name "README.org" root)))
+      (when (file-exists-p readme)
+        readme)))
   
   ;; Capture templates - note the "p" parent key
   (setq org-capture-templates
