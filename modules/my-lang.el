@@ -31,6 +31,16 @@
   :ensure nil
   :hook (go-mode . go-eldoc-setup))
 
+;; Go indentation configuration
+;; Go requires tabs, not spaces
+(defun my-go-mode-setup ()
+  "Configure Go mode to use tabs for indentation."
+  (setq-local indent-tabs-mode t)  ; Use tabs
+  (setq-local tab-width 4))        ; Display tabs as 4 spaces wide
+
+(add-hook 'go-mode-hook #'my-go-mode-setup)
+(add-hook 'go-ts-mode-hook #'my-go-mode-setup)
+
 (use-package templ-ts-mode
   :ensure nil
   :load-path "~/.emacs.d/site-lisp/templ-ts-mode"  ; Clone your fork here
