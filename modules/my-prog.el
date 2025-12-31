@@ -68,20 +68,18 @@
 
 (defun my/eglot-capf ()
   "Set up completion at point with Eglot and Tempel combined using Super Capf.
-This merges LSP completions with Tempel snippets into one unified list."
+This merges LSP completions with Tempel snippets into one unified list.
+Note: cape-file and cape-dabbrev are already added globally in my-completion.el."
   (when (and (buffer-live-p (current-buffer))
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
                 (list
-                 ;; Option 1: Super Capf - Merges Eglot + Tempel + File into ONE list
-                 ;; All completions appear together, sorted by the completion system
+                 ;; Merge Eglot + Tempel into ONE unified list
                  (cape-capf-buster
                   (cape-capf-super
                    #'eglot-completion-at-point
-                   #'tempel-complete
-                   #'cape-file))
-                 
-                 ;; Option 2: Fallback - Dabbrev as last resort when nothing else matches
+                   #'tempel-complete))
+                 ;; cape-dabbrev and cape-file already added globally
                  #'cape-dabbrev))))
 
 ;; (use-package eglot-booster

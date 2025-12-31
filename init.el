@@ -133,6 +133,10 @@
 (setq find-file-visit-truename t
 	  vc-follow-symlinks t)
 
+;; Enable .dir-locals.el for project-specific settings
+(setq enable-local-variables :safe
+	  enable-dir-local-variables t)
+
 ;; Prefer vertical splits over horizontal ones
 (setq split-width-threshold 170
 	  split-height-threshold nil)
@@ -601,8 +605,7 @@
   (add-hook 'yaml-mode-hook #'outline-indent-minor-mode)
   (add-hook 'yaml-ts-mode-hook #'outline-indent-minor-mode))
 
-
-(winner-mode 1)
+;; Note: winner-mode is configured in my-windows.el
 (repeat-mode 1)
 ;; CHANGE: Remove :ensure nil from packages you want to install via package.el
 

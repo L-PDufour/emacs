@@ -186,8 +186,6 @@
 
 (global-set-key (kbd "C-c w m") #'my/maximize-window)
 (global-set-key (kbd "C-c w c") #'my/close-all-popups)
-(setq-default scroll-preserve-screen-position t)
-(setq-default scroll-conservatively 1) ; affects `scroll-step'
-(setq-default scroll-margin 0)
+
 (provide 'my-windows)
 ;;; my-windows.el ends here

@@ -12,8 +12,11 @@
             (setq gc-cons-threshold (* 16 1024 1024)   ; 16MB (reasonable default)
                   gc-cons-percentage 0.1)))
 
-(setq igc-step-multiplier 2)               ; Adjust IGC aggressiveness
-(setq igc-cons-threshold (* 32 1024 1024))
+;; IGC (Incremental GC) settings - Emacs 31+ only
+(when (boundp 'igc-step-multiplier)
+  (setq igc-step-multiplier 2)               ; Adjust IGC aggressiveness
+  (setq igc-cons-threshold (* 32 1024 1024)))
+
 ;; GC when focus is lost
 (add-hook 'focus-out-hook #'garbage-collect)
 

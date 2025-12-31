@@ -64,6 +64,3 @@
 
 (provide 'my-org)
 ;;; my-org.el ends here
-;; Copyright (C) 2025  desktop
-
-;; Author: desktop <desktop@nixos>

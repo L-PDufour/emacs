@@ -41,6 +41,17 @@
 (add-hook 'go-mode-hook #'my-go-mode-setup)
 (add-hook 'go-ts-mode-hook #'my-go-mode-setup)
 
+;; Makefile indentation configuration
+;; Makefiles require tabs per the standard
+(defun my-makefile-mode-setup ()
+  "Configure Makefile mode to use tabs for indentation."
+  (setq-local indent-tabs-mode t)
+  (setq-local tab-width 8))  ; Standard 8-space tabs for Makefiles
+
+(add-hook 'makefile-mode-hook #'my-makefile-mode-setup)
+(add-hook 'makefile-gmake-mode-hook #'my-makefile-mode-setup)
+(add-hook 'makefile-bsdmake-mode-hook #'my-makefile-mode-setup)
+
 (use-package templ-ts-mode
   :ensure nil
   :load-path "~/.emacs.d/site-lisp/templ-ts-mode"  ; Clone your fork here
