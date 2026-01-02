@@ -20,5 +20,8 @@
 						:stream t
 						:key #'my-get-anthropic-key)))
 
+;; Load gptel tools and RAG configuration
+(require 'my-gptel-tools)
+
 (provide 'my-llm)
 ;;; my-llm.el ends here

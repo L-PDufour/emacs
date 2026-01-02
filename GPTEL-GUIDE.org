@@ -1,0 +1,214 @@
+#+TITLE: GPtel Tools & RAG Quick Reference
+#+AUTHOR: Your Emacs Setup
+#+DATE: 2026-01-02
+
+* Overview
+
+This guide covers gptel's **Tools** (function calling) and **RAG** (context/document inclusion) capabilities configured in =my-gptel-tools.el=.
+
+* 🔧 Available Tools
+
+** What Are Tools?
+
+Tools let the LLM call Emacs functions to interact with your environment.
+
+** How to Enable Tools
+
+1. Start gptel chat: =M-x gptel=
+2. Access menu: =M-x gptel-menu= OR =C-u M-x gptel-send=
+3. Select tools to enable
+4. Ask questions that need those tools
+
+** Tool List
+
+| Tool Name          | Category   | Description                                  |
+|--------------------+------------+----------------------------------------------|
+| =read_buffer=      | emacs      | Read contents of any Emacs buffer            |
+| =list_buffers=     | emacs      | List all open buffers with modes            |
+| =search_code=      | project    | Search for patterns in project files         |
+| =shell_command=    | system     | Execute shell commands                       |
+| =create_file=      | filesystem | Create or overwrite files                    |
+| =get_project_info= | project    | Get current project information              |
+| =describe_symbol=  | emacs      | Get documentation for Emacs functions/vars   |
+
+** Example Tool Usage
+
+#+begin_example
+User: "What buffers are currently open?"
+→ LLM uses list_buffers tool
+
+User: "Search for all TODO comments in my project"
+→ LLM uses search_code tool
+
+User: "Show me the contents of init.el"
+→ LLM uses read_buffer tool with argument "init.el"
+
+User: "Create a README.md file with project info"
+→ LLM uses create_file tool
+#+end_example
+
+* 📚 RAG / Context Features
+
+** What Is RAG/Context?
+
+Add files, buffers, or regions to your prompts so the LLM can reference them.
+
+** Three Ways to Add Context
+
+*** Method 1: Commands (Before Asking)
+
+#+begin_src emacs-lisp
+M-x gptel-add-file          ; Add one or more files
+M-x gptel-add               ; Add buffer or Dired-marked files
+M-x my-gptel-add-current-buffer  ; Quick: add current buffer
+M-x my-gptel-add-region     ; Add selected region
+#+end_src
+
+*** Method 2: Links in Chat Buffers
+
+In your gptel chat buffer, use links:
+
+*Markdown style:*
+#+begin_example
+[](file:///home/user/emacs/init.el)
+[My Config](/home/user/emacs/init.el)
+#+end_example
+
+*Org mode style:*
+#+begin_example
+[[file:/home/user/emacs/init.el]]
+[[file:/home/user/emacs/init.el][My Config]]
+#+end_example
+
+*** Method 3: Multi-modal (Images/Documents)
+
+With =gptel-track-media= enabled (set in my-gptel-tools.el):
+- Include images
+- Include PDFs
+- Include any document your LLM supports
+
+** Managing Context
+
+#+begin_src emacs-lisp
+M-x my-gptel-show-context   ; View current context
+M-x my-gptel-clear-context  ; Clear all context
+M-x gptel-menu              ; Manage in transient menu
+#+end_src
+
+* 🚀 Example Workflows
+
+** Workflow 1: Code Analysis with RAG
+
+#+begin_example
+1. Open your code file
+2. M-x my-gptel-add-current-buffer
+3. M-x gptel
+4. Ask: "Explain what this code does and suggest improvements"
+#+end_example
+
+** Workflow 2: Multi-file Understanding
+
+#+begin_example
+1. M-x dired (navigate to project)
+2. Mark files with 'm'
+3. M-x gptel-add
+4. M-x gptel
+5. Ask: "How do these files work together?"
+#+end_example
+
+** Workflow 3: Tool-Assisted Development
+
+#+begin_example
+1. M-x gptel
+2. C-u M-x gptel-send
+3. Enable tools: shell_command, create_file, search_code
+4. Ask: "Find all Python files, analyze them, and create a summary.md"
+#+end_example
+
+** Workflow 4: Documentation Generation
+
+#+begin_example
+1. M-x gptel-add-file → select source files
+2. M-x gptel
+3. Enable tool: create_file
+4. Ask: "Generate comprehensive documentation for these files"
+#+end_example
+
+** Workflow 5: Search and Refactor
+
+#+begin_example
+1. M-x gptel
+2. C-u M-x gptel-send
+3. Enable: search_code, read_buffer, create_file
+4. Ask: "Find all uses of 'old-function-name' and create refactored versions"
+#+end_example
+
+* 🎯 Quick Tips
+
+** Context Best Practices
+
+- Files are scanned "live" at query time (not snapshots)
+- Gitignored files are excluded by default
+- Use =gptel-org-set-topic= to limit context to specific Org headings
+- Clear context between unrelated queries to avoid confusion
+
+** Tool Best Practices
+
+- Start with 1-2 tools enabled, add more as needed
+- Use tool confirmation mode while learning
+- Tools can be enabled globally, per-buffer, or per-request
+- Check =*Messages*= buffer to see tool calls
+
+** Performance
+
+- Large context uses more tokens (costs money with APIs)
+- Tools add latency (LLM must decide when to call them)
+- Use =gptel-context-max-tokens= to limit context size
+
+* 🔑 Keybindings (Optional)
+
+Uncomment in =my-gptel-tools.el= to enable:
+
+#+begin_example
+C-c g g  → gptel (start chat)
+C-c g s  → gptel-send
+C-c g m  → gptel-menu
+C-c g a  → gptel-add
+C-c g f  → gptel-add-file
+C-c g b  → my-gptel-add-current-buffer
+C-c g r  → my-gptel-add-region
+C-c g c  → my-gptel-clear-context
+C-c g x  → my-gptel-show-context
+#+end_example
+
+* 🔌 Advanced: MCP Integration
+
+For external tool integrations:
+
+1. Install =mcp.el= from MELPA
+2. Configure MCP servers
+3. =(require 'gptel-integrations)=
+4. =M-x gptel-mcp-connect=
+
+This enables database access, API integrations, and more external tools.
+
+* 📖 Learning Resources
+
+- Main repo: https://github.com/karthink/gptel
+- Tool collections:
+  - llm-tool-collection
+  - gptel-agent
+  - codel.el
+  - gptel-org-tools
+  - ragmacs
+
+* 🎓 Exercises to Try
+
+1. *Basic RAG*: Add your init.el and ask "What packages do I use?"
+2. *Tool Use*: Enable =list_buffers= and ask "What am I working on?"
+3. *Code Search*: Enable =search_code= and ask "Where do I use defun?"
+4. *File Creation*: Enable =create_file= and ask "Create a TODO.org with 5 tasks"
+5. *Multi-modal*: Add an image and ask "What's in this screenshot?"
+6. *Combined*: Use both context AND tools: Add 3 files, enable =search_code=, ask for analysis
+
+Start simple and build up complexity!
