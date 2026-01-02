@@ -1,0 +1,596 @@
+#+TITLE: Evil Mode - Hybrid Vim+Emacs Configuration Guide
+#+AUTHOR: Your Emacs Setup
+#+DATE: 2026-01-02
+
+* Overview
+
+This guide covers your hybrid Evil configuration that combines:
+- **Vim's modal editing** (hjkl, text objects, operators)
+- **Emacs keybindings** (all your C-c, C-x commands preserved)
+- **Evil-keypad** (chord-free command access via SPC leader)
+- **Meow-style integrations** (which-key, avy, consult, vertico)
+
+*Philosophy*: Best of both worlds. Vim for editing, Emacs for everything else.
+
+* Why This Setup?
+
+** What You Get from Vim/Evil
+- Modal editing: no RSI from holding modifiers while editing
+- Powerful motions: =ciw=, =d$=, =ya"=, etc.
+- Composable operators: combine verbs (d,c,y) with motions (w,b,$)
+- Text objects: =iw= (inner word), =a"= (around quotes)
+- Efficient navigation: =f{char}=, =t{char}=, =/search=
+
+** What You Keep from Emacs
+- All your C-c keymaps (files, windows, search, code)
+- Pure Emacs in insert state (feel at home typing)
+- Your completion setup (vertico, consult, orderless)
+- Your integrations (which-key, avy, magit, etc.)
+- Emacs muscle memory where it matters
+
+** Evil-Keypad Magic
+Instead of =C-x C-f= (painful chording), type:
+: SPC x f
+
+Instead of =C-c f a= (your project-find-file), type:
+: SPC c f a
+
+No modifier keys needed!
+
+* States Explained
+
+** Normal State (Orange Box Cursor)
+- Default state for reading/navigating code
+- Vim motions active (hjkl, w, b, etc.)
+- Evil-keypad active (SPC for commands)
+- Press =i= to enter insert state
+
+** Insert State (White Bar Cursor)
+- Pure Emacs mode
+- All C-c, C-x, C-h commands work normally
+- Type like you normally would in Emacs
+- Press ESC to return to normal state
+
+** Visual State (Yellow Box Cursor)
+- Select text with Vim motions
+- Press =v= in normal state to enter
+- Operate on selections: =d= delete, =c= change, =y= yank
+- Press ESC or =v= again to exit
+
+** Motion State (Read-only buffers)
+- For help, info, man pages, compilation output
+- Vim motions for navigation
+- Can't edit (buffer is read-only)
+
+** Emacs State (Red Box Cursor)
+- For special modes (term, calc, etc.)
+- Pure Emacs keybindings
+- Evil doesn't interfere
+
+* Quick Start Tutorial
+
+** Lesson 1: Basic Movement in Normal State
+
+#+begin_example
+h - left      l - right
+j - down      k - up
+w - next word beginning
+b - previous word beginning
+e - next word end
+0 - line start
+$ - line end
+gg - buffer top
+G - buffer bottom
+#+end_example
+
+Try this: Open a file, press =j= to move down, =k= to move up.
+
+** Lesson 2: Entering Insert State
+
+From normal state, press:
+- =i= - insert before cursor
+- =a= - insert after cursor (append)
+- =I= - insert at line beginning
+- =A= - insert at line end
+- =o= - open new line below
+- =O= - open new line above
+
+Try this: Press =o=, type something, press ESC.
+
+** Lesson 3: Basic Editing
+
+In normal state:
+- =x= - delete character under cursor
+- =dd= - delete line
+- =D= - delete from cursor to end of line
+- =u= - undo
+- =C-r= - redo
+
+Try this: Press =dd= to delete a line, then =u= to undo it.
+
+** Lesson 4: Operators + Motions (The Power of Vim)
+
+Format: =[operator][motion]=
+
+Operators:
+- =d= - delete
+- =c= - change (delete and enter insert)
+- =y= - yank (copy)
+
+Motions (we learned these):
+- =w= - to next word
+- =$= - to end of line
+- =j= - down one line
+
+Combinations:
+- =dw= - delete word
+- =d$= - delete to end of line
+- =cw= - change word (deletes and enters insert)
+- =yy= - yank line
+- =3dd= - delete 3 lines
+- =2yy= - yank 2 lines
+
+Try this: Put cursor on a word, press =ciw=, type new word, press ESC.
+
+** Lesson 5: Text Objects (Even More Power!)
+
+Format: =[operator][i/a][text-object]=
+
+Text objects:
+- =w= - word
+- =s= - sentence
+- =p= - paragraph
+- ="= - double quotes
+- ='= - single quotes
+- =(= or =)= - parentheses
+- ={= or =}= - braces
+- =[= or =]= - brackets
+- =t= - tag
+
+Modifiers:
+- =i= - inner (inside, excluding delimiters)
+- =a= - around (including delimiters)
+
+Examples:
+- =ciw= - change inner word (cursor anywhere in word)
+- =di"= - delete inside double quotes
+- =ya(= - yank around parentheses (including parens)
+- =ci{= - change inside braces
+- =dap= - delete around paragraph
+
+Try this: Put cursor in a quoted string, press =ci"=, type new text.
+
+** Lesson 6: Evil-Keypad (Chord-free Commands)
+
+In normal state, press =SPC= then:
+
+#+begin_example
+SPC x f       → C-x C-f     (find-file)
+SPC x s       → C-x C-s     (save-buffer)
+SPC x k       → C-x k       (kill-buffer)
+SPC m x       → M-x         (execute-extended-command)
+SPC h f       → C-h f       (describe-function)
+SPC h v       → C-h v       (describe-variable)
+#+end_example
+
+Your custom keymaps work too:
+#+begin_example
+SPC c f a     → C-c f a     (my-project-find-file)
+SPC c f b     → C-c f b     (my-project-find-buffer)
+SPC c f r     → C-c f r     (consult-recent-file)
+SPC c w v     → C-c w v     (split-window-right)
+SPC c w s     → C-c w s     (split-window-below)
+SPC c s l     → C-c s l     (consult-line)
+SPC c s g     → C-c s g     (consult-grep)
+SPC c l d     → C-c l d     (xref-find-definitions)
+#+end_example
+
+Try this: Press =SPC c f a= to find a file in your project.
+
+** Lesson 7: Visual Selection
+
+Press =v= in normal state, then use motions:
+- =viw= - select inner word
+- =va"= - select around quotes
+- =V= - select line
+- =C-v= - select block (column)
+
+Once selected:
+- =d= - delete
+- =c= - change
+- =y= - yank
+- =gc= - comment (if enabled)
+- =>= - indent right
+- =<= - indent left
+
+Try this: =vip= to select paragraph, then =y= to yank it.
+
+* Common Workflows
+
+** Workflow 1: Quick Edit and Save
+
+#+begin_example
+1. Navigate with hjkl
+2. Press 'ciw' on a word you want to change
+3. Type the new word
+4. Press ESC
+5. Press 'SPC x s' to save
+#+end_example
+
+** Workflow 2: Search and Replace
+
+#+begin_example
+1. Press '/' and type search term
+2. Press 'n' to go to next match
+3. Press 'N' to go to previous match
+4. Press 'cgn' to change the match (enter insert mode)
+5. Type replacement
+6. Press ESC
+7. Press '.' to repeat on next match
+#+end_example
+
+Or use evil-ex command:
+#+begin_example
+:s/old/new/g      - replace in current line
+:%s/old/new/g     - replace in entire buffer
+:%s/old/new/gc    - replace with confirmation
+#+end_example
+
+** Workflow 3: Multiple Cursors (Fake It)
+
+#+begin_example
+1. Visual select lines (V, then j/k)
+2. Press ':' (starts command for selection)
+3. Type 's/pattern/replacement/g'
+4. Press enter
+#+end_example
+
+** Workflow 4: Avy Jump + Edit
+
+#+begin_example
+1. Press 's' in normal state (avy-goto-char-timer)
+2. Type a few characters
+3. Press the highlighted letter to jump
+4. Make your edit (ciw, etc.)
+#+end_example
+
+** Workflow 5: Project Navigation
+
+#+begin_example
+1. SPC c f a     - Find file in project
+2. SPC c f b     - Switch project buffer
+3. gd            - Go to definition
+4. C-o           - Jump back
+5. gr            - Find references
+#+end_example
+
+** Workflow 6: Window Management
+
+#+begin_example
+C-w v    - Split vertically
+C-w s    - Split horizontally
+C-w h    - Go to left window
+C-w j    - Go to down window
+C-w k    - Go to up window
+C-w l    - Go to right window
+C-w q    - Close window
+C-w o    - Close other windows
+#+end_example
+
+Or use evil-keypad:
+#+begin_example
+SPC c w v    - Split right
+SPC c w s    - Split below
+SPC c w h    - Go left
+#+end_example
+
+* Complete Keybinding Reference
+
+** Normal State - Movement
+
+| Key   | Action                      |
+|-------+-----------------------------|
+| h/l   | Left/right                  |
+| j/k   | Down/up (visual lines)      |
+| w     | Next word                   |
+| b     | Previous word               |
+| e     | End of word                 |
+| 0     | Line start                  |
+| ^     | First non-blank             |
+| $     | Line end                    |
+| gg    | Buffer start                |
+| G     | Buffer end                  |
+| {n}G  | Go to line {n}              |
+| %     | Match bracket               |
+| f{c}  | Find char forward           |
+| F{c}  | Find char backward          |
+| t{c}  | Till char forward           |
+| T{c}  | Till char backward          |
+| ;     | Repeat find                 |
+| ,     | Repeat find reverse         |
+| /     | Search forward              |
+| ?     | Search backward             |
+| n     | Next search result          |
+| N     | Previous search result      |
+| *     | Search word under cursor    |
+| s     | Avy jump (custom)           |
+| S     | Avy line (custom)           |
+
+** Normal State - Editing
+
+| Key        | Action                    |
+|------------+---------------------------|
+| i          | Insert before             |
+| a          | Insert after              |
+| I          | Insert line start         |
+| A          | Insert line end           |
+| o          | Open line below           |
+| O          | Open line above           |
+| x          | Delete char               |
+| X          | Delete char backward      |
+| dd         | Delete line               |
+| D          | Delete to end of line     |
+| cc         | Change line               |
+| C          | Change to end of line     |
+| yy         | Yank line                 |
+| Y          | Yank to end of line       |
+| p          | Paste after               |
+| P          | Paste before              |
+| u          | Undo                      |
+| C-r        | Redo                      |
+| .          | Repeat last change        |
+| ~          | Toggle case               |
+| J          | Join lines                |
+| r{char}    | Replace char              |
+| R          | Replace mode              |
+
+** Normal State - Text Objects
+
+| Key      | Action                      |
+|----------+-----------------------------|
+| {op}iw   | Inner word                  |
+| {op}aw   | Around word                 |
+| {op}is   | Inner sentence              |
+| {op}as   | Around sentence             |
+| {op}ip   | Inner paragraph             |
+| {op}ap   | Around paragraph            |
+| {op}i"   | Inside double quotes        |
+| {op}a"   | Around double quotes        |
+| {op}i'   | Inside single quotes        |
+| {op}a'   | Around single quotes        |
+| {op}i(   | Inside parentheses          |
+| {op}a(   | Around parentheses          |
+| {op}i{   | Inside braces               |
+| {op}a{   | Around braces               |
+| {op}i[   | Inside brackets             |
+| {op}a[   | Around brackets             |
+| {op}it   | Inside tag                  |
+| {op}at   | Around tag                  |
+
+Where {op} is an operator: d (delete), c (change), y (yank), v (visual select)
+
+** Normal State - Navigation (Custom)
+
+| Key     | Action                  |
+|---------+-------------------------|
+| gd      | Go to definition        |
+| gr      | Find references         |
+| gb      | Go back                 |
+| gf      | Find file at point      |
+| ]b      | Next buffer             |
+| [b      | Previous buffer         |
+| ]e      | Next error              |
+| [e      | Previous error          |
+| ]q      | Next quickfix           |
+| [q      | Previous quickfix       |
+
+** Visual State
+
+| Key   | Action                 |
+|-------+------------------------|
+| v     | Character visual       |
+| V     | Line visual            |
+| C-v   | Block visual           |
+| o     | Go to other end        |
+| d     | Delete selection       |
+| c     | Change selection       |
+| y     | Yank selection         |
+| >     | Indent right           |
+| <     | Indent left            |
+| gc    | Comment (if enabled)   |
+| I     | Insert block mode      |
+| A     | Append block mode      |
+
+** Evil-Keypad (SPC prefix)
+
+| Keys          | Equivalent | Action                     |
+|---------------+------------+----------------------------|
+| SPC x f       | C-x C-f    | Find file                  |
+| SPC x s       | C-x C-s    | Save buffer                |
+| SPC x k       | C-x k      | Kill buffer                |
+| SPC x b       | C-x b      | Switch buffer              |
+| SPC m x       | M-x        | Execute command            |
+| SPC h f       | C-h f      | Describe function          |
+| SPC h v       | C-h v      | Describe variable          |
+| SPC h k       | C-h k      | Describe key               |
+| SPC c f a     | C-c f a    | Project find file          |
+| SPC c f b     | C-c f b    | Project find buffer        |
+| SPC c f r     | C-c f r    | Recent file                |
+| SPC c w v     | C-c w v    | Split window right         |
+| SPC c w s     | C-c w s    | Split window below         |
+| SPC c w h/j/k/l | C-c w ...  | Move to window           |
+| SPC c w q     | C-c w q    | Delete window              |
+| SPC c s l     | C-c s l    | Consult line               |
+| SPC c s g     | C-c s g    | Consult grep               |
+| SPC c s G     | C-c s G    | Consult ripgrep            |
+| SPC c l d     | C-c l d    | Go to definition           |
+| SPC c l r     | C-c l r    | Find references            |
+
+** Window Management (C-w prefix)
+
+| Key     | Action              |
+|---------|---------------------|
+| C-w h   | Move left           |
+| C-w j   | Move down           |
+| C-w k   | Move up             |
+| C-w l   | Move right          |
+| C-w v   | Split vertically    |
+| C-w s   | Split horizontally  |
+| C-w q   | Close window        |
+| C-w o   | Close others        |
+
+** Insert State (Pure Emacs)
+
+All your normal Emacs keybindings work:
+- C-c ... (all your custom keymaps)
+- C-x ... (all standard Emacs commands)
+- C-g (keyboard-quit-dwim)
+- C-z (undo)
+- C-w (window prefix, same as normal state)
+- ESC (return to normal state)
+
+* Tips and Tricks
+
+** Tip 1: Use Counts
+Prefix any command with a number:
+- =3j= - move down 3 lines
+- =5w= - move forward 5 words
+- =2dd= - delete 2 lines
+- =4yy= - yank 4 lines
+
+** Tip 2: Combine Everything
+The power is in combinations:
+- =d3w= - delete 3 words
+- =c2j= - change current and next 2 lines
+- =y$= - yank to end of line
+- =v5j= - visual select 5 lines down
+
+** Tip 3: The Dot Command
+Press =.= to repeat the last change:
+1. =ciw= and change a word
+2. Move to another word
+3. Press =.= to change it the same way
+
+** Tip 4: Macros
+Record repetitive actions:
+1. =qa= - start recording to register 'a'
+2. Do your actions
+3. =q= - stop recording
+4. =@a= - replay macro
+5. =@@= - repeat last macro
+
+** Tip 5: Marks
+Set marks to jump around:
+- =ma= - set mark 'a' at cursor
+- ='a= - jump back to mark 'a'
+- =``= - jump to last position
+
+** Tip 6: Use Which-Key
+After pressing SPC, wait a moment and which-key will show you all available commands.
+
+** Tip 7: Stay in Normal State
+The more you stay in normal state, the more efficient you become. Only enter insert state to type text, then ESC out.
+
+** Tip 8: Learn Text Objects
+Text objects are the secret sauce:
+- =ci"= - change inside quotes (cursor anywhere in string)
+- =da(= - delete parentheses and contents
+- =yap= - yank paragraph
+
+** Tip 9: Use Avy for Long Jumps
+Instead of pressing =j= 20 times:
+1. Press =s= (avy)
+2. Type first few chars of target
+3. Press the highlighted key
+
+** Tip 10: Evil-Keypad for Commands
+When you need an Emacs command, use SPC instead of painful chords:
+- Instead of C-x C-f: =SPC x f=
+- Instead of C-c f a: =SPC c f a=
+
+* Switching Between Meow and Evil
+
+Your init.el is configured to load either meow or evil. To switch:
+
+Edit =init.el= line 761:
+#+begin_src emacs-lisp
+;; Choose ONE:
+(require 'my-meow)   ; Current: Meow modal editing
+;; (require 'my-evil)   ; Alternative: Evil (vim) modal editing
+#+end_src
+
+Change it to:
+#+begin_src emacs-lisp
+;; Choose ONE:
+;; (require 'my-meow)   ; Current: Meow modal editing
+(require 'my-evil)   ; Alternative: Evil (vim) modal editing
+#+end_src
+
+Then restart Emacs or evaluate the buffer.
+
+* Troubleshooting
+
+** Keys not working in certain modes
+Some modes need special handling. Check =my-evil.el= and add the mode to the appropriate state list.
+
+** Evil conflicts with package keybindings
+evil-collection should handle most packages. If not, you can:
+1. Add the mode to =evil-emacs-state-modes=
+2. Or customize the specific mode's evil bindings
+
+** Want more vim features
+Uncomment the optional packages at the end of =my-evil.el=:
+- evil-surround
+- evil-commentary
+- evil-indent-plus
+- evil-exchange
+- evil-textobj-tree-sitter
+
+** Evil-keypad not responding
+Make sure which-key is loaded. Check =SPC= is bound to =evil-keypad= in normal state.
+
+** Want different leader key
+Edit =my-evil.el= and change the =SPC= binding to your preferred key (comma, backslash, etc.).
+
+* Learning Resources
+
+** Practice
+The best way to learn: force yourself to stay in normal state. Only press =i= to insert text, then ESC immediately.
+
+** Vimtutor
+Run =vimtutor= in a terminal to learn basic vim motions.
+
+** Evil Documentation
+- =C-h f evil-mode= - See evil documentation
+- =C-h v evil-*= - Browse evil variables
+
+** Cheat Sheets
+Print this guide's keybinding reference and keep it visible while you learn.
+
+* Philosophy: Why Modal Editing?
+
+** The Problem with Modifiers
+Holding Ctrl/Alt constantly causes:
+- RSI (repetitive strain injury)
+- Slower editing (chord gymnastics)
+- Hand fatigue
+
+** The Modal Solution
+Separate concerns:
+- Reading/navigating: Normal state (most of your time)
+- Typing: Insert state (brief, focused)
+- Selecting: Visual state (quick operations)
+
+This means:
+- Most editing uses single keystrokes (no chording!)
+- More ergonomic (no modifier keys)
+- Composable commands (operators + motions)
+
+** Best of Both Worlds
+This config gives you:
+- Vim's editing efficiency
+- Emacs's extensibility and ecosystem
+- Your existing Emacs muscle memory preserved
+- Smooth integrations with modern packages
+
+Happy editing!

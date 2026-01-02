@@ -758,7 +758,9 @@
 (require 'my-elfeed)
 
 ;; Modal editing (affects everything)
-(require 'my-meow)
+;; Choose ONE of the following:
+;; (require 'my-meow)   ; Kakoune-style modal editing (currently active)
+(require 'my-evil)   ; Vim-style modal editing with evil-keypad
 
 ;; Windows and UI (should be late)
 (require 'my-windows)
