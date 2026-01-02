@@ -17,12 +17,19 @@
 ;;
 ;;; Code:
 
-(require 'evil)
-(require 'evil-collection)
-
 ;;; ============================================================================
 ;;; BASIC EVIL CONFIGURATION
 ;;; ============================================================================
+
+;; IMPORTANT: Set these BEFORE loading evil and evil-collection
+(setq evil-want-keybinding nil)        ; Required for evil-collection
+(setq evil-want-integration t)         ; Load evil integrations
+(setq evil-want-C-u-scroll t)          ; C-u scrolls up
+(setq evil-want-C-i-jump t)            ; C-i jumps forward (like vim)
+
+;; Load evil and evil-collection
+(require 'evil)
+(require 'evil-collection)
 
 ;; Start evil-mode
 (evil-mode 1)
