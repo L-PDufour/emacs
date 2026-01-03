@@ -8,19 +8,16 @@
   :ensure nil
   :mode "\\.nix\\'"
   :config
-  ;; Add LSP support via nil (Nix Language Server)
+  ;; LSP support via nixd
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
-
+  
   ;; Configure formatter for Nix files
   (with-eval-after-load 'apheleia
-	(setf (alist-get 'nixpkgs-fmt apheleia-formatters)
-          '("nixpkgs-fmt"))
-	;; Or use alejandra if preferred
-	;; (setf (alist-get 'alejandra apheleia-formatters)
-	;;       '("alejandra"))
-	(setf (alist-get 'nix-mode apheleia-mode-alist)
-          'nixpkgs-fmt)))
+    (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
+          '("nixfmt"))
+    (setf (alist-get 'nix-mode apheleia-mode-alist)
+          'nixfmt-rfc-style)))
 
 (use-package lua-mode
   :ensure nil
