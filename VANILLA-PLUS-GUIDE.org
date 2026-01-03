@@ -1,0 +1,633 @@
+#+TITLE: Vanilla Plus - Enhanced Emacs Without Modal Editing
+#+AUTHOR: Your Emacs Setup
+#+DATE: 2026-01-03
+
+* Overview
+
+Vanilla Plus enhances standard Emacs keybindings with modern conveniences while preserving the classic Emacs feel. No modal editing—just better defaults and repeat maps to reduce RSI.
+
+** Philosophy
+
+- Keep Emacs keybindings and muscle memory
+- Add repeat maps to eliminate constant modifier-key holding
+- Vim-style jump navigation (C-o/C-i) integrated with xref
+- Smart enhancements that feel natural
+- No modal editing—stay in one consistent mode
+
+** What You Get
+
+1. **S-exp navigation with repeat maps** - Press C-M-f once, then tap f f f
+2. **Vim-style C-o/C-i** - Jump back/forward through definitions
+3. **Window/buffer repeat maps** - C-x o then o o o
+4. **Smart line beginning** - C-a goes to indent, then column 0
+5. **Modern conveniences** - Duplicate lines, move lines, better commenting
+6. **All standard Emacs keys preserved** - Nothing breaks, only additions
+
+* The Big Problem: RSI from Modifier Keys
+
+Traditional Emacs requires constant chord holding:
+
+#+begin_example
+C-M-f C-M-f C-M-f C-M-b C-M-u C-M-d...
+#+end_example
+
+Your hands cramp. Your pinkies hurt. This is not sustainable.
+
+* The Solution: Repeat Maps
+
+**Repeat Mode** (built into Emacs 28+) lets you press the chord ONCE, then tap simple keys:
+
+#+begin_example
+C-M-f    → enters repeat mode
+f f f    → forward 3 times (just tap 'f')
+b b      → back 2 times
+u        → up one level
+d        → down one level
+<escape> → exit repeat mode (or any non-repeat key)
+#+end_example
+
+No more constant chording! Your hands will thank you.
+
+* S-exp Navigation - The Game Changer
+
+** The Problem
+
+Navigating Lisp/structured code requires endless C-M-f, C-M-b, C-M-u, etc.
+
+** The Solution
+
+Press the initial chord ONCE, then use single keys:
+
+| Initial Chord | Then Tap | Command             | Description              |
+|---------------+----------+---------------------+--------------------------|
+| C-M-f         | f        | forward-sexp        | Forward one s-expression |
+|               | b        | backward-sexp       | Backward one s-exp       |
+|               | u        | backward-up-list    | Up one level             |
+|               | d        | down-list           | Down one level           |
+|               | n        | forward-list        | Next sibling             |
+|               | p        | backward-list       | Previous sibling         |
+|               | a        | beginning-of-defun  | Start of function        |
+|               | e        | end-of-defun        | End of function          |
+|               | SPC      | mark-sexp           | Mark expression          |
+|               | k        | kill-sexp           | Kill expression          |
+|               | w        | copy-sexp-as-kill   | Copy expression          |
+|               | t        | transpose-sexps     | Swap with next           |
+
+** Example Workflow
+
+#+begin_src emacs-lisp
+;; You're here:              ↓
+(defun foo (bar baz)
+  (let ((x (+ bar baz)))
+    (message "Result: %s" x)))
+
+;; Press C-M-f to go forward
+;; Now just tap: f f f to navigate through (bar baz) (let ...) (message ...)
+;; Tap: u to go up to the defun level
+;; Tap: e to go to end of defun
+;; Tap: b b to go back two sexps
+#+end_src
+
+** Timeout
+
+Repeat mode exits after 3 seconds of inactivity (customizable via =repeat-exit-timeout=). Or press any non-repeat key to exit immediately.
+
+* Jump Navigation - Vim Style
+
+** The Problem
+
+- =M-.= jumps to definition ✓
+- =M-,= jumps back ✓
+- But no forward jump ✗
+- And M-, is awkward to press repeatedly ✗
+
+** The Solution
+
+Vim-style navigation integrated with xref:
+
+| Key   | Command          | Description                |
+|-------+------------------+----------------------------|
+| M-.   | xref-find-def    | Go to definition (builtin) |
+| C-o   | xref-go-back     | Jump back (vim-style!)     |
+| C-i   | xref-go-forward  | Jump forward (vim-style!)  |
+| M-i   | xref-go-forward  | Alternative (terminal)     |
+
+** Repeat Mode
+
+After pressing C-o, you can tap:
+- =o o o= - Jump back 3 times
+- =i i= - Jump forward 2 times
+
+** Example Workflow
+
+#+begin_example
+1. Reading code at line 100
+2. M-. on function name → jumps to definition at line 500
+3. M-. on another function → jumps to line 800
+4. C-o → back to line 500
+5. C-o → back to line 100
+6. C-i → forward to line 500
+7. C-i → forward to line 800
+#+end_example
+
+Just like Vim's C-o/C-i, but integrated with Emacs's xref system!
+
+* Window Navigation - No More Repetitive C-x o
+
+** The Problem
+
+Switching between 4 windows: =C-x o C-x o C-x o C-x o=
+
+** The Solution
+
+| Initial  | Then Tap | Command                    |
+|----------+----------+----------------------------|
+| C-x o    | o        | other-window               |
+|          | h        | windmove-left              |
+|          | j        | windmove-down              |
+|          | k        | windmove-up                |
+|          | l        | windmove-right             |
+|          | +        | enlarge-window             |
+|          | -        | shrink-window              |
+|          | >        | enlarge-window-horiz       |
+|          | <        | shrink-window-horiz        |
+|          | =        | balance-windows            |
+|          | 2        | split-window-below         |
+|          | 3        | split-window-right         |
+|          | 0        | delete-window              |
+|          | 1        | delete-other-windows       |
+
+** Example
+
+#+begin_example
+C-x o → enters window repeat mode
+h h   → move left 2 windows
+k     → move up one window
+++++  → enlarge 4 times
+=     → balance all windows
+#+end_example
+
+* Buffer Navigation
+
+** Enhanced Keybindings
+
+| Key            | Command         | Repeatable |
+|----------------+-----------------+------------|
+| C-x <left>     | previous-buffer | Yes        |
+| C-x <right>    | next-buffer     | Yes        |
+| C-x p          | previous-buffer | Yes        |
+| C-x n          | next-buffer     | Yes        |
+
+** Example
+
+#+begin_example
+C-x <right>     → next buffer
+<right> <right> → keep going
+<left>          → oops, go back one
+#+end_example
+
+* Other Repeat Maps
+
+** Page Navigation
+
+After =C-v= or =M-v=:
+- =v= - Continue scrolling down
+- =V= - Scroll up
+- =l= - Recenter
+
+** Word Navigation
+
+After =M-f= or =M-b=:
+- =f= - Forward word
+- =b= - Backward word
+- =k= - Kill word
+- =d= - Backward kill word
+
+** Paragraph Navigation
+
+After =M-}= or =M-{=:
+- =n= - Next paragraph
+- =p= - Previous paragraph
+
+** Error Navigation
+
+After =M-g n= or =M-g p=:
+- =n= - Next error
+- =p= - Previous error
+
+Works with:
+- Compilation errors
+- Flymake errors
+- Occur matches
+
+* Smart Enhancements
+
+** Smart Beginning of Line (C-a)
+
+Traditional C-a always goes to column 0. Annoying when code is indented.
+
+**New behavior:**
+1. First =C-a= → go to first non-whitespace character
+2. Second =C-a= → go to column 0
+
+#+begin_example
+    ↓ cursor here
+    (let ((x 10))
+      (message "foo"))
+
+Press C-a → moves to '('
+Press C-a → moves to column 0
+#+end_example
+
+** Comment/Uncomment (C-;)
+
+Works on current line or region.
+
+#+begin_example
+;; No need to select anything:
+C-; → comments current line
+
+;; With region selected:
+Select 5 lines
+C-; → toggles comments on all 5 lines
+#+end_example
+
+** Duplicate Line/Region (C-c d)
+
+Like many modern editors:
+
+#+begin_example
+;; Cursor on a line:
+C-c d → duplicates the line
+
+;; Region selected:
+C-c d → duplicates the entire region
+#+end_example
+
+** Move Lines Up/Down (M-<up> / M-<down>)
+
+Also available as =C-S-<up>= / =C-S-<down>=
+
+#+begin_example
+Put cursor on line:
+M-<up>   → moves line up
+M-<down> → moves line down
+#+end_example
+
+** Mark Whole Line (C-c l)
+
+Selects entire line including newline.
+
+** Indent Buffer (C-c i)
+
+Indents the entire buffer.
+
+** Exchange Point and Mark Without Activating (C-x C-x)
+
+Standard =C-x C-x= activates the region (annoying!).
+
+Now: =C-x C-x= exchanges without activating.
+
+Want the old behavior? Use =C-x x= instead.
+
+* Complete Keybinding Reference
+
+** Navigation
+
+| Key         | Command                  | Repeatable |
+|-------------+--------------------------+------------|
+| C-M-f       | forward-sexp             | Yes        |
+| C-M-b       | backward-sexp            | Yes        |
+| C-M-u       | backward-up-list         | Yes        |
+| C-M-d       | down-list                | Yes        |
+| C-M-n       | forward-list             | Yes        |
+| C-M-p       | backward-list            | Yes        |
+| C-M-a       | beginning-of-defun       | Yes        |
+| C-M-e       | end-of-defun             | Yes        |
+| M-f         | forward-word             | Yes        |
+| M-b         | backward-word            | Yes        |
+| M-}         | forward-paragraph        | Yes        |
+| M-{         | backward-paragraph       | Yes        |
+| C-v         | scroll-down              | Yes        |
+| M-v         | scroll-up                | Yes        |
+
+** Jumping
+
+| Key   | Command             | Repeatable |
+|-------+---------------------+------------|
+| M-.   | xref-find-def       | No         |
+| C-o   | xref-go-back        | Yes        |
+| C-i   | xref-go-forward     | Yes        |
+| M-i   | xref-go-forward     | Yes        |
+
+** Windows
+
+| Key     | Command                      | Repeatable |
+|---------+------------------------------+------------|
+| C-x o   | other-window                 | Yes        |
+| C-c w h | windmove-left                | Yes        |
+| C-c w j | windmove-down                | Yes        |
+| C-c w k | windmove-up                  | Yes        |
+| C-c w l | windmove-right               | Yes        |
+
+** Buffers
+
+| Key          | Command         | Repeatable |
+|--------------+-----------------+------------|
+| C-x <left>   | previous-buffer | Yes        |
+| C-x <right>  | next-buffer     | Yes        |
+| C-x p        | previous-buffer | Yes        |
+| C-x n        | next-buffer     | Yes        |
+
+** Editing
+
+| Key          | Command                        | Repeatable |
+|--------------+--------------------------------+------------|
+| C-a          | smart-beginning-of-line        | No         |
+| C-;          | comment-or-uncomment           | No         |
+| C-c d        | duplicate-line-or-region       | No         |
+| C-c i        | indent-buffer                  | No         |
+| C-c l        | mark-whole-line                | No         |
+| M-<up>       | move-line-up                   | No         |
+| M-<down>     | move-line-down                 | No         |
+| C-S-<up>     | move-line-up                   | No         |
+| C-S-<down>   | move-line-down                 | No         |
+| C-x C-x      | exchange-point-mark-no-activate| No         |
+| C-x x        | exchange-point-mark (original) | No         |
+
+** Help
+
+| Key    | Command                   |
+|--------|---------------------------|
+| C-c ?  | vanilla-plus-show-config  |
+
+* Workflows
+
+** Workflow 1: S-exp Heavy Navigation
+
+Working in Lisp code, jumping between functions:
+
+#+begin_example
+1. C-M-a         → beginning of defun
+2. e e e         → end, next end, next end (just tap 'e')
+3. a             → back to beginning
+4. f f           → forward 2 sexps
+5. u             → up one level
+6. d             → down into first element
+7. <any key>     → exit repeat mode
+#+end_example
+
+** Workflow 2: Definition Jumping
+
+Reading unfamiliar code:
+
+#+begin_example
+1. M-.           → go to definition
+2. M-.           → go to another definition
+3. M-.           → another
+4. C-o o o       → jump back 3 times (just tap 'o')
+5. C-i i         → forward 2 times
+#+end_example
+
+** Workflow 3: Multi-Window Coding
+
+Split screen with multiple buffers:
+
+#+begin_example
+1. C-x 3         → split vertically
+2. C-x o         → switch to other window
+3. C-x 2         → split horizontally
+4. Now have 3 windows
+5. C-x o         → enter repeat mode
+6. o o           → cycle to third window
+7. h             → move left
+8. ++++          → enlarge vertically 4 times
+9. >>>>>         → enlarge horizontally 5 times
+10. =            → balance windows
+#+end_example
+
+** Workflow 4: Quick Editing
+
+Making quick changes:
+
+#+begin_example
+1. C-a           → smart beginning (to indent)
+2. C-c d         → duplicate line
+3. M-<down>      → move it down
+4. C-;           → comment original
+5. C-c i         → indent whole buffer
+#+end_example
+
+** Workflow 5: Buffer Surfing
+
+Finding the right buffer:
+
+#+begin_example
+C-x <right> <right> <right> <left> <right>
+#+end_example
+
+Much faster than repeated =C-x b=!
+
+* Customization
+
+** Adjust Repeat Timeout
+
+Default is 3 seconds. Change it:
+
+#+begin_src emacs-lisp
+(setq repeat-exit-timeout 5) ; 5 seconds
+(setq repeat-exit-timeout nil) ; No timeout (manual exit only)
+#+end_src
+
+** Disable Specific Repeat Maps
+
+Don't want page scrolling to repeat?
+
+#+begin_src emacs-lisp
+(put 'scroll-up-command 'repeat-map nil)
+(put 'scroll-down-command 'repeat-map nil)
+#+end_src
+
+** Change Smart C-a Behavior
+
+Prefer original C-a?
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-a") #'move-beginning-of-line)
+#+end_src
+
+** Terminal Users: C-i Conflict
+
+In terminal, C-i = TAB. Use M-i instead:
+
+#+begin_example
+C-o   → jump back
+M-i   → jump forward (already bound as alternative)
+#+end_example
+
+* Comparison with Modal Editing
+
+** Vanilla Plus vs Evil/Meow
+
+| Feature              | Vanilla Plus        | Evil/Meow           |
+|----------------------+---------------------+---------------------|
+| Learning Curve       | None (same Emacs)   | Need to learn modes |
+| S-exp Navigation     | Repeat maps         | Evil: text objects  |
+| Jump Navigation      | C-o/C-i             | C-o in evil         |
+| Modifier Keys        | Less via repeat     | Almost none         |
+| Compatibility        | 100% Emacs          | Some conflicts      |
+| Mental Model         | One mode (Emacs)    | Multiple states     |
+| Muscle Memory        | Keep all Emacs keys | Learn new keys      |
+
+** When to Use Vanilla Plus
+
+- You love Emacs keybindings and don't want to change
+- You tried modal editing and didn't like it
+- You want gradual improvements, not wholesale changes
+- You work in teams using standard Emacs
+- You pair program frequently
+
+** When to Use Evil/Meow
+
+- You have RSI and need maximum ergonomics
+- You love vim/kakoune keybindings
+- You're comfortable with modal editing
+- You want composable operators (ci", da(, etc.)
+- You're coming from vim
+
+** Why Not Both?
+
+Some features overlap (C-o for jumping), but you CAN use both:
+- Vanilla-plus repeat maps work great with evil
+- Evil gives you modal editing
+- Vanilla-plus gives you Emacs enhancements
+
+Comment out evil and load vanilla-plus in init.el to choose.
+
+* Tips and Tricks
+
+** Tip 1: Embrace Repeat Mode
+
+After pressing a chord ONCE, you're in repeat mode. Tap tap tap. Don't go back to chording!
+
+** Tip 2: Use C-o Liberally
+
+Jump to definitions fearlessly. You can always C-o back.
+
+** Tip 3: Window Repeat is Magic
+
+C-x o then hjkl is faster than any other window management.
+
+** Tip 4: Learn S-exp Patterns
+
+Common patterns in repeat mode:
+- =f f b= - forward 2, back 1
+- =u e e= - up, end of defun, next end
+- =d f f= - down, forward 2
+
+** Tip 5: Duplicate + Move
+
+=C-c d= then =M-<down>= is incredibly useful for similar lines.
+
+** Tip 6: Buffer Cycling for Recent Files
+
+C-x <right> <right> <right> is often faster than C-x C-f for recent files.
+
+** Tip 7: Comment Toggling
+
+Select region, =C-;=, edit, =C-;= again. Great for debugging.
+
+** Tip 8: Practice the Repeat Timeout
+
+You have 3 seconds. Don't rush, but don't dawdle. Find your rhythm.
+
+* Troubleshooting
+
+** Repeat Mode Not Working
+
+Make sure repeat-mode is enabled:
+#+begin_src emacs-lisp
+(repeat-mode 1)
+#+end_src
+
+** C-i Does Nothing (Terminal)
+
+In terminal, C-i = TAB. Use M-i instead.
+
+** Timeout Too Short/Long
+
+Adjust:
+#+begin_src emacs-lisp
+(setq repeat-exit-timeout 5) ; Longer
+(setq repeat-exit-timeout 1) ; Shorter
+#+end_src
+
+** Want Visual Feedback
+
+Add to mode line or use echo area messages (already enabled).
+
+** Conflicts with Evil
+
+If using both, some keybindings conflict (C-o). Choose your preference.
+
+* Getting Started
+
+** Day 1: S-exp Navigation
+
+Force yourself to use repeat mode:
+1. C-M-f, then tap f f f f
+2. C-M-b, then tap b b
+3. Practice until it feels natural
+
+** Day 2: Jump Navigation
+
+Use C-o after every M-.:
+1. M-. to jump to definition
+2. C-o to come back
+3. Build the muscle memory
+
+** Day 3: Window Repeat
+
+Stop using C-x o C-x o:
+1. C-x o then o o o
+2. Or C-x o then h j k l
+3. Much faster!
+
+** Day 4: Smart Editing
+
+Try all the new commands:
+1. C-a for smart beginning
+2. C-c d to duplicate
+3. M-<up> to move lines
+4. C-; to comment
+
+** Day 5: Full Workflow
+
+Combine everything in your daily coding!
+
+* Philosophy
+
+Vanilla Plus is about **enhancing, not replacing**. It respects decades of Emacs conventions while acknowledging modern UX improvements.
+
+The goal: **Reduce RSI, increase productivity, maintain compatibility.**
+
+You don't need modal editing to have an ergonomic, efficient Emacs setup. Repeat mode is a game-changer that's criminally underused.
+
+Give your pinkies a break. Use Vanilla Plus.
+
+---
+
+** Quick Reference Card
+
+Print this and keep it visible:
+
+#+begin_example
+S-EXP (C-M-f/b/u/d, then):  f b u d n p a e SPC k w t
+JUMP:                       M-. → C-o (back) C-i (fwd)
+WINDOW (C-x o, then):       o h j k l + - > < = 2 3 0 1
+BUFFER:                     C-x <left/right/p/n>
+SMART:                      C-a C-; C-c d  C-c i  C-c l  M-<up/down>
+HELP:                       C-c ?
+#+end_example
+
+Happy Emacs-ing!

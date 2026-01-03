@@ -757,10 +757,22 @@
 (require 'my-org)
 (require 'my-elfeed)
 
-;; Modal editing (affects everything)
-;; Choose ONE of the following:
-;; (require 'my-meow)   ; Kakoune-style modal editing (currently active)
-(require 'my-evil)   ; Vim-style modal editing with evil-keypad
+;; Enhanced keybindings and navigation
+;; Choose your editing style (pick ONE):
+
+;; Option 1: Enhanced Vanilla Emacs (no modal editing)
+;;           - S-exp navigation with repeat maps (C-M-f, then just f f f)
+;;           - Vim-style C-o/C-i jump navigation
+;;           - Repeat maps for windows, buffers, pages
+;;           - Smart enhancements while keeping Emacs feel
+;; (require 'my-vanilla-plus)
+
+;; Option 2: Kakoune-style modal editing (Meow)
+;; (require 'my-meow)
+
+;; Option 3: Vim-style modal editing (Evil + evil-keypad)
+;;           Currently active
+(require 'my-evil)
 
 ;; Windows and UI (should be late)
 (require 'my-windows)
