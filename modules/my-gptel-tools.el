@@ -33,8 +33,8 @@
                (buffer-substring-no-properties (point-min) (point-max))))
  :description "Read and return the complete contents of an Emacs buffer by name"
  :args (list '(:name "buffer"
-               :type string
-               :description "The name of the buffer to read, e.g. 'init.el' or '*scratch*'"))
+                     :type string
+                     :description "The name of the buffer to read, e.g. 'init.el' or '*scratch*'"))
  :category "emacs")
 
 ;; Tool 2: List open buffers
@@ -60,7 +60,7 @@
  :function (lambda (pattern)
              "Search for a pattern in the current project."
              (let ((default-directory (or (project-root (project-current))
-                                         default-directory))
+                                          default-directory))
                    (results '()))
                (dolist (file (directory-files-recursively default-directory "\\.\\(el\\|org\\|py\\|js\\|ts\\)$"))
                  (with-temp-buffer
@@ -77,8 +77,8 @@
                  (format "No matches found for: %s" pattern))))
  :description "Search for a regex pattern in code files (.el, .org, .py, .js, .ts) within the current project"
  :args (list '(:name "pattern"
-               :type string
-               :description "The regex pattern to search for in project files"))
+                     :type string
+                     :description "The regex pattern to search for in project files"))
  :category "project")
 
 ;; Tool 4: Execute shell command
@@ -89,8 +89,8 @@
              (string-trim (shell-command-to-string command)))
  :description "Execute a shell command and return its output. Use for system operations like 'ls', 'git status', 'find', etc."
  :args (list '(:name "command"
-               :type string
-               :description "The shell command to execute"))
+                     :type string
+                     :description "The shell command to execute"))
  :category "system")
 
 ;; Tool 5: Create or write file
@@ -107,11 +107,11 @@
                        (length content))))
  :description "Create a new file or overwrite an existing file with the specified content"
  :args (list '(:name "filepath"
-               :type string
-               :description "The path where to create the file (relative or absolute)")
+                     :type string
+                     :description "The path where to create the file (relative or absolute)")
              '(:name "content"
-               :type string
-               :description "The complete content to write to the file"))
+                     :type string
+                     :description "The complete content to write to the file"))
  :category "filesystem")
 
 ;; Tool 6: Get current project info
@@ -143,8 +143,8 @@
                    (buffer-string)))))
  :description "Get documentation for an Emacs Lisp function or variable"
  :args (list '(:name "symbol_name"
-               :type string
-               :description "The name of the Emacs symbol (function or variable) to describe"))
+                     :type string
+                     :description "The name of the Emacs symbol (function or variable) to describe"))
  :category "emacs")
 
 ;;; ============================================================================
@@ -218,15 +218,15 @@
 ;;; KEY BINDINGS (Optional - uncomment to use)
 ;;; ============================================================================
 
-;; (global-set-key (kbd "C-c g g") #'gptel)
-;; (global-set-key (kbd "C-c g s") #'gptel-send)
-;; (global-set-key (kbd "C-c g m") #'gptel-menu)
-;; (global-set-key (kbd "C-c g a") #'gptel-add)
-;; (global-set-key (kbd "C-c g f") #'gptel-add-file)
-;; (global-set-key (kbd "C-c g b") #'my-gptel-add-current-buffer)
-;; (global-set-key (kbd "C-c g r") #'my-gptel-add-region)
-;; (global-set-key (kbd "C-c g c") #'my-gptel-clear-context)
-;; (global-set-key (kbd "C-c g x") #'my-gptel-show-context)
+(global-set-key (kbd "C-c g g") #'gptel)
+(global-set-key (kbd "C-c g s") #'gptel-send)
+(global-set-key (kbd "C-c g m") #'gptel-menu)
+(global-set-key (kbd "C-c g a") #'gptel-add)
+(global-set-key (kbd "C-c g f") #'gptel-add-file)
+(global-set-key (kbd "C-c g b") #'my-gptel-add-current-buffer)
+(global-set-key (kbd "C-c g r") #'my-gptel-add-region)
+(global-set-key (kbd "C-c g c") #'my-gptel-clear-context)
+(global-set-key (kbd "C-c g x") #'my-gptel-show-context)
 
 ;;; ============================================================================
 ;;; USAGE GUIDE
