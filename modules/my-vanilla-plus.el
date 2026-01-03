@@ -83,6 +83,40 @@
   (put cmd 'repeat-map 'sexp-navigation-repeat-map))
 
 ;;; ============================================================================
+;;; AUTO-CENTER (like Neovim)
+;;; ============================================================================
+;;
+;; Automatically center cursor after big jumps (like Neovim's scrolloff behavior)
+;;
+
+(defvar my-auto-center-commands
+  '(xref-find-definitions
+    xref-go-back
+    xref-go-forward
+    my-go-back
+    beginning-of-buffer
+    end-of-buffer
+    imenu
+    consult-imenu
+    consult-line
+    consult-outline
+    occur
+    next-error
+    previous-error)
+  "Commands that should auto-center after execution.")
+
+(defun my-auto-center (&rest _)
+  "Center cursor in window (like Neovim)."
+  (recenter))
+
+;; Add advice to auto-center after these commands
+(dolist (cmd my-auto-center-commands)
+  (advice-add cmd :after #'my-auto-center))
+
+;; Also auto-center after isearch
+(add-hook 'isearch-mode-end-hook #'my-auto-center)
+
+;;; ============================================================================
 ;;; UNIFIED XREF + MARK NAVIGATION
 ;;; ============================================================================
 ;;
@@ -176,9 +210,21 @@ Falls back to message if no forward history."
 ;; Example:
 ;;   1. Set mark with C-SPC
 ;;   2. Move around
-;;   3. M-. to jump to definition
-;;   4. M-. again to another definition
-;;   5. M-, , , goes back through ALL jumps and marks
+;;   3. M-. to jump to definition (auto-centers!)
+;;   4. M-. again to another definition (auto-centers!)
+;;   5. M-, , , goes back through ALL jumps and marks (auto-centers!)
+;;
+;; AUTO-CENTERING (like Neovim):
+;;   After these commands, cursor auto-centers:
+;;   - M-. (xref-find-definitions)
+;;   - M-, (my-go-back)
+;;   - C-s / C-r (isearch)
+;;   - consult-line, consult-imenu
+;;   - M-< / M-> (beginning/end of buffer)
+;;   - M-g n / M-g p (next/previous-error)
+;;
+;;   To disable: (setq my-auto-center-commands nil)
+;;   To add more: (add-to-list 'my-auto-center-commands 'your-command)
 ;;
 ;; TIMEOUT:
 ;;   Repeat mode exits after 3 seconds of inactivity
