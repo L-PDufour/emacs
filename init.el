@@ -106,9 +106,17 @@
 ;; Position underlines at the descent line instead of the baseline.
 (setq x-underline-at-descent-line t)
 
-(setq tramp-verbose 1)
+;; TRAMP performance optimizations
+(setq tramp-verbose 1)  ; Minimal logging for performance
 (setq tramp-completion-reread-directory-timeout 50)
-(setq remote-file-name-inhibit-cache 50)
+(setq remote-file-name-inhibit-cache 50)  ; Cache remote file info for 50 seconds
+
+;; Additional TRAMP performance settings
+(setq tramp-chunksize 2000)  ; Use larger chunks for file transfers
+(setq tramp-default-method "ssh")  ; Use SSH as default (fastest method)
+
+;; Performance: Reduce timeout for faster failure detection
+(setq tramp-connection-timeout 10)
 
 ;; Automatically rescan the buffer for Imenu entries when `imenu' is invoked
 ;; This ensures the index reflects recent edits.
