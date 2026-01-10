@@ -35,9 +35,8 @@
   :custom
   ;; Use "~" as trigger prefix so templates only appear when you type ~
   ;; This prevents templates from being swallowed by eglot completions
-  (tempel-trigger-prefix "~")
+  (tempel-trigger-prefix "<")
   ;; Set path to our custom templates file
-  (tempel-path (expand-file-name "templates.eld" user-emacs-directory))
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
