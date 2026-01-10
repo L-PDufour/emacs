@@ -59,11 +59,10 @@
 (use-package tempel-collection
   :after tempel)
 
-;; Disable eglot-tempel-mode - we handle tempel integration manually in my/eglot-capf
-;; (use-package eglot-tempel
-;;   :after (eglot tempel)
-;;   :config
-;;   (eglot-tempel-mode 1))
+ (use-package eglot-tempel
+   :after (eglot tempel)
+   :config
+  (eglot-tempel-mode 1))
 
 
 (defun my/eglot-capf ()
