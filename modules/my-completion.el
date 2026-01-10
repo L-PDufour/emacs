@@ -240,7 +240,7 @@
   (defun my/setup-elisp ()
 	(interactive)
 	(setq-local completion-at-point-functions
-				(list (cape-wrap-super
+				(list (cape-super-capf
 					   (cape-capf-predicate
 						#'elisp-completion-at-point
 						#'my/ignore-elisp-keywords)

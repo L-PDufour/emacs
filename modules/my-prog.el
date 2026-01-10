@@ -71,15 +71,14 @@ This merges LSP completions with Tempel snippets into one unified list."
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
                 (list
-                 ;; Option 1: Super Capf - Merges Eglot + Tempel + File into ONE list
-                 ;; All completions appear together, sorted by the completion system
-                 (cape-wrap-buster
-                  (cape-wrap-super
-                   #'tempel-expand            ; Tempel templates (exact prefix matching)
-                   #'eglot-completion-at-point ; LSP completions
-                   #'cape-file))               ; File path completions
+                 ;; Super Capf - Merges Eglot + Tempel + File into ONE list
+                 ;; Using cape-super-capf which creates a merged CAPF
+                 (cape-super-capf
+                  #'tempel-expand            ; Tempel templates (exact prefix matching)
+                  #'eglot-completion-at-point ; LSP completions
+                  #'cape-file)               ; File path completions
 
-                 ;; Option 2: Fallback - Dabbrev as last resort when nothing else matches
+                 ;; Fallback - Dabbrev as last resort when nothing else matches
                  #'cape-dabbrev))))
 
 ;; (use-package eglot-booster
