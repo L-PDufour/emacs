@@ -33,23 +33,20 @@
 ;; A lean fork of dumb-jump.
 (use-package tempel
   :custom
-  (tempel-trigger-prefix "<")
+  ;; Remove trigger prefix so tempel shows completions without needing "<"
+  (tempel-trigger-prefix nil)
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
 			  ("M-n" . tempel-next)
 			  ("M-p" . tempel-previous))
   :config
+  ;; Note: We don't add tempel to completion-at-point-functions here
+  ;; because eglot buffers will use my/eglot-capf instead
   (defun tempel-setup-capf ()
-	;; Add the Tempel Capf to `completion-at-point-functions'.
-	;; `tempel-expand' only triggers on exact matches. Alternatively use
-	;; `tempel-complete' if you want to see all matches, but then you
-	;; should also configure `tempel-trigger-prefix', such that Tempel
-	;; does not trigger too often when you don't expect it. NOTE: We add
-	;; `tempel-expand' *before* the main programming mode Capf, such
-	;; that it will be tried first.
+	;; Add the Tempel Capf to `completion-at-point-functions' for non-eglot buffers
 	(setq-local completion-at-point-functions
-				(cons #'tempel-complete
+				(cons #'tempel-expand
 					  completion-at-point-functions)))
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
@@ -60,10 +57,11 @@
 (use-package tempel-collection
   :after tempel)
 
-(use-package eglot-tempel
-  :after (eglot tempel)  ;; Make sure eglot and tempel are loaded first
-  :config                ;; Use :config instead of :init
-  (eglot-tempel-mode 1))  ;; Use 1 instead of t for the ode
+;; Disable eglot-tempel-mode - we handle tempel integration manually in my/eglot-capf
+;; (use-package eglot-tempel
+;;   :after (eglot tempel)
+;;   :config
+;;   (eglot-tempel-mode 1))
 
 
 (defun my/eglot-capf ()
@@ -77,9 +75,9 @@ This merges LSP completions with Tempel snippets into one unified list."
                  ;; All completions appear together, sorted by the completion system
                  (cape-wrap-buster
                   (cape-wrap-super
-                   #'tempel-complete
-                   #'eglot-completion-at-point
-                   #'cape-file))
+                   #'tempel-expand            ; Tempel templates (exact prefix matching)
+                   #'eglot-completion-at-point ; LSP completions
+                   #'cape-file))               ; File path completions
 
                  ;; Option 2: Fallback - Dabbrev as last resort when nothing else matches
                  #'cape-dabbrev))))
