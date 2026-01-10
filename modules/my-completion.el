@@ -240,11 +240,10 @@
   (defun my/setup-elisp ()
 	(interactive)
 	(setq-local completion-at-point-functions
-				(list (cape-super-capf
-					   (cape-capf-predicate
-						#'elisp-completion-at-point
-						#'my/ignore-elisp-keywords)
-					   #'cape-dabbrev)
+				(list (cape-capf-predicate
+					   #'elisp-completion-at-point
+					   #'my/ignore-elisp-keywords)
+					  #'cape-dabbrev
 					  #'cape-file))
 	(setq-local cape-dabbrev-min-length 5))
 

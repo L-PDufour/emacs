@@ -65,19 +65,16 @@
 
 
 (defun my/eglot-capf ()
-  "Set up completion at point with Eglot and Tempel combined using Super Capf.
-This merges LSP completions with Tempel snippets into one unified list."
+  "Set up completion at point with Eglot and Tempel combined.
+This uses a sequential fallback approach where each CAPF is tried in order."
   (when (and (buffer-live-p (current-buffer))
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
                 (list
-                 ;; Super Capf - Merges Eglot + Tempel + File into ONE list
-                 ;; Using cape-super-capf which creates a merged CAPF
-                 (cape-super-capf
-                  #'tempel-expand            ; Tempel templates (exact prefix matching)
-                  #'eglot-completion-at-point ; LSP completions
-                  #'cape-file)               ; File path completions
-
+                 ;; Primary completions - tried in order, first match wins
+                 #'tempel-expand             ; Tempel templates (exact prefix matching)
+                 #'eglot-completion-at-point  ; LSP completions
+                 #'cape-file                  ; File path completions
                  ;; Fallback - Dabbrev as last resort when nothing else matches
                  #'cape-dabbrev))))
 
