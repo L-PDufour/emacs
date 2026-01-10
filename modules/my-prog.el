@@ -33,8 +33,11 @@
 ;; A lean fork of dumb-jump.
 (use-package tempel
   :custom
-  ;; Remove trigger prefix so tempel shows completions without needing "<"
-  (tempel-trigger-prefix nil)
+  ;; Use "~" as trigger prefix so templates only appear when you type ~
+  ;; This prevents templates from being swallowed by eglot completions
+  (tempel-trigger-prefix "~")
+  ;; Set path to our custom templates file
+  (tempel-path (expand-file-name "templates.eld" user-emacs-directory))
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
@@ -46,7 +49,7 @@
   (defun tempel-setup-capf ()
 	;; Add the Tempel Capf to `completion-at-point-functions' for non-eglot buffers
 	(setq-local completion-at-point-functions
-				(cons #'tempel-expand
+				(cons #'tempel-complete
 					  completion-at-point-functions)))
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
@@ -72,7 +75,7 @@ This uses a sequential fallback approach where each CAPF is tried in order."
     (setq-local completion-at-point-functions
                 (list
                  ;; Primary completions - tried in order, first match wins
-                 #'tempel-expand             ; Tempel templates (exact prefix matching)
+                 #'tempel-complete            ; Tempel templates (trigger with ~)
                  #'eglot-completion-at-point  ; LSP completions
                  #'cape-file                  ; File path completions
                  ;; Fallback - Dabbrev as last resort when nothing else matches
