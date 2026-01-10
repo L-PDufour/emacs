@@ -75,12 +75,12 @@ This merges LSP completions with Tempel snippets into one unified list."
                 (list
                  ;; Option 1: Super Capf - Merges Eglot + Tempel + File into ONE list
                  ;; All completions appear together, sorted by the completion system
-                 (cape-capf-buster
-                  (cape-capf-super
-                   #'eglot-completion-at-point
+                 (cape-wrap-buster
+                  (cape-wrap-super
                    #'tempel-complete
+                   #'eglot-completion-at-point
                    #'cape-file))
-                 
+
                  ;; Option 2: Fallback - Dabbrev as last resort when nothing else matches
                  #'cape-dabbrev))))
 

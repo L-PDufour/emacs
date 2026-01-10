@@ -186,10 +186,13 @@
   :ensure nil
   ;; Optional customizations
   :custom
-  (corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                 ;; Enable auto completion popup
+  (corfu-auto-delay 0.1)         ;; Delay before showing popup (seconds)
+  (corfu-auto-prefix 2)          ;; Minimum prefix length for auto completion
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay 0.5)
-  (corfu-preselect 'directory) ;; Select the first candidate, except for directories
+  (corfu-preselect 'directory)   ;; Select the first candidate, except for directories
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
@@ -237,7 +240,7 @@
   (defun my/setup-elisp ()
 	(interactive)
 	(setq-local completion-at-point-functions
-				(list (cape-capf-super
+				(list (cape-wrap-super
 					   (cape-capf-predicate
 						#'elisp-completion-at-point
 						#'my/ignore-elisp-keywords)
