@@ -136,12 +136,79 @@ java-mode
 
 (class "public class " (p (file-name-base (or (buffer-file-name) (buffer-name)))) " {" n> r> n "}")
 
-c-mode :when (re-search-backward "^\\S-*$" (line-beginning-position) 'noerror)
+c-mode c-ts-mode :when (re-search-backward "^\\S-*$" (line-beginning-position) 'noerror)
 
-(main "int main(" > (p "int argc, char *argv[]" tabstop-1) ") {" > n > q > n > "return 0;" > n > "}" >)
+(main "int main(int argc, char *argv[]) {" n> r> n> "return 0;" n "}" >)
+(mainn "int main(void) {" n> r> n> "return 0;" n "}" >)
+(inc "#include <" (p "stdio.h" header) ">")
+(inch "#include \"" (p "header.h" header) "\"")
+(incstdio "#include <stdio.h>")
+(incstdlib "#include <stdlib.h>")
+(incstring "#include <string.h>")
+(incmath "#include <math.h>")
+(inctime "#include <time.h>")
+(incassert "#include <assert.h>")
+(incstdbool "#include <stdbool.h>")
+(incstdint "#include <stdint.h>")
 
-(inc "#include <" (p (concat (file-name-base (or (buffer-file-name) (buffer-name))) ".h")) ">")
-(incc "#include \"" (p (concat (file-name-base (or (buffer-file-name) (buffer-name))) ".h")) "\"")
+;; Control structures
+(if "if (" (p "condition") ") {" n> r> n "}" >)
+(ife "if (" (p "condition") ") {" n> r> n "} else {" n> p n "}" >)
+(elif "else if (" (p "condition") ") {" n> r> n "}" >)
+(else "else {" n> r> n "}" >)
+(for "for (" (p "int i = 0") "; " (p "i < n") "; " (p "i++") ") {" n> r> n "}" >)
+(fori "for (int " (p "i") " = 0; " (s i) " < " (p "count") "; " (s i) "++) {" n> r> n "}" >)
+(forr "for (int " (p "i") " = " (p "n") "; " (s i) " >= 0; " (s i) "--) {" n> r> n "}" >)
+(while "while (" (p "condition") ") {" n> r> n "}" >)
+(do "do {" n> r> n "} while (" (p "condition") ");" >)
+(switch "switch (" (p "expression") ") {" n> "case " (p "value") ":" n> r> n> "break;" n "default:" n> "break;" n "}" >)
+(case "case " (p "value") ":" n> r> n "break;" >)
+
+;; Functions
+(fn (p "void" return-type) " " (p "function_name") "(" (p "void") ") {" n> r> n "}" >)
+(fns "static " (p "void" return-type) " " (p "function_name") "(" (p "void") ") {" n> r> n "}" >)
+
+;; Struct and typedef
+(st "struct " (p "name") " {" n> r> n "};" >)
+(td "typedef " (p "type") " " (p "alias") ";")
+(tds "typedef struct " (p "name") " {" n> r> n "} " (s name) ";" >)
+
+;; Enum
+(enum "enum " (p "name") " {" n> r> n "};" >)
+(tenum "typedef enum " (p "name") " {" n> r> n "} " (s name) ";" >)
+
+;; Memory management
+(malloc (p "type") " *" (p "ptr") " = malloc(sizeof(" (s type) ") * " (p "count") ");")
+(calloc (p "type") " *" (p "ptr") " = calloc(" (p "count") ", sizeof(" (s type) "));")
+(realloc (p "ptr") " = realloc(" (s ptr) ", sizeof(" (p "type") ") * " (p "new_count") ");")
+(free "free(" (p "ptr") ");")
+
+;; Printf variants
+(printf "printf(\"" (p "%d\\n") "\", " (p "var") ");")
+(printfs "printf(\"%s\\n\", " (p "str") ");")
+(fprintf "fprintf(stderr, \"" (p "Error: %s\\n") "\", " (p "msg") ");")
+
+;; File I/O
+(fopen "FILE *" (p "fp") " = fopen(\"" (p "filename") "\", \"" (p "r" mode) "\");")
+(fclose "fclose(" (p "fp") ");")
+(fread "fread(" (p "buffer") ", sizeof(" (p "type") "), " (p "count") ", " (p "fp") ");")
+(fwrite "fwrite(" (p "buffer") ", sizeof(" (p "type") "), " (p "count") ", " (p "fp") ");")
+(fprintf "fprintf(" (p "fp") ", \"" (p "%d\\n") "\", " (p "var") ");")
+(fscanf "fscanf(" (p "fp") ", \"" (p "%d") "\", &" (p "var") ");")
+
+;; Error handling
+(perror "perror(\"" (p "error message") "\");")
+(check "if (" (p "ptr") " == NULL) {" n> "perror(\"" (s ptr) "\");" n> "exit(EXIT_FAILURE);" n "}" >)
+(assert "assert(" (p "condition") ");")
+
+;; Comments and documentation
+(comment "/*" n> "* " (p "description") n> "*/" >)
+(commentl "// " (p "comment"))
+
+;; Header guard
+(guard "#ifndef " (p (upcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))) "HEADER") "_H" n "#define " (s "HEADER") "_H" n n r n n "#endif /* " (s "HEADER") "_H */" n)
+;; Pragma once (modern alternative)
+(pragma "#pragma once" n n)
 
 js-mode js-ts-mode typescript-mode typescript-ts-mode
 (clog "console.log('"
