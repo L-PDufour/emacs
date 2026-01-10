@@ -31,51 +31,30 @@
   (xref-search-program 'ripgrep))
 
 ;; A lean fork of dumb-jump.
-(use-package tempel
-  :custom
-  ;; Use "~" as trigger prefix so templates only appear when you type ~
-  ;; This prevents templates from being swallowed by eglot completions
-  (tempel-trigger-prefix "~")
-  ;; Set path to our custom templates file
-  (tempel-path (expand-file-name "templates.eld" user-emacs-directory))
-  :bind (:map tempel-map
-			  ("M-+" . tempel-complete)
-			  ("M-*" . tempel-insert)
-			  ("M-n" . tempel-next)
-			  ("M-p" . tempel-previous))
+;; YASnippet - A template system for Emacs
+;; Much more mature and reliable than tempel, with huge snippet collection
+(use-package yasnippet
+  :ensure nil
+  :diminish yas-minor-mode
+  :hook ((prog-mode . yas-minor-mode)
+         (text-mode . yas-minor-mode)
+         (conf-mode . yas-minor-mode))
   :config
-  ;; Note: We don't add tempel to completion-at-point-functions here
-  ;; because eglot buffers will use my/eglot-capf instead
-  (defun tempel-setup-capf ()
-	;; Add the Tempel Capf to `completion-at-point-functions' for non-eglot buffers
-	(setq-local completion-at-point-functions
-				(cons #'tempel-complete
-					  completion-at-point-functions)))
+  (yas-reload-all))
 
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf))
-
-
-(use-package tempel-collection
-  :after tempel)
-
-;; Disable eglot-tempel-mode - we handle tempel integration manually in my/eglot-capf
-;; (use-package eglot-tempel
-;;   :after (eglot tempel)
-;;   :config
-;;   (eglot-tempel-mode 1))
-
+;; Collection of snippets for many languages
+(use-package yasnippet-snippets
+  :ensure nil
+  :after yasnippet)
 
 (defun my/eglot-capf ()
-  "Set up completion at point with Eglot and Tempel combined.
+  "Set up completion at point with Eglot.
 This uses a sequential fallback approach where each CAPF is tried in order."
   (when (and (buffer-live-p (current-buffer))
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
                 (list
                  ;; Primary completions - tried in order, first match wins
-                 #'tempel-complete            ; Tempel templates (trigger with ~)
                  #'eglot-completion-at-point  ; LSP completions
                  #'cape-file                  ; File path completions
                  ;; Fallback - Dabbrev as last resort when nothing else matches
