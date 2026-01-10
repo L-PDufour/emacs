@@ -7,7 +7,20 @@
   :custom
   (catppuccin-flavor 'frappe)
   :hook
-  (after-init . catppuccin-reload))
+  (after-init . catppuccin-reload)
+  :config
+  ;; Customize tempel face colors
+  (with-eval-after-load 'tempel
+    (set-face-attribute 'tempel-default nil
+                        :inherit 'font-lock-keyword-face
+                        :foreground "#a6d189")  ; Green from catppuccin-frappe
+    (set-face-attribute 'tempel-field nil
+                        :inherit 'highlight
+                        :background "#414559"   ; Surface2 from catppuccin-frappe
+                        :foreground "#e5c890")  ; Yellow from catppuccin-frappe
+    (set-face-attribute 'tempel-form nil
+                        :inherit 'font-lock-function-name-face
+                        :foreground "#81c8be")))
 
 (use-package nerd-icons
   :ensure nil

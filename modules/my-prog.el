@@ -33,21 +33,20 @@
 ;; A lean fork of dumb-jump.
 (use-package tempel
   :custom
+  ;; Use "~" as trigger prefix so templates only appear when you type ~
+  ;; This prevents templates from being swallowed by eglot completions
   (tempel-trigger-prefix "<")
+  ;; Set path to our custom templates file
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
 			  ("M-n" . tempel-next)
 			  ("M-p" . tempel-previous))
   :config
+  ;; Note: We don't add tempel to completion-at-point-functions here
+  ;; because eglot buffers will use my/eglot-capf instead
   (defun tempel-setup-capf ()
-	;; Add the Tempel Capf to `completion-at-point-functions'.
-	;; `tempel-expand' only triggers on exact matches. Alternatively use
-	;; `tempel-complete' if you want to see all matches, but then you
-	;; should also configure `tempel-trigger-prefix', such that Tempel
-	;; does not trigger too often when you don't expect it. NOTE: We add
-	;; `tempel-expand' *before* the main programming mode Capf, such
-	;; that it will be tried first.
+	;; Add the Tempel Capf to `completion-at-point-functions' for non-eglot buffers
 	(setq-local completion-at-point-functions
 				(cons #'tempel-complete
 					  completion-at-point-functions)))
@@ -60,28 +59,24 @@
 (use-package tempel-collection
   :after tempel)
 
-(use-package eglot-tempel
-  :after (eglot tempel)  ;; Make sure eglot and tempel are loaded first
-  :config                ;; Use :config instead of :init
-  (eglot-tempel-mode 1))  ;; Use 1 instead of t for the ode
+ (use-package eglot-tempel
+   :after (eglot tempel)
+   :config
+  (eglot-tempel-mode 1))
 
 
 (defun my/eglot-capf ()
-  "Set up completion at point with Eglot and Tempel combined using Super Capf.
-This merges LSP completions with Tempel snippets into one unified list."
+  "Set up completion at point with Eglot and Tempel combined.
+This uses a sequential fallback approach where each CAPF is tried in order."
   (when (and (buffer-live-p (current-buffer))
              (bound-and-true-p eglot--managed-mode))
     (setq-local completion-at-point-functions
                 (list
-                 ;; Option 1: Super Capf - Merges Eglot + Tempel + File into ONE list
-                 ;; All completions appear together, sorted by the completion system
-                 (cape-capf-buster
-                  (cape-capf-super
-                   #'eglot-completion-at-point
-                   #'tempel-complete
-                   #'cape-file))
-                 
-                 ;; Option 2: Fallback - Dabbrev as last resort when nothing else matches
+                 ;; Primary completions - tried in order, first match wins
+                 #'tempel-complete            ; Tempel templates (trigger with ~)
+                 #'eglot-completion-at-point  ; LSP completions
+                 #'cape-file                  ; File path completions
+                 ;; Fallback - Dabbrev as last resort when nothing else matches
                  #'cape-dabbrev))))
 
 ;; (use-package eglot-booster
