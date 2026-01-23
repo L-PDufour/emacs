@@ -148,14 +148,15 @@
   (consult-eglot-embark-mode 1))
 
 (use-package orderless
-  :ensure nil 
+  :ensure nil
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
   ;; (orderless-component-separator #'orderless-escapable-split-on-space)
   (completion-styles '(orderless basic))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion)))))
+  (completion-category-overrides '((file (styles partial-completion))))
+  (completion-category-defaults nil) ;; Disable defaults, use our settings
+  (completion-pcm-leading-wildcard t)) ;; Emacs 31: partial-completion behaves like substring
 
 (use-package embark
   :ensure nil
@@ -212,8 +213,8 @@
               ("M-;" . corfu-complete)
               ("RET" . nil))
   :init
-  ; (corfu-history-mode 1)
-  ; (corfu-popupinfo-mode 1)
+                                        ; (corfu-history-mode 1)
+                                        ; (corfu-popupinfo-mode 1)
   (global-corfu-mode)
   :config
   (with-eval-after-load 'savehist

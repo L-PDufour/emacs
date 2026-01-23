@@ -204,17 +204,6 @@
 ;; Remove duplicates from the kill ring to reduce clutter
 (setq kill-do-not-save-duplicates t)
 
-;;; Auto revert
-;; Auto-revert in Emacs is a feature that automatically updates the contents of
-;; a buffer to reflect changes made to the underlying file.
-(setq revert-without-query (list ".")  ; Do not prompt
-	  auto-revert-stop-on-user-input nil
-	  auto-revert-verbose t)
-
-;; Revert other buffers (e.g, Dired)
-(setq global-auto-revert-non-file-buffers t)
-(setq global-auto-revert-ignore-modes '(Buffer-menu-mode))  ; Resolve issue #29
-
 ;;; recentf
 
 ;; `recentf' is an that maintains a list of recently accessed files.
@@ -406,8 +395,6 @@
 ;; with additional logic. This `dired-buffer-stale-p' predicate handles remote
 ;; files, wdired, unreadable dirs, and delegates to dired-directory-changed-p
 ;; for modification checks.
-(setq auto-revert-remote-files nil)
-(setq dired-auto-revert-buffer 'dired-buffer-stale-p)
 
 (setq dired-vc-rename-file t)
 
@@ -506,11 +493,11 @@
   :hook
   (after-init . global-auto-revert-mode)
   :custom
-  (auto-revert-interval 5)
+  (auto-revert-interval 10)
   (auto-revert-remote-files nil)
   (auto-revert-use-notify t)
   (auto-revert-avoid-polling t)
-  (auto-revert-verbose t))
+  (auto-revert-verbose nil))
 
 ;; Recentf is an Emacs package that maintains a list of recently
 ;; accessed files, making it easier to reopen files you have worked on

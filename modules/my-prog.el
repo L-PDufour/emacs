@@ -32,25 +32,23 @@
 
 ;; A lean fork of dumb-jump.
 (use-package tempel
-  :custom
-  ;; Use "~" as trigger prefix so templates only appear when you type ~
-  ;; This prevents templates from being swallowed by eglot completions
-  (tempel-trigger-prefix "<")
-  ;; Set path to our custom templates file
   :bind (:map tempel-map
 			  ("M-+" . tempel-complete)
 			  ("M-*" . tempel-insert)
 			  ("M-n" . tempel-next)
 			  ("M-p" . tempel-previous))
-  :config
+  :init
   ;; Note: We don't add tempel to completion-at-point-functions here
   ;; because eglot buffers will use my/eglot-capf instead
   (defun tempel-setup-capf ()
-	;; Add the Tempel Capf to `completion-at-point-functions' for non-eglot buffers
-	(setq-local completion-at-point-functions
-				(cons #'tempel-complete
-					  completion-at-point-functions)))
-
+    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
+    ;; a trigger prefix character in order to prevent Tempel from triggering
+    ;; unexpectly.
+    (setq-local corfu-auto-trigger "/"
+                completion-at-point-functions
+                (cons (cape-capf-trigger #'tempel-complete ?/)
+                      completion-at-point-functions))
+    )
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf))
@@ -65,13 +63,6 @@
   (eglot-tempel-mode 1))
 
 
-(defun my/eglot-capf ()
-  (setq-local completion-at-point-functions
-              (list (cape-capf-super
-                     #'eglot-completion-at-point
-                     #'tempel-expand
-                     #'cape-file))))
-
 ;; (use-package eglot-booster
 ;;   :vc (:url "https://github.com/jdtsmith/eglot-booster"
 ;;             :rev :newest)
@@ -82,20 +73,31 @@
 
 (use-package eglot
   :ensure nil
+  :init
+  (defun my/eglot-capf ()
+    (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       #'eglot-completion-at-point
+                       #'cape-file)
+                      (cape-capf-trigger #'tempel-complete ?~))))  ;; Separate, only on ~
+
+  (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
   :custom
   (eglot-send-changes-idle-time 0.5)
   (eglot-extend-to-xref t)
   (eglot-code-action-indications '(eldoc-hint margin))
   (eglot-code-action-indicator "  α ")
-  ( completion-category-overrides '((eglot (styles orderless))
-                                    (eglot-capf (styles orderless))))
+  (completion-category-overrides '((eglot (styles orderless))
+                                   (eglot-capf (styles orderless))))
   (eglot-autoshutdown t)
   (jsonrpc-event-hook nil)
   (eglot-events-buffer-size 0) ; Disable event logging
-  (eglot-sync-connect 0)     ; Async connection
+  (eglot-sync-connect nil)     ; Async connection
   (eglot-report-progress nil)   ; Disable progress reports
   (eglot-ignored-server-capabilities '(:documentFormattingProvider :documentRangeFormattingProvider))
   :config
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+
   ;; (add-to-list 'eglot-server-programs
   ;;              '(templ-ts-mode . ("lspx" "--lsp" "vscode-html-language-server --stdio " "--lsp" "templ lsp")))
   (add-to-list 'eglot-server-programs
@@ -132,10 +134,8 @@
                                                   (:functionLikeReturnTypes . ((:enabled . t)))
                                                   (:enumMemberValues . ((:enabled . t)))))
                                   (:suggest . ((:completeFunctionCalls . t)))))
-                  (:html . ((:includeLanguages . ((:templ . "html")))))))
+                  (:html . ((:includeLanguages . ((:templ . "html"))))))))
 
-  :hook
-  (eglot-managed-mode . my/eglot-capf))
 
 ;;; INDENT-GUIDE
 ;; The `indent-guide' package provides visual indicators for indentation levels

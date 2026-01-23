@@ -136,7 +136,7 @@ java-mode
 
 (class "public class " (p (file-name-base (or (buffer-file-name) (buffer-name)))) " {" n> r> n "}")
 
-c-mode c-ts-mode :when (re-search-backward "^\\S-*$" (line-beginning-position) 'noerror)
+c-ts-mode
 
 (main "int main(int argc, char *argv[]) {" n> r> n> "return 0;" n "}" >)
 (mainn "int main(void) {" n> r> n> "return 0;" n "}" >)
