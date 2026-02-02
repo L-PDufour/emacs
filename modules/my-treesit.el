@@ -1,7 +1,11 @@
 ;;; my-treesit.el ---  -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
-
+(use-package combobulate
+  :vc (:url "https://github.com/mickeynp/combobulate" :branch "development")
+  :custom
+  (combobulate-key-prefix "C-c o")
+  :hook ((prog-mode . combobulate-mode)))
 ;; Font-lock level (3 is good balance)
 (setq treesit-font-lock-level 3)
 

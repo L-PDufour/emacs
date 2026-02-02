@@ -15,7 +15,10 @@
 (use-package gptel
   :config
   (setq gptel-default-mode 'org-mode)
-  
+  (gptel-make-ollama "Ollama"             ;Any name of your choosing
+    :host "localhost:11434"               ;Where it's running
+    :stream t                             ;Stream responses
+    :models '(qwen3:4b))          ;List of models  
   ;; Set the model BEFORE creating the backend
   (setq gptel-model "claude-sonnet-4-20250514")
   
@@ -24,6 +27,7 @@
           :stream t
           :key #'my-get-anthropic-key
           :models '(claude-sonnet-4-20250514      ; Default: best balance
+                    claude-opus-4-20250514        ; Maximum capability
                     claude-haiku-4-20250119))))   ; Fast and cheap
 
 ;; Load gptel tools and RAG configuration

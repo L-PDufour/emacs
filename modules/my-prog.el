@@ -143,11 +143,24 @@
 ;; It draws vertical lines (by default, a character of your choice) at each
 ;; level of indentation, helping to improve readability and navigation within
 ;; the code.
+
 (use-package highlight-indent-guides
   :ensure nil
   :hook (prog-mode . highlight-indent-guides-mode)
+  :init
+  ;; Fix marker/integer type mismatch with treesit
+  (defun my-treesit-fontify-region-wrapper (orig-fun beg end &optional loudly)
+    "Wrapper for treesit font-lock to handle markers from indent-guides."
+    (funcall orig-fun
+             (if (markerp beg) (marker-position beg) beg)
+             (if (markerp end) (marker-position end) end)
+             loudly))
+  
+  (with-eval-after-load 'treesit
+    (advice-add 'treesit-font-lock-fontify-region 
+                :around #'my-treesit-fontify-region-wrapper))
   :config
-  (setq highlight-indent-guides-method 'bitmap)  ; No character issues
+  (setq highlight-indent-guides-method 'bitmap)
   (setq highlight-indent-guides-responsive 'top))
 
 
