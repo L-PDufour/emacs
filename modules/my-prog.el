@@ -31,37 +31,51 @@
   (xref-search-program 'ripgrep))
 
 ;; A lean fork of dumb-jump.
-(use-package tempel
-  :bind (:map tempel-map
-			  ("M-+" . tempel-complete)
-			  ("M-*" . tempel-insert)
-			  ("M-n" . tempel-next)
-			  ("M-p" . tempel-previous))
-  :init
-  ;; Note: We don't add tempel to completion-at-point-functions here
-  ;; because eglot buffers will use my/eglot-capf instead
-  (defun tempel-setup-capf ()
-    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
-    ;; a trigger prefix character in order to prevent Tempel from triggering
-    ;; unexpectly.
-    (setq-local corfu-auto-trigger "/"
-                completion-at-point-functions
-                (cons (cape-capf-trigger #'tempel-complete ?/)
-                      completion-at-point-functions))
-    )
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf))
+;; (use-package tempel
+;;   :bind (:map tempel-map
+;; 			  ("M-+" . tempel-complete)
+;; 			  ("M-*" . tempel-insert)
+;; 			  ("M-n" . tempel-next)
+;; 			  ("M-p" . tempel-previous))
+;;   :init
+;;   ;; Note: We don't add tempel to completion-at-point-functions here
+;;   ;; because eglot buffers will use my/eglot-capf instead
+;;   (defun tempel-setup-capf ()
+;;     ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
+;;     ;; a trigger prefix character in order to prevent Tempel from triggering
+;;     ;; unexpectly.
+;;     (setq-local corfu-auto-trigger "/"
+;;                 completion-at-point-functions
+;;                 (cons (cape-capf-trigger #'tempel-complete ?/)
+;;                       completion-at-point-functions))
+;;     )
+;;   (add-hook 'conf-mode-hook 'tempel-setup-capf)
+;;   (add-hook 'prog-mode-hook 'tempel-setup-capf)
+;;   (add-hook 'text-mode-hook 'tempel-setup-capf))
+;; 
+;; 
+;; (use-package tempel-collection
+;;   :after tempel)
+;; 
+;; (use-package eglot-tempel
+;;   :after (eglot tempel)
+;;   :config
+;;   (eglot-tempel-mode 1))
 
-
-(use-package tempel-collection
-  :after tempel)
-
-(use-package eglot-tempel
-  :after (eglot tempel)
+(use-package yasnippet
+  :ensure nil
+  :diminish yas-minor-mode
   :config
-  (eglot-tempel-mode 1))
+  (yas-reload-all)
+  :hook (after-init . yas-global-mode))
 
+(use-package yasnippet-snippets
+  :ensure nil
+  :after yasnippet)
+
+(use-package yasnippet-capf
+  :ensure nil
+  :after cape)
 
 ;; (use-package eglot-booster
 ;;   :vc (:url "https://github.com/jdtsmith/eglot-booster"
@@ -78,9 +92,10 @@
     (setq-local completion-at-point-functions
                 (list (cape-capf-super
                        #'eglot-completion-at-point
-                       #'cape-file)
-                      (cape-capf-trigger #'tempel-complete ?~))))  ;; Separate, only on ~
+                       #'yasnippet-capf
+                       #'cape-file))))
 
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
   :custom
   (eglot-send-changes-idle-time 0.5)
@@ -91,50 +106,56 @@
                                    (eglot-capf (styles orderless))))
   (eglot-autoshutdown t)
   (jsonrpc-event-hook nil)
+  (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-events-buffer-size 0) ; Disable event logging
   (eglot-sync-connect nil)     ; Async connection
   (eglot-report-progress nil)   ; Disable progress reports
   (eglot-ignored-server-capabilities '(:documentFormattingProvider :documentRangeFormattingProvider))
   :config
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+
 
   ;; (add-to-list 'eglot-server-programs
   ;;              '(templ-ts-mode . ("lspx" "--lsp" "vscode-html-language-server --stdio " "--lsp" "templ lsp")))
   (add-to-list 'eglot-server-programs
+               '((go-mode go-ts-mode) . ("rass" "--" "gopls" "--"
+                                         "tailwindcss-language-server" "--stdio")))
+  (add-to-list 'eglot-server-programs
                '(templ-ts-mode . ("templ" "lsp")))
+  (defun my/eglot-workspace-config ()
+    "Return per-project eglot workspace configuration."
+    (let ((root (project-root (project-current))))
+      (cond
+       ((string-match-p "dashboard" root)
+        '(:tailwindCSS
+          (:includeLanguages (:go "html")
+                             :experimental (:classRegex [["Class(?:es)?[({]([^)}]*)[)}]"
+                                                          "[\"`]([^\"`]*)[\"`]"]]))))
+       ;; your deno/templ project
+       ((string-match-p "amerifor" root)
+        '(:deno (:enable t :lint t :unstable t)))
+       (t nil))))
+
+  (setq eglot-workspace-configuration #'my/eglot-workspace-config)
   ;; Register Deno LSP with proper language IDs
   (add-to-list 'eglot-server-programs
                '(((js-mode :language-id "javascript")
                   (js-ts-mode :language-id "javascript")
                   (tsx-ts-mode :language-id "typescriptreact")
-                  (typescript-ts-mode :language-id "typescript")
-                  (typescript-mode :language-id "typescript"))
+                  (typescript-ts-mode :language-id "typescript"))
                  "deno" "lsp"
                  :initializationOptions
                  (:enable t
                           :lint t
-                          :unstable t)))
+                          :unstable t))))
 
-  ;; Configure workspace settings
-  (setq-default eglot-workspace-configuration
-                '((:deno . ((:enable . t)
-                            (:lint . t)
-                            (:unstable . t)))
-                  (:javascript . ((:inlayHints . ((:parameterNames . ((:enabled . "all")))
-                                                  (:parameterTypes . ((:enabled . t)))
-                                                  (:variableTypes . ((:enabled . t)))
-                                                  (:propertyDeclarationTypes . ((:enabled . t)))
-                                                  (:functionLikeReturnTypes . ((:enabled . t)))
-                                                  (:enumMemberValues . ((:enabled . t)))))
-                                  (:suggest . ((:completeFunctionCalls . t)))))
-                  (:typescript . ((:inlayHints . ((:parameterNames . ((:enabled . "all")))
-                                                  (:parameterTypes . ((:enabled . t)))
-                                                  (:variableTypes . ((:enabled . t)))
-                                                  (:propertyDeclarationTypes . ((:enabled . t)))
-                                                  (:functionLikeReturnTypes . ((:enabled . t)))
-                                                  (:enumMemberValues . ((:enabled . t)))))
-                                  (:suggest . ((:completeFunctionCalls . t)))))
-                  (:html . ((:includeLanguages . ((:templ . "html"))))))))
+;; Configure workspace settings
+;; (setq-default eglot-workspace-configuration
+;;               '(:deno (:enable t
+;;                                :lint t
+;;                                :unstable t)
+;;                       :javascript (:suggest (:completeFunctionCalls t))
+;;                       :typescript (:suggest (:completeFunctionCalls t))
+;;                       :html (:includeLanguages (:templ "html")))))
 
 
 ;;; INDENT-GUIDE
@@ -144,25 +165,61 @@
 ;; level of indentation, helping to improve readability and navigation within
 ;; the code.
 
-(use-package highlight-indent-guides
-  :ensure nil
-  :hook (prog-mode . highlight-indent-guides-mode)
-  :init
-  ;; Fix marker/integer type mismatch with treesit
-  (defun my-treesit-fontify-region-wrapper (orig-fun beg end &optional loudly)
-    "Wrapper for treesit font-lock to handle markers from indent-guides."
-    (funcall orig-fun
-             (if (markerp beg) (marker-position beg) beg)
-             (if (markerp end) (marker-position end) end)
-             loudly))
-  
-  (with-eval-after-load 'treesit
-    (advice-add 'treesit-font-lock-fontify-region 
-                :around #'my-treesit-fontify-region-wrapper))
-  :config
-  (setq highlight-indent-guides-method 'bitmap)
-  (setq highlight-indent-guides-responsive 'top))
+;; (use-package highlight-indent-guides
+;;   :ensure nil
+;;   :hook (prog-mode . highlight-indent-guides-mode)
+;;   :init
+;;   ;; Fix marker/integer type mismatch with treesit
+;;   (defun my-treesit-fontify-region-wrapper (orig-fun beg end &optional loudly)
+;;     "Wrapper for treesit font-lock to handle markers from indent-guides."
+;;     (funcall orig-fun
+;;              (if (markerp beg) (marker-position beg) beg)
+;;              (if (markerp end) (marker-position end) end)
+;;              loudly))
+;;   
+;;   (with-eval-after-load 'treesit
+;;     (advice-add 'treesit-font-lock-fontify-region 
+;;                 :around #'my-treesit-fontify-region-wrapper))
+;;   :config
+;;   (setq highlight-indent-guides-method 'bitmap)
+;;   (setq highlight-indent-guides-responsive 'top))
+;; eldoc-box - childframe popup for eldoc
 
+;; tabspaces - workspace management with tab-bar
+(use-package tabspaces
+  :ensure nil
+  :hook (after-init . tabspaces-mode)
+  :custom
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "Default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*"))
+  :config
+  ;; Filter buffers to show only those in current workspace
+  (tabspaces-mode 1)
+  
+  ;; Optional: Add some keybindings
+  :bind
+  ("C-c TAB TAB" . tabspaces-switch-or-create-workspace)
+  ("C-c TAB b" . tabspaces-switch-to-buffer)
+  ("C-c TAB d" . tabspaces-close-workspace)
+  ("C-c TAB k" . tabspaces-kill-buffers-close-workspace)
+  ("C-c TAB r" . tabspaces-remove-current-buffer))
+
+;; indent-bars - visual indentation guides
+(use-package indent-bars
+  :ensure nil
+  :hook ((prog-mode . indent-bars-mode)
+         (eglot-managed-mode . indent-bars-mode))
+  :custom
+  (indent-bars-treesit-support t)
+  (indent-bars-no-descend-string t)
+  (indent-bars-treesit-ignore-blank-lines-types '("module"))
+  (indent-bars-width-frac 0.1)
+  (indent-bars-pad-frac 0.1)
+  (indent-bars-pattern ".")
+  (indent-bars-color '(highlight :face-bg t :blend 0.2))
+  (indent-bars-highlight-current-depth '(:blend 0.5)))
 
 
 (defun eglot-open-link ()

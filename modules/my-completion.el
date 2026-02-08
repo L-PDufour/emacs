@@ -148,7 +148,7 @@
   (consult-eglot-embark-mode 1))
 
 (use-package orderless
-  :ensure nil
+  :ensure nil 
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))

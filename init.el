@@ -1,6 +1,6 @@
 ;;; init.el --- Init -*- lexical-binding: t; -*-
 
-
+(put 'eglot-workspace-configuration 'safe-local-variable #'always)
 (setq package-archives nil)
 (setq package-enable-at-startup nil)
 
