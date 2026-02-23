@@ -38,11 +38,15 @@
   (setq org-capture-templates
         '(("p" "Project")
           ("pt" "Project TODO" entry
-           (file+headline my-project-readme "TODO")
+           (file+headline my-project-readme "Tasks")
            "* TODO %?\n  SCHEDULED: %t\n  Added: %U\n  %i\n  Link: %a"
            :empty-lines 1
            :prepend t)
-          
+          ("pn" "Project Note" entry
+           (file+headline my-project-readme "Notes")
+           "* %?\n  Added: %U\n  %i\n  Link: %a"
+           :empty-lines 1)
+
           ("i" "Inbox" entry
            (file+headline org-default-notes-file "Inbox")
            "* TODO %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\n%i\n\n%a")))

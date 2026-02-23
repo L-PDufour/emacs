@@ -193,18 +193,31 @@
   (tabspaces-use-filtered-buffers-as-default t)
   (tabspaces-default-tab "Default")
   (tabspaces-remove-to-default t)
-  (tabspaces-include-buffers '("*scratch*"))
+  (tabspaces-initialize-project-with-todo t)
+  (tabspaces-keymap-prefix "C-c t")  ;; disable default prefix, we manage our own
+  ;; sessions
+  (tabspaces-session t)
+  (tabspaces-session-auto-restore t)
+  ;; additional options
+  (tabspaces-fully-resolve-paths t)  ; Resolve relative project paths to absolute
+  (tabspaces-exclude-buffers '("*Messages*" "*Compile-Log*"))  ; Additional buffers to exclude
+  (tab-bar-new-tab-choice "*scratch*")
   :config
-  ;; Filter buffers to show only those in current workspace
-  (tabspaces-mode 1)
-  
-  ;; Optional: Add some keybindings
-  :bind
-  ("C-c TAB TAB" . tabspaces-switch-or-create-workspace)
-  ("C-c TAB b" . tabspaces-switch-to-buffer)
-  ("C-c TAB d" . tabspaces-close-workspace)
-  ("C-c TAB k" . tabspaces-kill-buffers-close-workspace)
-  ("C-c TAB r" . tabspaces-remove-current-buffer))
+  (with-eval-after-load 'consult
+    (plist-put consult-source-buffer :hidden t)
+    (plist-put consult-source-buffer :default nil)
+    (defvar consult--source-workspace
+      (list :name     "Workspace Buffers"
+            :narrow   ?w
+            :history  'buffer-name-history
+            :category 'buffer
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda () (consult--buffer-query
+                                  :predicate #'tabspaces--local-buffer-p
+                                  :sort 'visibility
+                                  :as #'buffer-name))))
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
 
 ;; indent-bars - visual indentation guides
 (use-package indent-bars

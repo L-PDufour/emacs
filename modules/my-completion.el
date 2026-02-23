@@ -185,17 +185,18 @@
 
 (use-package corfu
   :ensure nil
+  
   ;; Optional customizations
   :custom
   (corfu-auto t)                 ;; Enable auto completion popup
-  (corfu-auto-delay 0.1)         ;; Delay before showing popup (seconds)
+  (corfu-auto-delay 0.3)         ;; Delay before showing popup (seconds)
   (corfu-auto-prefix 2)          ;; Minimum prefix length for auto completion
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay 0.5)
   (corfu-preselect 'directory)   ;; Select the first candidate, except for directories
-  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  (corfu-quit-at-boundary 'separator)   ;; Never quit at completion boundary
+
   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
   ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
   (corfu-on-exact-match nil)     ;; Configure handling of exact matches
@@ -210,8 +211,8 @@
   :bind (:map corfu-map
               ("M-n" . corfu-popupinfo-scroll-up)
               ("M-p" . corfu-popupinfo-scroll-down)
-              ("M-;" . corfu-complete)
-              ("RET" . nil))
+              ("M-;" . corfu-complete))
+  
   :init
                                         ; (corfu-history-mode 1)
                                         ; (corfu-popupinfo-mode 1)
