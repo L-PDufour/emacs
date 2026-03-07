@@ -45,9 +45,7 @@ control step size and threshold separately.
                     gc-cons-percentage 0.1)))
 
   ;; IGC tuning (ignored on non-IGC builds)
-  (setq igc-step-multiplier 2)
-  (setq igc-cons-threshold (* 32 1024 1024))
-
+  
   (add-hook 'focus-out-hook #'garbage-collect)
 #+end_src
 
@@ -212,6 +210,7 @@ section but adapted for Sway (no xterm-mouse, pgtk handles clipboard).
     :ensure nil
     :custom
     (auto-save-default nil)
+    (auto-revert-use-notify nil)
     (column-number-mode t)
     (create-lockfiles nil)
     (delete-by-moving-to-trash t)

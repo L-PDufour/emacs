@@ -12,8 +12,6 @@
                   gc-cons-percentage 0.1)))
 
 ;; IGC tuning (ignored on non-IGC builds)
-(setq igc-step-multiplier 2)
-(setq igc-cons-threshold (* 32 1024 1024))
 
 (add-hook 'focus-out-hook #'garbage-collect)
 

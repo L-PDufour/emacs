@@ -31,6 +31,7 @@
   :ensure nil
   :custom
   (auto-save-default nil)
+  (auto-revert-use-notify nil)
   (column-number-mode t)
   (create-lockfiles nil)
   (delete-by-moving-to-trash t)
