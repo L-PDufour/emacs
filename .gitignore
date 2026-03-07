@@ -64,4 +64,4 @@ projects
 custom.el
 !var/*.org
 ..emacs.d-tabspaces-session.el
-*.el
+
