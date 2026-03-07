@@ -211,74 +211,74 @@ section but adapted for Sway (no xterm-mouse, pgtk handles clipboard).
 ** Defaults
 
 #+begin_src emacs-lisp
-  (use-package emacs
-    :ensure nil
-    :custom
-    (auto-save-default nil)
-    (column-number-mode t)
-    (create-lockfiles nil)
-    (delete-by-moving-to-trash t)
-    (delete-selection-mode 1)
-    (global-auto-revert-mode 1)
-    (inhibit-startup-message t)
-    (make-backup-files nil)
-    (pixel-scroll-precision-mode t)        ;; Smooth scrolling on pgtk/Wayland
-    (ring-bell-function 'ignore)
-    (split-width-threshold 170)
-    (tab-width 4)
-    (treesit-font-lock-level 4)
-    (use-short-answers t)
+(use-package emacs
+  :ensure nil
+  :custom
+  (auto-save-default nil)
+  (column-number-mode t)
+  (create-lockfiles nil)
+  (delete-by-moving-to-trash t)
+  (delete-selection-mode 1)
+  (global-auto-revert-mode 1)
+  (inhibit-startup-message t)
+  (make-backup-files nil)
+  (pixel-scroll-precision-mode t)        ;; Smooth scrolling on pgtk/Wayland
+  (ring-bell-function 'ignore)
+  (split-width-threshold 170)
+  (tab-width 4)
+  (treesit-font-lock-level 4)
+  (use-short-answers t)
 
-    :hook
-    (prog-mode . display-line-numbers-mode)
+  :hook
+  (prog-mode . display-line-numbers-mode)
 
-    :config
-    (let ((mono-font "FiraCode Nerd Font")
-      (sans-font "DejaVu Sans"))
-    ;; Font — adjust family/size to taste
-    (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
-    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
-    (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
+  :config
+  ;; Font — adjust family/size to taste
+  (let ((mono-font "FiraCode Nerd Font")
+        (sans-font "DejaVu Sans"))
+    ;; Semi-bold is usually a good middle ground
+  (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
+  (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
+  (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
+  ;; Skip special buffers with ]b / [b
+  (defun skip-these-buffers (_window buffer _bury-or-kill)
+    "Function for `switch-to-prev-buffer-skip'."
+    (string-match "\\*[^*]+\\*" (buffer-name buffer)))
+  (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
-    ;; Skip special buffers with ]b / [b
-    (defun skip-these-buffers (_window buffer _bury-or-kill)
-      "Function for `switch-to-prev-buffer-skip'."
-      (string-match "\\*[^*]+\\*" (buffer-name buffer)))
-    (setq switch-to-prev-buffer-skip 'skip-these-buffers)
+  ;; Custom file
+  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+  (load custom-file 'noerror 'nomessage)
 
-    ;; Custom file
-    (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-    (load custom-file 'noerror 'nomessage)
+  ;; Pretty vertical border
+  (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
 
-    ;; Pretty vertical border
-    (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
+  ;; Default coding
+  (modify-coding-system-alist 'file "" 'utf-8)
 
-    ;; Default coding
-    (modify-coding-system-alist 'file "" 'utf-8)
+  :init
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (when scroll-bar-mode (scroll-bar-mode -1))
+  (global-hl-line-mode 1)
+  (global-auto-revert-mode 1)
+  (recentf-mode 1)
+  (savehist-mode 1)
+  (save-place-mode 1)
+  (winner-mode 1)
+  (repeat-mode 1)
+  (file-name-shadow-mode 1)
 
-    :init
-    (tool-bar-mode -1)
-    (menu-bar-mode -1)
-    (when scroll-bar-mode (scroll-bar-mode -1))
-    (global-hl-line-mode 1)
-    (global-auto-revert-mode 1)
-    (recentf-mode 1)
-    (savehist-mode 1)
-    (save-place-mode 1)
-    (winner-mode 1)
-    (repeat-mode 1)
-    (file-name-shadow-mode 1)
+  ;; Compilation
+  (setq compilation-scroll-output t)
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
-    ;; Compilation
-    (setq compilation-scroll-output t)
-    (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
-
-    ;; Welcome message in *scratch*
-    (add-hook 'after-init-hook
-              (lambda ()
-                (with-current-buffer (get-buffer-create "*scratch*")
-                  (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
-                                  (emacs-init-time)))))))
+  ;; Welcome message in *scratch*
+  (add-hook 'after-init-hook
+            (lambda ()
+              (with-current-buffer (get-buffer-create "*scratch*")
+                (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
+                                (emacs-init-time)))))))
 #+end_src
 
 ** Window Display Rules
@@ -637,18 +637,6 @@ Nix provides the grammars. We just need the mode remapping.
         (toml-mode       . toml-ts-mode)
         (go-mode         . go-ts-mode)
         (rust-mode       . rust-ts-mode)))
-#+end_src
-
-** Combobulate
-
-Structural editing with tree-sitter.
-
-#+begin_src emacs-lisp
-(use-package combobulate
-  :ensure nil
-  :custom
-  (combobulate-key-prefix "C-c o")
-  :hook (prog-mode . combobulate-mode))
 #+end_src
 
 ** Eglot (LSP)
@@ -1359,6 +1347,194 @@ Workspace management via tab-bar.
    ("C-c TAB k"   . tabspaces-kill-buffers-close-workspace)))
 #+end_src
 
+* Keybindings
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+The =C-c= prefix keymaps below are what make evil-keypad powerful.
+In normal state, =SPC c= translates to =C-c=, so:
+
+| Keypad sequence | Emacs equivalent | Command               |
+|-----------------+------------------+-----------------------|
+| =SPC c f a=     | =C-c f a=        | project-find-file     |
+| =SPC c f b=     | =C-c f b=        | project-find-buffer   |
+| =SPC c f r=     | =C-c f r=        | consult-recent-file   |
+| =SPC c f s=     | =C-c f s=        | save-buffer           |
+| =SPC c w v=     | =C-c w v=        | split-window-right    |
+| =SPC c w s=     | =C-c w s=        | split-window-below    |
+| =SPC c w h/j/k/l= | =C-c w ...=   | windmove              |
+| =SPC c s l=     | =C-c s l=        | consult-line          |
+| =SPC c s g=     | =C-c s g=        | consult-grep          |
+| =SPC c s r=     | =C-c s r=        | consult-ripgrep       |
+| =SPC c l d=     | =C-c l d=        | xref-find-definitions |
+| =SPC c l r=     | =C-c l r=        | xref-find-references  |
+| =SPC c l a=     | =C-c l a=        | eglot-code-actions    |
+| =SPC c g g=     | =C-c g g=        | gptel                 |
+| =SPC m x=       | =M-x=           | execute-extended-command |
+| =SPC x f=       | =C-x C-f=       | find-file             |
+| =SPC h f=       | =C-h f=         | describe-function     |
+
+** Helper Functions
+
+#+begin_src emacs-lisp
+(defun prot/keyboard-quit-dwim ()
+  "Do-What-I-Mean behaviour for a general `keyboard-quit'.
+Deactivates the mark, closes completion, aborts minibuffer, or quits."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (deactivate-mark))
+   ((derived-mode-p 'completion-list-mode)
+    (delete-completion-window))
+   ((> (minibuffer-depth) 0)
+    (abort-recursive-edit))
+   (t
+    (keyboard-quit))))
+
+(defun my-project-find-file ()
+  "Find file in current project, fallback to consult-find."
+  (interactive)
+  (if (and (fboundp 'project-current) (project-current))
+      (call-interactively #'project-find-file)
+    (if (fboundp 'consult-find)
+        (consult-find default-directory)
+      (call-interactively #'find-file))))
+
+(defun my-project-find-buffer ()
+  "Project-aware buffer switch, fallback to consult-buffer."
+  (interactive)
+  (if (and (fboundp 'project-current) (project-current))
+      (consult-project-buffer)
+    (call-interactively #'consult-buffer)))
+#+end_src
+
+** C-c Prefix Keymaps
+
+These keymaps work in two ways:
+1. Directly via =C-c f a=, =C-c w v=, etc. (insert state, or any state)
+2. Via evil-keypad: =SPC c f a=, =SPC c w v=, etc. (normal state)
+
+#+begin_src emacs-lisp
+(defvar my-file-keymap (make-sparse-keymap) "Keymap for file operations.")
+(defvar my-window-keymap (make-sparse-keymap) "Keymap for window operations.")
+(defvar my-code-keymap (make-sparse-keymap) "Keymap for code operations.")
+
+;; Bind prefix keys under C-c
+(global-set-key (kbd "C-c f") my-file-keymap)
+(global-set-key (kbd "C-c w") my-window-keymap)
+(global-set-key (kbd "C-c s") search-map)
+(global-set-key (kbd "C-c p") project-prefix-map)
+(global-set-key (kbd "C-c l") my-code-keymap)
+
+;;; Files — C-c f ...
+(define-key my-file-keymap (kbd "a") #'my-project-find-file)
+(define-key my-file-keymap (kbd "b") #'my-project-find-buffer)
+(define-key my-file-keymap (kbd "r") #'consult-recent-file)
+(define-key my-file-keymap (kbd "s") #'save-buffer)
+
+;;; Windows — C-c w ...
+(define-key my-window-keymap (kbd "v") #'split-window-right)
+(define-key my-window-keymap (kbd "s") #'split-window-below)
+(define-key my-window-keymap (kbd "h") #'windmove-left)
+(define-key my-window-keymap (kbd "j") #'windmove-down)
+(define-key my-window-keymap (kbd "k") #'windmove-up)
+(define-key my-window-keymap (kbd "l") #'windmove-right)
+(define-key my-window-keymap (kbd "q") #'delete-window)
+(define-key my-window-keymap (kbd "o") #'delete-other-windows)
+(define-key my-window-keymap (kbd "m") #'delete-other-windows)
+(define-key my-window-keymap (kbd "u") #'winner-undo)
+(define-key my-window-keymap (kbd "r") #'winner-redo)
+
+;;; Search — C-c s ... (uses built-in search-map)
+(define-key search-map (kbd "l") #'consult-line)
+(define-key search-map (kbd "G") #'consult-ripgrep)
+(define-key search-map (kbd "g") #'consult-grep)
+(define-key search-map (kbd "o") #'consult-outline)
+(define-key search-map (kbd "i") #'consult-imenu)
+(define-key search-map (kbd "m") #'consult-mark)
+(define-key search-map (kbd "M") #'consult-global-mark)
+
+;;; Code — C-c l ...
+(define-key my-code-keymap (kbd "d") #'xref-find-definitions)
+(define-key my-code-keymap (kbd "r") #'xref-find-references)
+(define-key my-code-keymap (kbd "a") #'eglot-code-actions)
+(define-key my-code-keymap (kbd "h") #'display-local-help)
+(define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)
+(define-key my-code-keymap (kbd "R") #'eglot-rename)
+#+end_src
+
+** Global Keys
+
+#+begin_src emacs-lisp
+;; Better quit
+(global-set-key (kbd "C-g") #'prot/keyboard-quit-dwim)
+
+;; GPTel bindings under C-c g
+(global-set-key (kbd "C-c g g") #'gptel)
+(global-set-key (kbd "C-c g s") #'gptel-send)
+(global-set-key (kbd "C-c g m") #'gptel-menu)
+(global-set-key (kbd "C-c g a") #'gptel-add)
+(global-set-key (kbd "C-c g f") #'gptel-add-file)
+
+;; Org capture
+(global-set-key (kbd "C-c c") #'org-capture)
+#+end_src
+
+** Evil Insert State Overrides
+
+Keep Emacs bindings where they matter — insert state is pure Emacs.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'evil
+  ;; C-g uses our smart quit
+  (define-key evil-insert-state-map (kbd "C-g") 'prot/keyboard-quit-dwim)
+  (define-key evil-normal-state-map (kbd "C-g") 'prot/keyboard-quit-dwim)
+  (define-key evil-visual-state-map (kbd "C-g") 'prot/keyboard-quit-dwim)
+
+  ;; Undo in insert state
+  (define-key evil-insert-state-map (kbd "C-z") 'undo-fu-only-undo)
+  (define-key evil-insert-state-map (kbd "C-S-z") 'undo-fu-only-redo)
+
+  ;; Window navigation in insert state
+  (define-key evil-insert-state-map (kbd "C-w") evil-window-map)
+
+  ;; Keep visual selection after indent
+  (defun my-evil-shift-left-visual ()
+    "Shift left and keep visual selection."
+    (interactive)
+    (call-interactively 'evil-shift-left)
+    (evil-normal-state)
+    (evil-visual-restore))
+  (defun my-evil-shift-right-visual ()
+    "Shift right and keep visual selection."
+    (interactive)
+    (call-interactively 'evil-shift-right)
+    (evil-normal-state)
+    (evil-visual-restore))
+  (evil-define-key 'visual 'global
+    (kbd "<") 'my-evil-shift-left-visual
+    (kbd ">") 'my-evil-shift-right-visual))
+#+end_src
+
+** Which-Key Labels
+
+Tell which-key what each =C-c= prefix does, so evil-keypad shows
+helpful hints when you press =SPC c=.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'which-key
+  (which-key-add-key-based-replacements
+    "C-c f" "files"
+    "C-c w" "windows"
+    "C-c s" "search"
+    "C-c p" "project"
+    "C-c l" "code"
+    "C-c g" "gptel/llm"
+    "C-c TAB" "workspaces"
+    "C-c o" "combobulate"))
+#+end_src
+
 * Footer
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle init.el
@@ -1369,99 +1545,3 @@ Workspace management via tab-bar.
 ;;; init.el ends here
 #+end_src
 
-* Nix Package Reference (DO NOT TANGLE)
-:PROPERTIES:
-:header-args: :tangle no
-:END:
-
-This section is a reference for your =home-manager= or NixOS module.
-It does *not* tangle — copy the package list into your Nix config manually.
-
-#+begin_src nix :tangle no
-# Emacs packages to install via Nix (emacsPackagesFor or home-manager)
-# Keep in sync with use-package declarations above.
-epkgs: with epkgs; [
-  # Completion
-  vertico
-  orderless
-  marginalia
-  consult
-  consult-eglot
-  embark
-  embark-consult
-  corfu
-  cape
-
-  # Evil
-  evil
-  evil-collection
-  evil-surround
-  evil-matchit
-
-  # Theme & UI
-  catppuccin-theme
-  doom-modeline
-  nerd-icons
-  nerd-icons-dired
-  nerd-icons-completion
-  nerd-icons-corfu
-  neotree
-  pulsar
-  eldoc-box
-
-  # Programming
-  combobulate
-  yasnippet
-  yasnippet-snippets
-  yasnippet-capf
-  apheleia
-  indent-bars
-  rainbow-delimiters
-  editorconfig
-
-  # Languages
-  nix-mode
-  lua-mode
-  go-eldoc
-  markdown-mode
-  geiser
-  geiser-guile
-  dotenv-mode
-
-  # Git
-  magit
-  diff-hl
-
-  # Undo
-  undo-fu
-  undo-fu-session
-  vundo
-
-  # Utilities
-  avy
-  pdf-tools
-  envrc
-  helpful
-  xclip
-  diminish
-  org-appear
-
-  # Shell
-  eat
-
-  # Elfeed
-  elfeed
-  elfeed-org
-  elfeed-tube
-
-  # LLM
-  gptel
-
-  # Workspaces
-  tabspaces
-
-  # Dired
-  dired-subtree
-  trashed
-]
-#+end_src
