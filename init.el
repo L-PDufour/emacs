@@ -461,12 +461,14 @@
   :diminish
   :config
   (apheleia-global-mode 1)
-
+  (add-to-list 'apheleia-formatters
+               '(templ-format "templ" "fmt" filepath))
   (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
         '("nixfmt"))
   (setf (alist-get 'nix-mode apheleia-mode-alist)
         'nixfmt-rfc-style)
   (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'deno-format)
+  (setf (alist-get 'templ-ts-mode apheleia-mode-alist) 'templ-format)
   (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'deno-format))
 
 (use-package indent-bars
@@ -489,6 +491,11 @@
   :ensure nil
   :mode "\\.lua\\'"
   :interpreter "lua")
+
+(use-package templ-ts-mode
+  :ensure nil
+  :load-path "~/.emacs.d/site-lisp/templ-ts-mode"
+  :mode "\\.templ\\'")
 
 (use-package go-eldoc
   :ensure nil
