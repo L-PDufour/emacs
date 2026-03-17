@@ -39,7 +39,7 @@
   (global-auto-revert-mode 1)
   (inhibit-startup-message t)
   (make-backup-files nil)
-  (pixel-scroll-precision-mode t)        ;; Smooth scrolling on pgtk/Wayland
+  (pixel-scroll-precision-mode t)
   (ring-bell-function 'ignore)
   (split-width-threshold 170)
   (tab-width 4)
@@ -52,27 +52,20 @@
 
   :config
   (let ((mono-font "FiraCode Nerd Font")
-		(sans-font "DejaVu Sans"))
-	;; Semi-bold is usually a good middle ground
-	(set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
-	(set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
-	(set-face-attribute 'variable-pitch nil :family sans-font :height 180))
-  ;; Font — adjust family/size to taste
+        (sans-font "DejaVu Sans"))
+    (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
+    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
+    (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
 
-  ;; Skip special buffers with ]b / [b
   (defun skip-these-buffers (_window buffer _bury-or-kill)
     "Function for `switch-to-prev-buffer-skip'."
     (string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
-  ;; Custom file
   (setq custom-file (locate-user-emacs-file "custom-vars.el"))
   (load custom-file 'noerror 'nomessage)
 
-  ;; Pretty vertical border
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
-
-  ;; Default coding
   (modify-coding-system-alist 'file "" 'utf-8)
 
   :init
@@ -88,11 +81,9 @@
   (repeat-mode 1)
   (file-name-shadow-mode 1)
 
-  ;; Compilation
   (setq compilation-scroll-output t)
   (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
-  ;; Welcome message in *scratch*
   (add-hook 'after-init-hook
             (lambda ()
               (with-current-buffer (get-buffer-create "*scratch*")
@@ -162,18 +153,18 @@
    '((error "!»" compilation-error)
      (warning "»" compilation-warning)
      (note "»" compilation-info)))
-  (put 'flymake-goto-next-error 'repeat-map 'flymake-goto-next-error)
-  (put 'flymake-goto-prev-error 'repeat-map 'flymake-goto-prev-error  i)
   :config
+  (put 'flymake-goto-next-error 'repeat-map 'flymake-repeat-map)
+  (put 'flymake-goto-prev-error 'repeat-map 'flymake-repeat-map)
   (defun consult-flymake-project ()
-	"Jump to Flymake diagnostic in project."
-	(interactive)
-	(consult-flymake t))
+    "Jump to Flymake diagnostic in project."
+    (interactive)
+    (consult-flymake t))
   :bind (:map flymake-mode-map
-			  ("C-c e e" . consult-flymake)
-			  ("C-c e l" . consult-flymake-project)
-			  ("C-c e n" . flymake-goto-next-error)
-			  ("C-c e p" . flymake-goto-prev-error)))
+              ("C-c e e" . consult-flymake)
+              ("C-c e l" . consult-flymake-project)
+              ("C-c e n" . flymake-goto-next-error)
+              ("C-c e p" . flymake-goto-prev-error)))
 
 (use-package org
   :ensure nil
@@ -371,7 +362,6 @@
    '(:documentFormattingProvider :documentRangeFormattingProvider))
 
   :config
-  ;; Deno for JS/TS
   (add-to-list 'eglot-server-programs
                '(((js-mode :language-id "javascript")
                   (js-ts-mode :language-id "javascript")
@@ -379,8 +369,6 @@
                   (typescript-ts-mode :language-id "typescript"))
                  "deno" "lsp"
                  :initializationOptions (:enable t :lint t :unstable t)))
-
-  ;; Nix via nixd
   (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
 
 (use-package consult-eglot
@@ -410,21 +398,6 @@
      (project-eshell "Eshell")
      (project-any-command "Other"))))
 
-;; (use-package yasnippet
-;;   :custom (yas-keymap-disable-hook
-;;            (lambda () (and (frame-live-p corfu--frame)
-;;                            (frame-visible-p corfu--frame))))
-;;   :hook (after-init . yas-global-mode))
-
-;; (use-package yasnippet-snippets
-;;   :ensure nil
-;;   :after yasnippet)
-
-;; (use-package yasnippet-capf
-;;   :ensure nil
-;;   :after cape)
-
-;; Configure Tempel
 (use-package tempel
   :ensure nil
   :custom
@@ -444,18 +417,15 @@
     (setq-local completion-at-point-functions
                 (cons #'tempel-complete
                       completion-at-point-functions))))
-;; Optional: Add tempel-collection if you want ready-made templates.
-(use-package tempel-collection
-  :after tempel
-  :ensure nil)
 
-;; Optional: Use the Corfu completion UI
+(use-package tempel-collection
+  :ensure nil
+  :after tempel)
 
 (use-package eglot-tempel
-  :after tempel
   :ensure nil
-  :init
-  (eglot-tempel-mode t))
+  :after tempel
+  :init (eglot-tempel-mode t))
 
 (use-package apheleia
   :ensure nil
@@ -517,8 +487,7 @@
 
 (use-package geiser
   :ensure nil
-  :config
-  (setq geiser-default-implementation 'guile))
+  :config (setq geiser-default-implementation 'guile))
 
 (use-package geiser-guile
   :ensure nil
@@ -550,9 +519,126 @@
    '((insert . "┃") (delete . "-") (change . "┃")
      (unknown . "┆") (ignored . "i"))))
 
+(use-package undo-fu
+  :ensure nil
+  :commands (undo-fu-only-undo undo-fu-only-redo)
+  :config
+  (global-unset-key (kbd "C-z"))
+  (global-set-key (kbd "C-z") 'undo-fu-only-undo)
+  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+
+(use-package undo-fu-session
+  :ensure nil
+  :config
+  (setq undo-fu-session-directory
+        (expand-file-name "undo-fu-session" user-emacs-directory))
+  (unless (file-exists-p undo-fu-session-directory)
+    (make-directory undo-fu-session-directory t))
+  (setq undo-fu-session-incompatible-files
+        '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+  (undo-fu-session-global-mode))
+
+(use-package vundo
+  :ensure nil
+  :bind ("C-x u" . vundo))
+
+(setq evil-want-keybinding nil)
+(setq evil-want-integration t)
+(setq evil-want-C-u-scroll t)
+(setq evil-want-C-u-delete t)
+(setq evil-want-C-i-jump t)
+
+(use-package evil
+  :ensure nil
+  :demand t
+  :config
+  (evil-mode 1)
+
+  ;; Undo via undo-fu
+  (evil-set-undo-system 'undo-fu)
+
+  (setq evil-respect-visual-line-mode t
+        evil-search-module 'evil-search
+        evil-ex-search-case 'sensitive
+        evil-ex-substitute-global t
+        evil-split-window-below t
+        evil-vsplit-window-right t
+        evil-move-beyond-eol t
+        evil-want-fine-undo t)
+
+  ;; Cursor per state
+  (setq evil-insert-state-cursor  '(bar "white")
+        evil-normal-state-cursor  '(box "orange")
+        evil-visual-state-cursor  '(box "yellow")
+        evil-emacs-state-cursor   '(box "red"))
+
+  ;; === Hover docs ===
+  (evil-define-key 'normal 'global (kbd "K") 'eldoc-box-help-at-point)
+
+  ;; === Commenting — gcc / gc ===
+  (evil-define-key 'normal 'global (kbd "gcc")
+    (lambda () (interactive)
+      (comment-or-uncomment-region (line-beginning-position) (line-end-position))))
+  (evil-define-key 'visual 'global (kbd "gc")
+    (lambda () (interactive)
+      (when (use-region-p)
+        (comment-or-uncomment-region (region-beginning) (region-end)))))
+
+  ;; === Visual line motions ===
+  (evil-define-key 'normal 'global
+    (kbd "j") 'evil-next-visual-line
+    (kbd "k") 'evil-previous-visual-line)
+
+  ;; === Window management ===
+  (evil-define-key 'normal 'global
+    (kbd "C-w h") 'windmove-left
+    (kbd "C-w j") 'windmove-down
+    (kbd "C-w k") 'windmove-up
+    (kbd "C-w l") 'windmove-right
+    (kbd "C-w v") 'split-window-right
+    (kbd "C-w s") 'split-window-below
+    (kbd "C-w q") 'delete-window
+    (kbd "C-w o") 'delete-other-windows)
+
+  ;; === Avy jump ===
+  (evil-define-key 'normal 'global
+    (kbd "s") 'avy-goto-char-timer
+    (kbd "S") 'avy-goto-line)
+
+  ;; === Goto bindings ===
+  (evil-define-key 'normal 'global
+    (kbd "gd") 'xref-find-definitions
+    (kbd "gr") 'xref-find-references
+    (kbd "gb") 'xref-go-back
+    (kbd "gf") 'find-file-at-point))
+
+(use-package evil-collection
+  :ensure nil
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package evil-surround
+  :ensure nil
+  :after evil
+  :config (global-evil-surround-mode 1))
+
+(use-package evil-matchit
+  :ensure nil
+  :after evil
+  :config (global-evil-matchit-mode 1))
+
+(use-package evil-keypad
+  :ensure nil
+  :after evil
+  :demand t
+  :config
+  ;; SPC activates keypad in normal, visual, and motion states.
+  ;; No evil-set-leader needed — evil-keypad owns SPC entirely.
+  (evil-keypad-global-mode 1))
+
 (defun my-smarter-move-beginning-of-line (arg)
-  "Move point to first non-whitespace character, or beginning of line.
-Press again to toggle between indentation and column 0."
+  "Move to first non-whitespace char, or column 0 if already there."
   (interactive "^p")
   (setq arg (or arg 1))
   (when (/= arg 1)
@@ -588,13 +674,6 @@ Press again to toggle between indentation and column 0."
   (transpose-lines 1)
   (forward-line -1))
 
-(defun my-comment-or-uncomment ()
-  "Toggle comment on current line or region."
-  (interactive)
-  (if (use-region-p)
-      (comment-or-uncomment-region (region-beginning) (region-end))
-    (comment-or-uncomment-region (line-beginning-position) (line-end-position))))
-
 (defun my-indent-buffer ()
   "Indent the entire buffer."
   (interactive)
@@ -604,49 +683,23 @@ Press again to toggle between indentation and column 0."
 (global-set-key (kbd "C-c d")     #'my-duplicate-line)
 (global-set-key (kbd "M-<up>")    #'my-move-line-up)
 (global-set-key (kbd "M-<down>")  #'my-move-line-down)
-(global-set-key (kbd "C-;")       #'my-comment-or-uncomment)
 (global-set-key (kbd "C-c i")     #'my-indent-buffer)
 
-;; (defvar my-go-back-history '()
-;;   "Stack of markers for forward navigation after going back.")
-
-;; (defun my-go-back ()
-;;   "Go back: try xref history first, then fall back to mark ring."
-;;   (interactive)
-;;   (let ((old (point-marker)))
-;;     (condition-case nil
-;;         (progn (xref-go-back) (push old my-go-back-history))
-;;       (error
-;;        (if mark-ring
-;;            (progn
-;;              (push old my-go-back-history)
-;;              (goto-char (car mark-ring))
-;;              (setq mark-ring (cdr mark-ring)))
-;;          (message "No back history")))))
-;;   (recenter))
-
-;; (defun my-go-forward ()
-;;   "Go forward through the go-back history."
-;;   (interactive)
-;;   (if my-go-back-history
-;;       (let ((marker (pop my-go-back-history)))
-;;         (when (marker-buffer marker)
-;;           (switch-to-buffer (marker-buffer marker))
-;;           (goto-char marker)
-;;           (recenter)))
-;;     (message "No forward history")))
-
-;; (global-set-key (kbd "C-o") #'my-go-back)
-;; (global-set-key (kbd "M-i") #'my-go-forward)  ;; M-i because C-i = TAB in terminal
-;; (when (display-graphic-p)
-;;   (global-set-key (kbd "C-i") #'my-go-forward))
+;; Comment toggle for insert/emacs state (normal state uses gcc/gc via evil)
+(defun my-comment-or-uncomment ()
+  "Toggle comment on current line or region."
+  (interactive)
+  (if (use-region-p)
+      (comment-or-uncomment-region (region-beginning) (region-end))
+    (comment-or-uncomment-region (line-beginning-position) (line-end-position))))
+(global-set-key (kbd "C-c ;") #'my-comment-or-uncomment)
 
 (defvar my-auto-center-commands
-  '(xref-find-definitions my-go-back my-go-forward
-						  isearch-forward isearch-backward
-						  consult-line consult-imenu
-						  beginning-of-buffer end-of-buffer
-						  next-error previous-error)
+  '(xref-find-definitions
+    isearch-forward isearch-backward
+    consult-line consult-imenu
+    beginning-of-buffer end-of-buffer
+    next-error previous-error)
   "Commands after which the cursor auto-centers.")
 
 (defun my-auto-center-advice (&rest _)
@@ -674,8 +727,8 @@ Press again to toggle between indentation and column 0."
   "Repeat map for S-expression navigation.")
 
 (dolist (cmd '(forward-sexp backward-sexp backward-up-list down-list
-							forward-list backward-list beginning-of-defun end-of-defun
-							mark-sexp kill-sexp transpose-sexps))
+                             forward-list backward-list beginning-of-defun end-of-defun
+                             mark-sexp kill-sexp transpose-sexps))
   (put cmd 'repeat-map 'sexp-repeat-map))
 
 (defvar window-repeat-map
@@ -698,10 +751,10 @@ Press again to toggle between indentation and column 0."
   "Repeat map for window operations.")
 
 (dolist (cmd '(other-window windmove-left windmove-down windmove-up windmove-right
-							balance-windows enlarge-window shrink-window
-							enlarge-window-horizontally shrink-window-horizontally
-							delete-window delete-other-windows
-							split-window-below split-window-right))
+                             balance-windows enlarge-window shrink-window
+                             enlarge-window-horizontally shrink-window-horizontally
+                             delete-window delete-other-windows
+                             split-window-below split-window-right))
   (put cmd 'repeat-map 'window-repeat-map))
 
 (defvar buffer-repeat-map
@@ -716,13 +769,13 @@ Press again to toggle between indentation and column 0."
 
 (defvar xref-repeat-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd ",") #'my-go-back)
     (define-key map (kbd ".") #'xref-find-definitions)
+    (define-key map (kbd ",") #'xref-go-back)
     map)
   "Repeat map for xref navigation.")
 
-(put 'my-go-back 'repeat-map 'xref-repeat-map)
 (put 'xref-find-definitions 'repeat-map 'xref-repeat-map)
+(put 'xref-go-back 'repeat-map 'xref-repeat-map)
 
 (defvar page-repeat-map
   (let ((map (make-sparse-keymap)))
@@ -898,7 +951,6 @@ Press again to toggle between indentation and column 0."
                     claude-opus-4-20250514
                     claude-haiku-4-20250119)))
 
-  ;; Context / RAG
   (setq gptel-track-media t)
 
   :bind
@@ -913,20 +965,20 @@ Press again to toggle between indentation and column 0."
   :hook (after-init . tabspaces-mode)
   :config
   (with-eval-after-load 'consult
-	(plist-put consult-source-buffer :hidden t)
-	(plist-put consult-source-buffer :default nil)
-	(defvar consult--source-workspace
+    (plist-put consult-source-buffer :hidden t)
+    (plist-put consult-source-buffer :default nil)
+    (defvar consult--source-workspace
       (list :name     "Workspace Buffers"
-			:narrow   ?w
-			:history  'buffer-name-history
-			:category 'buffer
-			:state    #'consult--buffer-state
-			:default  t
-			:items    (lambda () (consult--buffer-query
+            :narrow   ?w
+            :history  'buffer-name-history
+            :category 'buffer
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda () (consult--buffer-query
                                   :predicate #'tabspaces--local-buffer-p
                                   :sort 'visibility
                                   :as #'buffer-name))))
-	(add-to-list 'consult-buffer-sources 'consult--source-workspace))
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   :custom
   (tabspaces-use-filtered-buffers-as-default t)
   (tabspaces-default-tab "Default")
@@ -942,8 +994,7 @@ Press again to toggle between indentation and column 0."
    ("C-c TAB k"   . tabspaces-kill-buffers-close-workspace)))
 
 (defun prot/keyboard-quit-dwim ()
-  "Do-What-I-Mean behaviour for a general `keyboard-quit'.
-Deactivates the mark, closes completion, aborts minibuffer, or quits."
+  "Do-What-I-Mean behaviour for `keyboard-quit'."
   (interactive)
   (cond
    ((region-active-p)
@@ -971,24 +1022,25 @@ Deactivates the mark, closes completion, aborts minibuffer, or quits."
       (consult-project-buffer)
     (call-interactively #'consult-buffer)))
 
-(defvar my-file-keymap (make-sparse-keymap) "Keymap for file operations.")
+(defvar my-file-keymap   (make-sparse-keymap) "Keymap for file operations.")
 (defvar my-window-keymap (make-sparse-keymap) "Keymap for window operations.")
-(defvar my-code-keymap (make-sparse-keymap) "Keymap for code operations.")
+(defvar my-code-keymap   (make-sparse-keymap) "Keymap for code operations.")
+(defvar my-term-keymap   (make-sparse-keymap) "Keymap for terminal/compile.")
 
-;; Bind prefix keys under C-c
 (global-set-key (kbd "C-c f") my-file-keymap)
 (global-set-key (kbd "C-c w") my-window-keymap)
 (global-set-key (kbd "C-c s") search-map)
 (global-set-key (kbd "C-c p") project-prefix-map)
 (global-set-key (kbd "C-c l") my-code-keymap)
+(global-set-key (kbd "C-c t") my-term-keymap)
 
-  ;;; Files — C-c f ...
+;;; Files — C-c f …
 (define-key my-file-keymap (kbd "a") #'my-project-find-file)
 (define-key my-file-keymap (kbd "b") #'my-project-find-buffer)
 (define-key my-file-keymap (kbd "r") #'consult-recent-file)
 (define-key my-file-keymap (kbd "s") #'save-buffer)
 
-  ;;; Windows — C-c w ...
+;;; Windows — C-c w …
 (define-key my-window-keymap (kbd "v") #'split-window-right)
 (define-key my-window-keymap (kbd "s") #'split-window-below)
 (define-key my-window-keymap (kbd "h") #'windmove-left)
@@ -1001,7 +1053,7 @@ Deactivates the mark, closes completion, aborts minibuffer, or quits."
 (define-key my-window-keymap (kbd "u") #'winner-undo)
 (define-key my-window-keymap (kbd "r") #'winner-redo)
 
-  ;;; Search — C-c s ... (uses built-in search-map)
+;;; Search — C-c s … (uses built-in search-map)
 (define-key search-map (kbd "l") #'consult-line)
 (define-key search-map (kbd "G") #'consult-ripgrep)
 (define-key search-map (kbd "g") #'consult-grep)
@@ -1010,17 +1062,13 @@ Deactivates the mark, closes completion, aborts minibuffer, or quits."
 (define-key search-map (kbd "m") #'consult-mark)
 (define-key search-map (kbd "M") #'consult-global-mark)
 
-  ;;; Code — C-c l ...
+;;; Code — C-c l …
 (define-key my-code-keymap (kbd "d") #'xref-find-definitions)
 (define-key my-code-keymap (kbd "r") #'xref-find-references)
 (define-key my-code-keymap (kbd "a") #'eglot-code-actions)
 (define-key my-code-keymap (kbd "h") #'display-local-help)
 (define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)
 (define-key my-code-keymap (kbd "R") #'eglot-rename)
-
-  ;;; Project shells & compile — C-c t ...
-(defvar my-term-keymap (make-sparse-keymap) "Keymap for terminal/compile.")
-(global-set-key (kbd "C-c t") my-term-keymap)
 
 (defun my-project-eat ()
   "Open eat in current project root."
@@ -1045,31 +1093,30 @@ Deactivates the mark, closes completion, aborts minibuffer, or quits."
 
 (define-key my-term-keymap (kbd "t") #'my-project-eat)
 (define-key my-term-keymap (kbd "c") #'my-project-compile)
-(define-key my-term-keymap (kbd "r") #'my-project-compile)  ;; recompile alias
+(define-key my-term-keymap (kbd "r") #'my-project-compile)
 (define-key my-term-keymap (kbd "s") #'my-project-sql)
 (define-key my-term-keymap (kbd "e") #'project-eshell)
 
-;; Better quit
 (global-set-key (kbd "C-g") #'prot/keyboard-quit-dwim)
 
-;; GPTel bindings under C-c g
 (global-set-key (kbd "C-c g g") #'gptel)
 (global-set-key (kbd "C-c g s") #'gptel-send)
 (global-set-key (kbd "C-c g m") #'gptel-menu)
 (global-set-key (kbd "C-c g a") #'gptel-add)
 (global-set-key (kbd "C-c g f") #'gptel-add-file)
 
-;; Org capture
 (global-set-key (kbd "C-c c") #'org-capture)
 
 (with-eval-after-load 'which-key
   (which-key-add-key-based-replacements
-    "C-c f" "files"
-    "C-c w" "windows"
-    "C-c s" "search"
-    "C-c p" "project"
-    "C-c l" "code"
-    "C-c g" "gptel/llm"
+    "C-c f"   "files"
+    "C-c w"   "windows"
+    "C-c s"   "search"
+    "C-c p"   "project"
+    "C-c l"   "code/lsp"
+    "C-c g"   "gptel/llm"
+    "C-c t"   "terminal"
+    "C-c e"   "errors/flymake"
     "C-c TAB" "workspaces"))
 
 (provide 'init)
