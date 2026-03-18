@@ -542,101 +542,6 @@
   :ensure nil
   :bind ("C-x u" . vundo))
 
-(setq evil-want-keybinding nil)
-(setq evil-want-integration t)
-(setq evil-want-C-u-scroll t)
-(setq evil-want-C-u-delete t)
-(setq evil-want-C-i-jump t)
-
-(use-package evil
-  :ensure nil
-  :demand t
-  :config
-  (evil-mode 1)
-
-  ;; Undo via undo-fu
-  (evil-set-undo-system 'undo-fu)
-
-  (setq evil-respect-visual-line-mode t
-        evil-search-module 'evil-search
-        evil-ex-search-case 'sensitive
-        evil-ex-substitute-global t
-        evil-split-window-below t
-        evil-vsplit-window-right t
-        evil-move-beyond-eol t
-        evil-want-fine-undo t)
-
-  ;; Cursor per state
-  (setq evil-insert-state-cursor  '(bar "white")
-        evil-normal-state-cursor  '(box "orange")
-        evil-visual-state-cursor  '(box "yellow")
-        evil-emacs-state-cursor   '(box "red"))
-
-  ;; === Hover docs ===
-  (evil-define-key 'normal 'global (kbd "K") 'eldoc-box-help-at-point)
-
-  ;; === Commenting — gcc / gc ===
-  (evil-define-key 'normal 'global (kbd "gcc")
-    (lambda () (interactive)
-      (comment-or-uncomment-region (line-beginning-position) (line-end-position))))
-  (evil-define-key 'visual 'global (kbd "gc")
-    (lambda () (interactive)
-      (when (use-region-p)
-        (comment-or-uncomment-region (region-beginning) (region-end)))))
-
-  ;; === Visual line motions ===
-  (evil-define-key 'normal 'global
-    (kbd "j") 'evil-next-visual-line
-    (kbd "k") 'evil-previous-visual-line)
-
-  ;; === Window management ===
-  (evil-define-key 'normal 'global
-    (kbd "C-w h") 'windmove-left
-    (kbd "C-w j") 'windmove-down
-    (kbd "C-w k") 'windmove-up
-    (kbd "C-w l") 'windmove-right
-    (kbd "C-w v") 'split-window-right
-    (kbd "C-w s") 'split-window-below
-    (kbd "C-w q") 'delete-window
-    (kbd "C-w o") 'delete-other-windows)
-
-  ;; === Avy jump ===
-  (evil-define-key 'normal 'global
-    (kbd "s") 'avy-goto-char-timer
-    (kbd "S") 'avy-goto-line)
-
-  ;; === Goto bindings ===
-  (evil-define-key 'normal 'global
-    (kbd "gd") 'xref-find-definitions
-    (kbd "gr") 'xref-find-references
-    (kbd "gb") 'xref-go-back
-    (kbd "gf") 'find-file-at-point))
-
-(use-package evil-collection
-  :ensure nil
-  :after evil
-  :config
-  (evil-collection-init))
-
-(use-package evil-surround
-  :ensure nil
-  :after evil
-  :config (global-evil-surround-mode 1))
-
-(use-package evil-matchit
-  :ensure nil
-  :after evil
-  :config (global-evil-matchit-mode 1))
-
-(use-package evil-keypad
-  :ensure nil
-  :after evil
-  :demand t
-  :config
-  ;; SPC activates keypad in normal, visual, and motion states.
-  ;; No evil-set-leader needed — evil-keypad owns SPC entirely.
-  (evil-keypad-global-mode 1))
-
 (defun my-smarter-move-beginning-of-line (arg)
   "Move to first non-whitespace char, or column 0 if already there."
   (interactive "^p")
@@ -808,6 +713,10 @@
   :bind
   ("C-;" . avy-goto-char-2)
   ("C-c C-j" . avy-resume))
+
+(use-package surround
+:ensure nil
+:bind-keymap ("C-c s" . surround-keymap))
 
 (use-package pdf-tools
   :ensure nil
@@ -1029,7 +938,7 @@
 
 (global-set-key (kbd "C-c f") my-file-keymap)
 (global-set-key (kbd "C-c w") my-window-keymap)
-(global-set-key (kbd "C-c s") search-map)
+
 (global-set-key (kbd "C-c p") project-prefix-map)
 (global-set-key (kbd "C-c l") my-code-keymap)
 (global-set-key (kbd "C-c t") my-term-keymap)
