@@ -223,7 +223,7 @@ Keep all generated state under =var/=.
     (treesit-font-lock-level 4)
     (use-short-answers t)
     (blink-cursor-mode nil)
-
+    (tab-always-indent 'complete)
     :hook
     (prog-mode . display-line-numbers-mode)
 
@@ -501,10 +501,8 @@ Keep all generated state under =var/=.
 #+begin_src emacs-lisp
   (use-package corfu
     :ensure nil
-    :custom
-    (corfu-auto t)
-    (corfu-auto-delay 0.1)
-    (corfu-auto-prefix 2)
+  :custom
+    (corfu-auto nil)
     (corfu-cycle t)
     (corfu-quit-no-match 'separator)
     (corfu-popupinfo-delay 0.5)
@@ -512,6 +510,7 @@ Keep all generated state under =var/=.
     :init
     (global-corfu-mode)
     (corfu-popupinfo-mode 1))
+
 #+end_src
 
 ** Cape
@@ -519,7 +518,6 @@ Keep all generated state under =var/=.
 #+begin_src emacs-lisp
   (use-package cape
     :ensure nil
-    :bind ("C-c p" . cape-prefix-map)
     :config
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
@@ -614,15 +612,7 @@ Keep all generated state under =var/=.
   (use-package eglot
     :ensure nil
     :init
-    (defun my/eglot-capf ()
-      (setq-local completion-at-point-functions
-                  (list (cape-capf-super
-                         #'eglot-completion-at-point
-                         #'tempel-complete
-                         #'cape-file))))
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
-    (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
-
     :custom
     (eglot-send-changes-idle-time 0.5)
     (eglot-extend-to-xref t)
