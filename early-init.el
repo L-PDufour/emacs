@@ -53,15 +53,22 @@
       initial-scratch-message nil
       initial-major-mode 'fundamental-mode)
 
-(setq auto-mode-case-fold nil
-      read-process-output-max (* 1024 1024 4))
+(setq auto-mode-case-fold nil)
+(winner-mode +1)
+
+(defun toggle-delete-other-windows ()
+  "Delete other windows in frame if any, or restore previous window config."
+  (interactive)
+  (if (and winner-mode
+  		   (equal (selected-window) (next-window)))
+  	  (winner-undo)
+    (delete-other-windows)))
+
+(global-set-key (kbd "C-x 1") #'toggle-delete-other-windows)
 
 (setq idle-update-delay 1.0
       inhibit-compacting-font-caches t
       ffap-machine-p-known 'reject)
-
-(setq-default bidi-display-reordering 'left-to-right
-              bidi-paragraph-direction 'left-to-right)
 
 (set-language-environment "UTF-8")
 (setq default-input-method nil)

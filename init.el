@@ -33,6 +33,7 @@
   (auto-save-default nil)
   (auto-revert-use-notify nil)
   (column-number-mode t)
+  (help-window-select t)
   (create-lockfiles nil)
   (delete-by-moving-to-trash t)
   (delete-selection-mode 1)
@@ -46,7 +47,21 @@
   (treesit-font-lock-level 4)
   (use-short-answers t)
   (blink-cursor-mode nil)
-
+  (redisplay-skip-fontification-on-input t)
+  (bidi-display-reordering 'left-to-right
+  						   bidi-paragraph-direction 'left-to-right)
+  (bidi-inhibit-bpa t)
+  (cursor-in-non-selected-windows nil)
+  (save-interprogram-paste-before-kill t)
+  (highlight-nonselected-windows nil)
+  (kill-do-not-save-duplicates t)
+  (tab-always-indent 'complete)
+  (savehist-additional-variables
+   '(search-ring regexp-search-ring kill-ring))
+  (add-hook 'after-save-hook
+  			#'executable-make-buffer-file-executable-if-script-p)
+  (window-combination-resize t)
+  (set-mark-command-repeat-pop t)
   :hook
   (prog-mode . display-line-numbers-mode)
 
@@ -263,10 +278,8 @@
 
 (use-package corfu
   :ensure nil
-  :custom
-  (corfu-auto t)
-  (corfu-auto-delay 0.1)
-  (corfu-auto-prefix 2)
+:custom
+  (corfu-auto nil)
   (corfu-cycle t)
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay 0.5)
@@ -277,7 +290,6 @@
 
 (use-package cape
   :ensure nil
-  :bind ("C-c p" . cape-prefix-map)
   :config
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
@@ -312,16 +324,50 @@
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-(use-package doom-modeline
-  :ensure nil
-  :defer t
-  :custom
-  (doom-modeline-buffer-file-name-style 'buffer-name)
-  (doom-modeline-project-detection 'project)
-  (doom-modeline-buffer-name t)
-  (doom-modeline-vcs-max-length 25)
-  (doom-modeline-icon t)
-  :hook (after-init . doom-modeline-mode))
+(defun my/ml-flymake ()
+  "Flymake error/warning counts for the mode-line."
+  (when (bound-and-true-p flymake-mode)
+    (let* ((diags (flymake-diagnostics))
+           (errors   (cl-count :error   diags :key #'flymake-diagnostic-type))
+           (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
+      (concat
+       (when (> errors 0)
+         (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
+       (when (> warnings 0)
+         (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
+       (when (= (+ errors warnings) 0)
+         (propertize " ✓" 'face '(:foreground "#81c784")))))))
+
+(defvar-local my/ml-flymake-cache "")
+
+(defun my/ml-flymake-update ()
+  "Cache flymake status string."
+  (setq my/ml-flymake-cache
+        (if (bound-and-true-p flymake-mode)
+            (let* ((diags (flymake-diagnostics))
+                   (errors (cl-count :error diags :key #'flymake-diagnostic-type))
+                   (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
+              (cond
+               ((> errors 0) (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
+               ((> warnings 0) (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
+               (t (propertize " ✓" 'face '(:foreground "#81c784")))))
+          "")))
+
+(add-hook 'flymake-after-diagnostics-hook #'my/ml-flymake-update)
+
+(setq-default mode-line-format
+  '(" "
+    (:eval (if (buffer-modified-p)
+               (propertize "●" 'face '(:foreground "#ffb74d"))
+             " "))
+    " %b "
+    "%l:%C  "
+    (:eval (my/ml-eglot))
+    (:eval (my/ml-flymake))
+    "  "
+    mode-line-end-spaces))
+
+(add-hook 'flymake-after-diagnostics-hook #'force-mode-line-update)
 
 (setq treesit-font-lock-level 4)
 
@@ -342,15 +388,7 @@
 (use-package eglot
   :ensure nil
   :init
-  (defun my/eglot-capf ()
-    (setq-local completion-at-point-functions
-                (list (cape-capf-super
-                       #'eglot-completion-at-point
-                       #'tempel-complete
-                       #'cape-file))))
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
-  (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
-
   :custom
   (eglot-send-changes-idle-time 0.5)
   (eglot-extend-to-xref t)
@@ -434,6 +472,8 @@
   (apheleia-global-mode 1)
   (add-to-list 'apheleia-formatters
                '(templ-format "templ" "fmt" filepath))
+  (add-to-list 'apheleia-formatters
+           '(deno-format "deno" "fmt" "--ext" "ts" "-"))
   (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
         '("nixfmt"))
   (setf (alist-get 'nix-mode apheleia-mode-alist)
@@ -508,16 +548,15 @@
 (use-package diff-hl
   :ensure nil
   :hook
-  ((after-init  . global-diff-hl-mode)
-   (magit-post-refresh . diff-hl-magit-post-refresh))
+  ((after-init             . global-diff-hl-mode)
+   (magit-post-refresh     . diff-hl-magit-post-refresh)
+   (after-save             . diff-hl-update)
+   (dired-mode             . diff-hl-dired-mode))
   :config
-  (diff-hl-flydiff-mode)
   (diff-hl-margin-mode)
   :custom
   (diff-hl-side 'left)
-  (diff-hl-margin-symbols-alist
-   '((insert . "┃") (delete . "-") (change . "┃")
-     (unknown . "┆") (ignored . "i"))))
+  (diff-hl-disable-on-remote t))
 
 (use-package undo-fu
   :ensure nil
@@ -614,6 +653,9 @@
 
 (dolist (cmd my-auto-center-commands)
   (advice-add cmd :after #'my-auto-center-advice))
+(advice-add 'save-place-find-file-hook :after
+			(lambda (&rest _)
+              (when buffer-file-name (ignore-errors (recenter)))))
 
 (defvar sexp-repeat-map
   (let ((map (make-sparse-keymap)))
@@ -765,24 +807,9 @@
          ("C-M-o" . popper-toggle-type))
   :custom
   (popper-reference-buffers
-   '("\\*Messages\\*"
-     "\\*Warnings\\*"
-     "\\*Compile-Log\\*"
-     "\\*compilation\\*"
-     "\\*eldoc.*\\*"
-     "\\*Flymake diagnostics\\*"
-     "\\*xref\\*"
-     "\\*Backtrace\\*"
-     "\\*e?shell\\*"
+   '("\\*compilation\\*"
      "\\*eat\\*"
-     "\\*term\\*"
-     "\\*vterm\\*"
-     "\\*SQL.*\\*"
-     help-mode
-     helpful-mode
-     compilation-mode
-     flymake-diagnostics-buffer-mode
-     messages-buffer-mode))
+     compilation-mode))
   (popper-display-control t)
   (popper-window-height 0.33)
   (popper-group-function #'popper-group-by-project)
@@ -980,18 +1007,26 @@
 (define-key my-code-keymap (kbd "R") #'eglot-rename)
 
 (defun my-project-eat ()
-  "Open eat in current project root."
-  (interactive)
-  (let ((default-directory (or (and (project-current) (project-root (project-current)))
-                               default-directory)))
-    (eat)))
+"Open eat in current project root with a project-named buffer."
+(interactive)
+(let* ((pr (project-current))
+       (default-directory (if pr (project-root pr) default-directory))
+       (name (if pr (project-name pr) "default"))
+       (buf-name (format "*eat-%s*" name)))
+  (if (get-buffer buf-name)
+      (pop-to-buffer buf-name)
+    (eat)
+    (rename-buffer buf-name))))
 
 (defun my-project-compile ()
-  "Compile in current project root."
-  (interactive)
-  (let ((default-directory (or (and (project-current) (project-root (project-current)))
-                               default-directory)))
-    (call-interactively #'compile)))
+"Compile in current project root with a project-named buffer."
+(interactive)
+(let* ((pr (project-current))
+       (default-directory (if pr (project-root pr) default-directory))
+       (name (if pr (project-name pr) "default"))
+       (compilation-buffer-name-function
+        (lambda (_mode) (format "*compilation-%s*" name))))
+  (call-interactively #'compile)))
 
 (defun my-project-sql ()
   "Open SQL interactive in current project."
@@ -1002,9 +1037,7 @@
 
 (define-key my-term-keymap (kbd "t") #'my-project-eat)
 (define-key my-term-keymap (kbd "c") #'my-project-compile)
-(define-key my-term-keymap (kbd "r") #'my-project-compile)
 (define-key my-term-keymap (kbd "s") #'my-project-sql)
-(define-key my-term-keymap (kbd "e") #'project-eshell)
 
 (global-set-key (kbd "C-g") #'prot/keyboard-quit-dwim)
 
