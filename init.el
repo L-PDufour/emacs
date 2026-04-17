@@ -163,14 +163,15 @@
   :ensure nil
   :defer t
   :hook (prog-mode . flymake-mode)
-  :custom
-  (flymake-margin-indicators-string
-   '((error "!»" compilation-error)
-     (warning "»" compilation-warning)
-     (note "»" compilation-info)))
   :config
-  (put 'flymake-goto-next-error 'repeat-map 'flymake-repeat-map)
-  (put 'flymake-goto-prev-error 'repeat-map 'flymake-repeat-map)
+      (defvar flymake-repeat-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "n") #'flymake-goto-next-error)
+    (define-key map (kbd "p") #'flymake-goto-prev-error)
+    map)
+  "Repeat map for Flymake error navigation.")
+(put 'flymake-goto-next-error 'repeat-map 'flymake-repeat-map)
+(put 'flymake-goto-prev-error 'repeat-map 'flymake-repeat-map)
   (defun consult-flymake-project ()
     "Jump to Flymake diagnostic in project."
     (interactive)
@@ -184,6 +185,10 @@
 (use-package org
   :ensure nil
   :defer t
+  :config
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   (append org-babel-load-languages '((sql . t))))
   :custom
   (org-M-RET-may-split-line '((default . nil)))
   (org-insert-heading-respect-content t)
@@ -192,6 +197,10 @@
   (org-log-into-drawer t)
   (org-directory "~/Sync/personal/")
   (org-default-notes-file (expand-file-name "inbox.org" org-directory))
+  :config
+  (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
+              org-level-5 org-level-6 org-level-7 org-level-8))
+(set-face-attribute face nil :weight 'bold))
   :hook
   ((org-mode . org-indent-mode)
    (org-mode . auto-save-mode))
@@ -303,6 +312,78 @@
   :config
   (load-theme 'catppuccin :no-confirm))
 
+(use-package ligature
+:ensure nil
+:config
+:config
+;; Enable the "www" ligature in every possible major mode
+(ligature-set-ligatures 't '("www"))
+;; Enable traditional ligature support in eww-mode, if the
+;; `variable-pitch' face supports it
+(ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+;; Enable all Cascadia and Fira Code ligatures in programming modes
+(ligature-set-ligatures 'prog-mode
+                      '(;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=// =~
+                        ;; =:= =!=
+                        ("=" (rx (+ (or ">" "<" "|" "/" "~" ":" "!" "="))))
+                        ;; ;; ;;;
+                        (";" (rx (+ ";")))
+                        ;; && &&&
+                        ("&" (rx (+ "&")))
+                        ;; !! !!! !. !: !!. != !== !~
+                        ("!" (rx (+ (or "=" "!" "\." ":" "~"))))
+                        ;; ?? ??? ?:  ?=  ?.
+                        ("?" (rx (or ":" "=" "\." (+ "?"))))
+                        ;; %% %%%
+                        ("%" (rx (+ "%")))
+                        ;; |> ||> |||> ||||> |] |} || ||| |-> ||-||
+                        ;; |->>-||-<<-| |- |== ||=||
+                        ;; |==>>==<<==<=>==//==/=!==:===>
+                        ("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\]"
+                                        "-" "=" ))))
+                        ;; \\ \\\ \/
+                        ("\\" (rx (or "/" (+ "\\"))))
+                        ;; ++ +++ ++++ +>
+                        ("+" (rx (or ">" (+ "+"))))
+                        ;; :: ::: :::: :> :< := :// ::=
+                        (":" (rx (or ">" "<" "=" "//" ":=" (+ ":"))))
+                        ;; // /// //// /\ /* /> /===:===!=//===>>==>==/
+                        ("/" (rx (+ (or ">"  "<" "|" "/" "\\" "\*" ":" "!"
+                                        "="))))
+                        ;; .. ... .... .= .- .? ..= ..<
+                        ("\." (rx (or "=" "-" "\?" "\.=" "\.<" (+ "\."))))
+                        ;; -- --- ---- -~ -> ->> -| -|->-->>->--<<-|
+                        ("-" (rx (+ (or ">" "<" "|" "~" "-"))))
+                        ;; *> */ *)  ** *** ****
+                        ("*" (rx (or ">" "/" ")" (+ "*"))))
+                        ;; www wwww
+                        ("w" (rx (+ "w")))
+                        ;; <> <!-- <|> <: <~ <~> <~~ <+ <* <$ </  <+> <*>
+                        ;; <$> </> <|  <||  <||| <|||| <- <-| <-<<-|-> <->>
+                        ;; <<-> <= <=> <<==<<==>=|=>==/==//=!==:=>
+                        ;; << <<< <<<<
+                        ("<" (rx (+ (or "\+" "\*" "\$" "<" ">" ":" "~"  "!"
+                                        "-"  "/" "|" "="))))
+                        ;; >: >- >>- >--|-> >>-|-> >= >== >>== >=|=:=>>
+                        ;; >> >>> >>>>
+                        (">" (rx (+ (or ">" "<" "|" "/" ":" "=" "-"))))
+                        ;; #: #= #! #( #? #[ #{ #_ #_( ## ### #####
+                        ("#" (rx (or ":" "=" "!" "(" "\?" "\[" "{" "_(" "_"
+                                     (+ "#"))))
+                        ;; ~~ ~~~ ~=  ~-  ~@ ~> ~~>
+                        ("~" (rx (or ">" "=" "-" "@" "~>" (+ "~"))))
+                        ;; __ ___ ____ _|_ __|____|_
+                        ("_" (rx (+ (or "_" "|"))))
+                        ;; Fira code: 0xFF 0x12
+                        ("0" (rx (and "x" (+ (in "A-F" "a-f" "0-9")))))
+                        ;; Fira code:
+                        "Fl"  "Tl"  "fi"  "fj"  "fl"  "ft"
+                        ;; The few not covered by the regexps.
+                        "{|"  "[|"  "]#"  "(*"  "}#"  "$>"  "^="))
+;; Enables ligature checks globally in all buffers. You can also do it
+;; per mode with `ligature-mode'.
+(global-ligature-mode t))
+
 (use-package nerd-icons
   :ensure nil
   :defer t)
@@ -362,7 +443,6 @@
              " "))
     " %b "
     "%l:%C  "
-    (:eval (my/ml-eglot))
     (:eval (my/ml-flymake))
     "  "
     mode-line-end-spaces))
@@ -873,20 +953,17 @@
   :config
   (setq gptel-default-mode 'org-mode)
 
-  (gptel-make-ollama "Ollama"
-    :host "localhost:11434"
-    :stream t
-    :models '(qwen3:4b))
-
-  (setq gptel-model "claude-sonnet-4-20250514")
-  (setq gptel-backend
-        (gptel-make-anthropic "Claude"
-          :stream t
-          :key #'my-get-anthropic-key
-          :models '(claude-sonnet-4-20250514
-                    claude-opus-4-20250514
-                    claude-haiku-4-20250119)))
-
+  
+(setq gptel-model 'qwen3.5-9b)
+(setq gptel-backend
+      (gptel-make-openai "llama.cpp"
+        :host "localhost:8999"
+        :protocol "http"
+        :endpoint "/v1/chat/completions"
+        :stream t
+        :key "dummy"
+        :models '(qwen3.5-9b)))
+      
   (setq gptel-track-media t)
 
   :bind
@@ -895,6 +972,147 @@
    ("C-c g m" . gptel-menu)
    ("C-c g a" . gptel-add)
    ("C-c g f" . gptel-add-file)))
+
+(with-eval-after-load 'gptel
+
+(setq gptel-use-tools t)
+
+;; Read buffer contents
+(gptel-make-tool
+ :name "read_buffer"
+ :function (lambda (buffer)
+             (unless (buffer-live-p (get-buffer buffer))
+               (error "Error: buffer %s is not live." buffer))
+             (with-current-buffer buffer
+               (buffer-substring-no-properties (point-min) (point-max))))
+ :description "Return the contents of an Emacs buffer"
+ :args (list '(:name "buffer"
+               :type string
+               :description "The name of the buffer whose contents are to be retrieved"))
+ :category "emacs")
+
+;; Read file contents
+(gptel-make-tool
+ :name "read_file"
+ :function (lambda (filepath)
+             (with-temp-buffer
+               (insert-file-contents (expand-file-name filepath))
+               (buffer-string)))
+ :description "Read and return the contents of a file"
+ :args (list '(:name "filepath"
+               :type string
+               :description "Path to the file to read. Supports relative paths and ~."))
+ :category "filesystem")
+
+;; List directory contents
+(gptel-make-tool
+ :name "list_directory"
+ :function (lambda (directory)
+             (mapconcat #'identity
+                        (directory-files (expand-file-name directory))
+                        "\n"))
+ :description "List the contents of a directory"
+ :args (list '(:name "directory"
+               :type string
+               :description "Path to the directory to list"))
+ :category "filesystem")
+
+;; List project files
+(gptel-make-tool
+ :name "list_project_files"
+ :function (lambda ()
+             (if-let ((pr (project-current)))
+                 (mapconcat #'identity (project-files pr) "\n")
+               "No project found for current buffer"))
+ :description "List all files in the current project"
+ :args (list)
+ :category "filesystem")
+
+;; Read Emacs documentation
+(gptel-make-tool
+ :name "read_documentation"
+ :function (lambda (symbol)
+             (let ((sym (intern symbol)))
+               (cond
+                ((fboundp sym) (documentation sym))
+                ((boundp sym) (documentation-property sym 'variable-documentation))
+                (t (format "No documentation found for %s" symbol)))))
+ :description "Read the documentation for a given Emacs function or variable"
+ :args (list '(:name "symbol"
+               :type string
+               :description "The name of the function or variable to look up"))
+ :category "emacs")
+
+;; Read URL contents
+(gptel-make-tool
+ :name "read_url"
+ :function (lambda (url)
+             (with-current-buffer (url-retrieve-synchronously url)
+               (goto-char (point-min))
+               (forward-paragraph)
+               (let ((dom (libxml-parse-html-region (point) (point-max))))
+                 (run-at-time 0 nil #'kill-buffer (current-buffer))
+                 (with-temp-buffer
+                   (shr-insert-document dom)
+                   (buffer-substring-no-properties (point-min) (point-max))))))
+ :description "Fetch and read the contents of a URL"
+ :args (list '(:name "url"
+               :type string
+               :description "The URL to fetch"))
+ :category "web")
+
+;; Run shell command (requires confirmation)
+(gptel-make-tool
+ :name "run_command"
+ :function (lambda (command &optional working_dir)
+             (let ((default-directory (if (and working_dir
+                                               (not (string= working_dir "")))
+                                          (expand-file-name working_dir)
+                                        default-directory)))
+               (shell-command-to-string command)))
+ :description "Run a shell command and return its output"
+ :args (list '(:name "command"
+               :type string
+               :description "The shell command to run")
+             '(:name "working_dir"
+               :type string
+               :description "Optional directory to run the command in"))
+ :category "command"
+ :confirm t
+ :include t)
+
+;; Append text to buffer
+(gptel-make-tool
+ :name "append_to_buffer"
+ :function (lambda (buffer text)
+             (with-current-buffer (get-buffer-create buffer)
+               (save-excursion
+                 (goto-char (point-max))
+                 (insert text)))
+             (format "Appended text to buffer %s" buffer))
+ :description "Append text to an Emacs buffer, creating it if needed"
+ :args (list '(:name "buffer"
+               :type string
+               :description "The name of the buffer to append to")
+             '(:name "text"
+               :type string
+               :description "The text to append"))
+ :category "emacs")
+
+;; Read PDF contents
+(gptel-make-tool
+ :name "read_pdf"
+ :function (lambda (filepath)
+             (let ((file (expand-file-name filepath)))
+               (unless (file-readable-p file)
+                 (error "Error: file %s is not readable." file))
+               (pdf-info-gettext file
+                                 (cons 1 (pdf-info-number-of-pages file)))))
+ :description "Extract text content from a PDF file"
+ :args (list '(:name "filepath"
+               :type string
+               :description "Path to the PDF file. Supports relative paths and ~."))
+ :category "filesystem"))
 
 (use-package tabspaces
   :ensure nil
