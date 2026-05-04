@@ -288,6 +288,26 @@ Keep all generated state under =var/=.
                 (with-current-buffer (get-buffer-create "*scratch*")
                   (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
                                   (emacs-init-time)))))))
+
+(use-package gnus
+  :ensure nil
+  :config
+  (setq gnus-select-method '(nnnil ""))
+  (setq gnus-secondary-select-methods
+        '((nnimap "gmail"
+                  (nnimap-address "imap.gmail.com")
+                  (nnimap-server-port 993)
+                  (nnimap-stream ssl)
+                  (nnir-search-engine imap)
+                  (nnimap-authinfo-file "~/.authinfo.gpg"))))
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 587
+        smtpmail-stream-type 'starttls)
+  (setq gnus-summary-line-format "%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n"
+        gnus-use-cache t
+        gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date)
+        gnus-summary-thread-gathering-function 'gnus-gather-threads-by-subject))  
 #+end_src
 
 ** Window Display Rules
@@ -1388,7 +1408,14 @@ Press =C-M-f= once, then tap =f=, =b=, =u=, =d=, etc.
   (use-package elfeed-tube
     :ensure nil
     :after elfeed
-    :config (elfeed-tube-setup))
+    :config (elfeed-tube-setup)
+    :bind (:map elfeed-show-mode-map
+  			  ("F" . elfeed-tube-fetch)
+  			  ([remap save-buffer] . elfeed-tube-save)
+  			  :map elfeed-search-mode-map
+  			  ("F" . elfeed-tube-fetch)
+  			  ([remap save-buffer] . elfeed-tube-save)))
+  
 #+end_src
 
 * LLM (GPTel)
