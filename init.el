@@ -28,82 +28,102 @@
 (setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
 
 (use-package emacs
+    :ensure nil
+    :custom
+    (auto-save-default nil)
+    (auto-revert-use-notify nil)
+    (column-number-mode t)
+    (help-window-select t)
+    (create-lockfiles nil)
+    (delete-by-moving-to-trash t)
+    (delete-selection-mode 1)
+    (global-auto-revert-mode 1)
+    (inhibit-startup-message t)
+    (make-backup-files nil)
+    (pixel-scroll-precision-mode t)
+    (ring-bell-function 'ignore)
+    (split-width-threshold 170)
+    (tab-width 4)
+    (treesit-font-lock-level 4)
+    (use-short-answers t)
+    (blink-cursor-mode nil)
+    (redisplay-skip-fontification-on-input t)
+    (bidi-display-reordering 'left-to-right
+    						   bidi-paragraph-direction 'left-to-right)
+    (bidi-inhibit-bpa t)
+    (cursor-in-non-selected-windows nil)
+    (save-interprogram-paste-before-kill t)
+    (highlight-nonselected-windows nil)
+    (kill-do-not-save-duplicates t)
+    (tab-always-indent 'complete)
+    (savehist-additional-variables
+     '(search-ring regexp-search-ring kill-ring))
+    (add-hook 'after-save-hook
+    			#'executable-make-buffer-file-executable-if-script-p)
+    (window-combination-resize t)
+    (set-mark-command-repeat-pop t)
+    :hook
+    (prog-mode . display-line-numbers-mode)
+
+    :config
+    (let ((mono-font "FiraCode Nerd Font")
+          (sans-font "DejaVu Sans"))
+      (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
+      (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
+      (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
+
+    (defun skip-these-buffers (_window buffer _bury-or-kill)
+      "Function for `switch-to-prev-buffer-skip'."
+      (string-match "\\*[^*]+\\*" (buffer-name buffer)))
+    (setq switch-to-prev-buffer-skip 'skip-these-buffers)
+
+    (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+    (load custom-file 'noerror 'nomessage)
+
+    (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
+    (modify-coding-system-alist 'file "" 'utf-8)
+
+    :init
+    (tool-bar-mode -1)
+    (menu-bar-mode -1)
+    (when scroll-bar-mode (scroll-bar-mode -1))
+    (global-hl-line-mode 1)
+    (global-auto-revert-mode 1)
+    (recentf-mode 1)
+    (savehist-mode 1)
+    (save-place-mode 1)
+    (winner-mode 1)
+    (repeat-mode 1)
+    (file-name-shadow-mode 1)
+
+    (setq compilation-scroll-output t)
+    (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+
+    (add-hook 'after-init-hook
+              (lambda ()
+                (with-current-buffer (get-buffer-create "*scratch*")
+                  (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
+                                  (emacs-init-time)))))))
+
+(use-package gnus
   :ensure nil
-  :custom
-  (auto-save-default nil)
-  (auto-revert-use-notify nil)
-  (column-number-mode t)
-  (help-window-select t)
-  (create-lockfiles nil)
-  (delete-by-moving-to-trash t)
-  (delete-selection-mode 1)
-  (global-auto-revert-mode 1)
-  (inhibit-startup-message t)
-  (make-backup-files nil)
-  (pixel-scroll-precision-mode t)
-  (ring-bell-function 'ignore)
-  (split-width-threshold 170)
-  (tab-width 4)
-  (treesit-font-lock-level 4)
-  (use-short-answers t)
-  (blink-cursor-mode nil)
-  (redisplay-skip-fontification-on-input t)
-  (bidi-display-reordering 'left-to-right
-  						   bidi-paragraph-direction 'left-to-right)
-  (bidi-inhibit-bpa t)
-  (cursor-in-non-selected-windows nil)
-  (save-interprogram-paste-before-kill t)
-  (highlight-nonselected-windows nil)
-  (kill-do-not-save-duplicates t)
-  (tab-always-indent 'complete)
-  (savehist-additional-variables
-   '(search-ring regexp-search-ring kill-ring))
-  (add-hook 'after-save-hook
-  			#'executable-make-buffer-file-executable-if-script-p)
-  (window-combination-resize t)
-  (set-mark-command-repeat-pop t)
-  :hook
-  (prog-mode . display-line-numbers-mode)
-
   :config
-  (let ((mono-font "FiraCode Nerd Font")
-        (sans-font "DejaVu Sans"))
-    (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
-    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
-    (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
-
-  (defun skip-these-buffers (_window buffer _bury-or-kill)
-    "Function for `switch-to-prev-buffer-skip'."
-    (string-match "\\*[^*]+\\*" (buffer-name buffer)))
-  (setq switch-to-prev-buffer-skip 'skip-these-buffers)
-
-  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-  (load custom-file 'noerror 'nomessage)
-
-  (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
-  (modify-coding-system-alist 'file "" 'utf-8)
-
-  :init
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (when scroll-bar-mode (scroll-bar-mode -1))
-  (global-hl-line-mode 1)
-  (global-auto-revert-mode 1)
-  (recentf-mode 1)
-  (savehist-mode 1)
-  (save-place-mode 1)
-  (winner-mode 1)
-  (repeat-mode 1)
-  (file-name-shadow-mode 1)
-
-  (setq compilation-scroll-output t)
-  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
-
-  (add-hook 'after-init-hook
-            (lambda ()
-              (with-current-buffer (get-buffer-create "*scratch*")
-                (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
-                                (emacs-init-time)))))))
+  (setq gnus-select-method '(nnnil ""))
+  (setq gnus-secondary-select-methods
+        '((nnimap "gmail"
+                  (nnimap-address "imap.gmail.com")
+                  (nnimap-server-port 993)
+                  (nnimap-stream ssl)
+                  (nnir-search-engine imap)
+                  (nnimap-authinfo-file "~/.authinfo.gpg"))))
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 587
+        smtpmail-stream-type 'starttls)
+  (setq gnus-summary-line-format "%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n"
+        gnus-use-cache t
+        gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date)
+        gnus-summary-thread-gathering-function 'gnus-gather-threads-by-subject))
 
 (use-package window
   :ensure nil
@@ -188,7 +208,9 @@
   :config
   (org-babel-do-load-languages
    'org-babel-load-languages
-   (append org-babel-load-languages '((sql . t))))
+   (append org-babel-load-languages
+           '((sqlite . t)
+			 (sql . t))))
   :custom
   (org-M-RET-may-split-line '((default . nil)))
   (org-insert-heading-respect-content t)
@@ -199,8 +221,8 @@
   (org-default-notes-file (expand-file-name "inbox.org" org-directory))
   :config
   (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
-              org-level-5 org-level-6 org-level-7 org-level-8))
-(set-face-attribute face nil :weight 'bold))
+							  org-level-5 org-level-6 org-level-7 org-level-8))
+	(set-face-attribute face nil :weight 'bold))
   :hook
   ((org-mode . org-indent-mode)
    (org-mode . auto-save-mode))
@@ -287,15 +309,23 @@
 
 (use-package corfu
   :ensure nil
-:custom
-  (corfu-auto nil)
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.1)
+  (corfu-auto-prefix 2)
   (corfu-cycle t)
   (corfu-quit-no-match 'separator)
-  (corfu-popupinfo-delay 0.5)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
   (corfu-on-exact-match nil)
+  (corfu-preselect 'prompt)
+  (corfu-preview-current nil)
   :init
   (global-corfu-mode)
-  (corfu-popupinfo-mode 1))
+  :config
+  (corfu-popupinfo-mode 1)
+  (corfu-history-mode 1)
+  (with-eval-after-load 'savehist
+    (add-to-list 'savehist-additional-variables 'corfu-history)))
 
 (use-package cape
   :ensure nil
@@ -450,7 +480,8 @@
 (add-hook 'flymake-after-diagnostics-hook #'force-mode-line-update)
 
 (setq treesit-font-lock-level 4)
-
+(add-to-list 'auto-mode-alist '("\\.ts\\'"  . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 (setq major-mode-remap-alist
       '((c-mode          . c-ts-mode)
         (c++-mode        . c++-ts-mode)
@@ -551,13 +582,17 @@
   :config
   (apheleia-global-mode 1)
   (add-to-list 'apheleia-formatters
-               '(templ-format "templ" "fmt" filepath))
+               '(templ-format "go" "tool" "templ" "fmt" filepath))
   (add-to-list 'apheleia-formatters
-           '(deno-format "deno" "fmt" "--ext" "ts" "-"))
+               '(deno-format "deno" "fmt" "--ext" "ts" "-"))
   (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
         '("nixfmt"))
   (setf (alist-get 'nix-mode apheleia-mode-alist)
         'nixfmt-rfc-style)
+  (setf (alist-get 'golangci-fmt apheleia-formatters)
+		'("golangci-lint" "fmt" "--stdin" filepath))
+  (setf (alist-get 'go-mode apheleia-mode-alist) 'golangci-fmt)
+  (setf (alist-get 'go-ts-mode apheleia-mode-alist) 'golangci-fmt)
   (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'deno-format)
   (setf (alist-get 'templ-ts-mode apheleia-mode-alist) 'templ-format)
   (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'deno-format))
@@ -922,6 +957,29 @@
   ((eshell-mode . eat-eshell-mode)
    (eshell-mode . eat-eshell-visual-command-mode)))
 
+(use-package ghostel
+  :ensure nil
+  :bind (("C-x m" . ghostel)
+         :map ghostel-semi-char-mode-map
+         ("C-s" . consult-line)
+         :map project-prefix-map
+         ("m" . ghostel-project)
+         ("M" . ghostel-project-list-buffers))
+  :config
+  (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
+  (add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t)
+  (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
+
+(use-package ghostel-eshell
+  :ensure nil
+  :after ghostel
+  :hook (eshell-load . ghostel-eshell-visual-command-mode))
+
+(use-package ghostel-compile
+  :ensure nil
+  :after ghostel
+  :hook (after-init . ghostel-compile-global-mode))
+
 (use-package elfeed
   :ensure nil
   :custom
@@ -937,7 +995,13 @@
 (use-package elfeed-tube
   :ensure nil
   :after elfeed
-  :config (elfeed-tube-setup))
+  :config (elfeed-tube-setup)
+  :bind (:map elfeed-show-mode-map
+			  ("F" . elfeed-tube-fetch)
+			  ([remap save-buffer] . elfeed-tube-save)
+			  :map elfeed-search-mode-map
+			  ("F" . elfeed-tube-fetch)
+			  ([remap save-buffer] . elfeed-tube-save)))
 
 (defvar my-anthropic-api-key nil
   "Cached Anthropic API key for current session.")

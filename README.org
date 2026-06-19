@@ -419,7 +419,9 @@ Keep all generated state under =var/=.
     :config
     (org-babel-do-load-languages
      'org-babel-load-languages
-     (append org-babel-load-languages '((sql . t))))
+     (append org-babel-load-languages
+             '((sqlite . t)
+  			 (sql . t))))
     :custom
     (org-M-RET-may-split-line '((default . nil)))
     (org-insert-heading-respect-content t)
@@ -430,8 +432,8 @@ Keep all generated state under =var/=.
     (org-default-notes-file (expand-file-name "inbox.org" org-directory))
     :config
     (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
-                org-level-5 org-level-6 org-level-7 org-level-8))
-  (set-face-attribute face nil :weight 'bold))
+  							  org-level-5 org-level-6 org-level-7 org-level-8))
+  	(set-face-attribute face nil :weight 'bold))
     :hook
     ((org-mode . org-indent-mode)
      (org-mode . auto-save-mode))
@@ -761,7 +763,8 @@ Keep all generated state under =var/=.
 
 #+begin_src emacs-lisp
   (setq treesit-font-lock-level 4)
-
+  (add-to-list 'auto-mode-alist '("\\.ts\\'"  . typescript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
   (setq major-mode-remap-alist
         '((c-mode          . c-ts-mode)
           (c++-mode        . c++-ts-mode)
@@ -885,7 +888,7 @@ file as =var/templates=.
     :config
     (apheleia-global-mode 1)
     (add-to-list 'apheleia-formatters
-                 '(templ-format "templ" "fmt" filepath))
+                 '(templ-format "go" "tool" "templ" "fmt" filepath))
     (add-to-list 'apheleia-formatters
                  '(deno-format "deno" "fmt" "--ext" "ts" "-"))
     (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
@@ -1398,7 +1401,38 @@ Press =C-M-f= once, then tap =f=, =b=, =u=, =d=, etc.
     ((eshell-mode . eat-eshell-mode)
      (eshell-mode . eat-eshell-visual-command-mode)))
 #+end_src
+** Ghostel
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
 
+Terminal emulator powered by libghostty-vt. Faster and more correct
+than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
+
+#+begin_src emacs-lisp
+  (use-package ghostel
+    :ensure nil
+    :bind (("C-x m" . ghostel)
+           :map ghostel-semi-char-mode-map
+           ("C-s" . consult-line)
+           :map project-prefix-map
+           ("m" . ghostel-project)
+           ("M" . ghostel-project-list-buffers))
+    :config
+    (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
+    (add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t)
+    (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
+
+  (use-package ghostel-eshell
+    :ensure nil
+    :after ghostel
+    :hook (eshell-load . ghostel-eshell-visual-command-mode))
+
+  (use-package ghostel-compile
+    :ensure nil
+    :after ghostel
+    :hook (after-init . ghostel-compile-global-mode))
+#+end_src
 * Elfeed
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle init.el
