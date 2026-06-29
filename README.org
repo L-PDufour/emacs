@@ -2159,8 +2159,6 @@ with meow's default single-key forwarding.
   (defvar my-toggle-keymap    (make-sparse-keymap))
   (defvar my-error-keymap     (make-sparse-keymap))
   (defvar my-ai-keymap        (make-sparse-keymap))
-  (defvar my-workspace-keymap (make-sparse-keymap))
-
   ;;; b = buffers
   (define-key my-buffer-keymap "b" #'consult-buffer)
   (define-key my-buffer-keymap "d" #'kill-current-buffer)
@@ -2210,12 +2208,6 @@ with meow's default single-key forwarding.
   (define-key my-ai-keymap "m" #'gptel-menu)
   (define-key my-ai-keymap "f" #'gptel-add-file)
 
-  ;;; TAB = workspaces
-  (define-key my-workspace-keymap (kbd "TAB") #'tabspaces-switch-or-create-workspace)
-  (define-key my-workspace-keymap "b" #'tabspaces-switch-to-buffer)
-  (define-key my-workspace-keymap "d" #'tabspaces-close-workspace)
-  (define-key my-workspace-keymap "k" #'tabspaces-kill-buffers-close-workspace)
-
   ;;; Also add code keys not in my-code-keymap yet
   (define-key my-code-keymap (kbd "D") #'xref-find-definitions-other-window)
   (define-key my-code-keymap (kbd "f") #'eglot-format)
@@ -2234,8 +2226,11 @@ with meow's default single-key forwarding.
      '("h"   . my-help-keymap)
      '("o"   . my-open-keymap)
      '("t"   . my-toggle-keymap)
-     '("TAB" . my-workspace-keymap)
      '("a"   . my-ai-keymap)))
+  ;; Wire TAB separately once tabspaces defines its command map
+  (with-eval-after-load 'tabspaces
+    (with-eval-after-load 'meow
+      (meow-leader-define-key '("TAB" . tabspaces-command-map))))
 #+end_src
 
 ** Which-Key Labels
