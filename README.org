@@ -714,50 +714,31 @@ Keep all generated state under =var/=.
 #+end_src
 
 ** Mode Line
+
 #+begin_src emacs-lisp
-(defun my/ml-flymake ()
-  "Flymake error/warning counts for the mode-line."
-  (when (bound-and-true-p flymake-mode)
-    (let* ((diags (flymake-diagnostics))
-           (errors   (cl-count :error   diags :key #'flymake-diagnostic-type))
-           (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
-      (concat
-       (when (> errors 0)
-         (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
-       (when (> warnings 0)
-         (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
-       (when (= (+ errors warnings) 0)
-         (propertize " ✓" 'face '(:foreground "#81c784")))))))
+  (use-package doom-modeline
+    :ensure nil
+    :hook (after-init . doom-modeline-mode)
+    :custom
+    (doom-modeline-height 25)
+    (doom-modeline-bar-width 4)
+    ;; Disable the segments that are expensive on every redisplay
+    (doom-modeline-github nil)           ; no GitHub API polling
+    (doom-modeline-env-version nil)      ; no language version subprocess
+    (doom-modeline-minor-modes nil)
+    (doom-modeline-enable-word-count nil)
+    (doom-modeline-time nil)
+    ;; VCS: truncate long branch names; the segment itself still runs
+    ;; but shorter strings redisplay faster
+    (doom-modeline-vcs-max-length 15)
+    ;; Simpler flymake indicator — avoids per-redisplay diagnostic scan
+    (doom-modeline-check-simple-format t)
+    (doom-modeline-buffer-file-name-style 'truncate-upto-project)
+    (doom-modeline-workspace-name t))
 
-(defvar-local my/ml-flymake-cache "")
-
-(defun my/ml-flymake-update ()
-  "Cache flymake status string."
-  (setq my/ml-flymake-cache
-        (if (bound-and-true-p flymake-mode)
-            (let* ((diags (flymake-diagnostics))
-                   (errors (cl-count :error diags :key #'flymake-diagnostic-type))
-                   (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
-              (cond
-               ((> errors 0) (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
-               ((> warnings 0) (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
-               (t (propertize " ✓" 'face '(:foreground "#81c784")))))
-          "")))
-
-(add-hook 'flymake-after-diagnostics-hook #'my/ml-flymake-update)
-
-(setq-default mode-line-format
-  '(" "
-    (:eval (if (buffer-modified-p)
-               (propertize "●" 'face '(:foreground "#ffb74d"))
-             " "))
-    " %b "
-    "%l:%C  "
-    (:eval (my/ml-flymake))
-    "  "
-    mode-line-end-spaces))
-
-(add-hook 'flymake-after-diagnostics-hook #'force-mode-line-update)
+  ;; Stop VC from polling file state on every auto-revert tick —
+  ;; this is what makes doom-modeline-segment--vcs expensive in large repos
+  (setq auto-revert-check-vc-info nil)
 #+end_src
 
 * Programming
