@@ -1959,6 +1959,44 @@ motion mode with namespace conventions borrowed from Doom Emacs.
     (meow-global-mode 1))
 #+end_src
 
+** Meow Tree-Sitter Objects
+
+=meow-tree-sitter= registers structural text objects backed by
+Tree-Sitter grammars. After loading, the standard meow thing
+commands (=,= inner, =.= bounds, =[= beginning, =]= end) gain:
+
+| Thing        | Selects                              |
+|--------------+--------------------------------------|
+| =function=   | function / method body               |
+| =class=      | class / struct body                  |
+| =argument=   | function argument                    |
+| =comment=    | line or block comment                |
+| =string=     | string literal                       |
+| =return=     | return statement                     |
+| =conditional=| if / else / switch block             |
+| =loop=       | for / while / loop body              |
+| =assignment= | variable assignment                  |
+
+#+begin_src emacs-lisp
+  (use-package meow-tree-sitter
+    :ensure nil
+    :after meow
+    :config
+    (meow-tree-sitter-register-defaults))
+#+end_src
+
+** Meow Repeat
+
+Meow integrates with Emacs =repeat-mode=: after any normal-mode
+command that has a =repeat-map= registered (e.g. =flymake-goto-next-error=,
+=windmove=, =xref=), tapping the single-key suffix repeats without
+re-entering the prefix. The ='= key in normal mode additionally calls
+=repeat= directly to re-run the last complex command.
+
+No extra configuration is needed — the =repeat-mode= and all repeat
+maps defined earlier in this file work transparently in meow normal
+mode.
+
 * Keybindings
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle init.el
