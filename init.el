@@ -28,82 +28,82 @@
 (setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
 
 (use-package emacs
-    :ensure nil
-    :custom
-    (auto-save-default nil)
-    (auto-revert-use-notify nil)
-    (column-number-mode t)
-    (help-window-select t)
-    (create-lockfiles nil)
-    (delete-by-moving-to-trash t)
-    (delete-selection-mode 1)
-    (global-auto-revert-mode 1)
-    (inhibit-startup-message t)
-    (make-backup-files nil)
-    (pixel-scroll-precision-mode t)
-    (ring-bell-function 'ignore)
-    (split-width-threshold 170)
-    (tab-width 4)
-    (treesit-font-lock-level 4)
-    (use-short-answers t)
-    (blink-cursor-mode nil)
-    (redisplay-skip-fontification-on-input t)
-    (bidi-display-reordering 'left-to-right
-    						   bidi-paragraph-direction 'left-to-right)
-    (bidi-inhibit-bpa t)
-    (cursor-in-non-selected-windows nil)
-    (save-interprogram-paste-before-kill t)
-    (highlight-nonselected-windows nil)
-    (kill-do-not-save-duplicates t)
-    (tab-always-indent 'complete)
-    (savehist-additional-variables
-     '(search-ring regexp-search-ring kill-ring))
-    (add-hook 'after-save-hook
-    			#'executable-make-buffer-file-executable-if-script-p)
-    (window-combination-resize t)
-    (set-mark-command-repeat-pop t)
-    :hook
-    (prog-mode . display-line-numbers-mode)
+  :ensure nil
+  :custom
+  (auto-save-default nil)
+  (auto-revert-use-notify nil)
+  (column-number-mode t)
+  (help-window-select t)
+  (create-lockfiles nil)
+  (delete-by-moving-to-trash t)
+  (delete-selection-mode 1)
+  (global-auto-revert-mode 1)
+  (inhibit-startup-message t)
+  (make-backup-files nil)
+  (pixel-scroll-precision-mode t)
+  (ring-bell-function 'ignore)
+  (split-width-threshold 170)
+  (tab-width 4)
+  (treesit-font-lock-level 4)
+  (use-short-answers t)
+  (blink-cursor-mode nil)
+  (redisplay-skip-fontification-on-input t)
+  (bidi-display-reordering 'left-to-right
+    					   bidi-paragraph-direction 'left-to-right)
+  (bidi-inhibit-bpa t)
+  (cursor-in-non-selected-windows nil)
+  (save-interprogram-paste-before-kill t)
+  (highlight-nonselected-windows nil)
+  (kill-do-not-save-duplicates t)
+  (tab-always-indent 'complete)
+  (savehist-additional-variables
+   '(search-ring regexp-search-ring kill-ring))
+  (add-hook 'after-save-hook
+    		#'executable-make-buffer-file-executable-if-script-p)
+  (window-combination-resize t)
+  (set-mark-command-repeat-pop t)
+  :hook
+  (prog-mode . display-line-numbers-mode)
 
-    :config
-    (let ((mono-font "FiraCode Nerd Font")
-          (sans-font "DejaVu Sans"))
-      (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
-      (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
-      (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
+  :config
+  (let ((mono-font "FiraCode Nerd Font")
+        (sans-font "DejaVu Sans"))
+    (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
+    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
+    (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
 
-    (defun skip-these-buffers (_window buffer _bury-or-kill)
-      "Function for `switch-to-prev-buffer-skip'."
-      (string-match "\\*[^*]+\\*" (buffer-name buffer)))
-    (setq switch-to-prev-buffer-skip 'skip-these-buffers)
+  (defun skip-these-buffers (_window buffer _bury-or-kill)
+    "Function for `switch-to-prev-buffer-skip'."
+    (string-match "\\*[^*]+\\*" (buffer-name buffer)))
+  (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
-    (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-    (load custom-file 'noerror 'nomessage)
+  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+  (load custom-file 'noerror 'nomessage)
 
-    (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
-    (modify-coding-system-alist 'file "" 'utf-8)
+  (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
+  (modify-coding-system-alist 'file "" 'utf-8)
 
-    :init
-    (tool-bar-mode -1)
-    (menu-bar-mode -1)
-    (when scroll-bar-mode (scroll-bar-mode -1))
-    (global-hl-line-mode 1)
-    (global-auto-revert-mode 1)
-    (recentf-mode 1)
-    (savehist-mode 1)
-    (save-place-mode 1)
-    (winner-mode 1)
-    (repeat-mode 1)
-    (file-name-shadow-mode 1)
+  :init
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (when scroll-bar-mode (scroll-bar-mode -1))
+  (global-hl-line-mode 1)
+  (global-auto-revert-mode 1)
+  (recentf-mode 1)
+  (savehist-mode 1)
+  (save-place-mode 1)
+  (winner-mode 1)
+  (repeat-mode 1)
+  (file-name-shadow-mode 1)
 
-    (setq compilation-scroll-output t)
-    (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+  (setq compilation-scroll-output t)
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
-    (add-hook 'after-init-hook
-              (lambda ()
-                (with-current-buffer (get-buffer-create "*scratch*")
-                  (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
-                                  (emacs-init-time)))))))
+  (add-hook 'after-init-hook
+            (lambda ()
+              (with-current-buffer (get-buffer-create "*scratch*")
+                (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
+                                (emacs-init-time)))))))
 
 (use-package gnus
   :ensure nil
@@ -184,14 +184,14 @@
   :defer t
   :hook (prog-mode . flymake-mode)
   :config
-      (defvar flymake-repeat-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "n") #'flymake-goto-next-error)
-    (define-key map (kbd "p") #'flymake-goto-prev-error)
-    map)
-  "Repeat map for Flymake error navigation.")
-(put 'flymake-goto-next-error 'repeat-map 'flymake-repeat-map)
-(put 'flymake-goto-prev-error 'repeat-map 'flymake-repeat-map)
+  (defvar flymake-repeat-map
+	(let ((map (make-sparse-keymap)))
+      (define-key map (kbd "n") #'flymake-goto-next-error)
+      (define-key map (kbd "p") #'flymake-goto-prev-error)
+      map)
+	"Repeat map for Flymake error navigation.")
+  (put 'flymake-goto-next-error 'repeat-map 'flymake-repeat-map)
+  (put 'flymake-goto-prev-error 'repeat-map 'flymake-repeat-map)
   (defun consult-flymake-project ()
     "Jump to Flymake diagnostic in project."
     (interactive)
@@ -343,76 +343,76 @@
   (load-theme 'catppuccin :no-confirm))
 
 (use-package ligature
-:ensure nil
-:config
-:config
-;; Enable the "www" ligature in every possible major mode
-(ligature-set-ligatures 't '("www"))
-;; Enable traditional ligature support in eww-mode, if the
-;; `variable-pitch' face supports it
-(ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
-;; Enable all Cascadia and Fira Code ligatures in programming modes
-(ligature-set-ligatures 'prog-mode
-                      '(;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=// =~
-                        ;; =:= =!=
-                        ("=" (rx (+ (or ">" "<" "|" "/" "~" ":" "!" "="))))
-                        ;; ;; ;;;
-                        (";" (rx (+ ";")))
-                        ;; && &&&
-                        ("&" (rx (+ "&")))
-                        ;; !! !!! !. !: !!. != !== !~
-                        ("!" (rx (+ (or "=" "!" "\." ":" "~"))))
-                        ;; ?? ??? ?:  ?=  ?.
-                        ("?" (rx (or ":" "=" "\." (+ "?"))))
-                        ;; %% %%%
-                        ("%" (rx (+ "%")))
-                        ;; |> ||> |||> ||||> |] |} || ||| |-> ||-||
-                        ;; |->>-||-<<-| |- |== ||=||
-                        ;; |==>>==<<==<=>==//==/=!==:===>
-                        ("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\]"
-                                        "-" "=" ))))
-                        ;; \\ \\\ \/
-                        ("\\" (rx (or "/" (+ "\\"))))
-                        ;; ++ +++ ++++ +>
-                        ("+" (rx (or ">" (+ "+"))))
-                        ;; :: ::: :::: :> :< := :// ::=
-                        (":" (rx (or ">" "<" "=" "//" ":=" (+ ":"))))
-                        ;; // /// //// /\ /* /> /===:===!=//===>>==>==/
-                        ("/" (rx (+ (or ">"  "<" "|" "/" "\\" "\*" ":" "!"
-                                        "="))))
-                        ;; .. ... .... .= .- .? ..= ..<
-                        ("\." (rx (or "=" "-" "\?" "\.=" "\.<" (+ "\."))))
-                        ;; -- --- ---- -~ -> ->> -| -|->-->>->--<<-|
-                        ("-" (rx (+ (or ">" "<" "|" "~" "-"))))
-                        ;; *> */ *)  ** *** ****
-                        ("*" (rx (or ">" "/" ")" (+ "*"))))
-                        ;; www wwww
-                        ("w" (rx (+ "w")))
-                        ;; <> <!-- <|> <: <~ <~> <~~ <+ <* <$ </  <+> <*>
-                        ;; <$> </> <|  <||  <||| <|||| <- <-| <-<<-|-> <->>
-                        ;; <<-> <= <=> <<==<<==>=|=>==/==//=!==:=>
-                        ;; << <<< <<<<
-                        ("<" (rx (+ (or "\+" "\*" "\$" "<" ">" ":" "~"  "!"
-                                        "-"  "/" "|" "="))))
-                        ;; >: >- >>- >--|-> >>-|-> >= >== >>== >=|=:=>>
-                        ;; >> >>> >>>>
-                        (">" (rx (+ (or ">" "<" "|" "/" ":" "=" "-"))))
-                        ;; #: #= #! #( #? #[ #{ #_ #_( ## ### #####
-                        ("#" (rx (or ":" "=" "!" "(" "\?" "\[" "{" "_(" "_"
-                                     (+ "#"))))
-                        ;; ~~ ~~~ ~=  ~-  ~@ ~> ~~>
-                        ("~" (rx (or ">" "=" "-" "@" "~>" (+ "~"))))
-                        ;; __ ___ ____ _|_ __|____|_
-                        ("_" (rx (+ (or "_" "|"))))
-                        ;; Fira code: 0xFF 0x12
-                        ("0" (rx (and "x" (+ (in "A-F" "a-f" "0-9")))))
-                        ;; Fira code:
-                        "Fl"  "Tl"  "fi"  "fj"  "fl"  "ft"
-                        ;; The few not covered by the regexps.
-                        "{|"  "[|"  "]#"  "(*"  "}#"  "$>"  "^="))
-;; Enables ligature checks globally in all buffers. You can also do it
-;; per mode with `ligature-mode'.
-(global-ligature-mode t))
+  :ensure nil
+  :config
+  :config
+  ;; Enable the "www" ligature in every possible major mode
+  (ligature-set-ligatures 't '("www"))
+  ;; Enable traditional ligature support in eww-mode, if the
+  ;; `variable-pitch' face supports it
+  (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+  ;; Enable all Cascadia and Fira Code ligatures in programming modes
+  (ligature-set-ligatures 'prog-mode
+						  '(;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=// =~
+							;; =:= =!=
+							("=" (rx (+ (or ">" "<" "|" "/" "~" ":" "!" "="))))
+							;; ;; ;;;
+							(";" (rx (+ ";")))
+							;; && &&&
+							("&" (rx (+ "&")))
+							;; !! !!! !. !: !!. != !== !~
+							("!" (rx (+ (or "=" "!" "\." ":" "~"))))
+							;; ?? ??? ?:  ?=  ?.
+							("?" (rx (or ":" "=" "\." (+ "?"))))
+							;; %% %%%
+							("%" (rx (+ "%")))
+							;; |> ||> |||> ||||> |] |} || ||| |-> ||-||
+							;; |->>-||-<<-| |- |== ||=||
+							;; |==>>==<<==<=>==//==/=!==:===>
+							("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\]"
+											"-" "=" ))))
+							;; \\ \\\ \/
+							("\\" (rx (or "/" (+ "\\"))))
+							;; ++ +++ ++++ +>
+							("+" (rx (or ">" (+ "+"))))
+							;; :: ::: :::: :> :< := :// ::=
+							(":" (rx (or ">" "<" "=" "//" ":=" (+ ":"))))
+							;; // /// //// /\ /* /> /===:===!=//===>>==>==/
+							("/" (rx (+ (or ">"  "<" "|" "/" "\\" "\*" ":" "!"
+											"="))))
+							;; .. ... .... .= .- .? ..= ..<
+							("\." (rx (or "=" "-" "\?" "\.=" "\.<" (+ "\."))))
+							;; -- --- ---- -~ -> ->> -| -|->-->>->--<<-|
+							("-" (rx (+ (or ">" "<" "|" "~" "-"))))
+							;; *> */ *)  ** *** ****
+							("*" (rx (or ">" "/" ")" (+ "*"))))
+							;; www wwww
+							("w" (rx (+ "w")))
+							;; <> <!-- <|> <: <~ <~> <~~ <+ <* <$ </  <+> <*>
+							;; <$> </> <|  <||  <||| <|||| <- <-| <-<<-|-> <->>
+							;; <<-> <= <=> <<==<<==>=|=>==/==//=!==:=>
+							;; << <<< <<<<
+							("<" (rx (+ (or "\+" "\*" "\$" "<" ">" ":" "~"  "!"
+											"-"  "/" "|" "="))))
+							;; >: >- >>- >--|-> >>-|-> >= >== >>== >=|=:=>>
+							;; >> >>> >>>>
+							(">" (rx (+ (or ">" "<" "|" "/" ":" "=" "-"))))
+							;; #: #= #! #( #? #[ #{ #_ #_( ## ### #####
+							("#" (rx (or ":" "=" "!" "(" "\?" "\[" "{" "_(" "_"
+										 (+ "#"))))
+							;; ~~ ~~~ ~=  ~-  ~@ ~> ~~>
+							("~" (rx (or ">" "=" "-" "@" "~>" (+ "~"))))
+							;; __ ___ ____ _|_ __|____|_
+							("_" (rx (+ (or "_" "|"))))
+							;; Fira code: 0xFF 0x12
+							("0" (rx (and "x" (+ (in "A-F" "a-f" "0-9")))))
+							;; Fira code:
+							"Fl"  "Tl"  "fi"  "fj"  "fl"  "ft"
+							;; The few not covered by the regexps.
+							"{|"  "[|"  "]#"  "(*"  "}#"  "$>"  "^="))
+  ;; Enables ligature checks globally in all buffers. You can also do it
+  ;; per mode with `ligature-mode'.
+  (global-ligature-mode t))
 
 (use-package nerd-icons
   :ensure nil
@@ -789,8 +789,8 @@
   "Repeat map for S-expression navigation.")
 
 (dolist (cmd '(forward-sexp backward-sexp backward-up-list down-list
-                             forward-list backward-list beginning-of-defun end-of-defun
-                             mark-sexp kill-sexp transpose-sexps))
+                            forward-list backward-list beginning-of-defun end-of-defun
+                            mark-sexp kill-sexp transpose-sexps))
   (put cmd 'repeat-map 'sexp-repeat-map))
 
 (defvar window-repeat-map
@@ -813,10 +813,10 @@
   "Repeat map for window operations.")
 
 (dolist (cmd '(other-window windmove-left windmove-down windmove-up windmove-right
-                             balance-windows enlarge-window shrink-window
-                             enlarge-window-horizontally shrink-window-horizontally
-                             delete-window delete-other-windows
-                             split-window-below split-window-right))
+                            balance-windows enlarge-window shrink-window
+                            enlarge-window-horizontally shrink-window-horizontally
+                            delete-window delete-other-windows
+                            split-window-below split-window-right))
   (put cmd 'repeat-map 'window-repeat-map))
 
 (defvar buffer-repeat-map
@@ -872,8 +872,8 @@
   ("C-c C-j" . avy-resume))
 
 (use-package surround
-:ensure nil
-:bind-keymap ("C-c s" . surround-keymap))
+  :ensure nil
+  :bind-keymap ("C-c s" . surround-keymap))
 
 (use-package pdf-tools
   :ensure nil
@@ -1018,16 +1018,16 @@
   (setq gptel-default-mode 'org-mode)
 
   
-(setq gptel-model 'qwen3.5-9b)
-(setq gptel-backend
-      (gptel-make-openai "llama.cpp"
-        :host "localhost:8999"
-        :protocol "http"
-        :endpoint "/v1/chat/completions"
-        :stream t
-        :key "dummy"
-        :models '(qwen3.5-9b)))
-      
+  (setq gptel-model 'qwen3.5-9b)
+  (setq gptel-backend
+		(gptel-make-openai "llama.cpp"
+          :host "localhost:8999"
+          :protocol "http"
+          :endpoint "/v1/chat/completions"
+          :stream t
+          :key "dummy"
+          :models '(qwen3.5-9b)))
+  
   (setq gptel-track-media t)
 
   :bind
@@ -1039,149 +1039,164 @@
 
 (with-eval-after-load 'gptel
 
-(setq gptel-use-tools t)
+  (setq gptel-use-tools t)
 
-;; Read buffer contents
-(gptel-make-tool
- :name "read_buffer"
- :function (lambda (buffer)
-             (unless (buffer-live-p (get-buffer buffer))
-               (error "Error: buffer %s is not live." buffer))
-             (with-current-buffer buffer
-               (buffer-substring-no-properties (point-min) (point-max))))
- :description "Return the contents of an Emacs buffer"
- :args (list '(:name "buffer"
-               :type string
-               :description "The name of the buffer whose contents are to be retrieved"))
- :category "emacs")
+  ;; Read buffer contents
+  (gptel-make-tool
+   :name "read_buffer"
+   :function (lambda (buffer)
+               (unless (buffer-live-p (get-buffer buffer))
+				 (error "Error: buffer %s is not live." buffer))
+               (with-current-buffer buffer
+				 (buffer-substring-no-properties (point-min) (point-max))))
+   :description "Return the contents of an Emacs buffer"
+   :args (list '(:name "buffer"
+					   :type string
+					   :description "The name of the buffer whose contents are to be retrieved"))
+   :category "emacs")
 
-;; Read file contents
-(gptel-make-tool
- :name "read_file"
- :function (lambda (filepath)
-             (with-temp-buffer
-               (insert-file-contents (expand-file-name filepath))
-               (buffer-string)))
- :description "Read and return the contents of a file"
- :args (list '(:name "filepath"
-               :type string
-               :description "Path to the file to read. Supports relative paths and ~."))
- :category "filesystem")
+  ;; Read file contents
+  (gptel-make-tool
+   :name "read_file"
+   :function (lambda (filepath)
+               (with-temp-buffer
+				 (insert-file-contents (expand-file-name filepath))
+				 (buffer-string)))
+   :description "Read and return the contents of a file"
+   :args (list '(:name "filepath"
+					   :type string
+					   :description "Path to the file to read. Supports relative paths and ~."))
+   :category "filesystem")
 
-;; List directory contents
-(gptel-make-tool
- :name "list_directory"
- :function (lambda (directory)
-             (mapconcat #'identity
-                        (directory-files (expand-file-name directory))
-                        "\n"))
- :description "List the contents of a directory"
- :args (list '(:name "directory"
-               :type string
-               :description "Path to the directory to list"))
- :category "filesystem")
+  ;; List directory contents
+  (gptel-make-tool
+   :name "list_directory"
+   :function (lambda (directory)
+               (mapconcat #'identity
+                          (directory-files (expand-file-name directory))
+                          "\n"))
+   :description "List the contents of a directory"
+   :args (list '(:name "directory"
+					   :type string
+					   :description "Path to the directory to list"))
+   :category "filesystem")
 
-;; List project files
-(gptel-make-tool
- :name "list_project_files"
- :function (lambda ()
-             (if-let ((pr (project-current)))
-                 (mapconcat #'identity (project-files pr) "\n")
-               "No project found for current buffer"))
- :description "List all files in the current project"
- :args (list)
- :category "filesystem")
+  ;; List project files
+  (gptel-make-tool
+   :name "list_project_files"
+   :function (lambda ()
+               (if-let ((pr (project-current)))
+                   (mapconcat #'identity (project-files pr) "\n")
+				 "No project found for current buffer"))
+   :description "List all files in the current project"
+   :args (list)
+   :category "filesystem")
 
-;; Read Emacs documentation
-(gptel-make-tool
- :name "read_documentation"
- :function (lambda (symbol)
-             (let ((sym (intern symbol)))
-               (cond
-                ((fboundp sym) (documentation sym))
-                ((boundp sym) (documentation-property sym 'variable-documentation))
-                (t (format "No documentation found for %s" symbol)))))
- :description "Read the documentation for a given Emacs function or variable"
- :args (list '(:name "symbol"
-               :type string
-               :description "The name of the function or variable to look up"))
- :category "emacs")
+  ;; Read Emacs documentation
+  (gptel-make-tool
+   :name "read_documentation"
+   :function (lambda (symbol)
+               (let ((sym (intern symbol)))
+				 (cond
+                  ((fboundp sym) (documentation sym))
+                  ((boundp sym) (documentation-property sym 'variable-documentation))
+                  (t (format "No documentation found for %s" symbol)))))
+   :description "Read the documentation for a given Emacs function or variable"
+   :args (list '(:name "symbol"
+					   :type string
+					   :description "The name of the function or variable to look up"))
+   :category "emacs")
 
-;; Read URL contents
-(gptel-make-tool
- :name "read_url"
- :function (lambda (url)
-             (with-current-buffer (url-retrieve-synchronously url)
-               (goto-char (point-min))
-               (forward-paragraph)
-               (let ((dom (libxml-parse-html-region (point) (point-max))))
-                 (run-at-time 0 nil #'kill-buffer (current-buffer))
-                 (with-temp-buffer
-                   (shr-insert-document dom)
-                   (buffer-substring-no-properties (point-min) (point-max))))))
- :description "Fetch and read the contents of a URL"
- :args (list '(:name "url"
-               :type string
-               :description "The URL to fetch"))
- :category "web")
+  ;; Read URL contents
+  (gptel-make-tool
+   :name "read_url"
+   :function (lambda (url)
+               (with-current-buffer (url-retrieve-synchronously url)
+				 (goto-char (point-min))
+				 (forward-paragraph)
+				 (let ((dom (libxml-parse-html-region (point) (point-max))))
+                   (run-at-time 0 nil #'kill-buffer (current-buffer))
+                   (with-temp-buffer
+					 (shr-insert-document dom)
+					 (buffer-substring-no-properties (point-min) (point-max))))))
+   :description "Fetch and read the contents of a URL"
+   :args (list '(:name "url"
+					   :type string
+					   :description "The URL to fetch"))
+   :category "web")
 
-;; Run shell command (requires confirmation)
-(gptel-make-tool
- :name "run_command"
- :function (lambda (command &optional working_dir)
-             (let ((default-directory (if (and working_dir
-                                               (not (string= working_dir "")))
-                                          (expand-file-name working_dir)
-                                        default-directory)))
-               (shell-command-to-string command)))
- :description "Run a shell command and return its output"
- :args (list '(:name "command"
-               :type string
-               :description "The shell command to run")
-             '(:name "working_dir"
-               :type string
-               :description "Optional directory to run the command in"))
- :category "command"
- :confirm t
- :include t)
+  ;; Run shell command (requires confirmation)
+  (gptel-make-tool
+   :name "run_command"
+   :function (lambda (command &optional working_dir)
+               (let ((default-directory (if (and working_dir
+												 (not (string= working_dir "")))
+											(expand-file-name working_dir)
+                                          default-directory)))
+				 (shell-command-to-string command)))
+   :description "Run a shell command and return its output"
+   :args (list '(:name "command"
+					   :type string
+					   :description "The shell command to run")
+               '(:name "working_dir"
+					   :type string
+					   :description "Optional directory to run the command in"))
+   :category "command"
+   :confirm t
+   :include t)
 
-;; Append text to buffer
-(gptel-make-tool
- :name "append_to_buffer"
- :function (lambda (buffer text)
-             (with-current-buffer (get-buffer-create buffer)
-               (save-excursion
-                 (goto-char (point-max))
-                 (insert text)))
-             (format "Appended text to buffer %s" buffer))
- :description "Append text to an Emacs buffer, creating it if needed"
- :args (list '(:name "buffer"
-               :type string
-               :description "The name of the buffer to append to")
-             '(:name "text"
-               :type string
-               :description "The text to append"))
- :category "emacs")
+  ;; Append text to buffer
+  (gptel-make-tool
+   :name "append_to_buffer"
+   :function (lambda (buffer text)
+               (with-current-buffer (get-buffer-create buffer)
+				 (save-excursion
+                   (goto-char (point-max))
+                   (insert text)))
+               (format "Appended text to buffer %s" buffer))
+   :description "Append text to an Emacs buffer, creating it if needed"
+   :args (list '(:name "buffer"
+					   :type string
+					   :description "The name of the buffer to append to")
+               '(:name "text"
+					   :type string
+					   :description "The text to append"))
+   :category "emacs")
 
-;; Read PDF contents
-(gptel-make-tool
- :name "read_pdf"
- :function (lambda (filepath)
-             (let ((file (expand-file-name filepath)))
-               (unless (file-readable-p file)
-                 (error "Error: file %s is not readable." file))
-               (pdf-info-gettext file
-                                 (cons 1 (pdf-info-number-of-pages file)))))
- :description "Extract text content from a PDF file"
- :args (list '(:name "filepath"
-               :type string
-               :description "Path to the PDF file. Supports relative paths and ~."))
- :category "filesystem"))
+  ;; Read PDF contents
+  (gptel-make-tool
+   :name "read_pdf"
+   :function (lambda (filepath)
+               (let ((file (expand-file-name filepath)))
+				 (unless (file-readable-p file)
+                   (error "Error: file %s is not readable." file))
+				 (pdf-info-gettext file
+                                   (cons 1 (pdf-info-number-of-pages file)))))
+   :description "Extract text content from a PDF file"
+   :args (list '(:name "filepath"
+					   :type string
+					   :description "Path to the PDF file. Supports relative paths and ~."))
+   :category "filesystem"))
 
 (use-package tabspaces
   :ensure nil
   :hook (after-init . tabspaces-mode)
   :config
+  (defvar tabspaces-command-map
+	(let ((map (make-sparse-keymap)))
+	  (define-key map (kbd "C") 'tabspaces-clear-buffers)
+	  (define-key map (kbd "b") 'tabspaces-switch-to-buffer)
+	  (define-key map (kbd "d") 'tabspaces-close-workspace)
+	  (define-key map (kbd "k") 'tabspaces-kill-buffers-close-workspace)
+	  (define-key map (kbd "o") 'tabspaces-open-or-create-project-and-workspace)
+	  (define-key map (kbd "r") 'tabspaces-remove-current-buffer)
+	  (define-key map (kbd "R") 'tabspaces-remove-selected-buffer)
+	  (define-key map (kbd "s") 'tabspaces-switch-or-create-workspace)
+	  (define-key map (kbd "t") 'tabspaces-switch-buffer-and-tab)
+	  (define-key map (kbd "w") 'tabspaces-show-workspaces)
+	  (define-key map (kbd "T") 'tabspaces-toggle-echo-area-display)
+	  map)
+	"Keymap for tabspace/workspace commands after `tabspaces-keymap-prefix'.")
   (with-eval-after-load 'consult
     (plist-put consult-source-buffer :hidden t)
     (plist-put consult-source-buffer :default nil)
@@ -1204,12 +1219,111 @@
   (tabspaces-include-buffers '("*scratch*"))
   (tabspaces-session t)
   (tabspaces-session-auto-restore t)
-  (tabspaces-initialize-project-with-todo nil)
-  :bind
-  (("C-c TAB TAB" . tabspaces-switch-or-create-workspace)
-   ("C-c TAB b"   . tabspaces-switch-to-buffer)
-   ("C-c TAB d"   . tabspaces-close-workspace)
-   ("C-c TAB k"   . tabspaces-kill-buffers-close-workspace)))
+  (tabspaces-initialize-project-with-todo nil))
+
+(use-package meow
+  :ensure nil
+  :demand t
+  :config
+  (defun meow-setup ()
+    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+	(setq meow-use-clipboard t)
+	(setq meow-selection-command-fallback
+		  '((meow-change . meow-change-char)
+			;; (meow-kill . meow-c-k)
+			(meow-kill . meow-delete)
+			;; (meow-cancel-selection . keyboard-quit)
+			(meow-cancel-selection . ignore)
+			(meow-pop-selection . meow-pop-grab)
+			(meow-beacon-change . meow-beacon-change-char)))
+    (meow-motion-overwrite-define-key
+     '("j" . meow-next)
+     '("k" . meow-prev)
+     '("<escape>" . ignore))
+    ;; Top-level single-key shortcuts only here.
+    ;; Namespace keymaps are wired in the Keybindings section after
+    ;; all keymaps are defined (avoids forward-reference errors).
+    (meow-leader-define-key
+     '("SPC" . execute-extended-command)
+     '("."   . find-file)
+     '(","   . consult-buffer)
+     '(";"   . comment-line)
+     '("x"   . org-capture)
+     '("u"   . universal-argument)
+     '("/"   . meow-keypad-describe-key)
+     '("?"   . meow-cheatsheet)
+     '("1" . meow-digit-argument) '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument) '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument) '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument) '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument) '("0" . meow-digit-argument))
+    (meow-normal-define-key
+     '("0" . meow-expand-0)   '("9" . meow-expand-9)
+     '("8" . meow-expand-8)   '("7" . meow-expand-7)
+     '("6" . meow-expand-6)   '("5" . meow-expand-5)
+     '("4" . meow-expand-4)   '("3" . meow-expand-3)
+     '("2" . meow-expand-2)   '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '(";" . meow-reverse)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("[" . meow-beginning-of-thing)
+     '("]" . meow-end-of-thing)
+     '("a" . meow-append)
+     '("A" . meow-open-below)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-change)
+     '("d" . meow-delete)
+     '("D" . meow-backward-delete)
+     '("e" . meow-next-word)
+     '("E" . meow-next-symbol)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above)
+     '("j" . meow-next)
+     '("J" . meow-next-expand)
+     '("k" . meow-prev)
+     '("K" . meow-prev-expand)
+     '("l" . meow-right)
+     '("L" . meow-right-expand)
+     '("m" . meow-join)
+     '("n" . meow-search)
+     '("N" . meow-pop-search)
+     '("o" . meow-block)
+     '("O" . meow-to-block)
+     '("p" . meow-yank)
+     '("P" . meow-yank-pop)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab)
+     '("s" . meow-kill)
+     '("t" . meow-till)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection)
+     '("v" . meow-visit)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
+     '("x" . meow-line)
+     '("X" . meow-goto-line)
+     '("y" . meow-save)
+     '("Y" . meow-sync-grab)
+     '("z" . meow-pop-selection)
+     '("'" . repeat)
+     '("<escape>" . ignore)))
+  (meow-setup)
+  (meow-global-mode 1))
+
+(use-package meow-tree-sitter
+  :ensure nil
+  :after meow
+  :config
+  (meow-tree-sitter-register-defaults))
 
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for `keyboard-quit'."
@@ -1251,6 +1365,8 @@
 (global-set-key (kbd "C-c p") project-prefix-map)
 (global-set-key (kbd "C-c l") my-code-keymap)
 (global-set-key (kbd "C-c t") my-term-keymap)
+  (with-eval-after-load 'tabspaces
+  (global-set-key (kbd "C-c TAB") tabspaces-command-map))
 
 ;;; Files — C-c f …
 (define-key my-file-keymap (kbd "a") #'my-project-find-file)
@@ -1289,26 +1405,26 @@
 (define-key my-code-keymap (kbd "R") #'eglot-rename)
 
 (defun my-project-eat ()
-"Open eat in current project root with a project-named buffer."
-(interactive)
-(let* ((pr (project-current))
-       (default-directory (if pr (project-root pr) default-directory))
-       (name (if pr (project-name pr) "default"))
-       (buf-name (format "*eat-%s*" name)))
-  (if (get-buffer buf-name)
-      (pop-to-buffer buf-name)
-    (eat)
-    (rename-buffer buf-name))))
+  "Open eat in current project root with a project-named buffer."
+  (interactive)
+  (let* ((pr (project-current))
+		 (default-directory (if pr (project-root pr) default-directory))
+		 (name (if pr (project-name pr) "default"))
+		 (buf-name (format "*eat-%s*" name)))
+	(if (get-buffer buf-name)
+		(pop-to-buffer buf-name)
+      (eat)
+      (rename-buffer buf-name))))
 
 (defun my-project-compile ()
-"Compile in current project root with a project-named buffer."
-(interactive)
-(let* ((pr (project-current))
-       (default-directory (if pr (project-root pr) default-directory))
-       (name (if pr (project-name pr) "default"))
-       (compilation-buffer-name-function
-        (lambda (_mode) (format "*compilation-%s*" name))))
-  (call-interactively #'compile)))
+  "Compile in current project root with a project-named buffer."
+  (interactive)
+  (let* ((pr (project-current))
+		 (default-directory (if pr (project-root pr) default-directory))
+		 (name (if pr (project-name pr) "default"))
+		 (compilation-buffer-name-function
+          (lambda (_mode) (format "*compilation-%s*" name))))
+	(call-interactively #'compile)))
 
 (defun my-project-sql ()
   "Open SQL interactive in current project."
