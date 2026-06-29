@@ -308,9 +308,7 @@
 (use-package corfu
   :ensure nil
   :custom
-  (corfu-auto t)
-  (corfu-auto-delay 0.3)
-  (corfu-auto-prefix 3)
+  (corfu-auto nil)
   (corfu-cycle t)
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay '(0.5 . 0.2))
