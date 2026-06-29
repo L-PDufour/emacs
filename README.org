@@ -1349,8 +1349,8 @@ Press =C-M-f= once, then tap =f=, =b=, =u=, =d=, etc.
 
 #+begin_src emacs-lisp
   (use-package surround
-    :ensure nil
-    :bind-keymap ("C-c s" . surround-keymap))
+    :ensure nil)
+    
 #+end_src
 
 ** PDF Tools
