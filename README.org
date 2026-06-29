@@ -2048,10 +2048,12 @@ Doom-style namespaces.
 
   (global-set-key (kbd "C-c f") my-file-keymap)
   (global-set-key (kbd "C-c w") my-window-keymap)
- 
+
   (global-set-key (kbd "C-c p") project-prefix-map)
   (global-set-key (kbd "C-c l") my-code-keymap)
   (global-set-key (kbd "C-c t") my-term-keymap)
+  (with-eval-after-load 'tabspaces
+    (global-set-key (kbd "C-c TAB") tabspaces-command-map))
 
   ;;; Files — C-c f …
   (define-key my-file-keymap (kbd "a") #'my-project-find-file)
