@@ -1786,112 +1786,23 @@ motion mode with namespace conventions borrowed from Doom Emacs.
        '("j" . meow-next)
        '("k" . meow-prev)
        '("<escape>" . ignore))
+      ;; Top-level single-key shortcuts only here.
+      ;; Namespace keymaps are wired in the Keybindings section after
+      ;; all keymaps are defined (avoids forward-reference errors).
       (meow-leader-define-key
-       ;; Top-level shortcuts
        '("SPC" . execute-extended-command)
        '("."   . find-file)
        '(","   . consult-buffer)
        '(";"   . comment-line)
        '("x"   . org-capture)
        '("u"   . universal-argument)
-       ;; Digit arguments
+       '("/"   . meow-keypad-describe-key)
+       '("?"   . meow-cheatsheet)
        '("1" . meow-digit-argument) '("2" . meow-digit-argument)
        '("3" . meow-digit-argument) '("4" . meow-digit-argument)
        '("5" . meow-digit-argument) '("6" . meow-digit-argument)
        '("7" . meow-digit-argument) '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument) '("0" . meow-digit-argument)
-       '("/" . meow-keypad-describe-key)
-       '("?" . meow-cheatsheet)
-       ;; f = files
-       '("f f" . find-file)
-       '("f r" . consult-recent-file)
-       '("f s" . save-buffer)
-       '("f S" . save-some-buffers)
-       '("f d" . dired-jump)
-       ;; b = buffers
-       '("b b" . consult-buffer)
-       '("b d" . kill-current-buffer)
-       '("b n" . next-buffer)
-       '("b p" . previous-buffer)
-       '("b s" . save-buffer)
-       '("b i" . ibuffer)
-       ;; w = windows
-       '("w v" . split-window-right)
-       '("w s" . split-window-below)
-       '("w h" . windmove-left)
-       '("w j" . windmove-down)
-       '("w k" . windmove-up)
-       '("w l" . windmove-right)
-       '("w d" . delete-window)
-       '("w q" . delete-window)
-       '("w m" . delete-other-windows)
-       '("w =" . balance-windows)
-       '("w u" . winner-undo)
-       '("w r" . winner-redo)
-       ;; s = search
-       '("s s" . consult-line)
-       '("s p" . consult-ripgrep)
-       '("s g" . consult-grep)
-       '("s i" . consult-imenu)
-       '("s o" . consult-outline)
-       '("s m" . consult-mark)
-       '("s M" . consult-global-mark)
-       ;; p = project
-       '("p f" . project-find-file)
-       '("p p" . project-switch-project)
-       '("p b" . consult-project-buffer)
-       '("p s" . consult-ripgrep)
-       '("p c" . my-project-compile)
-       '("p t" . my-project-eat)
-       ;; c = code / lsp
-       '("c d" . xref-find-definitions)
-       '("c D" . xref-find-definitions-other-window)
-       '("c r" . xref-find-references)
-       '("c a" . eglot-code-actions)
-       '("c R" . eglot-rename)
-       '("c f" . eglot-format)
-       '("c i" . eglot-code-action-organize-imports)
-       '("c h" . display-local-help)
-       ;; e = errors / diagnostics
-       '("e e" . consult-flymake)
-       '("e n" . flymake-goto-next-error)
-       '("e p" . flymake-goto-prev-error)
-       '("e l" . flymake-show-buffer-diagnostics)
-       ;; g = git
-       '("g g" . magit-status)
-       '("g b" . magit-blame)
-       '("g l" . magit-log-current)
-       '("g f" . magit-log-buffer-file)
-       '("g d" . magit-diff-buffer-file)
-       ;; h = help
-       '("h f" . describe-function)
-       '("h v" . describe-variable)
-       '("h k" . describe-key)
-       '("h m" . describe-mode)
-       '("h p" . describe-package)
-       '("h ." . display-local-help)
-       ;; o = open
-       '("o t" . my-project-eat)
-       '("o e" . eshell)
-       '("o m" . ghostel)
-       '("o -" . dired-jump)
-       '("o p" . popper-toggle)
-       ;; t = toggles
-       '("t l" . display-line-numbers-mode)
-       '("t w" . visual-line-mode)
-       '("t h" . global-hl-line-mode)
-       '("t f" . flymake-mode)
-       '("t d" . diff-hl-mode)
-       ;; TAB = workspaces (tabspaces)
-       '("TAB TAB" . tabspaces-switch-or-create-workspace)
-       '("TAB b"   . tabspaces-switch-to-buffer)
-       '("TAB d"   . tabspaces-close-workspace)
-       '("TAB k"   . tabspaces-kill-buffers-close-workspace)
-       ;; a = AI / gptel
-       '("a a" . gptel)
-       '("a s" . gptel-send)
-       '("a m" . gptel-menu)
-       '("a f" . gptel-add-file))
+       '("9" . meow-digit-argument) '("0" . meow-digit-argument))
       (meow-normal-define-key
        '("0" . meow-expand-0)   '("9" . meow-expand-9)
        '("8" . meow-expand-8)   '("7" . meow-expand-7)
@@ -2027,8 +1938,8 @@ Doom-style namespaces.
 | =SPC w m=         | =delete-other-windows=          |                     |
 | =SPC w ==         | =balance-windows=               |                     |
 | =SPC w u / r=     | =winner-undo= / =winner-redo=   |                     |
-| =SPC s s=         | =consult-line=                  |                     |
-| =SPC s p=         | =consult-ripgrep=               | project-wide        |
+| =SPC s l=         | =consult-line=                  | via search-map      |
+| =SPC s G=         | =consult-ripgrep=               | project-wide        |
 | =SPC s g=         | =consult-grep=                  |                     |
 | =SPC s i=         | =consult-imenu=                 |                     |
 | =SPC s o=         | =consult-outline=               |                     |
@@ -2197,6 +2108,102 @@ Doom-style namespaces.
   (global-set-key (kbd "C-c g f") #'gptel-add-file)
 
   (global-set-key (kbd "C-c c") #'org-capture)
+#+end_src
+
+** Meow Leader Namespaces
+
+Wired here — after all keymaps are defined — so meow can reference
+them without forward-reference errors.  Each namespace letter is bound
+to a proper keymap; meow never sees multi-key sequences in
+=meow-leader-define-key=, which avoids the "non-prefix key" conflict
+with meow's default single-key forwarding.
+
+#+begin_src emacs-lisp
+  ;;; Additional keymaps for leader namespaces not covered by C-c maps
+  (defvar my-buffer-keymap    (make-sparse-keymap))
+  (defvar my-git-keymap       (make-sparse-keymap))
+  (defvar my-help-keymap      (make-sparse-keymap))
+  (defvar my-open-keymap      (make-sparse-keymap))
+  (defvar my-toggle-keymap    (make-sparse-keymap))
+  (defvar my-error-keymap     (make-sparse-keymap))
+  (defvar my-ai-keymap        (make-sparse-keymap))
+  (defvar my-workspace-keymap (make-sparse-keymap))
+
+  ;;; b = buffers
+  (define-key my-buffer-keymap "b" #'consult-buffer)
+  (define-key my-buffer-keymap "d" #'kill-current-buffer)
+  (define-key my-buffer-keymap "n" #'next-buffer)
+  (define-key my-buffer-keymap "p" #'previous-buffer)
+  (define-key my-buffer-keymap "s" #'save-buffer)
+  (define-key my-buffer-keymap "i" #'ibuffer)
+
+  ;;; g = git
+  (define-key my-git-keymap "g" #'magit-status)
+  (define-key my-git-keymap "b" #'magit-blame)
+  (define-key my-git-keymap "l" #'magit-log-current)
+  (define-key my-git-keymap "f" #'magit-log-buffer-file)
+  (define-key my-git-keymap "d" #'magit-diff-buffer-file)
+
+  ;;; h = help
+  (define-key my-help-keymap "f" #'describe-function)
+  (define-key my-help-keymap "v" #'describe-variable)
+  (define-key my-help-keymap "k" #'describe-key)
+  (define-key my-help-keymap "m" #'describe-mode)
+  (define-key my-help-keymap "p" #'describe-package)
+  (define-key my-help-keymap "." #'display-local-help)
+
+  ;;; o = open
+  (define-key my-open-keymap "t" #'my-project-eat)
+  (define-key my-open-keymap "e" #'eshell)
+  (define-key my-open-keymap "m" #'ghostel)
+  (define-key my-open-keymap "-" #'dired-jump)
+  (define-key my-open-keymap "p" #'popper-toggle)
+
+  ;;; t = toggles
+  (define-key my-toggle-keymap "l" #'display-line-numbers-mode)
+  (define-key my-toggle-keymap "w" #'visual-line-mode)
+  (define-key my-toggle-keymap "h" #'hl-line-mode)
+  (define-key my-toggle-keymap "f" #'flymake-mode)
+  (define-key my-toggle-keymap "d" #'diff-hl-mode)
+
+  ;;; e = errors
+  (define-key my-error-keymap "e" #'consult-flymake)
+  (define-key my-error-keymap "n" #'flymake-goto-next-error)
+  (define-key my-error-keymap "p" #'flymake-goto-prev-error)
+  (define-key my-error-keymap "l" #'flymake-show-buffer-diagnostics)
+
+  ;;; a = AI / gptel
+  (define-key my-ai-keymap "a" #'gptel)
+  (define-key my-ai-keymap "s" #'gptel-send)
+  (define-key my-ai-keymap "m" #'gptel-menu)
+  (define-key my-ai-keymap "f" #'gptel-add-file)
+
+  ;;; TAB = workspaces
+  (define-key my-workspace-keymap (kbd "TAB") #'tabspaces-switch-or-create-workspace)
+  (define-key my-workspace-keymap "b" #'tabspaces-switch-to-buffer)
+  (define-key my-workspace-keymap "d" #'tabspaces-close-workspace)
+  (define-key my-workspace-keymap "k" #'tabspaces-kill-buffers-close-workspace)
+
+  ;;; Also add code keys not in my-code-keymap yet
+  (define-key my-code-keymap (kbd "D") #'xref-find-definitions-other-window)
+  (define-key my-code-keymap (kbd "f") #'eglot-format)
+
+  ;;; Wire all namespaces into the meow leader (single-key → keymap, no sequences)
+  (with-eval-after-load 'meow
+    (meow-leader-define-key
+     '("f"   . my-file-keymap)
+     '("b"   . my-buffer-keymap)
+     '("w"   . my-window-keymap)
+     '("s"   . search-map)
+     '("p"   . project-prefix-map)
+     '("c"   . my-code-keymap)
+     '("e"   . my-error-keymap)
+     '("g"   . my-git-keymap)
+     '("h"   . my-help-keymap)
+     '("o"   . my-open-keymap)
+     '("t"   . my-toggle-keymap)
+     '("TAB" . my-workspace-keymap)
+     '("a"   . my-ai-keymap)))
 #+end_src
 
 ** Which-Key Labels
