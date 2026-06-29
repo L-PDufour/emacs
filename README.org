@@ -1757,13 +1757,14 @@ motion mode with namespace conventions borrowed from Doom Emacs.
 | Normal | =h / j / k / l=  | left / down / up / right                 |
 | Normal | =w / b / e=       | next word / back word / word end         |
 | Normal | =i / a=           | insert before / append after             |
-| Normal | =I / A=           | open line above / open line below        |
-| Normal | =o / O=           | select block / extend to block           |
-| Normal | =x=               | select line                              |
-| Normal | =d / s=           | delete selection / kill (cut) selection  |
+| Normal | =I / A=           | insert at first non-blank / append EOL   |
+| Normal | =o / O=           | open line below / open line above        |
+| Normal | =x / X=           | delete char forward / select line        |
+| Normal | =d / s=           | kill (cut) into kill-ring / delete       |
 | Normal | =c=               | change (delete + insert)                 |
 | Normal | =y / p=           | yank (copy) / paste                      |
 | Normal | =u / U=           | undo / undo in selection                 |
+| Normal | =gg / G=          | buffer start / buffer end                |
 | Normal | =n / N=           | search next / search pop                 |
 | Normal | =f / t=           | find char / till char                    |
 | Normal | =, / .=           | inner of thing / bounds of thing         |
@@ -1775,7 +1776,38 @@ motion mode with namespace conventions borrowed from Doom Emacs.
 
 ** Meow Setup
 
+Normal mode follows meow's default QWERTY scheme with a handful of
+overrides for vim muscle memory: =x= deletes a char forward (not
+line-select), =o= / =O= open a line below/above and enter insert (vim
+=o=/=O=), =A= / =I= append at end-of-line / insert at first
+non-blank (vim =A=/=I=), and =gg= / =G= jump to buffer start/end (vim
+=gg=/=G=). =d= kills into the kill-ring like vim's register-delete;
+the previous non-killing delete moved to =s=. Whole-line operations
+(vim's =dd=/=yy=/=cc=) now read as =X d= / =X y= / =X c= since
+line-select moved to =X=.
+
 #+begin_src emacs-lisp
+  (defun meow-vim-append-eol ()
+    "Vim-style `A': move to end of line, then enter insert state."
+    (interactive)
+    (end-of-line)
+    (meow-insert))
+
+  (defun meow-vim-insert-bol ()
+    "Vim-style `I': move to first non-blank, then enter insert state."
+    (interactive)
+    (back-to-indentation)
+    (meow-insert))
+
+  (defvar my-meow-g-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map "g" #'beginning-of-buffer)  ; gg
+      (define-key map "c" #'meow-cancel-selection)
+      (define-key map "r" #'meow-grab)
+      (define-key map "l" #'meow-goto-line)
+      map)
+    "Vim-style g-prefix map for meow normal state.")
+
   (use-package meow
     :ensure nil
     :demand t
@@ -1816,21 +1848,21 @@ motion mode with namespace conventions borrowed from Doom Emacs.
        '("[" . meow-beginning-of-thing)
        '("]" . meow-end-of-thing)
        '("a" . meow-append)
-       '("A" . meow-open-below)
+       '("A" . meow-vim-append-eol)     ; vim A: end-of-line then insert
        '("b" . meow-back-word)
        '("B" . meow-back-symbol)
        '("c" . meow-change)
-       '("d" . meow-delete)
+       '("d" . meow-kill)               ; vim d: kill into kill-ring; with region, removes it
        '("D" . meow-backward-delete)
        '("e" . meow-next-word)
        '("E" . meow-next-symbol)
        '("f" . meow-find)
-       '("g" . meow-cancel-selection)
-       '("G" . meow-grab)
+       '("g" . my-meow-g-map)           ; g-prefix: gg=buf-start, gc=cancel, gr=grab, gl=goto-line
+       '("G" . end-of-buffer)           ; vim G: jump to buffer end
        '("h" . meow-left)
        '("H" . meow-left-expand)
        '("i" . meow-insert)
-       '("I" . meow-open-above)
+       '("I" . meow-vim-insert-bol)     ; vim I: first-non-blank then insert
        '("j" . meow-next)
        '("J" . meow-next-expand)
        '("k" . meow-prev)
@@ -1840,23 +1872,23 @@ motion mode with namespace conventions borrowed from Doom Emacs.
        '("m" . meow-join)
        '("n" . meow-search)
        '("N" . meow-pop-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
+       '("o" . meow-open-below)         ; vim o: open line below
+       '("O" . meow-open-above)         ; vim O: open line above
        '("p" . meow-yank)
        '("P" . meow-yank-pop)
        '("q" . meow-quit)
        '("Q" . meow-goto-line)
        '("r" . meow-replace)
        '("R" . meow-swap-grab)
-       '("s" . meow-kill)
+       '("s" . meow-delete)             ; non-killing delete (swapped with d)
        '("t" . meow-till)
        '("u" . meow-undo)
        '("U" . meow-undo-in-selection)
        '("v" . meow-visit)
        '("w" . meow-mark-word)
        '("W" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . meow-goto-line)
+       '("x" . delete-char)             ; vim x: delete char forward
+       '("X" . meow-line)               ; line-select (for X d/y/c whole-line ops)
        '("y" . meow-save)
        '("Y" . meow-sync-grab)
        '("z" . meow-pop-selection)
