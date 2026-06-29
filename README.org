@@ -586,6 +586,10 @@ Keep all generated state under =var/=.
 ** Cape
 
 #+begin_src emacs-lisp
+  ;; Emacs 30 injects ispell-completion-at-point in text modes; disable it
+  ;; because it errors without a system word list (common in Nix envs)
+  (setq text-mode-ispell-word-completion nil)
+
   (use-package cape
     :ensure nil
     :config
