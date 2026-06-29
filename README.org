@@ -138,6 +138,12 @@ This avoids the flash of default UI.
         inhibit-compacting-font-caches t
         ffap-machine-p-known 'reject)
 
+  ;; Defer font-lock until input stops — eliminates jit-lock antiblink overhead
+  (setq jit-lock-defer-time 0.05)
+
+  ;; Skip expensive rendering mid-scroll
+  (setq fast-but-imprecise-scrolling t)
+
   (set-language-environment "UTF-8")
   (setq default-input-method nil)
 #+end_src
@@ -271,7 +277,9 @@ Keep all generated state under =var/=.
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (when scroll-bar-mode (scroll-bar-mode -1))
-    (global-hl-line-mode 1)
+    ;; hl-line only where useful — global mode redraws on every cursor move
+    (add-hook 'prog-mode-hook #'hl-line-mode)
+    (add-hook 'text-mode-hook #'hl-line-mode)
     (global-auto-revert-mode 1)
     (recentf-mode 1)
     (savehist-mode 1)
@@ -915,7 +923,10 @@ file as =var/templates=.
     (indent-bars-pad-frac 0.1)
     (indent-bars-pattern ".")
     (indent-bars-color '(highlight :face-bg t :blend 0.2))
-    (indent-bars-highlight-current-depth '(:blend 0.5)))
+    ;; Current-depth highlight tracks the cursor on every move — skip it
+    (indent-bars-highlight-current-depth nil)
+    ;; Throttle tree-sitter context queries while navigating
+    (indent-bars-treesit-update-delay 0.1))
 #+end_src
 
 * Languages
