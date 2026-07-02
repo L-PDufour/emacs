@@ -17,7 +17,7 @@
   (load custom-file :noerror :nomessage))
 
 (setq auto-save-list-file-prefix (expand-file-name "autosave/" user-emacs-directory))
-(setq backup-directory-alist `(("." . ,(expand-file-name "backup" user-emacs-directory))))
+(setq backup-directory-alist `((".". ,(expand-file-name "backup" user-emacs-directory))))
 (setq recentf-save-file (expand-file-name "recentf" user-emacs-directory))
 (setq save-place-file (expand-file-name "saveplace" user-emacs-directory))
 (setq savehist-file (expand-file-name "history" user-emacs-directory))
@@ -369,19 +369,19 @@
 							;; |> ||> |||> ||||> |] |} || ||| |-> ||-||
 							;; |->>-||-<<-| |- |== ||=||
 							;; |==>>==<<==<=>==//==/=!==:===>
-							("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\]"
+							("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\\]"
 											"-" "=" ))))
-							;; \\ \\\ \/
-							("\\" (rx (or "/" (+ "\\"))))
+							;; \\ \\\\ \/
+							("\\\\" (rx (or "/" (+ "\\\\"))))
 							;; ++ +++ ++++ +>
 							("+" (rx (or ">" (+ "+"))))
 							;; :: ::: :::: :> :< := :// ::=
 							(":" (rx (or ">" "<" "=" "//" ":=" (+ ":"))))
 							;; // /// //// /\ /* /> /===:===!=//===>>==>==/
-							("/" (rx (+ (or ">"  "<" "|" "/" "\\" "\*" ":" "!"
+							("/" (rx (+ (or ">"  "<" "|" "/" "\\\\" "\\*" ":" "!"
 											"="))))
 							;; .. ... .... .= .- .? ..= ..<
-							("\." (rx (or "=" "-" "\?" "\.=" "\.<" (+ "\."))))
+							("\\." (rx (or "=" "-" "\\?" "\.=" "\\.<" (+ "\\."))))
 							;; -- --- ---- -~ -> ->> -| -|->-->>->--<<-|
 							("-" (rx (+ (or ">" "<" "|" "~" "-"))))
 							;; *> */ *)  ** *** ****
@@ -392,13 +392,13 @@
 							;; <$> </> <|  <||  <||| <|||| <- <-| <-<<-|-> <->>
 							;; <<-> <= <=> <<==<<==>=|=>==/==//=!==:=>
 							;; << <<< <<<<
-							("<" (rx (+ (or "\+" "\*" "\$" "<" ">" ":" "~"  "!"
+							("<" (rx (+ (or "\\+" "\\*" "\\$" "<" ">" ":" "~"  "!"
 											"-"  "/" "|" "="))))
 							;; >: >- >>- >--|-> >>-|-> >= >== >>== >=|=:=>>
 							;; >> >>> >>>>
 							(">" (rx (+ (or ">" "<" "|" "/" ":" "=" "-"))))
 							;; #: #= #! #( #? #[ #{ #_ #_( ## ### #####
-							("#" (rx (or ":" "=" "!" "(" "\?" "\[" "{" "_(" "_"
+							("#" (rx (or ":" "=" "!" "(" "\\?" "\\[" "{" "_(" "_"
 										 (+ "#"))))
 							;; ~~ ~~~ ~=  ~-  ~@ ~> ~~>
 							("~" (rx (or ">" "=" "-" "@" "~>" (+ "~"))))
@@ -546,6 +546,63 @@
      (project-vc-dir "VC-Dir")
      (project-eshell "Eshell")
      (project-any-command "Other"))))
+
+(use-package dape
+  :ensure nil
+  :defer t
+  :config
+  ;; js-debug adapter path — adjust if yours differs
+  ;; On NixOS: nix-env -iA nixpkgs.nodePackages.vscode-js-debug
+  ;; or add vscode-js-debug to your home-manager packages
+  (defvar my/js-debug-path
+    (or (executable-find "js-debug-dap")
+        (expand-file-name "~/.local/share/js-debug/src/dapDebugServer.js"))
+    "Path to the js-debug DAP server entry point.")
+
+  ;; Attach to a Chrome/Chromium tab already open at localhost:3000
+  ;; Launch Chrome with: chromium --remote-debugging-port=9222
+  (add-to-list 'dape-configs
+               `(js-debug-chrome-attach
+                 modes (js-ts-mode typescript-ts-mode tsx-ts-mode)
+                 ensure dape-ensure-command
+                 command "node"
+                 command-args [,my/js-debug-path :autoport]
+                 port :autoport
+                 :type "pwa-chrome"
+                 :request "attach"
+                 :port 9222
+                 :webRoot dape-cwd
+                 :sourceMaps t
+                 :pauseForSourceMap t))
+
+  ;; Launch Chrome automatically pointing to localhost:3000
+  (add-to-list 'dape-configs
+               `(js-debug-chrome-launch
+                 modes (js-ts-mode typescript-ts-mode tsx-ts-mode)
+                 ensure dape-ensure-command
+                 command "node"
+                 command-args [,my/js-debug-path :autoport]
+                 port :autoport
+                 :type "pwa-chrome"
+                 :request "launch"
+                 :url "http://localhost:3000"
+                 :webRoot dape-cwd
+                 :sourceMaps t
+                 :pauseForSourceMap t))
+
+  :bind-keymap ("C-c D" . dape-global-map)
+  :bind
+  (("C-c d d" . dape)
+   ("C-c d q" . dape-quit)
+   ("C-c d r" . dape-restart)
+   ("C-c d b" . dape-breakpoint-toggle)
+   ("C-c d B" . dape-breakpoint-remove-all)
+   ("C-c d c" . dape-continue)
+   ("C-c d n" . dape-next)
+   ("C-c d s" . dape-step-in)
+   ("C-c d o" . dape-step-out)
+   ("C-c d i" . dape-info)
+   ("C-c d R" . dape-repl)))
 
 (use-package tempel
   :ensure nil
@@ -1457,6 +1514,7 @@
     "C-c g"   "gptel/llm"
     "C-c t"   "terminal"
     "C-c e"   "errors/flymake"
+    "C-c d"   "debug/dape"
     "C-c TAB" "workspaces"))
 
 (provide 'init)
