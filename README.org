@@ -326,7 +326,7 @@ Keep all generated state under =var/=.
         (window-height . 0.25)
         (side . bottom)
         (slot . 0))
-       ("\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*"
+       ("\\*\\(xref\\|Completions\\)\\*"
         (display-buffer-in-side-window)
         (window-height . 0.25)
         (side . bottom)
@@ -1438,6 +1438,7 @@ Press =C-M-f= once, then tap =f=, =b=, =u=, =d=, etc.
     (popper-reference-buffers
      '("\\*compilation\\*"
        "\\*eat\\*"
+       "\\*Flymake diagnostics.*\\*"
        compilation-mode))
     (popper-display-control t)
     (popper-window-height 0.33)
