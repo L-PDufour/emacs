@@ -555,7 +555,12 @@ Keep all generated state under =var/=.
     :ensure nil
     :defer t
     :bind (("C-." . embark-act)
-           ("M-." . embark-dwim)))
+           ("M-." . embark-dwim))
+    :config
+    ;; Ignore Flymake diagnostics as an embark-dwim target so M-. always
+    ;; falls through to eglot's identifier-based navigation.
+    (setq embark-target-finders
+          (remove 'embark-target-flymake-at-point embark-target-finders)))
 
   (use-package embark-consult
     :ensure nil
