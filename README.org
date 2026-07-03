@@ -137,7 +137,9 @@ This avoids the flash of default UI.
   (setq idle-update-delay 1.0
         inhibit-compacting-font-caches t
         ffap-machine-p-known 'reject)
-
+  (setq jit-lock-defer-time 0.05)
+  ;; Skip expensive rendering mid-scroll
+  (setq fast-but-imprecise-scrolling t)
   (set-language-environment "UTF-8")
   (setq default-input-method nil)
 #+end_src
@@ -271,7 +273,9 @@ Keep all generated state under =var/=.
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (when scroll-bar-mode (scroll-bar-mode -1))
-    (global-hl-line-mode 1)
+    ;; (global-hl-line-mode 1)
+    (add-hook 'prog-mode-hook #'hl-line-mode)
+    (add-hook 'text-mode-hook #'hl-line-mode)
     (global-auto-revert-mode 1)
     (recentf-mode 1)
     (savehist-mode 1)
@@ -503,12 +507,18 @@ Keep all generated state under =var/=.
 
 #+begin_src emacs-lisp
   (use-package orderless
-    :ensure nil
-    :after vertico
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-defaults nil)
-    (completion-category-overrides '((file (styles partial-completion)))))
+  :ensure nil
+  :after vertico
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion))))
+  :config
+  (with-eval-after-load 'eglot
+    (setq completion-category-overrides
+      '((file (styles partial-completion))
+        (eglot (styles orderless))
+        (eglot-capf (styles orderless))))))
 #+end_src
 
 ** Marginalia
@@ -558,14 +568,14 @@ Keep all generated state under =var/=.
   (use-package corfu
     :ensure nil
     :custom
-    (corfu-auto t)
-    (corfu-auto-delay 0.1)
-    (corfu-auto-prefix 2)
+    (corfu-auto nil)
+    ;; (corfu-auto-delay 0.1)
+    ;; (corfu-auto-prefix 2)
     (corfu-cycle t)
     (corfu-quit-no-match 'separator)
     (corfu-popupinfo-delay '(0.5 . 0.2))
     (corfu-on-exact-match nil)
-    (corfu-preselect 'prompt)
+    (corfu-preselect 'first)
     (corfu-preview-current nil)
     :init
     (global-corfu-mode)
@@ -581,12 +591,22 @@ Keep all generated state under =var/=.
 
 #+begin_src emacs-lisp
   (use-package cape
-    :ensure nil
-    :config
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block)
-    (add-hook 'completion-at-point-functions #'cape-history))
+  :ensure nil
+  :init
+  (add-hook 'emacs-lisp-mode-hook (lambda ()
+    (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+  (add-hook 'org-mode-hook (lambda ()
+    (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+  :config
+  ;; Only file completion globally makes sense
+  (add-hook 'eglot-managed-mode-hook
+  (lambda ()
+    (setq-local completion-at-point-functions
+      (list (cape-capf-super
+             #'eglot-completion-at-point
+             #'tempel-expand
+             #'cape-file)))))
+  (add-to-list 'completion-at-point-functions #'cape-file 'append))
 #+end_src
 
 * Theme and Icons
@@ -785,8 +805,8 @@ Keep all generated state under =var/=.
 #+begin_src emacs-lisp
   (use-package eglot
     :ensure nil
-    :init
-    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+    ;; :init
+    ;; (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     :custom
     (eglot-send-changes-idle-time 0.5)
     (eglot-extend-to-xref t)
@@ -917,7 +937,59 @@ file as =var/templates=.
     (indent-bars-pad-frac 0.1)
     (indent-bars-pattern ".")
     (indent-bars-color '(highlight :face-bg t :blend 0.2))
-    (indent-bars-highlight-current-depth '(:blend 0.5)))
+    (indent-bars-highlight-current-depth nil)
+    ;; Throttle tree-sitter context queries while navigating
+    (indent-bars-treesit-update-delay 0.1))
+#+end_src
+
+** Dape
+
+#+begin_src emacs-lisp
+  (use-package dape
+    :preface
+    ;; By default dape shares the same keybinding prefix as `gud'
+    ;; If you do not want to use any prefix, set it to nil.
+    ;; (setq dape-key-prefix "\C-x\C-a")
+
+    :hook
+    ;; Save breakpoints on quit
+     (kill-emacs . dape-breakpoint-save)
+    ;; Load breakpoints on startup
+     (after-init . dape-breakpoint-load)
+
+    :custom
+    ;; Turn on global bindings for setting breakpoints with mouse
+     (dape-breakpoint-global-mode +1)
+
+    ;; Info buffers to the right
+    ;; (dape-buffer-window-arrangement 'right)
+    ;; Info buffers like gud (gdb-mi)
+     (dape-buffer-window-arrangement 'gud)
+     (dape-info-hide-mode-line nil)
+
+    ;; Projectile users
+    ;; (dape-cwd-function #'projectile-project-root)
+
+    :config
+    ;; Pulse source line (performance hit)
+    ;; (add-hook 'dape-display-source-hook #'pulse-momentary-highlight-one-line)
+
+    ;; Save buffers on startup, useful for interpreted languages
+     (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
+
+    ;; Kill compile buffer on build success
+     (add-hook 'dape-compile-hook #'kill-buffer)
+    )
+
+  ;; For a more ergonomic Emacs and `dape' experience
+  (use-package repeat
+    :custom
+    (repeat-mode +1))
+
+  ;; Left and right side windows occupy full frame height
+  (use-package emacs
+    :custom
+    (window-sides-vertical t))
 #+end_src
 
 * Languages
