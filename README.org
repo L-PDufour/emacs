@@ -51,6 +51,78 @@ control step size and threshold separately.
   (add-hook 'focus-out-hook #'garbage-collect)
 #+end_src
 
+** File Name Handler Cache
+
+Borrowed from [[https://github.com/jamescherti/minimal-emacs.d][minimal-emacs.d]]. Every =load= and =require= during
+startup consults =file-name-handler-alist= (TRAMP, jka-compr, …),
+none of which is needed to load our own config. Empty it during
+init, then restore the original value — merged with anything added
+in the meantime — once startup finishes. The =jka-compr= handler is
+kept when the loaddefs are gzipped (the case on Nix, where lisp
+sources ship as =.el.gz=).
+
+#+begin_src emacs-lisp
+  (defvar my--file-name-handler-alist
+    (default-toplevel-value 'file-name-handler-alist))
+
+  (unless noninteractive
+    (set-default-toplevel-value
+     'file-name-handler-alist
+     (if (locate-file-internal "calc-loaddefs.el" load-path)
+         nil
+       (list (rassq 'jka-compr-handler my--file-name-handler-alist))))
+    (add-hook 'emacs-startup-hook
+              (lambda ()
+                (set-default-toplevel-value
+                 'file-name-handler-alist
+                 (delete-dups (append file-name-handler-alist
+                                      my--file-name-handler-alist))))
+              101))
+#+end_src
+
+** Startup Redisplay and Mode Line
+
+Also from minimal-emacs.d: suppress redisplay, echo-area messages,
+and the mode line while init runs, so Emacs paints the frame once
+instead of dozens of times. Everything is restored on the first
+=post-command-hook= firing, with =emacs-startup-hook= as a safety
+net in case init errors out.
+
+#+begin_src emacs-lisp
+  (unless noninteractive
+    ;; Hide the mode line until init installs the real one.
+    (put 'mode-line-format 'initial-value
+         (default-toplevel-value 'mode-line-format))
+    (setq-default mode-line-format nil)
+
+    (setq-default inhibit-redisplay t
+                  inhibit-message t)
+
+    (defun my--reset-inhibited-vars ()
+      "Restore redisplay, messages, and the mode line after startup."
+      (setq-default inhibit-redisplay nil
+                    inhibit-message nil)
+      (unless (default-toplevel-value 'mode-line-format)
+        (setq-default mode-line-format
+                      (get 'mode-line-format 'initial-value)))
+      (remove-hook 'post-command-hook #'my--reset-inhibited-vars))
+
+    (add-hook 'post-command-hook #'my--reset-inhibited-vars -100)
+    (add-hook 'emacs-startup-hook #'my--reset-inhibited-vars 101))
+#+end_src
+
+** Process I/O
+
+Read subprocess output in much larger chunks. The main beneficiary
+is Eglot: LSP servers send responses far bigger than the 4 kB
+default, and adaptive buffering only helps processes that trickle
+output.
+
+#+begin_src emacs-lisp
+  (setq read-process-output-max (* 4 1024 1024))
+  (setq process-adaptive-read-buffering nil)
+#+end_src
+
 ** Directory Structure
 
 Keep all runtime state under =~/.emacs.d/var/= so the config root
@@ -101,6 +173,10 @@ This avoids the flash of default UI.
   (setq menu-bar-mode nil
         tool-bar-mode nil
         scroll-bar-mode nil)
+
+  ;; Never pop GUI dialogs — keep everything in the minibuffer.
+  (setq use-file-dialog nil
+        use-dialog-box nil)
 #+end_src
 
 ** Frame and Startup
@@ -142,6 +218,13 @@ This avoids the flash of default UI.
   (setq fast-but-imprecise-scrolling t)
   (set-language-environment "UTF-8")
   (setq default-input-method nil)
+
+  ;; From minimal-emacs.d
+  (setq load-prefer-newer t)           ; never load stale byte-code
+  (setq ad-redefinition-action 'accept) ; silence advice redefinition noise
+  ;; PGTK (Wayland/Sway): don't stall waiting for GTK events
+  (when (boundp 'pgtk-wait-for-event-timeout)
+    (setq pgtk-wait-for-event-timeout 0.001))
 #+end_src
 
 ** Custom File
