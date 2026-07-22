@@ -68,9 +68,9 @@
   :config
   (let ((mono-font "FiraCode Nerd Font")
         (sans-font "DejaVu Sans"))
-    (set-face-attribute 'default nil :family mono-font :weight 'semi-bold :height 180)
-    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'semi-bold :height 180)
-    (set-face-attribute 'variable-pitch nil :family sans-font :height 180))
+    (set-face-attribute 'default nil :family mono-font :weight 'medium :height 160)
+    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'medium :height 160)
+    (set-face-attribute 'variable-pitch nil :family sans-font :height 160))
 
   (defun skip-these-buffers (_window buffer _bury-or-kill)
     "Function for `switch-to-prev-buffer-skip'."
@@ -87,7 +87,9 @@
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (when scroll-bar-mode (scroll-bar-mode -1))
-  (global-hl-line-mode 1)
+  ;; (global-hl-line-mode 1)
+  (add-hook 'prog-mode-hook #'hl-line-mode)
+  (add-hook 'text-mode-hook #'hl-line-mode)
   (global-auto-revert-mode 1)
   (recentf-mode 1)
   (savehist-mode 1)
@@ -272,12 +274,18 @@
                  cand))))
 
 (use-package orderless
-  :ensure nil
-  :after vertico
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion)))))
+:ensure nil
+:after vertico
+:custom
+(completion-styles '(orderless basic))
+(completion-category-defaults nil)
+(completion-category-overrides '((file (styles partial-completion))))
+:config
+(with-eval-after-load 'eglot
+  (setq completion-category-overrides
+    '((file (styles partial-completion))
+      (eglot (styles orderless))
+      (eglot-capf (styles orderless))))))
 
 (use-package marginalia
   :ensure nil
@@ -293,6 +301,7 @@
          ("M-s r"   . consult-ripgrep)
          ("M-s l"   . consult-line)
          ("M-s g"   . consult-grep))
+  :hook (embark-collect-mode . consult-preview-at-point-mode)
   :init
   (advice-add #'register-preview :override #'consult-register-window)
   (setq xref-show-xrefs-function #'consult-xref
@@ -306,19 +315,19 @@
 
 (use-package embark-consult
   :ensure nil
-  :hook (embark-collect-mode . consult-preview-at-point-mode))
+  :after (embark consult))
 
 (use-package corfu
   :ensure nil
   :custom
-  (corfu-auto t)
-  (corfu-auto-delay 0.1)
-  (corfu-auto-prefix 2)
+  (corfu-auto nil)
+  ;; (corfu-auto-delay 0.1)
+  ;; (corfu-auto-prefix 2)
   (corfu-cycle t)
   (corfu-quit-no-match 'separator)
   (corfu-popupinfo-delay '(0.5 . 0.2))
   (corfu-on-exact-match nil)
-  (corfu-preselect 'prompt)
+  (corfu-preselect 'first)
   (corfu-preview-current nil)
   :init
   (global-corfu-mode)
@@ -329,12 +338,22 @@
     (add-to-list 'savehist-additional-variables 'corfu-history)))
 
 (use-package cape
-  :ensure nil
-  :config
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  (add-hook 'completion-at-point-functions #'cape-history))
+:ensure nil
+:init
+(add-hook 'emacs-lisp-mode-hook (lambda ()
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+(add-hook 'org-mode-hook (lambda ()
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+:config
+;; Only file completion globally makes sense
+(add-hook 'eglot-managed-mode-hook
+(lambda ()
+  (setq-local completion-at-point-functions
+    (list (cape-capf-super
+           #'eglot-completion-at-point
+           #'tempel-expand
+           #'cape-file)))))
+(add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme
   :ensure nil
@@ -609,7 +628,55 @@
   (indent-bars-pad-frac 0.1)
   (indent-bars-pattern ".")
   (indent-bars-color '(highlight :face-bg t :blend 0.2))
-  (indent-bars-highlight-current-depth '(:blend 0.5)))
+  (indent-bars-highlight-current-depth nil)
+  ;; Throttle tree-sitter context queries while navigating
+  (indent-bars-treesit-update-delay 0.1))
+
+(use-package dape
+  :preface
+  ;; By default dape shares the same keybinding prefix as `gud'
+  ;; If you do not want to use any prefix, set it to nil.
+  ;; (setq dape-key-prefix "\C-x\C-a")
+
+  :hook
+  ;; Save breakpoints on quit
+   (kill-emacs . dape-breakpoint-save)
+  ;; Load breakpoints on startup
+   (after-init . dape-breakpoint-load)
+
+  :custom
+  ;; Turn on global bindings for setting breakpoints with mouse
+   (dape-breakpoint-global-mode +1)
+
+  ;; Info buffers to the right
+  ;; (dape-buffer-window-arrangement 'right)
+  ;; Info buffers like gud (gdb-mi)
+   (dape-buffer-window-arrangement 'gud)
+   (dape-info-hide-mode-line nil)
+
+  ;; Projectile users
+  ;; (dape-cwd-function #'projectile-project-root)
+
+  :config
+  ;; Pulse source line (performance hit)
+  ;; (add-hook 'dape-display-source-hook #'pulse-momentary-highlight-one-line)
+
+  ;; Save buffers on startup, useful for interpreted languages
+   (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
+
+  ;; Kill compile buffer on build success
+   (add-hook 'dape-compile-hook #'kill-buffer)
+  )
+
+;; For a more ergonomic Emacs and `dape' experience
+(use-package repeat
+  :custom
+  (repeat-mode +1))
+
+;; Left and right side windows occupy full frame height
+(use-package emacs
+  :custom
+  (window-sides-vertical t))
 
 (use-package nix-mode
   :ensure nil
@@ -1220,62 +1287,6 @@
   (tabspaces-session t)
   (tabspaces-session-auto-restore t)
   (tabspaces-initialize-project-with-todo nil))
-
-(use-package evil
-  :ensure nil
-  :demand t
-  :init
-  (setq evil-want-integration t
-        evil-want-keybinding nil
-        evil-want-C-u-scroll t
-        evil-want-C-i-jump nil
-        evil-want-fine-undo nil
-        evil-respect-visual-line-mode t
-        evil-search-module 'isearch
-        evil-symbol-word-search t
-        evil-split-window-below t
-        evil-vsplit-window-right t
-        evil-default-state 'emacs)
-  :config
-  (evil-mode 1)
-  (evil-set-undo-system 'undo-fu))
-
-(defun my-evil-state-by-mode ()
-  "Evil normal state in `prog-mode' buffers, Emacs state elsewhere."
-  (if (derived-mode-p 'prog-mode)
-      (evil-normal-state)
-    (evil-emacs-state)))
-
-(add-hook 'after-change-major-mode-hook #'my-evil-state-by-mode 90)
-
-(use-package evil-collection
-  :ensure nil
-  :after evil
-  :custom
-  (evil-collection-setup-minibuffer t)
-  :config
-  (evil-collection-init))
-
-(use-package evil-surround
-  :ensure nil
-  :after evil
-  :config
-  (global-evil-surround-mode 1))
-
-(use-package evil-commentary
-  :ensure nil
-  :after evil
-  :config
-  (evil-commentary-mode 1))
-
-(use-package evil-keypad
-  :ensure nil
-  :after evil
-  :load-path "~/.emacs.d/site-lisp"
-  :custom
-  (evil-keypad-activation-states '(normal visual motion))
-  :config
-  (evil-keypad-global-mode 1))
 
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for `keyboard-quit'."
