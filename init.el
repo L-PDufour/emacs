@@ -1234,10 +1234,19 @@
         evil-search-module 'isearch
         evil-symbol-word-search t
         evil-split-window-below t
-        evil-vsplit-window-right t)
+        evil-vsplit-window-right t
+        evil-default-state 'emacs)
   :config
   (evil-mode 1)
   (evil-set-undo-system 'undo-fu))
+
+(defun my-evil-state-by-mode ()
+  "Evil normal state in `prog-mode' buffers, Emacs state elsewhere."
+  (if (derived-mode-p 'prog-mode)
+      (evil-normal-state)
+    (evil-emacs-state)))
+
+(add-hook 'after-change-major-mode-hook #'my-evil-state-by-mode 90)
 
 (use-package evil-collection
   :ensure nil
@@ -1263,6 +1272,8 @@
   :ensure nil
   :after evil
   :load-path "~/.emacs.d/site-lisp"
+  :custom
+  (evil-keypad-activation-states '(normal visual motion))
   :config
   (evil-keypad-global-mode 1))
 

@@ -1923,6 +1923,10 @@ Doom-style leader keypad (via the vendored =evil-keypad=) that
 replays the existing =C-c= maps defined in the Keybindings section
 below, so nothing is bound twice.
 
+Normal state is scoped to =prog-mode= buffers only (see below) —
+everywhere else, and while actually typing, this behaves like plain
+Emacs.
+
 | Mode   | Keys              | Meaning                               |
 |--------+-------------------+----------------------------------------|
 | Normal | =h j k l=         | left / down / up / right              |
@@ -1955,10 +1959,37 @@ below, so nothing is bound twice.
           evil-search-module 'isearch
           evil-symbol-word-search t
           evil-split-window-below t
-          evil-vsplit-window-right t)
+          evil-vsplit-window-right t
+          evil-default-state 'emacs)
     :config
     (evil-mode 1)
     (evil-set-undo-system 'undo-fu))
+#+end_src
+
+** Evil Scope: Programming Buffers Only
+
+Vim motions/operators only earn their keep where you're editing
+structured code — everywhere else (Dired, Magit, Org, prose,
+=eshell=, the minibuffer, ...) this uses plain Emacs state, i.e.
+ordinary Emacs bindings with no modal layer at all. That covers
+"insert mode" too: Emacs state has no normal/insert split, you can
+just type.
+
+=evil-default-state= above sets the fallback; this hook promotes any
+=prog-mode=-derived buffer to Evil normal state and is intentionally
+appended (depth 90) so it runs *after* Evil's own
+=after-change-major-mode-hook= entry and after whatever
+=evil-collection= wired up for that major mode — otherwise those
+would win and put non-programming buffers back into normal state.
+
+#+begin_src emacs-lisp
+  (defun my-evil-state-by-mode ()
+    "Evil normal state in `prog-mode' buffers, Emacs state elsewhere."
+    (if (derived-mode-p 'prog-mode)
+        (evil-normal-state)
+      (evil-emacs-state)))
+
+  (add-hook 'after-change-major-mode-hook #'my-evil-state-by-mode 90)
 #+end_src
 
 ** Evil Collection
@@ -2003,11 +2034,18 @@ Vendored in =site-lisp/evil-keypad.el= (not on any package archive).
 =C-x=, =SPC m x= into =M-x=, etc. — a Doom-style leader without
 pulling in =general.el= or redeclaring every binding a second time.
 
+=evil-keypad='s default trigger states include Evil's =emacs= state,
+which would steal the literal =SPC= keypress (no more typing spaces)
+in every buffer this config now puts in =emacs= state. Restrict it
+to =normal=/=visual=/=motion=, none of which self-insert on =SPC=.
+
 #+begin_src emacs-lisp
   (use-package evil-keypad
     :ensure nil
     :after evil
     :load-path "~/.emacs.d/site-lisp"
+    :custom
+    (evil-keypad-activation-states '(normal visual motion))
     :config
     (evil-keypad-global-mode 1))
 #+end_src
