@@ -626,6 +626,7 @@ Keep all generated state under =var/=.
            ("M-s r"   . consult-ripgrep)
            ("M-s l"   . consult-line)
            ("M-s g"   . consult-grep))
+    :hook (embark-collect-mode . consult-preview-at-point-mode)
     :init
     (advice-add #'register-preview :override #'consult-register-window)
     (setq xref-show-xrefs-function #'consult-xref
@@ -633,6 +634,13 @@ Keep all generated state under =var/=.
 #+end_src
 
 ** Embark
+
+=consult-preview-at-point-mode= is defined in =consult.el=, so its
+=:hook= lives on the =consult= block above, not here — putting it on
+=embark-consult= makes =use-package= generate an autoload that
+(wrongly) points at =embark-consult.elc=, which doesn't define that
+function and throws a =run-hooks= autoloading error the first time
+an Embark collect buffer opens.
 
 #+begin_src emacs-lisp
   (use-package embark
@@ -643,7 +651,7 @@ Keep all generated state under =var/=.
 
   (use-package embark-consult
     :ensure nil
-    :hook (embark-collect-mode . consult-preview-at-point-mode))
+    :after (embark consult))
 #+end_src
 
 ** Corfu

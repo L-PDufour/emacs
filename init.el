@@ -293,6 +293,7 @@
          ("M-s r"   . consult-ripgrep)
          ("M-s l"   . consult-line)
          ("M-s g"   . consult-grep))
+  :hook (embark-collect-mode . consult-preview-at-point-mode)
   :init
   (advice-add #'register-preview :override #'consult-register-window)
   (setq xref-show-xrefs-function #'consult-xref
@@ -306,7 +307,7 @@
 
 (use-package embark-consult
   :ensure nil
-  :hook (embark-collect-mode . consult-preview-at-point-mode))
+  :after (embark consult))
 
 (use-package corfu
   :ensure nil
