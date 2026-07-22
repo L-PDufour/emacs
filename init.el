@@ -107,6 +107,7 @@
 
 (use-package gnus
   :ensure nil
+  :defer t
   :config
   (setq gnus-select-method '(nnnil ""))
   (setq gnus-secondary-select-methods
@@ -498,6 +499,7 @@
 
 (use-package eglot
   :ensure nil
+  :hook (prog-mode . eglot-ensure)
   :init
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   :custom
@@ -871,10 +873,6 @@
   ("C-;" . avy-goto-char-2)
   ("C-c C-j" . avy-resume))
 
-(use-package surround
-  :ensure nil
-  :bind-keymap ("C-c s" . surround-keymap))
-
 (use-package pdf-tools
   :ensure nil
   :mode ("\\.pdf\\'" . pdf-view-mode))
@@ -982,11 +980,13 @@
 
 (use-package elfeed
   :ensure nil
+  :defer t
   :custom
   (elfeed-db-directory (expand-file-name "elfeed" user-emacs-directory)))
 
 (use-package elfeed-org
   :ensure nil
+  :after elfeed
   :config (elfeed-org)
   :custom
   (rmh-elfeed-org-files
@@ -1221,109 +1221,50 @@
   (tabspaces-session-auto-restore t)
   (tabspaces-initialize-project-with-todo nil))
 
-(use-package meow
+(use-package evil
   :ensure nil
   :demand t
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-C-u-scroll t
+        evil-want-C-i-jump nil
+        evil-want-fine-undo nil
+        evil-respect-visual-line-mode t
+        evil-search-module 'isearch
+        evil-symbol-word-search t
+        evil-split-window-below t
+        evil-vsplit-window-right t)
   :config
-  (defun meow-setup ()
-    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-	(setq meow-use-clipboard t)
-	(setq meow-selection-command-fallback
-		  '((meow-change . meow-change-char)
-			;; (meow-kill . meow-c-k)
-			(meow-kill . meow-delete)
-			;; (meow-cancel-selection . keyboard-quit)
-			(meow-cancel-selection . ignore)
-			(meow-pop-selection . meow-pop-grab)
-			(meow-beacon-change . meow-beacon-change-char)))
-    (meow-motion-overwrite-define-key
-     '("j" . meow-next)
-     '("k" . meow-prev)
-     '("<escape>" . ignore))
-    ;; Top-level single-key shortcuts only here.
-    ;; Namespace keymaps are wired in the Keybindings section after
-    ;; all keymaps are defined (avoids forward-reference errors).
-    (meow-leader-define-key
-     '("SPC" . execute-extended-command)
-     '("."   . find-file)
-     '(","   . consult-buffer)
-     '(";"   . comment-line)
-     '("x"   . org-capture)
-     '("u"   . universal-argument)
-     '("/"   . meow-keypad-describe-key)
-     '("?"   . meow-cheatsheet)
-     '("1" . meow-digit-argument) '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument) '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument) '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument) '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument) '("0" . meow-digit-argument))
-    (meow-normal-define-key
-     '("0" . meow-expand-0)   '("9" . meow-expand-9)
-     '("8" . meow-expand-8)   '("7" . meow-expand-7)
-     '("6" . meow-expand-6)   '("5" . meow-expand-5)
-     '("4" . meow-expand-4)   '("3" . meow-expand-3)
-     '("2" . meow-expand-2)   '("1" . meow-expand-1)
-     '("-" . negative-argument)
-     '(";" . meow-reverse)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
-     '("[" . meow-beginning-of-thing)
-     '("]" . meow-end-of-thing)
-     '("a" . meow-append)
-     '("A" . meow-open-below)
-     '("b" . meow-back-word)
-     '("B" . meow-back-symbol)
-     '("c" . meow-change)
-     '("d" . meow-delete)
-     '("D" . meow-backward-delete)
-     '("e" . meow-next-word)
-     '("E" . meow-next-symbol)
-     '("f" . meow-find)
-     '("g" . meow-cancel-selection)
-     '("G" . meow-grab)
-     '("h" . meow-left)
-     '("H" . meow-left-expand)
-     '("i" . meow-insert)
-     '("I" . meow-open-above)
-     '("j" . meow-next)
-     '("J" . meow-next-expand)
-     '("k" . meow-prev)
-     '("K" . meow-prev-expand)
-     '("l" . meow-right)
-     '("L" . meow-right-expand)
-     '("m" . meow-join)
-     '("n" . meow-search)
-     '("N" . meow-pop-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
-     '("p" . meow-yank)
-     '("P" . meow-yank-pop)
-     '("q" . meow-quit)
-     '("Q" . meow-goto-line)
-     '("r" . meow-replace)
-     '("R" . meow-swap-grab)
-     '("s" . meow-kill)
-     '("t" . meow-till)
-     '("u" . meow-undo)
-     '("U" . meow-undo-in-selection)
-     '("v" . meow-visit)
-     '("w" . meow-mark-word)
-     '("W" . meow-mark-symbol)
-     '("x" . meow-line)
-     '("X" . meow-goto-line)
-     '("y" . meow-save)
-     '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
-     '("'" . repeat)
-     '("<escape>" . ignore)))
-  (meow-setup)
-  (meow-global-mode 1))
+  (evil-mode 1)
+  (evil-set-undo-system 'undo-fu))
 
-(use-package meow-tree-sitter
+(use-package evil-collection
   :ensure nil
-  :after meow
+  :after evil
+  :custom
+  (evil-collection-setup-minibuffer t)
   :config
-  (meow-tree-sitter-register-defaults))
+  (evil-collection-init))
+
+(use-package evil-surround
+  :ensure nil
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+
+(use-package evil-commentary
+  :ensure nil
+  :after evil
+  :config
+  (evil-commentary-mode 1))
+
+(use-package evil-keypad
+  :ensure nil
+  :after evil
+  :load-path "~/.emacs.d/site-lisp"
+  :config
+  (evil-keypad-global-mode 1))
 
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for `keyboard-quit'."
@@ -1388,6 +1329,7 @@
 (define-key my-window-keymap (kbd "r") #'winner-redo)
 
 ;;; Search — C-c s … (uses built-in search-map)
+(global-set-key (kbd "C-c s") search-map)
 (define-key search-map (kbd "l") #'consult-line)
 (define-key search-map (kbd "G") #'consult-ripgrep)
 (define-key search-map (kbd "g") #'consult-grep)
