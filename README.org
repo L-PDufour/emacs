@@ -35,6 +35,17 @@ We run on the IGC (incremental garbage collector) branch. Crank GC
 thresholds sky-high during init, then reset. IGC-specific knobs
 control step size and threshold separately.
 
+The =gc-cons-*= pair is the fallback for a non-IGC build — an MPS
+build collects incrementally and ignores it. The =igc-*= knobs are
+the reverse: unbound on a stock build, where =setq= just defines an
+unused variable.
+
+No =focus-out= GC hook: =focus-out-hook= was made obsolete in Emacs
+27.1 and removed in 28, so it never fired (=after-focus-change-function=
+is the modern equivalent), and forcing a full stop-the-world
+=garbage-collect= is exactly what an incremental collector exists to
+avoid.
+
 #+begin_src emacs-lisp
   (setq gc-cons-threshold most-positive-fixnum
         gc-cons-percentage 0.6)
@@ -47,8 +58,6 @@ control step size and threshold separately.
   ;; IGC tuning (ignored on non-IGC builds)
   (setq igc-step-multiplier 2)
   (setq igc-cons-threshold (* 32 1024 1024))
-
-  (add-hook 'focus-out-hook #'garbage-collect)
 #+end_src
 
 ** File Name Handler Cache
@@ -626,7 +635,6 @@ Keep all generated state under =var/=.
            ("M-s r"   . consult-ripgrep)
            ("M-s l"   . consult-line)
            ("M-s g"   . consult-grep))
-    :hook (embark-collect-mode . consult-preview-at-point-mode)
     :init
     (advice-add #'register-preview :override #'consult-register-window)
     (setq xref-show-xrefs-function #'consult-xref
@@ -635,12 +643,15 @@ Keep all generated state under =var/=.
 
 ** Embark
 
-=consult-preview-at-point-mode= is defined in =consult.el=, so its
-=:hook= lives on the =consult= block above, not here — putting it on
-=embark-consult= makes =use-package= generate an autoload that
-(wrongly) points at =embark-consult.elc=, which doesn't define that
-function and throws a =run-hooks= autoloading error the first time
-an Embark collect buffer opens.
+There is deliberately no =embark-collect-mode= → preview hook here.
+Consult 3.2 made =consult-preview-at-point-mode= obsolete (preview in
+completion buffers is enabled automatically) and Consult 3.4 removed
+it, so hooking it now signals =void-function= the first time an Embark
+collect buffer opens. On Consult older than 3.2, re-add
+=:hook (embark-collect-mode . consult-preview-at-point-mode)= to the
+=consult= block above — never to =embark-consult=, since use-package
+would then autoload it from =embark-consult.el=, which does not define
+it.
 
 #+begin_src emacs-lisp
   (use-package embark
@@ -1205,8 +1216,10 @@ file as =var/templates=.
 :header-args:emacs-lisp: :tangle init.el
 :END:
 
-Repeat maps, smart editing functions, and auto-centering that work
-in both Emacs and Evil states.
+Repeat maps, smart editing functions, and auto-centering. This config
+is plain Emacs — no modal layer. Structural editing comes from
+=expreg= (expand-region on tree-sitter nodes) and =surround=, both
+below.
 
 ** Smart Editing Functions
 
@@ -1256,9 +1269,9 @@ in both Emacs and Evil states.
 
 ** Smart Editing Bindings
 
-=C-a= smart indent works in insert state too. =M-<up/down>= for line
-moving. Note: commenting is handled by =gcc= / =gc= in evil states,
-and by =C-c ;= for insert/emacs state.
+=C-a= toggles between the first non-whitespace character and column 0.
+=M-<up/down>= move the current line. =C-c ;= toggles comments on the
+line or the active region.
 
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-a")       #'my-smarter-move-beginning-of-line)
@@ -1267,7 +1280,6 @@ and by =C-c ;= for insert/emacs state.
   (global-set-key (kbd "M-<down>")  #'my-move-line-down)
   (global-set-key (kbd "C-c i")     #'my-indent-buffer)
 
-  ;; Comment toggle for insert/emacs state (normal state uses gcc/gc via evil)
   (defun my-comment-or-uncomment ()
     "Toggle comment on current line or region."
     (interactive)
@@ -1405,7 +1417,15 @@ Press =C-M-f= once, then tap =f=, =b=, =u=, =d=, etc.
   (setq repeat-exit-timeout 3)
 #+end_src
 
-** Expreg (Tree-Sitter Expand Region)
+** Expreg (Expand Region)
+
+Takes the place of =expand-region=: same =C-== / =C--= grow/shrink
+loop, but the regions come from tree-sitter nodes when the buffer has
+a parser, so they follow the real syntax tree instead of heuristics.
+The repeat map means =C-= = - - = works without re-pressing =C-=.
+
+Note =C--= shadows the global =negative-argument=; use =C-u -= or
+=M--= for that.
 
 #+begin_src emacs-lisp
   (use-package expreg
@@ -1421,6 +1441,36 @@ Press =C-M-f= once, then tap =f=, =b=, =u=, =d=, etc.
       "Repeat map for expreg.")
     (put 'expreg-expand 'repeat-map 'expreg-repeat-map)
     (put 'expreg-contract 'repeat-map 'expreg-repeat-map))
+#+end_src
+
+** Surround
+
+=surround.el= covers what =vim-surround= did, without a modal layer.
+=M-'= is a prefix, so the package is only loaded the first time it is
+pressed (=:bind-keymap= autoloads on the prefix).
+
+| Keys        | Action                                        |
+|-------------+-----------------------------------------------|
+| =M-' s (=   | surround region/symbol with =(= … =)=         |
+| =M-' d (=   | delete the surrounding =(= … =)=              |
+| =M-' c ( [= | change surrounding =(= … =)= to =[= … =]=     |
+| =M-' i (=   | mark inside the pair                          |
+| =M-' o (=   | mark the pair including the delimiters        |
+| =M-' k (=   | kill inside the pair                          |
+| =M-' K (=   | kill the pair including the delimiters        |
+
+Any of the pair characters work on either side, so =M-' d )= is the
+same as =M-' d (=. Quotes, backticks and =*= / =_= are pairs too.
+
+=M-'= is =abbrev-prefix-mark= by default; this shadows it. As with
+every other package here, =surround= has to come from Nix — add
+=epkgs.surround= to the home-manager =emacs= package list, or the
+=:bind-keymap= will fail to autoload.
+
+#+begin_src emacs-lisp
+  (use-package surround
+    :ensure nil
+    :bind-keymap ("M-'" . surround-keymap))
 #+end_src
 
 * Utilities
@@ -1873,81 +1923,109 @@ confirmation before any tool call fires from the same menu.
 :header-args:emacs-lisp: :tangle init.el
 :END:
 
+Buffer-isolated workspaces on top of =tab-bar= and =project.el=: each
+tab keeps its own buffer list, so =C-x b= in the =emacs= tab does not
+offer buffers from the =work= tab.
+
+Two things this block deliberately does *not* do:
+
+- It does not redefine =tabspaces-command-map=. The package already
+  defines that map — with exactly these bindings — and =fset='s it so
+  it can be used as a prefix command. A =defvar= in =:config= runs
+  *after* the package is loaded, and =defvar= never reassigns an
+  already-bound variable, so the copy was dead code.
+- It does not =global-set-key= the prefix. =tabspaces-mode-map= binds
+  =tabspaces-keymap-prefix= itself when the mode turns on. The prefix
+  is set here in =:custom= (which use-package emits *before* the load,
+  which matters — =tabspaces-mode-map= is built at load time from that
+  variable, so setting it afterwards would have no effect).
+
+| Keys        | Command                                     |
+|-------------+---------------------------------------------|
+| =C-c TAB s= | switch to / create workspace                |
+| =C-c TAB o= | open or create project + workspace          |
+| =C-c TAB b= | switch to a workspace-local buffer          |
+| =C-c TAB t= | switch to a buffer and its tab              |
+| =C-c TAB r= | remove current buffer from the workspace    |
+| =C-c TAB R= | remove a selected buffer from the workspace |
+| =C-c TAB C= | clear workspace buffers                     |
+| =C-c TAB d= | close workspace, keep buffers               |
+| =C-c TAB k= | kill workspace buffers and close it         |
+| =C-c TAB w= | show workspaces in the echo area            |
+| =C-c TAB T= | toggle the echo-area workspace display      |
+
+The consult integration adds a "Workspace Buffers" source (narrow key
+=w=) as the default in =consult-buffer=, and hides the unfiltered
+"Buffer" source behind its own =b= narrow key. Candidates are built
+with =consult--buffer-pair= to match consult's own buffer sources —
+plain buffer names would collide when two workspaces hold same-named
+buffers.
+
 #+begin_src emacs-lisp
   (use-package tabspaces
     :ensure nil
     :hook (after-init . tabspaces-mode)
-    :config
-    (defvar tabspaces-command-map
-  	(let ((map (make-sparse-keymap)))
-  	  (define-key map (kbd "C") 'tabspaces-clear-buffers)
-  	  (define-key map (kbd "b") 'tabspaces-switch-to-buffer)
-  	  (define-key map (kbd "d") 'tabspaces-close-workspace)
-  	  (define-key map (kbd "k") 'tabspaces-kill-buffers-close-workspace)
-  	  (define-key map (kbd "o") 'tabspaces-open-or-create-project-and-workspace)
-  	  (define-key map (kbd "r") 'tabspaces-remove-current-buffer)
-  	  (define-key map (kbd "R") 'tabspaces-remove-selected-buffer)
-  	  (define-key map (kbd "s") 'tabspaces-switch-or-create-workspace)
-  	  (define-key map (kbd "t") 'tabspaces-switch-buffer-and-tab)
-  	  (define-key map (kbd "w") 'tabspaces-show-workspaces)
-  	  (define-key map (kbd "T") 'tabspaces-toggle-echo-area-display)
-  	  map)
-  	"Keymap for tabspace/workspace commands after `tabspaces-keymap-prefix'.")
-    (with-eval-after-load 'consult
-      (plist-put consult-source-buffer :hidden t)
-      (plist-put consult-source-buffer :default nil)
-      (defvar consult--source-workspace
-        (list :name     "Workspace Buffers"
-              :narrow   ?w
-              :history  'buffer-name-history
-              :category 'buffer
-              :state    #'consult--buffer-state
-              :default  t
-              :items    (lambda () (consult--buffer-query
-                                    :predicate #'tabspaces--local-buffer-p
-                                    :sort 'visibility
-                                    :as #'buffer-name))))
-      (add-to-list 'consult-buffer-sources 'consult--source-workspace))
     :custom
+    (tabspaces-keymap-prefix "C-c TAB")
     (tabspaces-use-filtered-buffers-as-default t)
     (tabspaces-default-tab "Default")
     (tabspaces-remove-to-default t)
     (tabspaces-include-buffers '("*scratch*"))
     (tabspaces-session t)
     (tabspaces-session-auto-restore t)
-    (tabspaces-initialize-project-with-todo nil))
-
+    (tabspaces-initialize-project-with-todo nil)
+    :config
+    (with-eval-after-load 'consult
+      (defvar consult-source-workspace
+        (list :name     "Workspace Buffers"
+              :narrow   ?w
+              :category 'buffer
+              :face     'consult-buffer
+              :history  'buffer-name-history
+              :state    #'consult--buffer-state
+              :default  t
+              :items    (lambda ()
+                          (consult--buffer-query
+                           :predicate #'tabspaces--local-buffer-p
+                           :sort 'visibility
+                           :as #'consult--buffer-pair)))
+        "Tabspaces-local buffer source for `consult-buffer'.")
+      (add-to-list 'consult-buffer-sources 'consult-source-workspace)
+      ;; Full buffer list is still reachable via its `b' narrow key.
+      (plist-put consult-source-buffer :hidden t)
+      (plist-put consult-source-buffer :default nil)))
 #+end_src
 * Keybindings
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle init.el
 :END:
 
-All =C-c= prefix maps. Every binding here is also accessible in evil
-normal state via =SPC c …= through evil-keypad.
+All =C-c= prefix maps. There is no modal layer and no leader key —
+these are plain Emacs bindings, discoverable through which-key.
 
-| Keys              | Command                    | SPC equivalent    |
-|-------------------+----------------------------+-------------------|
-| =C-c f a=         | my-project-find-file       | =SPC c f a=       |
-| =C-c f b=         | my-project-find-buffer     | =SPC c f b=       |
-| =C-c f r=         | consult-recent-file        | =SPC c f r=       |
-| =C-c f s=         | save-buffer                | =SPC c f s=       |
-| =C-c w v=         | split-window-right         | =SPC c w v=       |
-| =C-c w s=         | split-window-below         | =SPC c w s=       |
-| =C-c w h/j/k/l=   | windmove directions        | =SPC c w h/j/k/l= |
-| =C-c s l=         | consult-line               | =SPC c s l=       |
-| =C-c s g=         | consult-grep               | =SPC c s g=       |
-| =C-c s G=         | consult-ripgrep            | =SPC c s G=       |
-| =C-c l d=         | xref-find-definitions      | =SPC c l d=       |
-| =C-c l r=         | xref-find-references       | =SPC c l r=       |
-| =C-c l a=         | eglot-code-actions         | =SPC c l a=       |
-| =C-c l R=         | eglot-rename               | =SPC c l R=       |
-| =C-c g g=         | gptel                      | =SPC c g g=       |
-| =C-c e e=         | consult-flymake            | =SPC c e e=       |
-| =C-c TAB TAB=     | tabspaces switch/create    | =SPC c TAB TAB=   |
-| =C-;=             | avy-goto-char-2            | —                 |
-| =C-c ;=           | comment toggle             | =SPC c ;=         |
-| =gd / gr / gb=    | xref goto/refs/back        | evil normal only  |
+| Keys            | Command                  |
+|-----------------+--------------------------|
+| =C-c f a=       | my-project-find-file     |
+| =C-c f b=       | my-project-find-buffer   |
+| =C-c f r=       | consult-recent-file      |
+| =C-c f s=       | save-buffer              |
+| =C-c w v=       | split-window-right       |
+| =C-c w s=       | split-window-below       |
+| =C-c w h/j/k/l= | windmove directions      |
+| =C-c s l=       | consult-line             |
+| =C-c s g=       | consult-grep             |
+| =C-c s G=       | consult-ripgrep          |
+| =C-c l d=       | xref-find-definitions    |
+| =C-c l r=       | xref-find-references     |
+| =C-c l a=       | eglot-code-actions       |
+| =C-c l R=       | eglot-rename             |
+| =C-c g g=       | gptel                    |
+| =C-c e e=       | consult-flymake          |
+| =C-c TAB s=     | tabspaces switch/create  |
+| =C-;=           | avy-goto-char-2          |
+| =C-c ;=         | comment toggle           |
+| =C-= / =C--=    | expreg expand / contract |
+| =M-'=           | surround prefix          |
 
 ** Helper Functions
 
@@ -1996,9 +2074,8 @@ normal state via =SPC c …= through evil-keypad.
   (global-set-key (kbd "C-c p") project-prefix-map)
   (global-set-key (kbd "C-c l") my-code-keymap)
   (global-set-key (kbd "C-c t") my-term-keymap)
-    (with-eval-after-load 'tabspaces
-    (global-set-key (kbd "C-c TAB") tabspaces-command-map))
-  
+  ;; C-c TAB is bound by `tabspaces-mode-map', see the Tabspaces section.
+
   ;;; Files — C-c f …
   (define-key my-file-keymap (kbd "a") #'my-project-find-file)
   (define-key my-file-keymap (kbd "b") #'my-project-find-buffer)
@@ -2105,7 +2182,8 @@ normal state via =SPC c …= through evil-keypad.
       "C-c g"   "gptel/llm"
       "C-c t"   "terminal"
       "C-c e"   "errors/flymake"
-      "C-c TAB" "workspaces"))
+      "C-c TAB" "workspaces"
+      "M-'"     "surround"))
 #+end_src
 
 * Footer

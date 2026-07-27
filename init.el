@@ -301,7 +301,6 @@
          ("M-s r"   . consult-ripgrep)
          ("M-s l"   . consult-line)
          ("M-s g"   . consult-grep))
-  :hook (embark-collect-mode . consult-preview-at-point-mode)
   :init
   (advice-add #'register-preview :override #'consult-register-window)
   (setq xref-show-xrefs-function #'consult-xref
@@ -813,7 +812,6 @@
 (global-set-key (kbd "M-<down>")  #'my-move-line-down)
 (global-set-key (kbd "C-c i")     #'my-indent-buffer)
 
-;; Comment toggle for insert/emacs state (normal state uses gcc/gc via evil)
 (defun my-comment-or-uncomment ()
   "Toggle comment on current line or region."
   (interactive)
@@ -933,6 +931,10 @@
     "Repeat map for expreg.")
   (put 'expreg-expand 'repeat-map 'expreg-repeat-map)
   (put 'expreg-contract 'repeat-map 'expreg-repeat-map))
+
+(use-package surround
+  :ensure nil
+  :bind-keymap ("M-'" . surround-keymap))
 
 (use-package avy
   :ensure nil
@@ -1248,45 +1250,35 @@
 (use-package tabspaces
   :ensure nil
   :hook (after-init . tabspaces-mode)
-  :config
-  (defvar tabspaces-command-map
-	(let ((map (make-sparse-keymap)))
-	  (define-key map (kbd "C") 'tabspaces-clear-buffers)
-	  (define-key map (kbd "b") 'tabspaces-switch-to-buffer)
-	  (define-key map (kbd "d") 'tabspaces-close-workspace)
-	  (define-key map (kbd "k") 'tabspaces-kill-buffers-close-workspace)
-	  (define-key map (kbd "o") 'tabspaces-open-or-create-project-and-workspace)
-	  (define-key map (kbd "r") 'tabspaces-remove-current-buffer)
-	  (define-key map (kbd "R") 'tabspaces-remove-selected-buffer)
-	  (define-key map (kbd "s") 'tabspaces-switch-or-create-workspace)
-	  (define-key map (kbd "t") 'tabspaces-switch-buffer-and-tab)
-	  (define-key map (kbd "w") 'tabspaces-show-workspaces)
-	  (define-key map (kbd "T") 'tabspaces-toggle-echo-area-display)
-	  map)
-	"Keymap for tabspace/workspace commands after `tabspaces-keymap-prefix'.")
-  (with-eval-after-load 'consult
-    (plist-put consult-source-buffer :hidden t)
-    (plist-put consult-source-buffer :default nil)
-    (defvar consult--source-workspace
-      (list :name     "Workspace Buffers"
-            :narrow   ?w
-            :history  'buffer-name-history
-            :category 'buffer
-            :state    #'consult--buffer-state
-            :default  t
-            :items    (lambda () (consult--buffer-query
-                                  :predicate #'tabspaces--local-buffer-p
-                                  :sort 'visibility
-                                  :as #'buffer-name))))
-    (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   :custom
+  (tabspaces-keymap-prefix "C-c TAB")
   (tabspaces-use-filtered-buffers-as-default t)
   (tabspaces-default-tab "Default")
   (tabspaces-remove-to-default t)
   (tabspaces-include-buffers '("*scratch*"))
   (tabspaces-session t)
   (tabspaces-session-auto-restore t)
-  (tabspaces-initialize-project-with-todo nil))
+  (tabspaces-initialize-project-with-todo nil)
+  :config
+  (with-eval-after-load 'consult
+    (defvar consult-source-workspace
+      (list :name     "Workspace Buffers"
+            :narrow   ?w
+            :category 'buffer
+            :face     'consult-buffer
+            :history  'buffer-name-history
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda ()
+                        (consult--buffer-query
+                         :predicate #'tabspaces--local-buffer-p
+                         :sort 'visibility
+                         :as #'consult--buffer-pair)))
+      "Tabspaces-local buffer source for `consult-buffer'.")
+    (add-to-list 'consult-buffer-sources 'consult-source-workspace)
+    ;; Full buffer list is still reachable via its `b' narrow key.
+    (plist-put consult-source-buffer :hidden t)
+    (plist-put consult-source-buffer :default nil)))
 
 (defun prot/keyboard-quit-dwim ()
   "Do-What-I-Mean behaviour for `keyboard-quit'."
@@ -1328,8 +1320,7 @@
 (global-set-key (kbd "C-c p") project-prefix-map)
 (global-set-key (kbd "C-c l") my-code-keymap)
 (global-set-key (kbd "C-c t") my-term-keymap)
-  (with-eval-after-load 'tabspaces
-  (global-set-key (kbd "C-c TAB") tabspaces-command-map))
+;; C-c TAB is bound by `tabspaces-mode-map', see the Tabspaces section.
 
 ;;; Files — C-c f …
 (define-key my-file-keymap (kbd "a") #'my-project-find-file)
@@ -1421,7 +1412,8 @@
     "C-c g"   "gptel/llm"
     "C-c t"   "terminal"
     "C-c e"   "errors/flymake"
-    "C-c TAB" "workspaces"))
+    "C-c TAB" "workspaces"
+    "M-'"     "surround"))
 
 (provide 'init)
 ;;; init.el ends here

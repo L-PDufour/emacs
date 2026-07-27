@@ -15,8 +15,6 @@
 (setq igc-step-multiplier 2)
 (setq igc-cons-threshold (* 32 1024 1024))
 
-(add-hook 'focus-out-hook #'garbage-collect)
-
 (defvar my--file-name-handler-alist
   (default-toplevel-value 'file-name-handler-alist))
 
