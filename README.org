@@ -507,6 +507,38 @@ Keep all generated state under =var/=.
 #+RESULTS:
 : flymake-goto-prev-error
 
+** Flycheck
+
+Flycheck is installed but *not* enabled — Flymake above is the active
+checker.  There is no hook and no =global-flycheck-mode=; nothing turns it
+on by itself.  It is here so third-party packages that expect Flycheck can
+load it, and so =M-x flycheck-mode= works in a single buffer when a
+Flycheck-only checker is worth reaching for.
+
+Running both checkers in one buffer means two sets of overlays and two sets
+of subprocesses, so switching Flycheck on locally switches Flymake off in
+that buffer.  Turning Flycheck back off leaves Flymake off too; =M-x
+flymake-mode= restores it.
+
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :ensure nil
+    :defer t
+    :commands (flycheck-mode flycheck-list-errors flycheck-verify-setup)
+    :custom
+    (flycheck-check-syntax-automatically '(save idle-change mode-enabled))
+    (flycheck-idle-change-delay 1.0)
+    (flycheck-display-errors-delay 0.5)
+    (flycheck-indication-mode 'left-fringe)
+    (flycheck-emacs-lisp-load-path 'inherit)
+    :config
+    (defun my-flycheck-disable-flymake ()
+      "Turn Flymake off where Flycheck has been switched on."
+      (when (and flycheck-mode (bound-and-true-p flymake-mode))
+        (flymake-mode -1)))
+    (add-hook 'flycheck-mode-hook #'my-flycheck-disable-flymake))
+#+end_src
+
 ** Org Mode
 
 #+begin_src emacs-lisp
@@ -1094,6 +1126,55 @@ file as =var/templates=.
   (use-package emacs
     :custom
     (window-sides-vertical t))
+#+end_src
+
+** DevDocs
+
+Offline API documentation from [[https://devdocs.io][devdocs.io]].  Docsets are downloaded on
+demand with =M-x devdocs-install= and stored under =var/devdocs/=, which
+=.gitignore= already covers.  Nothing is fetched at startup.
+
+=devdocs-current-docs= is buffer-local and decides which docsets
+=devdocs-lookup= searches without a prefix argument.  A single
+=prog-mode-hook= sets it from =my-devdocs-major-mode-docs=; modes missing
+from that alist just fall back to prompting.  The slugs are the ones
+DevDocs itself uses, so versioned entries (=python~3.12=) need to match the
+docset actually installed.
+
+Bound to =C-h D= globally and to =C-c l k= in the code map.  =C-u C-h D=
+picks docsets for the current buffer interactively.
+
+#+begin_src emacs-lisp
+  (use-package devdocs
+    :ensure nil
+    :defer t
+    :commands (devdocs-lookup devdocs-peruse devdocs-install
+               devdocs-delete devdocs-update-all)
+    :custom
+    (devdocs-data-dir (expand-file-name "var/devdocs" user-emacs-directory))
+    :init
+    (defvar my-devdocs-major-mode-docs
+      '((c-ts-mode          . ("c"))
+        (c++-ts-mode        . ("cpp" "c"))
+        (bash-ts-mode       . ("bash"))
+        (css-ts-mode        . ("css"))
+        (go-ts-mode         . ("go"))
+        (js-ts-mode         . ("javascript" "node"))
+        (typescript-ts-mode . ("typescript" "javascript"))
+        (tsx-ts-mode        . ("typescript" "javascript" "react"))
+        (python-ts-mode     . ("python~3.12"))
+        (rust-ts-mode       . ("rust"))
+        (lua-mode           . ("lua~5.4"))
+        (sql-mode           . ("postgresql~16")))
+      "Alist of major mode to DevDocs slugs for `devdocs-current-docs'.
+  Each slug must be installed with `devdocs-install' before it resolves.")
+
+    (defun my-devdocs-set-current-docs ()
+      "Set `devdocs-current-docs' from `my-devdocs-major-mode-docs'."
+      (when-let* ((docs (alist-get major-mode my-devdocs-major-mode-docs)))
+        (setq-local devdocs-current-docs docs)))
+    (add-hook 'prog-mode-hook #'my-devdocs-set-current-docs)
+    :bind ("C-h D" . devdocs-lookup))
 #+end_src
 
 * Languages
@@ -2112,6 +2193,7 @@ these are plain Emacs bindings, discoverable through which-key.
   (define-key my-code-keymap (kbd "h") #'display-local-help)
   (define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)
   (define-key my-code-keymap (kbd "R") #'eglot-rename)
+  (define-key my-code-keymap (kbd "k") #'devdocs-lookup)
 #+end_src
 
 #+RESULTS:

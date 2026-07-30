@@ -205,6 +205,23 @@
               ("C-c e n" . flymake-goto-next-error)
               ("C-c e p" . flymake-goto-prev-error)))
 
+(use-package flycheck
+  :ensure nil
+  :defer t
+  :commands (flycheck-mode flycheck-list-errors flycheck-verify-setup)
+  :custom
+  (flycheck-check-syntax-automatically '(save idle-change mode-enabled))
+  (flycheck-idle-change-delay 1.0)
+  (flycheck-display-errors-delay 0.5)
+  (flycheck-indication-mode 'left-fringe)
+  (flycheck-emacs-lisp-load-path 'inherit)
+  :config
+  (defun my-flycheck-disable-flymake ()
+    "Turn Flymake off where Flycheck has been switched on."
+    (when (and flycheck-mode (bound-and-true-p flymake-mode))
+      (flymake-mode -1)))
+  (add-hook 'flycheck-mode-hook #'my-flycheck-disable-flymake))
+
 (use-package org
   :ensure nil
   :defer t
@@ -676,6 +693,37 @@
 (use-package emacs
   :custom
   (window-sides-vertical t))
+
+(use-package devdocs
+  :ensure nil
+  :defer t
+  :commands (devdocs-lookup devdocs-peruse devdocs-install
+             devdocs-delete devdocs-update-all)
+  :custom
+  (devdocs-data-dir (expand-file-name "var/devdocs" user-emacs-directory))
+  :init
+  (defvar my-devdocs-major-mode-docs
+    '((c-ts-mode          . ("c"))
+      (c++-ts-mode        . ("cpp" "c"))
+      (bash-ts-mode       . ("bash"))
+      (css-ts-mode        . ("css"))
+      (go-ts-mode         . ("go"))
+      (js-ts-mode         . ("javascript" "node"))
+      (typescript-ts-mode . ("typescript" "javascript"))
+      (tsx-ts-mode        . ("typescript" "javascript" "react"))
+      (python-ts-mode     . ("python~3.12"))
+      (rust-ts-mode       . ("rust"))
+      (lua-mode           . ("lua~5.4"))
+      (sql-mode           . ("postgresql~16")))
+    "Alist of major mode to DevDocs slugs for `devdocs-current-docs'.
+Each slug must be installed with `devdocs-install' before it resolves.")
+
+  (defun my-devdocs-set-current-docs ()
+    "Set `devdocs-current-docs' from `my-devdocs-major-mode-docs'."
+    (when-let* ((docs (alist-get major-mode my-devdocs-major-mode-docs)))
+      (setq-local devdocs-current-docs docs)))
+  (add-hook 'prog-mode-hook #'my-devdocs-set-current-docs)
+  :bind ("C-h D" . devdocs-lookup))
 
 (use-package nix-mode
   :ensure nil
@@ -1358,6 +1406,7 @@
 (define-key my-code-keymap (kbd "h") #'display-local-help)
 (define-key my-code-keymap (kbd "o") #'eglot-code-action-organize-imports)
 (define-key my-code-keymap (kbd "R") #'eglot-rename)
+(define-key my-code-keymap (kbd "k") #'devdocs-lookup)
 
 (defun my-project-eat ()
   "Open eat in current project root with a project-named buffer."
