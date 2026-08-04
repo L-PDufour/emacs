@@ -880,9 +880,85 @@ only caches when the server answers =isIncomplete: false=, and re-queries
 by itself otherwise. If completion feels heavy on a chatty server, drop
 the advice before you blame the interface.
 
-What is genuinely lost with Corfu gone is the documentation popup
-(=corfu-popupinfo= rendering =:company-doc-buffer=) and the kind icons.
-Annotations remain; hover documentation is still =eldoc='s job.
+The kind icons are gone for good — =:company-kind= is a company/corfu
+convention with no consumer in core. Documentation is a different story;
+see below.
+
+*** Candidate documentation
+
+Losing =corfu-popupinfo= does not mean losing the documentation. Eglot
+still puts a =:company-doc-buffer= function in its completion property
+list — it resolves the candidate through =completionItem/resolve= and
+returns a buffer of rendered markup — and =elisp-completion-at-point= and
+others do the same. Core simply never calls it: there is not one
+reference to =:company-doc-buffer= in =minibuffer.el=. So the data is
+there with nothing to read it, which is a keybinding away from fixed.
+
+=M-h= on a candidate does it. The only awkward part is that
+=completion-in-region--data= keeps just the bounds, table and predicate —
+not the property list the function lives in — so we re-run
+=completion-at-point-functions= to get it back. That is cheap: Eglot's
+capf builds its closures without talking to the server, and only the
+=:company-doc-buffer= call itself makes a request.
+
+The Elisp fallback is the reason =M-h= is also bound in the minibuffer
+map: for the =command=, =function= and =variable= categories there is no
+capf at all, so it falls through to =describe-symbol= and =M-x= grows
+documentation too. Under Vertico the binding is inert, since =vertico-map=
+inherits from =minibuffer-local-map= rather than from the completion map.
+
+#+begin_src emacs-lisp
+  (defun my/completion--doc-buffer (candidate)
+    "Return a documentation buffer for CANDIDATE, or nil if there is none.
+  Re-runs `completion-at-point-functions', because `completion-in-region--data'
+  does not keep the property list that `:company-doc-buffer' lives in."
+    (pcase (run-hook-wrapped 'completion-at-point-functions
+                             #'completion--capf-wrapper 'optimist)
+      (`(,_hookfun . (,_start ,_end ,_collection . ,plist))
+       (when-let* ((fn (plist-get plist :company-doc-buffer))
+                   (doc (funcall fn candidate)))
+         ;; Some capfs answer with (BUFFER . POSITION).
+         (if (consp doc) (car doc) doc)))))
+
+  (defun my/completion--doc-symbol (candidate)
+    "Return CANDIDATE as a documented Elisp symbol, or nil.
+  Only for the minibuffer categories where that makes sense."
+    (when (memq (my/completion-category) '(command function variable symbol))
+      (when-let* ((symbol (intern-soft candidate)))
+        (and (or (fboundp symbol) (boundp symbol)) symbol))))
+
+  (defun my/completion-doc-at-point ()
+    "Show documentation for the completion candidate at point.
+  Works from the *Completions* buffer, or from the minibuffer when a
+  candidate is highlighted per `minibuffer-visible-completions'."
+    (interactive)
+    (let* ((in-list (derived-mode-p 'completion-list-mode))
+           (candidate (if in-list
+                          (and (fboundp 'completion-list-candidate-at-point)
+                               (car (completion-list-candidate-at-point)))
+                        (and (fboundp 'completion--selected-candidate)
+                             (completion--selected-candidate))))
+           (origin (or (and in-list completion-reference-buffer)
+                       (current-buffer)))
+           (doc (and candidate
+                     (with-current-buffer origin
+                       (my/completion--doc-buffer candidate))))
+           (symbol (and candidate (not doc)
+                        (my/completion--doc-symbol candidate))))
+      (cond
+       ((null candidate) (user-error "No completion candidate at point"))
+       (doc (display-buffer doc))
+       (symbol (describe-symbol symbol))
+       (t (user-error "No documentation for %s" candidate)))))
+
+  (keymap-set completion-list-mode-map "M-h" #'my/completion-doc-at-point)
+  (keymap-set minibuffer-local-completion-map "M-h" #'my/completion-doc-at-point)
+#+end_src
+
+Still missing next to =corfu-popupinfo=: this is on demand rather than a
+popup that follows the selection, and it opens a window instead of
+floating. Signatures are already in the list through
+=:annotation-function=, and =eldoc= covers the symbol once inserted.
 
 If you want the same interface with none of this config around it, the
 [[*Minibuffer Playground][Minibuffer Playground]] chapter tangles one.

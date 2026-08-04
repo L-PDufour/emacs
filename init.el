@@ -408,6 +408,52 @@ out which key to write a `completion-category-overrides' entry for."
                     "C-p" #'minibuffer-previous-completion))
     (setq minibuffer-visible-completions t)))
 
+(defun my/completion--doc-buffer (candidate)
+  "Return a documentation buffer for CANDIDATE, or nil if there is none.
+Re-runs `completion-at-point-functions', because `completion-in-region--data'
+does not keep the property list that `:company-doc-buffer' lives in."
+  (pcase (run-hook-wrapped 'completion-at-point-functions
+                           #'completion--capf-wrapper 'optimist)
+    (`(,_hookfun . (,_start ,_end ,_collection . ,plist))
+     (when-let* ((fn (plist-get plist :company-doc-buffer))
+                 (doc (funcall fn candidate)))
+       ;; Some capfs answer with (BUFFER . POSITION).
+       (if (consp doc) (car doc) doc)))))
+
+(defun my/completion--doc-symbol (candidate)
+  "Return CANDIDATE as a documented Elisp symbol, or nil.
+Only for the minibuffer categories where that makes sense."
+  (when (memq (my/completion-category) '(command function variable symbol))
+    (when-let* ((symbol (intern-soft candidate)))
+      (and (or (fboundp symbol) (boundp symbol)) symbol))))
+
+(defun my/completion-doc-at-point ()
+  "Show documentation for the completion candidate at point.
+Works from the *Completions* buffer, or from the minibuffer when a
+candidate is highlighted per `minibuffer-visible-completions'."
+  (interactive)
+  (let* ((in-list (derived-mode-p 'completion-list-mode))
+         (candidate (if in-list
+                        (and (fboundp 'completion-list-candidate-at-point)
+                             (car (completion-list-candidate-at-point)))
+                      (and (fboundp 'completion--selected-candidate)
+                           (completion--selected-candidate))))
+         (origin (or (and in-list completion-reference-buffer)
+                     (current-buffer)))
+         (doc (and candidate
+                   (with-current-buffer origin
+                     (my/completion--doc-buffer candidate))))
+         (symbol (and candidate (not doc)
+                      (my/completion--doc-symbol candidate))))
+    (cond
+     ((null candidate) (user-error "No completion candidate at point"))
+     (doc (display-buffer doc))
+     (symbol (describe-symbol symbol))
+     (t (user-error "No documentation for %s" candidate)))))
+
+(keymap-set completion-list-mode-map "M-h" #'my/completion-doc-at-point)
+(keymap-set minibuffer-local-completion-map "M-h" #'my/completion-doc-at-point)
+
 (use-package catppuccin-theme
   :ensure nil
   :custom
