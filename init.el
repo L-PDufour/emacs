@@ -371,7 +371,9 @@ out which key to write a `completion-category-overrides' entry for."
   ;; about the keys to select a candidate or narrate completion in the
   ;; echo area.
   (completion-auto-help t)
-  (completion-auto-select t)
+  ;; nil, not t: with t, TAB moves point into the read-only
+  ;; *Completions* buffer and you can no longer type to narrow.
+  (completion-auto-select nil)
   (completion-show-help nil)
   (completion-show-inline-help nil)
   ;; A single vertical column reads as a dropdown; the default packs
@@ -406,7 +408,13 @@ out which key to write a `completion-category-overrides' entry for."
                     "C-n" #'minibuffer-next-completion)
         (keymap-set minibuffer-visible-completions-up-down-map
                     "C-p" #'minibuffer-previous-completion))
-    (setq minibuffer-visible-completions t)))
+    (setq minibuffer-visible-completions t))
+
+  ;; The same two keys in a code buffer.  `completion-in-region-mode-map'
+  ;; is only live while a completion session is, exactly like `corfu-map',
+  ;; so this does not shadow ordinary line movement the rest of the time.
+  (keymap-set completion-in-region-mode-map "C-n" #'minibuffer-next-completion)
+  (keymap-set completion-in-region-mode-map "C-p" #'minibuffer-previous-completion))
 
 (defun my/completion--doc-buffer (candidate)
   "Return a documentation buffer for CANDIDATE, or nil if there is none.
@@ -453,6 +461,9 @@ candidate is highlighted per `minibuffer-visible-completions'."
 
 (keymap-set completion-list-mode-map "M-h" #'my/completion-doc-at-point)
 (keymap-set minibuffer-local-completion-map "M-h" #'my/completion-doc-at-point)
+;; And from a code buffer, where `completion-auto-select' nil leaves
+;; point during in-buffer completion.
+(keymap-set completion-in-region-mode-map "M-h" #'my/completion-doc-at-point)
 
 (use-package catppuccin-theme
   :ensure nil

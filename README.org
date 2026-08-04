@@ -770,11 +770,14 @@ story: point stays in the minibuffer while =C-n= / =C-p= walk the visible
 list and =RET= takes the highlighted candidate. ='up-down= rather than =t=
 leaves left and right moving through your input.
 
-=completion-auto-select= is =t= here, following Rahul: the first =TAB= puts
-point inside =*Completions*=, which is what makes in-buffer completion
-work without a second reach. Prot prefers =nil= — in the minibuffer,
-eager display means you rarely press =TAB= anyway and never lose focus.
-Try both.
+=completion-auto-select= is =nil=, which is Prot's choice rather than
+Rahul's =t=. With =t= the first =TAB= moves point into =*Completions*=,
+and since that buffer is read-only you cannot keep typing to narrow the
+list — you get a list to walk, but you have lost the ability to refine
+it, which is the opposite of how Corfu feels. With =nil= point stays
+where you are typing, in the minibuffer or in your code, and the list
+narrows under you. Selection does not need point to be in the list; see
+below.
 
 =my/completion-category= is Prot's helper for writing
 =completion-category-overrides=: focus a minibuffer prompt, =M-:=,
@@ -812,7 +815,9 @@ category symbol to write an override for. It needs
     ;; about the keys to select a candidate or narrate completion in the
     ;; echo area.
     (completion-auto-help t)
-    (completion-auto-select t)
+    ;; nil, not t: with t, TAB moves point into the read-only
+    ;; *Completions* buffer and you can no longer type to narrow.
+    (completion-auto-select nil)
     (completion-show-help nil)
     (completion-show-inline-help nil)
     ;; A single vertical column reads as a dropdown; the default packs
@@ -847,8 +852,49 @@ category symbol to write an override for. It needs
                       "C-n" #'minibuffer-next-completion)
           (keymap-set minibuffer-visible-completions-up-down-map
                       "C-p" #'minibuffer-previous-completion))
-      (setq minibuffer-visible-completions t)))
+      (setq minibuffer-visible-completions t))
+
+    ;; The same two keys in a code buffer.  `completion-in-region-mode-map'
+    ;; is only live while a completion session is, exactly like `corfu-map',
+    ;; so this does not shadow ordinary line movement the rest of the time.
+    (keymap-set completion-in-region-mode-map "C-n" #'minibuffer-next-completion)
+    (keymap-set completion-in-region-mode-map "C-p" #'minibuffer-previous-completion))
 #+end_src
+
+*** Typing and selecting without leaving the buffer
+
+Consult's manual warns that =consult-completion-in-region= breaks LSP
+completion: it moves the completion into the minibuffer, so the server
+never sees the updated input at point and cannot refine its candidates.
+That warning is real, and it is one reason this config does /not/ set
+=completion-in-region-function=. The default path completes in place —
+you type in your own buffer, at the position the server knows about —
+so the refinement Consult loses is intact here.
+
+The Corfu loop therefore survives in full, and none of it needs point to
+be in =*Completions*=:
+
+| Key             | Does                                       |
+| =TAB=           | start completion, show the list            |
+| /type/          | narrows the list live, at real point       |
+| =C-n= / =C-p=   | walk candidates from your buffer           |
+| =M-<down>/<up>= | the same, built-in                         |
+| =RET=           | take the selected candidate                |
+| =M-h=           | documentation for it                       |
+| =C-g=           | dismiss                                    |
+
+The middle rows are what =completion-auto-select nil= buys, and the
+=RET= binding is neatly done upstream: it is a =menu-item= with a filter
+that only claims the key when a candidate is actually selected, so =RET=
+stays a newline until you have picked something.
+
+Two details make this work outside the minibuffer even though the
+commands are named for it. =minibuffer--completions-visible= falls back
+to the selected window when there is no active minibuffer, and
+=completions--after-change= re-runs the update for any live
+=completion-in-region-mode=, not just minibuffer sessions. Eager
+/display/ is still the one piece that stays minibuffer-only, so the
+first =TAB= remains yours to press.
 
 *** What Eglot does with this
 
@@ -953,6 +999,9 @@ inherits from =minibuffer-local-map= rather than from the completion map.
 
   (keymap-set completion-list-mode-map "M-h" #'my/completion-doc-at-point)
   (keymap-set minibuffer-local-completion-map "M-h" #'my/completion-doc-at-point)
+  ;; And from a code buffer, where `completion-auto-select' nil leaves
+  ;; point during in-buffer completion.
+  (keymap-set completion-in-region-mode-map "M-h" #'my/completion-doc-at-point)
 #+end_src
 
 Still missing next to =corfu-popupinfo=: this is on demand rather than a
@@ -974,12 +1023,15 @@ around it, straight from Rahul's post:
 
 : emacs -Q --load test-minibuffer.el
 
-Two things differ from [[*Default Completions (Emacs 31)][Default Completions]] on purpose. It uses the
+Three things differ from [[*Default Completions (Emacs 31)][Default Completions]] on purpose. It uses the
 stock =flex= style instead of Orderless, so it is where you can watch
 =TAB= merge the surviving candidates and type a wrong one at you before
-the list appears — and =flex-noinsert=, Rahul's wrapper, fix it. And it
+the list appears — and =flex-noinsert=, Rahul's wrapper, fix it. It
 enables =savehist-mode= itself, since =emacs -Q= has none of our
-[[*Defaults][Defaults]].
+[[*Defaults][Defaults]]. And it keeps Rahul's =completion-auto-select t=, so
+=TAB= drops you into =*Completions*= and you cannot type to narrow from
+there — try it against our =nil= to feel the difference described in
+[[*Typing and selecting without leaving the buffer][Typing and selecting without leaving the buffer]].
 
 ** Header
 
