@@ -3,8 +3,8 @@
 ;;; Commentary:
 
 ;; The built-in minibuffer/in-buffer completion UI with nothing else
-;; around it.  Run it against a stock Emacs, without touching the real
-;; config:
+;; around it.  Tangled from README.org; nothing loads this.  Run it
+;; against a stock Emacs, without touching the real config:
 ;;
 ;;     emacs -Q --load test-minibuffer.el
 ;;
@@ -25,14 +25,6 @@
 ;; - In *scratch*, type (window-lay and hit TAB twice.
 ;; - Focus any prompt, `M-:', and evaluate (my/completion-category) to
 ;;   learn which key to write a `completion-category-overrides' entry for.
-;;
-;; Note the difference from the real config: this file uses the stock
-;; `flex' style, whose `try-completion' merges the surviving candidates
-;; and inserts the result.  With `tab-always-indent' set to `complete'
-;; that means TAB types a candidate at you — often a far, wrong one —
-;; before you ever see the list.  `flex-noinsert' below keeps flex's
-;; filtering and scoring and drops the merge.  The real config runs
-;; Orderless, which never merges, so it does not need this.
 
 ;;; Code:
 
