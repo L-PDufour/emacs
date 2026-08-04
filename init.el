@@ -28,9 +28,10 @@
 (setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
 
 (defcustom my/default-completion-ui nil
-  "When non-nil, complete with the built-in *Completions* buffer.
-Vertico and Corfu are then left disabled and the settings in the
-\"Default Completions\" section take over.  Takes effect on restart."
+  "When non-nil, complete in the minibuffer with the *Completions* buffer.
+Vertico is then left disabled.  In-buffer completion uses *Completions*
+either way, since Corfu is not part of this config.  Takes effect on
+restart."
   :type 'boolean
   :group 'convenience)
 
@@ -139,14 +140,12 @@ Vertico and Corfu are then left disabled and the settings in the
   :ensure nil
   :custom
   (display-buffer-alist
-   `(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+   '(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
       (display-buffer-in-side-window)
       (window-height . 0.25)
       (side . bottom)
       (slot . 0))
-     (,(if my/default-completion-ui
-           "\\*\\(Flymake diagnostics\\|xref\\)\\*"
-         "\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*")
+     ("\\*\\(Flymake diagnostics\\|xref\\)\\*"
       (display-buffer-in-side-window)
       (window-height . 0.25)
       (side . bottom)
@@ -326,27 +325,6 @@ Vertico and Corfu are then left disabled and the settings in the
   :ensure nil
   :after (embark consult))
 
-(use-package corfu
-  :ensure nil
-  :unless my/default-completion-ui
-  :custom
-  (corfu-auto nil)
-  ;; (corfu-auto-delay 0.1)
-  ;; (corfu-auto-prefix 2)
-  (corfu-cycle t)
-  (corfu-quit-no-match 'separator)
-  (corfu-popupinfo-delay '(0.5 . 0.2))
-  (corfu-on-exact-match nil)
-  (corfu-preselect 'first)
-  (corfu-preview-current nil)
-  :init
-  (global-corfu-mode)
-  :config
-  (corfu-popupinfo-mode 1)
-  (corfu-history-mode 1)
-  (with-eval-after-load 'savehist
-    (add-to-list 'savehist-additional-variables 'corfu-history)))
-
 (use-package cape
 :ensure nil
 :init
@@ -385,7 +363,6 @@ out which key to write a `completion-category-overrides' entry for."
 
 (use-package minibuffer
   :ensure nil
-  :when my/default-completion-ui
   :demand t
   :hook ((minibuffer-setup . cursor-intangible-mode)
          (minibuffer-setup . my/minibuffer-truncate-lines))
@@ -524,12 +501,6 @@ out which key to write a `completion-category-overrides' entry for."
   :config
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-
-(use-package nerd-icons-corfu
-  :ensure nil
-  :after corfu
-  :config
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (defun my/ml-flymake ()
   "Flymake error/warning counts for the mode-line."

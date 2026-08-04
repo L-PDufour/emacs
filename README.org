@@ -301,22 +301,25 @@ Keep all generated state under =var/=.
 
 ** Completion UI Toggle
 
-=my/default-completion-ui= decides which completion front-end the rest of
-this file builds. =nil= (the default) is the setup we have always run:
-Vertico for the minibuffer, Corfu for in-buffer completion. Non-nil
-leaves both disabled and hands the job to the built-in =*Completions*=
-buffer, which grew eager display and eager update in Emacs 31 — see the
-[[*Default Completions (Emacs 31)][Default Completions]] section for what that turns on.
+Corfu is gone, so in-buffer completion is /always/ the built-in
+=*Completions*= buffer now. What is left to choose is the minibuffer
+front-end, and =my/default-completion-ui= chooses it: =nil= (the default)
+keeps Vertico, non-nil leaves it disabled so the same =*Completions*=
+buffer does both jobs. Either way the [[*Default Completions (Emacs 31)][Default Completions]] settings
+apply — Vertico neutralises the ones that would collide (it binds
+=completion-eager-display= to nil around the read and sets
+=completion-auto-help= nil in the minibuffer), so there is nothing to
+gate.
 
 Flip it here or with =M-x customize-variable RET my/default-completion-ui=,
-then restart. It is defined this early because [[*Window Display Rules][Window Display Rules]]
-below has to know about it.
+then restart.
 
 #+begin_src emacs-lisp
   (defcustom my/default-completion-ui nil
-    "When non-nil, complete with the built-in *Completions* buffer.
-  Vertico and Corfu are then left disabled and the settings in the
-  \"Default Completions\" section take over.  Takes effect on restart."
+    "When non-nil, complete in the minibuffer with the *Completions* buffer.
+  Vertico is then left disabled.  In-buffer completion uses *Completions*
+  either way, since Corfu is not part of this config.  Takes effect on
+  restart."
     :type 'boolean
     :group 'convenience)
 #+end_src
@@ -433,26 +436,25 @@ below has to know about it.
 
 ** Window Display Rules
 
-When =my/default-completion-ui= is on, =*Completions*= is dropped from the
-side-window rule. A bottom side window pinned to =0.25= of the frame
-overrides =completions-max-height= and never opens under the window you
-are completing in, which is most of what makes in-buffer =TAB= completion
-pleasant. Left to itself, =*Completions*= splits the selected window and
-shrinks to fit.
+=*Completions*= used to be pinned here to a bottom side window at =0.25=
+of the frame. It is not anymore, because now that Corfu is gone it is
+the in-buffer completion UI too: a fixed-height side window overrides
+=completions-max-height= and never opens under the window you are
+completing in, which is most of what makes in-buffer =TAB= completion
+bearable. Left to itself it splits the selected window and shrinks to
+fit.
 
 #+begin_src emacs-lisp
   (use-package window
     :ensure nil
     :custom
     (display-buffer-alist
-     `(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+     '(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
         (display-buffer-in-side-window)
         (window-height . 0.25)
         (side . bottom)
         (slot . 0))
-       (,(if my/default-completion-ui
-             "\\*\\(Flymake diagnostics\\|xref\\)\\*"
-           "\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*")
+       ("\\*\\(Flymake diagnostics\\|xref\\)\\*"
         (display-buffer-in-side-window)
         (window-height . 0.25)
         (side . bottom)
@@ -608,7 +610,7 @@ shrinks to fit.
 
 Skipped entirely when =my/default-completion-ui= is on — =:unless= keeps
 the mode, the keybindings and the candidate-arrow advice from ever being
-installed, so the built-in UI gets a clean field.
+installed, so the built-in UI gets a clean field in the minibuffer too.
 
 #+begin_src emacs-lisp
   (use-package vertico
@@ -715,37 +717,6 @@ it.
     :after (embark consult))
 #+end_src
 
-** Corfu
-
-Also skipped when =my/default-completion-ui= is on. =tab-always-indent= is
-already =complete= in [[*Defaults][Defaults]], so with Corfu out of the way in-buffer
-=TAB= falls through to the same =*Completions*= buffer the minibuffer uses.
-Cape stays either way: it only feeds =completion-at-point-functions=.
-
-#+begin_src emacs-lisp
-  (use-package corfu
-    :ensure nil
-    :unless my/default-completion-ui
-    :custom
-    (corfu-auto nil)
-    ;; (corfu-auto-delay 0.1)
-    ;; (corfu-auto-prefix 2)
-    (corfu-cycle t)
-    (corfu-quit-no-match 'separator)
-    (corfu-popupinfo-delay '(0.5 . 0.2))
-    (corfu-on-exact-match nil)
-    (corfu-preselect 'first)
-    (corfu-preview-current nil)
-    :init
-    (global-corfu-mode)
-    :config
-    (corfu-popupinfo-mode 1)
-    (corfu-history-mode 1)
-    (with-eval-after-load 'savehist
-      (add-to-list 'savehist-additional-variables 'corfu-history)))
-
-#+end_src
-
 ** Cape
 
 #+begin_src emacs-lisp
@@ -770,35 +741,47 @@ Cape stays either way: it only feeds =completion-at-point-functions=.
 
 ** Default Completions (Emacs 31)
 
-Everything below is inert unless =my/default-completion-ui= is non-nil.
-It follows two write-ups on the built-in interface: Protesilaos'
+This is the in-buffer completion UI since Corfu left, and the minibuffer
+one too when [[*Completion UI Toggle][the toggle]] is on. It follows two write-ups: Protesilaos'
 [[https://protesilaos.com/codelog/2026-07-29-emacs-default-minibuffer-completion-overview/][default minibuffer completions overview]] and Rahul Juliato's
-[[https://www.rahuljuliato.com/posts/completions-buffer-is-now-enough][The Completions Buffer Is Now Enough]].
+[[https://www.rahuljuliato.com/posts/completions-buffer-is-now-enough][The Completions Buffer Is Now Enough]]. It loads unconditionally: Vertico
+binds =completion-eager-display= to nil around its read and sets
+=completion-auto-help= nil in the minibuffer, so nothing here fights it.
 
-The two settings that carry the whole thing are new in Emacs 31:
+The two settings that carry it are new in Emacs 31:
 =completion-eager-display= decides whether =*Completions*= appears on its
 own, =completion-eager-update= whether it refreshes as you type. Both
 default to ='auto=, meaning "only if the completion table asks for it",
-and almost nothing asks. Set to =t= they turn =*Completions*= into a live
-narrowing list you never summon with =TAB=. They are guarded with
-=boundp= so this section stays harmless on Emacs 30 and older, where you
-get a static, =TAB=-driven =*Completions*= instead.
+and almost nothing asks. They are guarded with =boundp= so this section
+stays harmless on Emacs 30 and older, where you get a static,
+=TAB=-driven =*Completions*= instead.
 
-=minibuffer-visible-completions= is the other half: point stays in the
-minibuffer while =C-n= / =C-p= walk the visible list and =RET= takes the
-highlighted candidate. ='up-down= rather than =t= leaves left and right
-moving through your input.
+Worth knowing which half of the config each one buys, because it is not
+symmetric. Eager /display/ is minibuffer-only: =completions--start-eager-display=
+runs from =completing-read-default='s setup hook and from nowhere else, so
+no amount of configuration makes a completion list appear in a code
+buffer on its own. In-buffer completion still starts with =TAB=, exactly
+like the =corfu-auto nil= we ran before. Eager /update/ is what applies to
+both — once a list is on screen, =completions--after-change= keeps it
+narrowing as you type.
+
+=minibuffer-visible-completions= is the other half of the minibuffer
+story: point stays in the minibuffer while =C-n= / =C-p= walk the visible
+list and =RET= takes the highlighted candidate. ='up-down= rather than =t=
+leaves left and right moving through your input.
 
 =completion-auto-select= is =t= here, following Rahul: the first =TAB= puts
 point inside =*Completions*=, which is what makes in-buffer completion
-work without a second reach. Prot prefers =nil= — with eager display you
-rarely press =TAB= anyway and never lose the minibuffer. Try both.
+work without a second reach. Prot prefers =nil= — in the minibuffer,
+eager display means you rarely press =TAB= anyway and never lose focus.
+Try both.
 
 =my/completion-category= is Prot's helper for writing
-=completion-category-overrides=. It is defined under either UI: focus a
-minibuffer prompt, =M-:=, evaluate =(my/completion-category)=, and the echo
-area gives you the category symbol to write an override for. It needs
+=completion-category-overrides=: focus a minibuffer prompt, =M-:=,
+evaluate =(my/completion-category)=, and the echo area gives you the
+category symbol to write an override for. It needs
 =enable-recursive-minibuffers=, which this section turns on.
+
 
 #+begin_src emacs-lisp
   (defun my/completion-category ()
@@ -821,7 +804,6 @@ area gives you the category symbol to write an override for. It needs
 
   (use-package minibuffer
     :ensure nil
-    :when my/default-completion-ui
     :demand t
     :hook ((minibuffer-setup . cursor-intangible-mode)
            (minibuffer-setup . my/minibuffer-truncate-lines))
@@ -867,6 +849,40 @@ area gives you the category symbol to write an override for. It needs
                       "C-p" #'minibuffer-previous-completion))
       (setq minibuffer-visible-completions t)))
 #+end_src
+
+*** What Eglot does with this
+
+Eglot needs nothing special, and the pieces line up better than they
+look:
+
+- Its candidates arrive through an ordinary =completion-at-point=
+  function, so =completion-in-region= handles them like any other:
+  =:annotation-function= gives you the LSP detail string in the list, and
+  =:exit-function= still runs, which is what applies snippets and
+  =textEdit= replacements. Nothing about that was Corfu-specific.
+- Sorting stays the server's. Eglot's table returns a
+  =display-sort-function= built from the LSP =sortText=, and table
+  metadata wins over our =completions-sort ='historical=.
+- Eglot pushes =(eglot-capf (styles eglot--dumb-flex))= onto
+  =completion-category-defaults=, but =completion--category-override=
+  consults =completion-category-overrides= first, so the =orderless= entry
+  in the [[*Orderless][Orderless]] section is what actually applies.
+- The eager update loop is designed for this. It runs on an idle timer
+  inside =while-no-input= with =non-essential= bound, and Eglot issues
+  =:textDocument/completion= with =:cancel-on-input t=, so a keystroke
+  aborts an in-flight request rather than queueing behind it.
+
+One thing to watch. =(advice-add 'eglot-completion-at-point :around
+#'cape-wrap-buster)= in the [[*Eglot (LSP)][Eglot]] section invalidates Eglot's session
+cache on every input, so with eager update each idle keystroke becomes a
+fresh server round trip. That advice is also close to redundant: Eglot
+only caches when the server answers =isIncomplete: false=, and re-queries
+by itself otherwise. If completion feels heavy on a chatty server, drop
+the advice before you blame the interface.
+
+What is genuinely lost with Corfu gone is the documentation popup
+(=corfu-popupinfo= rendering =:company-doc-buffer=) and the kind icons.
+Annotations remain; hover documentation is still =eldoc='s job.
 
 If you want the same interface with none of this config around it, the
 [[*Minibuffer Playground][Minibuffer Playground]] chapter tangles one.
@@ -1152,13 +1168,12 @@ the merge.
     :config
     (nerd-icons-completion-mode)
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-
-  (use-package nerd-icons-corfu
-    :ensure nil
-    :after corfu
-    :config
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
+
+=nerd-icons-completion= only decorates minibuffer categories, so it
+survives; =nerd-icons-corfu= went with Corfu. In-buffer candidates come
+with no icon now — the =:company-kind= property Corfu drew them from is a
+company/corfu convention that the built-in UI ignores.
 
 ** Mode Line
 #+begin_src emacs-lisp
