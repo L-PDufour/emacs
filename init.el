@@ -27,6 +27,13 @@
 (setq transient-values-file (expand-file-name "transient/values.el" user-emacs-directory))
 (setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
 
+(defcustom my/default-completion-ui nil
+  "When non-nil, complete with the built-in *Completions* buffer.
+Vertico and Corfu are then left disabled and the settings in the
+\"Default Completions\" section take over.  Takes effect on restart."
+  :type 'boolean
+  :group 'convenience)
+
 (use-package emacs
   :ensure nil
   :custom
@@ -132,12 +139,14 @@
   :ensure nil
   :custom
   (display-buffer-alist
-   '(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+   `(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
       (display-buffer-in-side-window)
       (window-height . 0.25)
       (side . bottom)
       (slot . 0))
-     ("\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*"
+     (,(if my/default-completion-ui
+           "\\*\\(Flymake diagnostics\\|xref\\)\\*"
+         "\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*")
       (display-buffer-in-side-window)
       (window-height . 0.25)
       (side . bottom)
@@ -254,6 +263,7 @@
 
 (use-package vertico
   :ensure nil
+  :unless my/default-completion-ui
   :hook (after-init . vertico-mode)
   :custom
   (vertico-count 10)
@@ -275,7 +285,7 @@
 
 (use-package orderless
 :ensure nil
-:after vertico
+:demand t
 :custom
 (completion-styles '(orderless basic))
 (completion-category-defaults nil)
@@ -318,6 +328,7 @@
 
 (use-package corfu
   :ensure nil
+  :unless my/default-completion-ui
   :custom
   (corfu-auto nil)
   ;; (corfu-auto-delay 0.1)
@@ -353,6 +364,72 @@
            #'tempel-expand
            #'cape-file)))))
 (add-to-list 'completion-at-point-functions #'cape-file 'append))
+
+(defun my/completion-category ()
+  "Return the completion category of the active minibuffer prompt.
+Evaluate this from a recursive minibuffer (\\[eval-expression]) to find
+out which key to write a `completion-category-overrides' entry for."
+  (when-let* ((window (active-minibuffer-window)))
+    (with-current-buffer (window-buffer window)
+      (completion-metadata-get
+       (completion-metadata (buffer-substring-no-properties
+                             (minibuffer-prompt-end)
+                             (max (minibuffer-prompt-end) (point)))
+                            minibuffer-completion-table
+                            minibuffer-completion-predicate)
+       'category))))
+
+(defun my/minibuffer-truncate-lines ()
+  "Keep minibuffer lines unwrapped."
+  (setq truncate-lines t))
+
+(use-package minibuffer
+  :ensure nil
+  :when my/default-completion-ui
+  :demand t
+  :hook ((minibuffer-setup . cursor-intangible-mode)
+         (minibuffer-setup . my/minibuffer-truncate-lines))
+  :custom
+  ;; Pop the list up when there is no unique match, and do not tell me
+  ;; about the keys to select a candidate or narrate completion in the
+  ;; echo area.
+  (completion-auto-help t)
+  (completion-auto-select t)
+  (completion-show-help nil)
+  (completion-show-inline-help nil)
+  ;; A single vertical column reads as a dropdown; the default packs
+  ;; candidates across the window like `ls' output.
+  (completions-format 'one-column)
+  (completions-max-height 12)
+  ;; Alphabetical, with whatever I picked recently floated to the top
+  ;; (`savehist-mode' is on in Defaults, so this persists).
+  (completions-sort 'historical)
+  (completions-detailed t)
+  (completion-ignore-case t)
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  ;; Needed by `my/completion-category', and generally worth having.
+  (enable-recursive-minibuffers t)
+  (read-minibuffer-restore-windows nil)
+  ;; Keep point out of the read-only prompt text; `cursor-intangible-mode'
+  ;; on `minibuffer-setup-hook' is what enforces it.
+  (minibuffer-prompt-properties
+   '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
+  :config
+  (minibuffer-depth-indicate-mode 1)
+  (minibuffer-electric-default-mode 1)
+  ;; Emacs 31.
+  (when (boundp 'completion-eager-display)
+    (setq completion-eager-display t
+          completion-eager-update t))
+  (if (boundp 'minibuffer-visible-completions-up-down-map)
+      (progn
+        (setq minibuffer-visible-completions 'up-down)
+        (keymap-set minibuffer-visible-completions-up-down-map
+                    "C-n" #'minibuffer-next-completion)
+        (keymap-set minibuffer-visible-completions-up-down-map
+                    "C-p" #'minibuffer-previous-completion))
+    (setq minibuffer-visible-completions t)))
 
 (use-package catppuccin-theme
   :ensure nil

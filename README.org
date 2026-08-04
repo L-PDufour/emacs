@@ -10,6 +10,10 @@ Files produced:
 - =~/.emacs.d/early-init.el=
 - =~/.emacs.d/init.el=
 
+=test-minibuffer.el= is not tangled from here. It is a standalone
+=emacs -Q= playground for the built-in =*Completions*= UI; see
+[[*Default Completions (Emacs 31)][Default Completions]].
+
 *Important*: All packages are installed via Nix/home-manager. Every =use-package=
 declaration uses =:ensure nil=. Do not add =:straight t= or =:ensure t= here.
 
@@ -297,6 +301,28 @@ Keep all generated state under =var/=.
   (setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
 #+end_src
 
+** Completion UI Toggle
+
+=my/default-completion-ui= decides which completion front-end the rest of
+this file builds. =nil= (the default) is the setup we have always run:
+Vertico for the minibuffer, Corfu for in-buffer completion. Non-nil
+leaves both disabled and hands the job to the built-in =*Completions*=
+buffer, which grew eager display and eager update in Emacs 31 — see the
+[[*Default Completions (Emacs 31)][Default Completions]] section for what that turns on.
+
+Flip it here or with =M-x customize-variable RET my/default-completion-ui=,
+then restart. It is defined this early because [[*Window Display Rules][Window Display Rules]]
+below has to know about it.
+
+#+begin_src emacs-lisp
+  (defcustom my/default-completion-ui nil
+    "When non-nil, complete with the built-in *Completions* buffer.
+  Vertico and Corfu are then left disabled and the settings in the
+  \"Default Completions\" section take over.  Takes effect on restart."
+    :type 'boolean
+    :group 'convenience)
+#+end_src
+
 * Core Emacs
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle init.el
@@ -409,17 +435,26 @@ Keep all generated state under =var/=.
 
 ** Window Display Rules
 
+When =my/default-completion-ui= is on, =*Completions*= is dropped from the
+side-window rule. A bottom side window pinned to =0.25= of the frame
+overrides =completions-max-height= and never opens under the window you
+are completing in, which is most of what makes in-buffer =TAB= completion
+pleasant. Left to itself, =*Completions*= splits the selected window and
+shrinks to fit.
+
 #+begin_src emacs-lisp
   (use-package window
     :ensure nil
     :custom
     (display-buffer-alist
-     '(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+     `(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
         (display-buffer-in-side-window)
         (window-height . 0.25)
         (side . bottom)
         (slot . 0))
-       ("\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*"
+       (,(if my/default-completion-ui
+             "\\*\\(Flymake diagnostics\\|xref\\)\\*"
+           "\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*")
         (display-buffer-in-side-window)
         (window-height . 0.25)
         (side . bottom)
@@ -573,9 +608,14 @@ Keep all generated state under =var/=.
 
 ** Vertico
 
+Skipped entirely when =my/default-completion-ui= is on — =:unless= keeps
+the mode, the keybindings and the candidate-arrow advice from ever being
+installed, so the built-in UI gets a clean field.
+
 #+begin_src emacs-lisp
   (use-package vertico
     :ensure nil
+    :unless my/default-completion-ui
     :hook (after-init . vertico-mode)
     :custom
     (vertico-count 10)
@@ -598,10 +638,22 @@ Keep all generated state under =var/=.
 
 ** Orderless
 
+=:demand t= rather than =:after vertico=: the styles here have nothing to
+do with the front-end drawing them, and hanging them off Vertico meant
+they silently never loaded once =my/default-completion-ui= disabled it.
+
+Keeping Orderless also sidesteps the =flex= complaint in Rahul's post.
+The stock =flex= style merges the surviving candidates and inserts the
+result on =TAB=, so with =tab-always-indent= set to =complete= it types a
+wrong candidate at you before showing the list; his fix is a
+=flex-noinsert= style. Orderless never merges — =TAB= just pops the list —
+so we do not need the workaround. It is in [[file:test-minibuffer.el][test-minibuffer.el]] if you
+want to feel the problem it solves.
+
 #+begin_src emacs-lisp
   (use-package orderless
   :ensure nil
-  :after vertico
+  :demand t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
@@ -667,9 +719,15 @@ it.
 
 ** Corfu
 
+Also skipped when =my/default-completion-ui= is on. =tab-always-indent= is
+already =complete= in [[*Defaults][Defaults]], so with Corfu out of the way in-buffer
+=TAB= falls through to the same =*Completions*= buffer the minibuffer uses.
+Cape stays either way: it only feeds =completion-at-point-functions=.
+
 #+begin_src emacs-lisp
   (use-package corfu
     :ensure nil
+    :unless my/default-completion-ui
     :custom
     (corfu-auto nil)
     ;; (corfu-auto-delay 0.1)
@@ -711,6 +769,114 @@ it.
              #'cape-file)))))
   (add-to-list 'completion-at-point-functions #'cape-file 'append))
 #+end_src
+
+** Default Completions (Emacs 31)
+
+Everything below is inert unless =my/default-completion-ui= is non-nil.
+It follows two write-ups on the built-in interface: Protesilaos'
+[[https://protesilaos.com/codelog/2026-07-29-emacs-default-minibuffer-completion-overview/][default minibuffer completions overview]] and Rahul Juliato's
+[[https://www.rahuljuliato.com/posts/completions-buffer-is-now-enough][The Completions Buffer Is Now Enough]].
+
+The two settings that carry the whole thing are new in Emacs 31:
+=completion-eager-display= decides whether =*Completions*= appears on its
+own, =completion-eager-update= whether it refreshes as you type. Both
+default to ='auto=, meaning "only if the completion table asks for it",
+and almost nothing asks. Set to =t= they turn =*Completions*= into a live
+narrowing list you never summon with =TAB=. They are guarded with
+=boundp= so this section stays harmless on Emacs 30 and older, where you
+get a static, =TAB=-driven =*Completions*= instead.
+
+=minibuffer-visible-completions= is the other half: point stays in the
+minibuffer while =C-n= / =C-p= walk the visible list and =RET= takes the
+highlighted candidate. ='up-down= rather than =t= leaves left and right
+moving through your input.
+
+=completion-auto-select= is =t= here, following Rahul: the first =TAB= puts
+point inside =*Completions*=, which is what makes in-buffer completion
+work without a second reach. Prot prefers =nil= — with eager display you
+rarely press =TAB= anyway and never lose the minibuffer. Try both.
+
+=my/completion-category= is Prot's helper for writing
+=completion-category-overrides=. It is defined under either UI: focus a
+minibuffer prompt, =M-:=, evaluate =(my/completion-category)=, and the echo
+area gives you the category symbol to write an override for. It needs
+=enable-recursive-minibuffers=, which this section turns on.
+
+#+begin_src emacs-lisp
+  (defun my/completion-category ()
+    "Return the completion category of the active minibuffer prompt.
+  Evaluate this from a recursive minibuffer (\\[eval-expression]) to find
+  out which key to write a `completion-category-overrides' entry for."
+    (when-let* ((window (active-minibuffer-window)))
+      (with-current-buffer (window-buffer window)
+        (completion-metadata-get
+         (completion-metadata (buffer-substring-no-properties
+                               (minibuffer-prompt-end)
+                               (max (minibuffer-prompt-end) (point)))
+                              minibuffer-completion-table
+                              minibuffer-completion-predicate)
+         'category))))
+
+  (defun my/minibuffer-truncate-lines ()
+    "Keep minibuffer lines unwrapped."
+    (setq truncate-lines t))
+
+  (use-package minibuffer
+    :ensure nil
+    :when my/default-completion-ui
+    :demand t
+    :hook ((minibuffer-setup . cursor-intangible-mode)
+           (minibuffer-setup . my/minibuffer-truncate-lines))
+    :custom
+    ;; Pop the list up when there is no unique match, and do not tell me
+    ;; about the keys to select a candidate or narrate completion in the
+    ;; echo area.
+    (completion-auto-help t)
+    (completion-auto-select t)
+    (completion-show-help nil)
+    (completion-show-inline-help nil)
+    ;; A single vertical column reads as a dropdown; the default packs
+    ;; candidates across the window like `ls' output.
+    (completions-format 'one-column)
+    (completions-max-height 12)
+    ;; Alphabetical, with whatever I picked recently floated to the top
+    ;; (`savehist-mode' is on in Defaults, so this persists).
+    (completions-sort 'historical)
+    (completions-detailed t)
+    (completion-ignore-case t)
+    (read-buffer-completion-ignore-case t)
+    (read-file-name-completion-ignore-case t)
+    ;; Needed by `my/completion-category', and generally worth having.
+    (enable-recursive-minibuffers t)
+    (read-minibuffer-restore-windows nil)
+    ;; Keep point out of the read-only prompt text; `cursor-intangible-mode'
+    ;; on `minibuffer-setup-hook' is what enforces it.
+    (minibuffer-prompt-properties
+     '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
+    :config
+    (minibuffer-depth-indicate-mode 1)
+    (minibuffer-electric-default-mode 1)
+    ;; Emacs 31.
+    (when (boundp 'completion-eager-display)
+      (setq completion-eager-display t
+            completion-eager-update t))
+    (if (boundp 'minibuffer-visible-completions-up-down-map)
+        (progn
+          (setq minibuffer-visible-completions 'up-down)
+          (keymap-set minibuffer-visible-completions-up-down-map
+                      "C-n" #'minibuffer-next-completion)
+          (keymap-set minibuffer-visible-completions-up-down-map
+                      "C-p" #'minibuffer-previous-completion))
+      (setq minibuffer-visible-completions t)))
+#+end_src
+
+*** Playground
+
+[[file:test-minibuffer.el][test-minibuffer.el]] is the same interface with none of this config
+around it, straight from Rahul's post: =emacs -Q --load test-minibuffer.el=.
+It uses stock =flex= plus his =flex-noinsert= style instead of Orderless,
+so it is also where you can see the =TAB=-inserts-a-wrong-candidate
+behaviour that Orderless spares us.
 
 * Theme and Icons
 :PROPERTIES:
