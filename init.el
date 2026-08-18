@@ -1074,19 +1074,26 @@
 
 (require 'auth-source)
 
-(defvar my-gptel--openrouter-key nil
-  "Session cache for an OpenRouter API key entered by hand.")
+(defvar my-gptel--key-cache nil
+  "Alist of API keys entered by hand this session, keyed by host.")
+
+(defun my-gptel-key (host env-var)
+  "Return the API key for HOST.
+Search `auth-sources' for HOST first, then the ENV-VAR environment
+variable, and only then prompt — caching the answer for the session."
+  (or (auth-source-pick-first-password :host host :user "apikey")
+      (getenv env-var)
+      (alist-get host my-gptel--key-cache nil nil #'equal)
+      (setf (alist-get host my-gptel--key-cache nil nil #'equal)
+            (read-passwd (format "%s API key: " host)))))
 
 (defun my-gptel-openrouter-key ()
-  "Return the OpenRouter API key.
-Look for an `openrouter.ai' entry in `auth-sources' first, then fall
-back to the OPENROUTER_API_KEY environment variable, and only prompt
-if neither is set."
-  (or (auth-source-pick-first-password :host "openrouter.ai" :user "apikey")
-      (getenv "OPENROUTER_API_KEY")
-      my-gptel--openrouter-key
-      (setq my-gptel--openrouter-key
-            (read-passwd "OpenRouter API key: "))))
+  "Return the OpenRouter API key."
+  (my-gptel-key "openrouter.ai" "OPENROUTER_API_KEY"))
+
+(defun my-gptel-litellm-key ()
+  "Return the master key of the local LiteLLM proxy."
+  (my-gptel-key "litellm" "LITELLM_MASTER_KEY"))
 
 (defvar my-gptel-openrouter-models
   '(anthropic/claude-sonnet-4.5
@@ -1105,11 +1112,22 @@ is a hand-picked subset that will drift.  Run
 `my-gptel-openrouter-refresh-models' to replace it with the live
 catalogue.")
 
+(defvar my-gptel-litellm-models
+  '(deepseek-chat deepseek-reasoner sonnet)
+  "Model aliases served by the local LiteLLM proxy.
+These are the `model_name' values from the proxy's own config.yaml,
+not upstream model names — LiteLLM maps one to the other.  Run
+`my-gptel-litellm-refresh-models' to sync this list with the running
+proxy.")
+
 (defvar my-gptel-openrouter nil
   "The OpenRouter gptel backend.")
 
 (defvar my-gptel-llama-cpp nil
   "The local llama.cpp gptel backend.")
+
+(defvar my-gptel-litellm nil
+  "The gptel backend for a local LiteLLM proxy.")
 
 (use-package gptel
   :ensure nil
@@ -1138,6 +1156,19 @@ catalogue.")
           :key #'my-gptel-openrouter-key
           :models my-gptel-openrouter-models))
 
+  ;; Optional LiteLLM proxy: one endpoint in front of DeepSeek and
+  ;; anything else worth routing directly, with its own key store and
+  ;; spend caps.  Registering it is free when the proxy is not running
+  ;; — nothing connects until the backend is selected.
+  (setq my-gptel-litellm
+        (gptel-make-openai "LiteLLM"
+          :host "localhost:4000"
+          :protocol "http"
+          :endpoint "/v1/chat/completions"
+          :stream t
+          :key #'my-gptel-litellm-key
+          :models my-gptel-litellm-models))
+
   (setq gptel-backend my-gptel-openrouter)
   (setq gptel-model 'anthropic/claude-sonnet-4.5)
 
@@ -1150,28 +1181,46 @@ catalogue.")
    ("C-c g r" . gptel-rewrite)
    ("C-c g k" . gptel-abort)))
 
-(defun my-gptel-openrouter-refresh-models ()
-  "Replace the OpenRouter backend's model list with the live catalogue."
-  (interactive)
-  (let ((buf (url-retrieve-synchronously
-              "https://openrouter.ai/api/v1/models" t nil 30)))
+(defun my-gptel--fetch-models (url &optional key)
+  "Return the model ids advertised at URL as a list of symbols.
+URL must be an OpenAI-style /models endpoint.  KEY, when non-nil, is
+sent as a bearer token."
+  (let* ((url-request-extra-headers
+          (and key (list (cons "Authorization" (concat "Bearer " key)))))
+         (buf (url-retrieve-synchronously url t nil 30)))
     (unless buf
-      (user-error "Could not reach openrouter.ai"))
+      (user-error "No response from %s" url))
     (unwind-protect
         (with-current-buffer buf
           (goto-char (point-min))
           (unless (search-forward "\n\n" nil t)
-            (user-error "Malformed response from openrouter.ai"))
-          (let* ((payload (json-parse-buffer :object-type 'plist
-                                             :array-type 'list))
-                 (models (mapcar (lambda (m) (intern (plist-get m :id)))
-                                 (plist-get payload :data))))
-            (unless models
-              (user-error "No models in the OpenRouter response"))
-            (setq my-gptel-openrouter-models models)
-            (setf (gptel-backend-models my-gptel-openrouter) models)
-            (message "OpenRouter: %d models available" (length models))))
+            (user-error "Malformed response from %s" url))
+          (let ((payload (json-parse-buffer :object-type 'plist
+                                            :array-type 'list)))
+            (or (mapcar (lambda (m) (intern (plist-get m :id)))
+                        (plist-get payload :data))
+                (user-error "No models listed at %s" url))))
       (kill-buffer buf))))
+
+(defun my-gptel-openrouter-refresh-models ()
+  "Replace the OpenRouter backend's model list with the live catalogue."
+  (interactive)
+  (let ((models (my-gptel--fetch-models
+                 "https://openrouter.ai/api/v1/models")))
+    (setq my-gptel-openrouter-models models)
+    (setf (gptel-backend-models my-gptel-openrouter) models)
+    (message "OpenRouter: %d models available" (length models))))
+
+(defun my-gptel-litellm-refresh-models ()
+  "Sync the LiteLLM backend's model list with the running proxy.
+Doubles as a health check: an error here means the proxy is down, on
+another port, or refusing the master key."
+  (interactive)
+  (let ((models (my-gptel--fetch-models "http://localhost:4000/v1/models"
+                                        (my-gptel-litellm-key))))
+    (setq my-gptel-litellm-models models)
+    (setf (gptel-backend-models my-gptel-litellm) models)
+    (message "LiteLLM: %s" (mapconcat #'symbol-name models ", "))))
 
 (defvar my-gptel-code-directive
   "You are a programming assistant working inside Emacs on the user's project.
@@ -1465,6 +1514,14 @@ if it has one.  Reuses the buffer on subsequent calls."
       :backend "OpenRouter"
       :model 'google/gemini-2.5-flash
       :tools nil)
+
+    (gptel-make-preset 'cheap
+      :description "DeepSeek through the local LiteLLM proxy."
+      :backend "LiteLLM"
+      :model 'deepseek-chat
+      :system my-gptel-code-directive
+      :tools '("project_root" "list_project_files" "search_project"
+               "read_file" "read_buffer"))
 
     (gptel-make-preset 'code
       :description "Strong hosted model with project tools."

@@ -1678,11 +1678,16 @@ than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
 :header-args:emacs-lisp: :tangle init.el
 :END:
 
-Two backends are registered: *OpenRouter* for hosted models (the
-default) and *llama.cpp* for the local one on =localhost:8999=.
-OpenRouter is a single API — and a single key — in front of every
-hosted model worth using, and it speaks the OpenAI protocol, so
-=gptel-make-openai= is the correct constructor for it.
+Three backends are registered: *OpenRouter* for hosted models (the
+default), *llama.cpp* for the local one on =localhost:8999=, and
+*LiteLLM* for an optional proxy on =localhost:4000= that fronts
+cheaper providers such as DeepSeek. All three speak the OpenAI
+protocol, so =gptel-make-openai= is the right constructor for each;
+only the host, key and model list differ.
+
+Registering a backend costs nothing at startup — no connection is made
+until it is selected — so the LiteLLM entry is harmless when the proxy
+is not running.
 
 ** Backends and API Keys
 :PROPERTIES:
@@ -1692,19 +1697,26 @@ hosted model worth using, and it speaks the OpenAI protocol, so
 #+begin_src emacs-lisp
   (require 'auth-source)
 
-  (defvar my-gptel--openrouter-key nil
-    "Session cache for an OpenRouter API key entered by hand.")
+  (defvar my-gptel--key-cache nil
+    "Alist of API keys entered by hand this session, keyed by host.")
+
+  (defun my-gptel-key (host env-var)
+    "Return the API key for HOST.
+  Search `auth-sources' for HOST first, then the ENV-VAR environment
+  variable, and only then prompt — caching the answer for the session."
+    (or (auth-source-pick-first-password :host host :user "apikey")
+        (getenv env-var)
+        (alist-get host my-gptel--key-cache nil nil #'equal)
+        (setf (alist-get host my-gptel--key-cache nil nil #'equal)
+              (read-passwd (format "%s API key: " host)))))
 
   (defun my-gptel-openrouter-key ()
-    "Return the OpenRouter API key.
-  Look for an `openrouter.ai' entry in `auth-sources' first, then fall
-  back to the OPENROUTER_API_KEY environment variable, and only prompt
-  if neither is set."
-    (or (auth-source-pick-first-password :host "openrouter.ai" :user "apikey")
-        (getenv "OPENROUTER_API_KEY")
-        my-gptel--openrouter-key
-        (setq my-gptel--openrouter-key
-              (read-passwd "OpenRouter API key: "))))
+    "Return the OpenRouter API key."
+    (my-gptel-key "openrouter.ai" "OPENROUTER_API_KEY"))
+
+  (defun my-gptel-litellm-key ()
+    "Return the master key of the local LiteLLM proxy."
+    (my-gptel-key "litellm" "LITELLM_MASTER_KEY"))
 
   (defvar my-gptel-openrouter-models
     '(anthropic/claude-sonnet-4.5
@@ -1723,11 +1735,22 @@ hosted model worth using, and it speaks the OpenAI protocol, so
   `my-gptel-openrouter-refresh-models' to replace it with the live
   catalogue.")
 
+  (defvar my-gptel-litellm-models
+    '(deepseek-chat deepseek-reasoner sonnet)
+    "Model aliases served by the local LiteLLM proxy.
+  These are the `model_name' values from the proxy's own config.yaml,
+  not upstream model names — LiteLLM maps one to the other.  Run
+  `my-gptel-litellm-refresh-models' to sync this list with the running
+  proxy.")
+
   (defvar my-gptel-openrouter nil
     "The OpenRouter gptel backend.")
 
   (defvar my-gptel-llama-cpp nil
     "The local llama.cpp gptel backend.")
+
+  (defvar my-gptel-litellm nil
+    "The gptel backend for a local LiteLLM proxy.")
 
   (use-package gptel
     :ensure nil
@@ -1756,6 +1779,19 @@ hosted model worth using, and it speaks the OpenAI protocol, so
             :key #'my-gptel-openrouter-key
             :models my-gptel-openrouter-models))
 
+    ;; Optional LiteLLM proxy: one endpoint in front of DeepSeek and
+    ;; anything else worth routing directly, with its own key store and
+    ;; spend caps.  Registering it is free when the proxy is not running
+    ;; — nothing connects until the backend is selected.
+    (setq my-gptel-litellm
+          (gptel-make-openai "LiteLLM"
+            :host "localhost:4000"
+            :protocol "http"
+            :endpoint "/v1/chat/completions"
+            :stream t
+            :key #'my-gptel-litellm-key
+            :models my-gptel-litellm-models))
+
     (setq gptel-backend my-gptel-openrouter)
     (setq gptel-model 'anthropic/claude-sonnet-4.5)
 
@@ -1768,63 +1804,167 @@ hosted model worth using, and it speaks the OpenAI protocol, so
      ("C-c g r" . gptel-rewrite)
      ("C-c g k" . gptel-abort)))
 
-  (defun my-gptel-openrouter-refresh-models ()
-    "Replace the OpenRouter backend's model list with the live catalogue."
-    (interactive)
-    (let ((buf (url-retrieve-synchronously
-                "https://openrouter.ai/api/v1/models" t nil 30)))
+  (defun my-gptel--fetch-models (url &optional key)
+    "Return the model ids advertised at URL as a list of symbols.
+  URL must be an OpenAI-style /models endpoint.  KEY, when non-nil, is
+  sent as a bearer token."
+    (let* ((url-request-extra-headers
+            (and key (list (cons "Authorization" (concat "Bearer " key)))))
+           (buf (url-retrieve-synchronously url t nil 30)))
       (unless buf
-        (user-error "Could not reach openrouter.ai"))
+        (user-error "No response from %s" url))
       (unwind-protect
           (with-current-buffer buf
             (goto-char (point-min))
             (unless (search-forward "\n\n" nil t)
-              (user-error "Malformed response from openrouter.ai"))
-            (let* ((payload (json-parse-buffer :object-type 'plist
-                                               :array-type 'list))
-                   (models (mapcar (lambda (m) (intern (plist-get m :id)))
-                                   (plist-get payload :data))))
-              (unless models
-                (user-error "No models in the OpenRouter response"))
-              (setq my-gptel-openrouter-models models)
-              (setf (gptel-backend-models my-gptel-openrouter) models)
-              (message "OpenRouter: %d models available" (length models))))
+              (user-error "Malformed response from %s" url))
+            (let ((payload (json-parse-buffer :object-type 'plist
+                                              :array-type 'list)))
+              (or (mapcar (lambda (m) (intern (plist-get m :id)))
+                          (plist-get payload :data))
+                  (user-error "No models listed at %s" url))))
         (kill-buffer buf))))
+
+  (defun my-gptel-openrouter-refresh-models ()
+    "Replace the OpenRouter backend's model list with the live catalogue."
+    (interactive)
+    (let ((models (my-gptel--fetch-models
+                   "https://openrouter.ai/api/v1/models")))
+      (setq my-gptel-openrouter-models models)
+      (setf (gptel-backend-models my-gptel-openrouter) models)
+      (message "OpenRouter: %d models available" (length models))))
+
+  (defun my-gptel-litellm-refresh-models ()
+    "Sync the LiteLLM backend's model list with the running proxy.
+  Doubles as a health check: an error here means the proxy is down, on
+  another port, or refusing the master key."
+    (interactive)
+    (let ((models (my-gptel--fetch-models "http://localhost:4000/v1/models"
+                                          (my-gptel-litellm-key))))
+      (setq my-gptel-litellm-models models)
+      (setf (gptel-backend-models my-gptel-litellm) models)
+      (message "LiteLLM: %s" (mapconcat #'symbol-name models ", "))))
 #+end_src
 
-*** The API key
+*** API keys
 
-The key is never stored in this repo. =my-gptel-openrouter-key= looks
-in three places, in order:
+No key is stored in this repo. =my-gptel-key= looks in three places,
+in order:
 
 1. =~/.authinfo.gpg= — the preferred spot, same file Gnus already uses:
    #+begin_src authinfo
      machine openrouter.ai login apikey password sk-or-v1-xxxxxxxx
+     machine litellm login apikey password sk-litellm-xxxxxxxx
    #+end_src
-2. the =OPENROUTER_API_KEY= environment variable, for keys injected by
-   home-manager or sops;
-3. a =read-passwd= prompt, cached for the session, as a last resort.
+2. the matching environment variable (=OPENROUTER_API_KEY=,
+   =LITELLM_MASTER_KEY=), for keys injected by home-manager or sops;
+3. a =read-passwd= prompt, cached per host for the session.
 
 Note the =login apikey= field — that is the user name gptel's own
-auth-source helper expects, so the same line keeps working if this
-function is ever dropped in favour of =gptel-api-key-from-auth-source=.
+auth-source helper expects, so the same lines keep working if these
+functions are ever dropped in favour of
+=gptel-api-key-from-auth-source=.
 
 *** Models
 
 =my-gptel-openrouter-models= is a hand-picked shortlist, and it *will*
 go stale — OpenRouter adds and renames models constantly.
 =M-x my-gptel-openrouter-refresh-models= fetches the live catalogue
-from =https://openrouter.ai/api/v1/models= and replaces the backend's
-list in place, so the model picker in =C-c g m= shows what actually
-exists today. Nothing else needs restarting.
+and replaces the backend's list in place, so the model picker in
+=C-c g m= shows what actually exists today. Nothing needs restarting.
+
+=M-x my-gptel-litellm-refresh-models= does the same against the proxy,
+and doubles as a health check: it errors when the proxy is down, on
+another port, or refusing the master key.
 
 *** Switching backends
 
 =C-c g m= opens the transient menu, where the backend and model can be
 changed globally, buffer-locally, or for the next request only. The
-=local= preset (below) is the quick way back to llama.cpp — worth
-using for anything where a 9B model is good enough, since every
-OpenRouter request costs money.
+presets below are the fast path: =@local= for llama.cpp, =@cheap= for
+DeepSeek through the proxy, =@code= for a strong hosted model.
+
+** Cheap Models Through LiteLLM
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+LiteLLM is a *router*, not an inference engine: it runs on your own
+machine and forwards requests to whoever serves the model, so tokens
+are still billed by the provider. What it buys is a single
+OpenAI-compatible endpoint in front of several providers, plus a key
+store, spend caps and fallbacks that live outside Emacs.
+
+The saving comes from *what it routes to*, not from the proxy itself.
+Pointing =deepseek-chat= at DeepSeek's own API pays DeepSeek's list
+price directly, with no broker margin in between.
+
+*** The proxy config
+
+=~/.config/litellm/config.yaml=. The =model_name= values are the
+aliases gptel asks for — they must match =my-gptel-litellm-models=,
+which is what =my-gptel-litellm-refresh-models= keeps honest:
+
+#+begin_src yaml
+  model_list:
+    - model_name: deepseek-chat          # what gptel asks for
+      litellm_params:
+        model: deepseek/deepseek-chat    # who actually serves it
+        api_key: os.environ/DEEPSEEK_API_KEY
+    - model_name: deepseek-reasoner
+      litellm_params:
+        model: deepseek/deepseek-reasoner
+        api_key: os.environ/DEEPSEEK_API_KEY
+    - model_name: sonnet
+      litellm_params:
+        model: anthropic/claude-sonnet-4-5
+        api_key: os.environ/ANTHROPIC_API_KEY
+
+  general_settings:
+    master_key: os.environ/LITELLM_MASTER_KEY
+
+  litellm_settings:
+    drop_params: true        # drop params a given provider rejects
+    max_budget: 20           # dollars; requests are refused past this
+    budget_duration: 30d
+
+  router_settings:
+    fallbacks: [{"deepseek-chat": ["sonnet"]}]
+#+end_src
+
+Per-key virtual budgets and spend history need a Postgres database
+behind the proxy; the global =max_budget= above does not. Check the
+LiteLLM docs for the current schema before copying this wholesale — it
+moves faster than this file does.
+
+*** Running it
+
+As a home-manager user service, keys in an =EnvironmentFile= with mode
+0600 (never in the Nix store, never in this repo):
+
+#+begin_src nix
+  systemd.user.services.litellm = {
+    Unit.Description = "LiteLLM proxy";
+    Service = {
+      ExecStart = "${pkgs.litellm}/bin/litellm --config %h/.config/litellm/config.yaml --port 4000";
+      EnvironmentFile = "%h/.config/litellm/env";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+#+end_src
+
+If =pkgs.litellm= is not in your channel, =python3Packages.litellm= or
+the =ghcr.io/berriai/litellm= container work the same way. Then
+=M-x my-gptel-litellm-refresh-models= to confirm Emacs can reach it,
+and =@cheap= in any prompt to use it.
+
+*** Do you need the proxy at all?
+
+For DeepSeek alone, no — its API is OpenAI-compatible, so a fourth
+=gptel-make-openai= pointed at =api.deepseek.com= would do the same job
+with no daemon to run. The proxy earns its keep once you want spend
+caps, fallbacks, or several providers behind one endpoint and one key.
 
 ** Project Context
 :PROPERTIES:
@@ -2239,6 +2379,14 @@ one name, so the expensive path is opt-in rather than the default.
         :model 'google/gemini-2.5-flash
         :tools nil)
 
+      (gptel-make-preset 'cheap
+        :description "DeepSeek through the local LiteLLM proxy."
+        :backend "LiteLLM"
+        :model 'deepseek-chat
+        :system my-gptel-code-directive
+        :tools '("project_root" "list_project_files" "search_project"
+                 "read_file" "read_buffer"))
+
       (gptel-make-preset 'code
         :description "Strong hosted model with project tools."
         :backend "OpenRouter"
@@ -2265,6 +2413,7 @@ one name, so the expensive path is opt-in rather than the default.
 |------------+------------------------------------------------------------|
 | ~local~    | llama.cpp, no tools — offline, free, good enough for prose  |
 | ~quick~    | Gemini Flash, no tools — cheap one-off questions            |
+| ~cheap~    | DeepSeek via the LiteLLM proxy, with the project tools      |
 | ~code~     | Claude Sonnet with the project-reading tools                |
 | ~reason~   | Claude Opus with the same tools, for hard problems          |
 | ~explain~  | System message only, inherits whatever backend is active    |
