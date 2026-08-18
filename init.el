@@ -1072,39 +1072,193 @@
 			  ("F" . elfeed-tube-fetch)
 			  ([remap save-buffer] . elfeed-tube-save)))
 
-(defvar my-anthropic-api-key nil
-  "Cached Anthropic API key for current session.")
+(require 'auth-source)
 
-(defun my-get-anthropic-key ()
-  "Get Anthropic API key, prompting if not cached."
-  (unless my-anthropic-api-key
-    (setq my-anthropic-api-key (read-passwd "Enter Anthropic API key: ")))
-  my-anthropic-api-key)
+(defvar my-gptel--openrouter-key nil
+  "Session cache for an OpenRouter API key entered by hand.")
+
+(defun my-gptel-openrouter-key ()
+  "Return the OpenRouter API key.
+Look for an `openrouter.ai' entry in `auth-sources' first, then fall
+back to the OPENROUTER_API_KEY environment variable, and only prompt
+if neither is set."
+  (or (auth-source-pick-first-password :host "openrouter.ai" :user "apikey")
+      (getenv "OPENROUTER_API_KEY")
+      my-gptel--openrouter-key
+      (setq my-gptel--openrouter-key
+            (read-passwd "OpenRouter API key: "))))
+
+(defvar my-gptel-openrouter-models
+  '(anthropic/claude-sonnet-4.5
+    anthropic/claude-opus-4.1
+    anthropic/claude-haiku-4.5
+    openai/gpt-5.1
+    openai/gpt-5-mini
+    google/gemini-2.5-pro
+    google/gemini-2.5-flash
+    deepseek/deepseek-chat-v3.1
+    qwen/qwen3-coder
+    moonshotai/kimi-k2)
+  "Shortlist of models offered by the OpenRouter backend.
+OpenRouter carries hundreds of models and renames them often, so this
+is a hand-picked subset that will drift.  Run
+`my-gptel-openrouter-refresh-models' to replace it with the live
+catalogue.")
+
+(defvar my-gptel-openrouter nil
+  "The OpenRouter gptel backend.")
+
+(defvar my-gptel-llama-cpp nil
+  "The local llama.cpp gptel backend.")
 
 (use-package gptel
   :ensure nil
   :config
   (setq gptel-default-mode 'org-mode)
+  (setq gptel-track-media t)
 
-  
-  (setq gptel-model 'qwen3.5-9b)
-  (setq gptel-backend
-		(gptel-make-openai "llama.cpp"
+  ;; Local model: no key, no network, no cost.  Reachable from the
+  ;; gptel menu or with the `local' preset.
+  (setq my-gptel-llama-cpp
+        (gptel-make-openai "llama.cpp"
           :host "localhost:8999"
           :protocol "http"
           :endpoint "/v1/chat/completions"
           :stream t
           :key "dummy"
           :models '(qwen3.5-9b)))
-  
-  (setq gptel-track-media t)
+
+  ;; OpenRouter speaks the OpenAI API, so `gptel-make-openai' is the
+  ;; right constructor — one key for every hosted model.
+  (setq my-gptel-openrouter
+        (gptel-make-openai "OpenRouter"
+          :host "openrouter.ai"
+          :endpoint "/api/v1/chat/completions"
+          :stream t
+          :key #'my-gptel-openrouter-key
+          :models my-gptel-openrouter-models))
+
+  (setq gptel-backend my-gptel-openrouter)
+  (setq gptel-model 'anthropic/claude-sonnet-4.5)
 
   :bind
   (("C-c g g" . gptel)
    ("C-c g s" . gptel-send)
    ("C-c g m" . gptel-menu)
    ("C-c g a" . gptel-add)
-   ("C-c g f" . gptel-add-file)))
+   ("C-c g f" . gptel-add-file)
+   ("C-c g r" . gptel-rewrite)
+   ("C-c g k" . gptel-abort)))
+
+(defun my-gptel-openrouter-refresh-models ()
+  "Replace the OpenRouter backend's model list with the live catalogue."
+  (interactive)
+  (let ((buf (url-retrieve-synchronously
+              "https://openrouter.ai/api/v1/models" t nil 30)))
+    (unless buf
+      (user-error "Could not reach openrouter.ai"))
+    (unwind-protect
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (unless (search-forward "\n\n" nil t)
+            (user-error "Malformed response from openrouter.ai"))
+          (let* ((payload (json-parse-buffer :object-type 'plist
+                                             :array-type 'list))
+                 (models (mapcar (lambda (m) (intern (plist-get m :id)))
+                                 (plist-get payload :data))))
+            (unless models
+              (user-error "No models in the OpenRouter response"))
+            (setq my-gptel-openrouter-models models)
+            (setf (gptel-backend-models my-gptel-openrouter) models)
+            (message "OpenRouter: %d models available" (length models))))
+      (kill-buffer buf))))
+
+(defvar my-gptel-code-directive
+  "You are a programming assistant working inside Emacs on the user's project.
+Read the project with your tools instead of guessing: list files, search,
+and read what you need before answering.  Keep answers short, show real
+code, and say plainly when you are unsure."
+  "Base system message for project chats and the `code' preset.")
+
+(defvar my-gptel-project-instruction-files
+  '("AGENTS.md" ".gptel.md" "CLAUDE.md" "CONVENTIONS.md")
+  "File names looked for at a project root, in order of preference.
+The first one that exists is appended to `my-gptel-code-directive' to
+form the system message of that project's chat buffer.")
+
+(defun my-gptel-project-root (&optional dir)
+  "Return the project root for DIR, or nil when there is no project."
+  (let ((default-directory (or dir default-directory)))
+    (when-let ((pr (project-current)))
+      (project-root pr))))
+
+(defun my-gptel-project-instructions (root)
+  "Return (FILE . TEXT) for ROOT's instruction file, or nil if it has none."
+  (when root
+    (when-let ((file (seq-some (lambda (name)
+                                 (let ((f (expand-file-name name root)))
+                                   (and (file-readable-p f) f)))
+                               my-gptel-project-instruction-files)))
+      (with-temp-buffer
+        (insert-file-contents file)
+        (cons file (buffer-string))))))
+
+(defun my-gptel-project-system-message (root)
+  "Build the system message for the project at ROOT."
+  (let ((instructions (my-gptel-project-instructions root)))
+    (concat my-gptel-code-directive
+            (format "\n\nProject root: %s"
+                    (abbreviate-file-name (or root default-directory)))
+            (when instructions
+              (format "\n\nProject instructions from %s:\n\n%s"
+                      (file-name-nondirectory (car instructions))
+                      (cdr instructions))))))
+
+(defun my-gptel-set-system-message (text)
+  "Set TEXT as the system message of the current buffer.
+`gptel-system-prompt' was called `gptel--system-message' before gptel
+0.9.9.6, so honour both — the Nix pin decides which one exists."
+  (if (boundp 'gptel-system-prompt)
+      (setq-local gptel-system-prompt text)
+    (setq-local gptel--system-message text)))
+
+(defun my-gptel-project-reload ()
+  "Re-read the project instruction file into this buffer's system message."
+  (interactive)
+  (let* ((root (my-gptel-project-root))
+         (instructions (my-gptel-project-instructions root)))
+    (my-gptel-set-system-message (my-gptel-project-system-message root))
+    (message "gptel: context reloaded for %s%s"
+             (abbreviate-file-name (or root default-directory))
+             (if instructions
+                 (format " (%s)" (file-name-nondirectory (car instructions)))
+               " (no instruction file)"))))
+
+(defun my-gptel-project ()
+  "Open a gptel chat buffer dedicated to the current project.
+The buffer's `default-directory' is the project root — so tools run
+there — and its system message carries the project's instruction file
+if it has one.  Reuses the buffer on subsequent calls."
+  (interactive)
+  (let* ((pr (project-current))
+         (root (if pr (project-root pr) default-directory))
+         (name (if pr (project-name pr) "default"))
+         (buf-name (format "*gptel: %s*" name))
+         (fresh (not (get-buffer buf-name)))
+         (buf (gptel buf-name)))
+    (with-current-buffer buf
+      (setq default-directory root)
+      (when fresh (my-gptel-project-reload)))
+    (pop-to-buffer buf)))
+
+(defun my-gptel-add-project-file (file)
+  "Add FILE, completed from the current project's files, to gptel's context."
+  (interactive
+   (let ((pr (or (project-current)
+                 (user-error "Not inside a project"))))
+     (list (completing-read "Add to gptel context: "
+                            (project-files pr) nil t))))
+  (gptel-add-file file))
 
 (with-eval-after-load 'gptel
 
@@ -1245,7 +1399,93 @@
    :args (list '(:name "filepath"
 					   :type string
 					   :description "Path to the PDF file. Supports relative paths and ~."))
-   :category "filesystem"))
+   :category "filesystem")
+
+  ;; Project root, name and branch
+  (gptel-make-tool
+   :name "project_root"
+   :function (lambda ()
+               (if-let ((pr (project-current)))
+                   (let* ((root (project-root pr))
+                          (default-directory root)
+                          (branch (ignore-errors
+                                    (car (process-lines-ignore-status
+                                          "git" "rev-parse" "--abbrev-ref" "HEAD")))))
+                     (format "root: %s\nname: %s\nbranch: %s"
+                             root (project-name pr) (or branch "unknown")))
+				 "No project found for current buffer"))
+   :description "Return the root directory, name and VC branch of the current project"
+   :args (list)
+   :category "filesystem")
+
+  ;; Search the project with ripgrep
+  (gptel-make-tool
+   :name "search_project"
+   :function (lambda (pattern &optional glob)
+               (let* ((pr (project-current))
+                      (default-directory (if pr (project-root pr) default-directory))
+                      (args (append '("--line-number" "--no-heading" "--color" "never"
+                                      "--max-count" "20" "--max-columns" "200")
+                                    (when (and glob (not (string-empty-p glob)))
+                                      (list "--glob" glob))
+                                    (list "--regexp" pattern)))
+                      (output (with-temp-buffer
+								(let ((status (apply #'call-process "rg" nil t nil args)))
+                                  (pcase status
+                                    (0 (buffer-string))
+                                    (1 "No matches")
+                                    (_ (format "ripgrep failed: %s" (buffer-string))))))))
+				 (if (> (length output) 8000)
+                     (concat (substring output 0 8000)
+                             "\n… output truncated, narrow the search")
+                   output)))
+   :description "Search the files of the current project with ripgrep, returning matching lines with their file and line number"
+   :args (list '(:name "pattern"
+					   :type string
+					   :description "Regular expression to search for")
+               '(:name "glob"
+					   :type string
+					   :optional t
+					   :description "Optional file glob restricting the search, e.g. *.el"))
+   :category "project"))
+
+(with-eval-after-load 'gptel
+  ;; Presets landed in gptel 0.9.8; skip them on an older pin rather
+  ;; than breaking init.
+  (when (fboundp 'gptel-make-preset)
+
+    (gptel-make-preset 'local
+      :description "Local llama.cpp model — offline and free."
+      :backend "llama.cpp"
+      :model 'qwen3.5-9b
+      :tools nil)
+
+    (gptel-make-preset 'quick
+      :description "Cheap fast hosted model for one-off questions."
+      :backend "OpenRouter"
+      :model 'google/gemini-2.5-flash
+      :tools nil)
+
+    (gptel-make-preset 'code
+      :description "Strong hosted model with project tools."
+      :backend "OpenRouter"
+      :model 'anthropic/claude-sonnet-4.5
+      :system my-gptel-code-directive
+      :tools '("project_root" "list_project_files" "search_project"
+               "read_file" "read_buffer"))
+
+    (gptel-make-preset 'reason
+      :description "Slowest, strongest model for hard problems."
+      :backend "OpenRouter"
+      :model 'anthropic/claude-opus-4.1
+      :system my-gptel-code-directive
+      :tools '("project_root" "list_project_files" "search_project"
+               "read_file" "read_buffer"))
+
+    (gptel-make-preset 'explain
+      :description "Explain code to someone who has not seen it."
+      :system "Explain what this code does, plainly and concretely.
+Name the moving parts, then walk through the flow.  No filler.")))
 
 (use-package tabspaces
   :ensure nil
@@ -1399,6 +1639,11 @@
 (global-set-key (kbd "C-c g m") #'gptel-menu)
 (global-set-key (kbd "C-c g a") #'gptel-add)
 (global-set-key (kbd "C-c g f") #'gptel-add-file)
+(global-set-key (kbd "C-c g r") #'gptel-rewrite)
+(global-set-key (kbd "C-c g k") #'gptel-abort)
+(global-set-key (kbd "C-c g p") #'my-gptel-project)
+(global-set-key (kbd "C-c g P") #'my-gptel-add-project-file)
+(global-set-key (kbd "C-c g R") #'my-gptel-project-reload)
 
 (global-set-key (kbd "C-c c") #'org-capture)
 

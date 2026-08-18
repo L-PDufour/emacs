@@ -1678,41 +1678,287 @@ than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
 :header-args:emacs-lisp: :tangle init.el
 :END:
 
-#+begin_src emacs-lisp
-  (defvar my-anthropic-api-key nil
-    "Cached Anthropic API key for current session.")
+Two backends are registered: *OpenRouter* for hosted models (the
+default) and *llama.cpp* for the local one on =localhost:8999=.
+OpenRouter is a single API — and a single key — in front of every
+hosted model worth using, and it speaks the OpenAI protocol, so
+=gptel-make-openai= is the correct constructor for it.
 
-  (defun my-get-anthropic-key ()
-    "Get Anthropic API key, prompting if not cached."
-    (unless my-anthropic-api-key
-      (setq my-anthropic-api-key (read-passwd "Enter Anthropic API key: ")))
-    my-anthropic-api-key)
+** Backends and API Keys
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+#+begin_src emacs-lisp
+  (require 'auth-source)
+
+  (defvar my-gptel--openrouter-key nil
+    "Session cache for an OpenRouter API key entered by hand.")
+
+  (defun my-gptel-openrouter-key ()
+    "Return the OpenRouter API key.
+  Look for an `openrouter.ai' entry in `auth-sources' first, then fall
+  back to the OPENROUTER_API_KEY environment variable, and only prompt
+  if neither is set."
+    (or (auth-source-pick-first-password :host "openrouter.ai" :user "apikey")
+        (getenv "OPENROUTER_API_KEY")
+        my-gptel--openrouter-key
+        (setq my-gptel--openrouter-key
+              (read-passwd "OpenRouter API key: "))))
+
+  (defvar my-gptel-openrouter-models
+    '(anthropic/claude-sonnet-4.5
+      anthropic/claude-opus-4.1
+      anthropic/claude-haiku-4.5
+      openai/gpt-5.1
+      openai/gpt-5-mini
+      google/gemini-2.5-pro
+      google/gemini-2.5-flash
+      deepseek/deepseek-chat-v3.1
+      qwen/qwen3-coder
+      moonshotai/kimi-k2)
+    "Shortlist of models offered by the OpenRouter backend.
+  OpenRouter carries hundreds of models and renames them often, so this
+  is a hand-picked subset that will drift.  Run
+  `my-gptel-openrouter-refresh-models' to replace it with the live
+  catalogue.")
+
+  (defvar my-gptel-openrouter nil
+    "The OpenRouter gptel backend.")
+
+  (defvar my-gptel-llama-cpp nil
+    "The local llama.cpp gptel backend.")
 
   (use-package gptel
     :ensure nil
     :config
     (setq gptel-default-mode 'org-mode)
+    (setq gptel-track-media t)
 
-    
-    (setq gptel-model 'qwen3.5-9b)
-    (setq gptel-backend
-  		(gptel-make-openai "llama.cpp"
+    ;; Local model: no key, no network, no cost.  Reachable from the
+    ;; gptel menu or with the `local' preset.
+    (setq my-gptel-llama-cpp
+          (gptel-make-openai "llama.cpp"
             :host "localhost:8999"
             :protocol "http"
             :endpoint "/v1/chat/completions"
             :stream t
             :key "dummy"
             :models '(qwen3.5-9b)))
-    
-    (setq gptel-track-media t)
+
+    ;; OpenRouter speaks the OpenAI API, so `gptel-make-openai' is the
+    ;; right constructor — one key for every hosted model.
+    (setq my-gptel-openrouter
+          (gptel-make-openai "OpenRouter"
+            :host "openrouter.ai"
+            :endpoint "/api/v1/chat/completions"
+            :stream t
+            :key #'my-gptel-openrouter-key
+            :models my-gptel-openrouter-models))
+
+    (setq gptel-backend my-gptel-openrouter)
+    (setq gptel-model 'anthropic/claude-sonnet-4.5)
 
     :bind
     (("C-c g g" . gptel)
      ("C-c g s" . gptel-send)
      ("C-c g m" . gptel-menu)
      ("C-c g a" . gptel-add)
-     ("C-c g f" . gptel-add-file)))
+     ("C-c g f" . gptel-add-file)
+     ("C-c g r" . gptel-rewrite)
+     ("C-c g k" . gptel-abort)))
 
+  (defun my-gptel-openrouter-refresh-models ()
+    "Replace the OpenRouter backend's model list with the live catalogue."
+    (interactive)
+    (let ((buf (url-retrieve-synchronously
+                "https://openrouter.ai/api/v1/models" t nil 30)))
+      (unless buf
+        (user-error "Could not reach openrouter.ai"))
+      (unwind-protect
+          (with-current-buffer buf
+            (goto-char (point-min))
+            (unless (search-forward "\n\n" nil t)
+              (user-error "Malformed response from openrouter.ai"))
+            (let* ((payload (json-parse-buffer :object-type 'plist
+                                               :array-type 'list))
+                   (models (mapcar (lambda (m) (intern (plist-get m :id)))
+                                   (plist-get payload :data))))
+              (unless models
+                (user-error "No models in the OpenRouter response"))
+              (setq my-gptel-openrouter-models models)
+              (setf (gptel-backend-models my-gptel-openrouter) models)
+              (message "OpenRouter: %d models available" (length models))))
+        (kill-buffer buf))))
+#+end_src
+
+*** The API key
+
+The key is never stored in this repo. =my-gptel-openrouter-key= looks
+in three places, in order:
+
+1. =~/.authinfo.gpg= — the preferred spot, same file Gnus already uses:
+   #+begin_src authinfo
+     machine openrouter.ai login apikey password sk-or-v1-xxxxxxxx
+   #+end_src
+2. the =OPENROUTER_API_KEY= environment variable, for keys injected by
+   home-manager or sops;
+3. a =read-passwd= prompt, cached for the session, as a last resort.
+
+Note the =login apikey= field — that is the user name gptel's own
+auth-source helper expects, so the same line keeps working if this
+function is ever dropped in favour of =gptel-api-key-from-auth-source=.
+
+*** Models
+
+=my-gptel-openrouter-models= is a hand-picked shortlist, and it *will*
+go stale — OpenRouter adds and renames models constantly.
+=M-x my-gptel-openrouter-refresh-models= fetches the live catalogue
+from =https://openrouter.ai/api/v1/models= and replaces the backend's
+list in place, so the model picker in =C-c g m= shows what actually
+exists today. Nothing else needs restarting.
+
+*** Switching backends
+
+=C-c g m= opens the transient menu, where the backend and model can be
+changed globally, buffer-locally, or for the next request only. The
+=local= preset (below) is the quick way back to llama.cpp — worth
+using for anything where a 9B model is good enough, since every
+OpenRouter request costs money.
+
+** Project Context
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+Four layers, cheapest first. The point is that the model should
+*fetch* what it needs rather than have the whole repo pasted at it —
+tokens are billed per request, and a stuffed context makes answers
+worse, not better.
+
+1. *A chat buffer per project.* =C-c g p= opens =*gptel: NAME*= with
+   =default-directory= at the project root, so every tool call runs
+   there. It plays well with tabspaces: the buffer belongs to the tab
+   its project lives in.
+2. *An instruction file.* On first open, the project root is searched
+   for =AGENTS.md=, =.gptel.md=, =CLAUDE.md= or =CONVENTIONS.md=; the
+   first hit is appended to =my-gptel-code-directive= and set as that
+   buffer's system message. This is the knob to turn per repo — build
+   commands, house style, "don't touch the generated files".
+   =C-c g R= re-reads it after an edit.
+3. *Fast context adding.* =C-c g P= completes over =project-files= and
+   hands the result to =gptel-add-file=, instead of navigating dired.
+   Gitignored files stay out, because
+   =gptel-context-restrict-to-project-files= defaults to =t=.
+4. *Tools.* =search_project=, =list_project_files= and =read_file= let
+   the model pull exactly the lines it needs. See the tools section.
+
+#+begin_src emacs-lisp
+  (defvar my-gptel-code-directive
+    "You are a programming assistant working inside Emacs on the user's project.
+  Read the project with your tools instead of guessing: list files, search,
+  and read what you need before answering.  Keep answers short, show real
+  code, and say plainly when you are unsure."
+    "Base system message for project chats and the `code' preset.")
+
+  (defvar my-gptel-project-instruction-files
+    '("AGENTS.md" ".gptel.md" "CLAUDE.md" "CONVENTIONS.md")
+    "File names looked for at a project root, in order of preference.
+  The first one that exists is appended to `my-gptel-code-directive' to
+  form the system message of that project's chat buffer.")
+
+  (defun my-gptel-project-root (&optional dir)
+    "Return the project root for DIR, or nil when there is no project."
+    (let ((default-directory (or dir default-directory)))
+      (when-let ((pr (project-current)))
+        (project-root pr))))
+
+  (defun my-gptel-project-instructions (root)
+    "Return (FILE . TEXT) for ROOT's instruction file, or nil if it has none."
+    (when root
+      (when-let ((file (seq-some (lambda (name)
+                                   (let ((f (expand-file-name name root)))
+                                     (and (file-readable-p f) f)))
+                                 my-gptel-project-instruction-files)))
+        (with-temp-buffer
+          (insert-file-contents file)
+          (cons file (buffer-string))))))
+
+  (defun my-gptel-project-system-message (root)
+    "Build the system message for the project at ROOT."
+    (let ((instructions (my-gptel-project-instructions root)))
+      (concat my-gptel-code-directive
+              (format "\n\nProject root: %s"
+                      (abbreviate-file-name (or root default-directory)))
+              (when instructions
+                (format "\n\nProject instructions from %s:\n\n%s"
+                        (file-name-nondirectory (car instructions))
+                        (cdr instructions))))))
+
+  (defun my-gptel-set-system-message (text)
+    "Set TEXT as the system message of the current buffer.
+  `gptel-system-prompt' was called `gptel--system-message' before gptel
+  0.9.9.6, so honour both — the Nix pin decides which one exists."
+    (if (boundp 'gptel-system-prompt)
+        (setq-local gptel-system-prompt text)
+      (setq-local gptel--system-message text)))
+
+  (defun my-gptel-project-reload ()
+    "Re-read the project instruction file into this buffer's system message."
+    (interactive)
+    (let* ((root (my-gptel-project-root))
+           (instructions (my-gptel-project-instructions root)))
+      (my-gptel-set-system-message (my-gptel-project-system-message root))
+      (message "gptel: context reloaded for %s%s"
+               (abbreviate-file-name (or root default-directory))
+               (if instructions
+                   (format " (%s)" (file-name-nondirectory (car instructions)))
+                 " (no instruction file)"))))
+
+  (defun my-gptel-project ()
+    "Open a gptel chat buffer dedicated to the current project.
+  The buffer's `default-directory' is the project root — so tools run
+  there — and its system message carries the project's instruction file
+  if it has one.  Reuses the buffer on subsequent calls."
+    (interactive)
+    (let* ((pr (project-current))
+           (root (if pr (project-root pr) default-directory))
+           (name (if pr (project-name pr) "default"))
+           (buf-name (format "*gptel: %s*" name))
+           (fresh (not (get-buffer buf-name)))
+           (buf (gptel buf-name)))
+      (with-current-buffer buf
+        (setq default-directory root)
+        (when fresh (my-gptel-project-reload)))
+      (pop-to-buffer buf)))
+
+  (defun my-gptel-add-project-file (file)
+    "Add FILE, completed from the current project's files, to gptel's context."
+    (interactive
+     (let ((pr (or (project-current)
+                   (user-error "Not inside a project"))))
+       (list (completing-read "Add to gptel context: "
+                              (project-files pr) nil t))))
+    (gptel-add-file file))
+#+end_src
+
+Context added with =C-c g a= / =C-c g f= / =C-c g P= is *live*: files
+and regions are re-read at each request, not snapshotted when added.
+=C-c g m= → /inspect context/ shows what is currently attached, which
+is worth a glance before an expensive request.
+
+** GPTel Tools
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+Tools extend gptel so the LLM can take actions inside Emacs or read
+external data during a conversation.  All tools here are registered
+after gptel loads and are available to any backend that supports tool
+use — every hosted model in the OpenRouter list, and capable local
+models via llama.cpp.
+
+#+begin_src emacs-lisp
   (with-eval-after-load 'gptel
 
     (setq gptel-use-tools t)
@@ -1852,25 +2098,65 @@ than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
      :args (list '(:name "filepath"
   					   :type string
   					   :description "Path to the PDF file. Supports relative paths and ~."))
-     :category "filesystem"))
+     :category "filesystem")
+
+    ;; Project root, name and branch
+    (gptel-make-tool
+     :name "project_root"
+     :function (lambda ()
+                 (if-let ((pr (project-current)))
+                     (let* ((root (project-root pr))
+                            (default-directory root)
+                            (branch (ignore-errors
+                                      (car (process-lines-ignore-status
+                                            "git" "rev-parse" "--abbrev-ref" "HEAD")))))
+                       (format "root: %s\nname: %s\nbranch: %s"
+                               root (project-name pr) (or branch "unknown")))
+  				 "No project found for current buffer"))
+     :description "Return the root directory, name and VC branch of the current project"
+     :args (list)
+     :category "filesystem")
+
+    ;; Search the project with ripgrep
+    (gptel-make-tool
+     :name "search_project"
+     :function (lambda (pattern &optional glob)
+                 (let* ((pr (project-current))
+                        (default-directory (if pr (project-root pr) default-directory))
+                        (args (append '("--line-number" "--no-heading" "--color" "never"
+                                        "--max-count" "20" "--max-columns" "200")
+                                      (when (and glob (not (string-empty-p glob)))
+                                        (list "--glob" glob))
+                                      (list "--regexp" pattern)))
+                        (output (with-temp-buffer
+  								(let ((status (apply #'call-process "rg" nil t nil args)))
+                                    (pcase status
+                                      (0 (buffer-string))
+                                      (1 "No matches")
+                                      (_ (format "ripgrep failed: %s" (buffer-string))))))))
+  				 (if (> (length output) 8000)
+                       (concat (substring output 0 8000)
+                               "\n… output truncated, narrow the search")
+                     output)))
+     :description "Search the files of the current project with ripgrep, returning matching lines with their file and line number"
+     :args (list '(:name "pattern"
+  					   :type string
+  					   :description "Regular expression to search for")
+                 '(:name "glob"
+  					   :type string
+  					   :optional t
+  					   :description "Optional file glob restricting the search, e.g. *.el"))
+     :category "project"))
 #+end_src
-
-** GPTel Tools
-:PROPERTIES:
-:header-args:emacs-lisp: :tangle init.el
-:END:
-
-Tools extend gptel so the LLM can take actions inside Emacs or read
-external data during a conversation.  All tools here are registered
-after gptel loads and are available to any backend that supports tool
-use (Claude, GPT-4o, and capable local models via llama-cpp/Ollama).
 
 *** Enabling tools
 
 Tools are enabled globally with ~gptel-use-tools~.  To activate them
 for a session, open the gptel transient menu with ~C-c g m~ and toggle
 the tools you want under the "Tools" section.  You can also require
-confirmation before any tool call fires from the same menu.
+confirmation before any tool call fires from the same menu.  The
+~code~ and ~reason~ presets switch on the project-reading set in one
+step.
 
 *** Available tools
 
@@ -1880,6 +2166,8 @@ confirmation before any tool call fires from the same menu.
 | ~read_file~         | filesystem | Read a file from disk by path                     |
 | ~list_directory~    | filesystem | List files in a directory                         |
 | ~list_project_files~| filesystem | List all files in the current project             |
+| ~project_root~      | filesystem | Report the project root, name and VC branch       |
+| ~search_project~    | project    | ripgrep the project, with an optional file glob   |
 | ~read_documentation~| emacs      | Look up docstrings for any Emacs symbol           |
 | ~read_url~          | web        | Fetch and render a URL as plain text              |
 | ~run_command~       | command    | Run a shell command (always asks for confirmation)|
@@ -1889,34 +2177,110 @@ confirmation before any tool call fires from the same menu.
 *** Typical workflows
 
 - /Explain this buffer/: open a gptel chat, ask "explain the code in
-  buffer foo.el" — Claude will call ~read_buffer~ automatically.
+  buffer foo.el" — the model will call ~read_buffer~ automatically.
 
-- /Project orientation/: ask "what files are in this project and what
-  does the README say?" — Claude chains ~list_project_files~ then
-  ~read_file~.
+- /Project orientation/: from a project chat (~C-c g p~), ask "where is
+  the retry logic?" — the model chains ~search_project~ then
+  ~read_file~ instead of you pasting anything.
 
 - /PDF Q&A/: with a paper on disk, ask "summarise
-  ~/papers/foo.pdf~" — Claude calls ~read_pdf~ and summarises
+  ~/papers/foo.pdf~" — the model calls ~read_pdf~ and summarises
   inline.
 
-- /Documentation lookup/: ask "how does ~consult-ripgrep~ work?" —
-  Claude calls ~read_documentation~ rather than relying on training
+- /Documentation lookup/: ask "how does ~consult-ripgrep~ work?" — the
+  model calls ~read_documentation~ rather than relying on training
   data, giving you accurate docstrings.
 
-- /Shell tasks/: ask "run the tests for this project" — Claude
+- /Shell tasks/: ask "run the tests for this project" — the model
   constructs the command and prompts you to confirm before running it.
 
 *** Notes
 
 - ~run_command~ has ~:confirm t~, meaning gptel will always show you
   the command and ask before executing it.  Do not remove this.
+- ~search_project~ shells out to ~rg~ and caps its output — 20 matches
+  per file, 200 columns per line, 8000 characters overall.  A model
+  that hits the cap should narrow its pattern, not be given a bigger
+  budget.
 - ~read_pdf~ requires the ~epdfinfo~ server from pdf-tools to be
   running.  Opening any PDF in Emacs first is sufficient.
 - ~list_project_files~ uses ~project.el~ and respects your
   ~.gitignore~ via ~project-vc-extra-root-markers~.
+- Tool calls are not free on a hosted backend: each round trip resends
+  the conversation so far.  A long tool-heavy session is the most
+  expensive thing you can do with OpenRouter.
 - Not all local models support tool use well.  If a model ignores
-  tools, try a larger quant or switch to Claude/GPT-4o for
+  tools, try a larger quant or switch to a hosted model for
   tool-heavy sessions.
+
+** Presets
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+A preset bundles a backend, model, system message and tool set under
+one name, so the expensive path is opt-in rather than the default.
+
+#+begin_src emacs-lisp
+  (with-eval-after-load 'gptel
+    ;; Presets landed in gptel 0.9.8; skip them on an older pin rather
+    ;; than breaking init.
+    (when (fboundp 'gptel-make-preset)
+
+      (gptel-make-preset 'local
+        :description "Local llama.cpp model — offline and free."
+        :backend "llama.cpp"
+        :model 'qwen3.5-9b
+        :tools nil)
+
+      (gptel-make-preset 'quick
+        :description "Cheap fast hosted model for one-off questions."
+        :backend "OpenRouter"
+        :model 'google/gemini-2.5-flash
+        :tools nil)
+
+      (gptel-make-preset 'code
+        :description "Strong hosted model with project tools."
+        :backend "OpenRouter"
+        :model 'anthropic/claude-sonnet-4.5
+        :system my-gptel-code-directive
+        :tools '("project_root" "list_project_files" "search_project"
+                 "read_file" "read_buffer"))
+
+      (gptel-make-preset 'reason
+        :description "Slowest, strongest model for hard problems."
+        :backend "OpenRouter"
+        :model 'anthropic/claude-opus-4.1
+        :system my-gptel-code-directive
+        :tools '("project_root" "list_project_files" "search_project"
+                 "read_file" "read_buffer"))
+
+      (gptel-make-preset 'explain
+        :description "Explain code to someone who has not seen it."
+        :system "Explain what this code does, plainly and concretely.
+  Name the moving parts, then walk through the flow.  No filler.")))
+#+end_src
+
+| Preset     | What it is                                                 |
+|------------+------------------------------------------------------------|
+| ~local~    | llama.cpp, no tools — offline, free, good enough for prose  |
+| ~quick~    | Gemini Flash, no tools — cheap one-off questions            |
+| ~code~     | Claude Sonnet with the project-reading tools                |
+| ~reason~   | Claude Opus with the same tools, for hard problems          |
+| ~explain~  | System message only, inherits whatever backend is active    |
+
+Apply one from the transient menu (~C-c g m~), or for a single request
+write its name as an ~@cookie~ anywhere in the prompt:
+
+#+begin_quote
+@code Why does the retry loop in the worker drop the last error?
+#+end_quote
+
+The cookie applies only to the final user turn, is offered as a
+completion in chat buffers, and leaves your other settings alone.
+Presets arrived in gptel 0.9.8, so the whole block is guarded with
+~fboundp~ — an older pin from Nix will simply skip it.
+
 
 * Tabspaces
 :PROPERTIES:
@@ -2020,6 +2384,13 @@ these are plain Emacs bindings, discoverable through which-key.
 | =C-c l a=       | eglot-code-actions       |
 | =C-c l R=       | eglot-rename             |
 | =C-c g g=       | gptel                    |
+| =C-c g s=       | gptel-send               |
+| =C-c g m=       | gptel-menu (backend etc) |
+| =C-c g p=       | project chat buffer      |
+| =C-c g P=       | add project file to ctx  |
+| =C-c g R=       | reload project context   |
+| =C-c g r=       | gptel-rewrite            |
+| =C-c g k=       | gptel-abort              |
 | =C-c e e=       | consult-flymake          |
 | =C-c TAB s=     | tabspaces switch/create  |
 | =C-;=           | avy-goto-char-2          |
@@ -2165,6 +2536,11 @@ these are plain Emacs bindings, discoverable through which-key.
   (global-set-key (kbd "C-c g m") #'gptel-menu)
   (global-set-key (kbd "C-c g a") #'gptel-add)
   (global-set-key (kbd "C-c g f") #'gptel-add-file)
+  (global-set-key (kbd "C-c g r") #'gptel-rewrite)
+  (global-set-key (kbd "C-c g k") #'gptel-abort)
+  (global-set-key (kbd "C-c g p") #'my-gptel-project)
+  (global-set-key (kbd "C-c g P") #'my-gptel-add-project-file)
+  (global-set-key (kbd "C-c g R") #'my-gptel-project-reload)
 
   (global-set-key (kbd "C-c c") #'org-capture)
 #+end_src
