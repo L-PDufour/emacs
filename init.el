@@ -564,6 +564,40 @@
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)))
 
+(use-package flycheck
+  :ensure nil
+  :defer t
+  :commands (flycheck-mode global-flycheck-mode)
+  :config
+  ;; Error Lens-style tint across the whole line, not just the message.
+  ;; (setq flycheck-annotate-background t)
+  (global-flycheck-annotate-mode 1)
+  ;; Eglot keeps doing the LSP work; Flycheck renders the diagnostics.
+  (global-flycheck-eglot-mode 1))
+
+(defun my/use-flycheck ()
+  "Hand diagnostics over to Flycheck, disabling Flymake."
+  (interactive)
+  (remove-hook 'prog-mode-hook #'flymake-mode)
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (bound-and-true-p flymake-mode)
+        (flymake-mode -1))))
+  (global-flycheck-mode 1)
+  (message "Diagnostics: Flycheck"))
+
+(defun my/use-flymake ()
+  "Hand diagnostics back to Flymake, disabling Flycheck."
+  (interactive)
+  (when (bound-and-true-p global-flycheck-mode)
+    (global-flycheck-mode -1))
+  (add-hook 'prog-mode-hook #'flymake-mode)
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (derived-mode-p 'prog-mode)
+        (flymake-mode 1))))
+  (message "Diagnostics: Flymake"))
+
 (use-package xref
   :ensure nil
   :custom
@@ -1732,6 +1766,7 @@ Name the moving parts, then walk through the flow.  No filler.")))
     "C-c g"   "gptel/llm"
     "C-c t"   "terminal"
     "C-c e"   "errors/flymake"
+    "C-c !"   "flycheck"
     "C-c TAB" "workspaces"
     "M-'"     "surround"))
 

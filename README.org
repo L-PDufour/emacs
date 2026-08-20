@@ -973,6 +973,67 @@ it.
                 ([remap xref-find-apropos] . consult-eglot-symbols)))
 #+end_src
 
+** Flycheck (opt-in)
+
+Flycheck 38 is installed but *not* enabled at startup — *Flymake* above
+still owns diagnostics. Running both at once double-reports every error,
+so switch with =M-x my/use-flycheck= and back with =M-x my/use-flymake=.
+Neither choice survives a restart; Flymake stays the default until this
+block changes.
+
+What Flycheck 38 adds over the Flymake setup:
+
+- =flycheck-annotate-mode= shows messages inline beside the code (Error
+  Lens style): the line at point gets the full message, the rest stay
+  compact.
+- =global-flycheck-eglot-mode= routes Eglot's LSP diagnostics through
+  Flycheck. It reads the raw LSP diagnostic rather than the flattened
+  Flymake one, so =quickfix= code actions become applicable fixes
+  (=C-c ! f=, or =C-c ! F= for the whole buffer) and a diagnostic's
+  related locations become navigable (=C-c ! j=).
+- =P= in the error list flips to project-wide scope, surfacing the
+  cross-file errors that a per-buffer view discards.
+
+Flycheck keeps its own =C-c != prefix, so the =C-c e= bindings on the
+Flymake block are untouched. Eglot is started manually here (see *Eglot*),
+so the bridge only engages once you run =M-x eglot=.
+
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :ensure nil
+    :defer t
+    :commands (flycheck-mode global-flycheck-mode)
+    :config
+    ;; Error Lens-style tint across the whole line, not just the message.
+    ;; (setq flycheck-annotate-background t)
+    (global-flycheck-annotate-mode 1)
+    ;; Eglot keeps doing the LSP work; Flycheck renders the diagnostics.
+    (global-flycheck-eglot-mode 1))
+
+  (defun my/use-flycheck ()
+    "Hand diagnostics over to Flycheck, disabling Flymake."
+    (interactive)
+    (remove-hook 'prog-mode-hook #'flymake-mode)
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (bound-and-true-p flymake-mode)
+          (flymake-mode -1))))
+    (global-flycheck-mode 1)
+    (message "Diagnostics: Flycheck"))
+
+  (defun my/use-flymake ()
+    "Hand diagnostics back to Flymake, disabling Flycheck."
+    (interactive)
+    (when (bound-and-true-p global-flycheck-mode)
+      (global-flycheck-mode -1))
+    (add-hook 'prog-mode-hook #'flymake-mode)
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (derived-mode-p 'prog-mode)
+          (flymake-mode 1))))
+    (message "Diagnostics: Flymake"))
+#+end_src
+
 ** Xref
 
 #+begin_src emacs-lisp
@@ -2742,6 +2803,7 @@ these are plain Emacs bindings, discoverable through which-key.
       "C-c g"   "gptel/llm"
       "C-c t"   "terminal"
       "C-c e"   "errors/flymake"
+      "C-c !"   "flycheck"
       "C-c TAB" "workspaces"
       "M-'"     "surround"))
 #+end_src
