@@ -266,11 +266,22 @@ Nix provides all packages on the load-path already. We just need
 =use-package= (built-in since Emacs 29) and tell it never to install
 anything.
 
+=package-initialize= is load-bearing, despite =package.el= having no
+archives to talk to. =early-init.el= sets =package-enable-at-startup= to
+nil, which stops Emacs from running =package-activate-all= on its own, so
+this call is the only thing that activates the packages Nix put under
+=site-lisp/elpa/= and loads their =*-autoloads.el=. Drop it and every
+autoloaded symbol goes void — =global-corfu-mode=, =popper-mode=,
+=diff-hl-margin-mode= and friends all fail at =:init= / =:config= time.
+
 #+begin_src emacs-lisp
   (setq package-archives nil)
   (setq package-enable-at-startup nil)
 
   (require 'package)
+  ;; Activates Nix-provided packages and loads their autoloads.
+  ;; Required: package-enable-at-startup is nil, so nothing else does this.
+  (package-initialize)
   (require 'use-package)
   (setq use-package-always-ensure nil)
 #+end_src

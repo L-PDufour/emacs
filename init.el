@@ -8,6 +8,9 @@
 (setq package-enable-at-startup nil)
 
 (require 'package)
+;; Activates Nix-provided packages and loads their autoloads.
+;; Required: package-enable-at-startup is nil, so nothing else does this.
+(package-initialize)
 (require 'use-package)
 (setq use-package-always-ensure nil)
 
