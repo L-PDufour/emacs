@@ -1,6 +1,6 @@
 ;;; early-init.el --- Early initialization -*- lexical-binding: t; -*-
 ;;; Commentary:
-;; Tangled from config.org — do not edit by hand.
+;; Tangled from README.org — do not edit by hand.
 ;;; Code:
 
 (setq gc-cons-threshold most-positive-fixnum
@@ -124,8 +124,6 @@
 ;; PGTK (Wayland/Sway): don't stall waiting for GTK events
 (when (boundp 'pgtk-wait-for-event-timeout)
   (setq pgtk-wait-for-event-timeout 0.001))
-
-(setq custom-file (expand-file-name "custom.el" "~/.emacs.d/"))
 
 (provide 'early-init)
 ;;; early-init.el ends here

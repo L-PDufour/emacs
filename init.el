@@ -1,6 +1,6 @@
 ;;; init.el --- Main configuration -*- lexical-binding: t; -*-
 ;;; Commentary:
-;; Tangled from config.org — do not edit by hand.
+;; Tangled from README.org — do not edit by hand.
 ;; Based on Emacs-Kick by Rahul Martim Juliato, adapted for NixOS + IGC + Sway.
 ;;; Code:
 
@@ -8,7 +8,6 @@
 (setq package-enable-at-startup nil)
 
 (require 'package)
-(package-initialize)
 (require 'use-package)
 (setq use-package-always-ensure nil)
 
@@ -32,24 +31,18 @@
   :custom
   (auto-save-default nil)
   (auto-revert-use-notify nil)
-  (column-number-mode t)
   (help-window-select t)
   (create-lockfiles nil)
   (delete-by-moving-to-trash t)
-  (delete-selection-mode 1)
-  (global-auto-revert-mode 1)
   (inhibit-startup-message t)
   (make-backup-files nil)
-  (pixel-scroll-precision-mode t)
   (ring-bell-function 'ignore)
   (split-width-threshold 170)
   (tab-width 4)
   (treesit-font-lock-level 4)
   (use-short-answers t)
-  (blink-cursor-mode nil)
   (redisplay-skip-fontification-on-input t)
-  (bidi-display-reordering 'left-to-right
-    					   bidi-paragraph-direction 'left-to-right)
+  (bidi-paragraph-direction 'left-to-right)
   (bidi-inhibit-bpa t)
   (cursor-in-non-selected-windows nil)
   (save-interprogram-paste-before-kill t)
@@ -58,8 +51,6 @@
   (tab-always-indent 'complete)
   (savehist-additional-variables
    '(search-ring regexp-search-ring kill-ring))
-  (add-hook 'after-save-hook
-    		#'executable-make-buffer-file-executable-if-script-p)
   (window-combination-resize t)
   (set-mark-command-repeat-pop t)
   :hook
@@ -77,16 +68,20 @@
     (string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
-  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-  (load custom-file 'noerror 'nomessage)
-
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
   (modify-coding-system-alist 'file "" 'utf-8)
+
+  (add-hook 'after-save-hook
+            #'executable-make-buffer-file-executable-if-script-p)
 
   :init
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (when scroll-bar-mode (scroll-bar-mode -1))
+  (column-number-mode 1)
+  (delete-selection-mode 1)
+  (pixel-scroll-precision-mode 1)
+  (blink-cursor-mode -1)
   ;; (global-hl-line-mode 1)
   (add-hook 'prog-mode-hook #'hl-line-mode)
   (add-hook 'text-mode-hook #'hl-line-mode)
@@ -205,6 +200,26 @@
               ("C-c e n" . flymake-goto-next-error)
               ("C-c e p" . flymake-goto-prev-error)))
 
+(defvar my/literate-config-file
+  (expand-file-name "README.org" "~/.emacs.d/")
+  "The org file this configuration is tangled from.")
+
+(defun my/literate-config-buffer-p ()
+  "Return non-nil if the current buffer visits `my/literate-config-file'."
+  (and buffer-file-name
+       (file-equal-p buffer-file-name my/literate-config-file)))
+
+(defun my/org-babel-tangle-config ()
+  "Tangle the literate config when it is saved."
+  (when (my/literate-config-buffer-p)
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle)
+      (message "Tangled %s" (file-name-nondirectory my/literate-config-file)))))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook #'my/org-babel-tangle-config nil t)))
+
 (use-package org
   :ensure nil
   :defer t
@@ -222,6 +237,10 @@
   (org-log-into-drawer t)
   (org-directory "~/Sync/personal/")
   (org-default-notes-file (expand-file-name "inbox.org" org-directory))
+  (org-confirm-babel-evaluate
+   (lambda (lang _body)
+     (not (and (equal lang "emacs-lisp")
+               (my/literate-config-buffer-p)))))
   :config
   (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
 							  org-level-5 org-level-6 org-level-7 org-level-8))
@@ -363,7 +382,6 @@
 
 (use-package ligature
   :ensure nil
-  :config
   :config
   ;; Enable the "www" ligature in every possible major mode
   (ligature-set-ligatures 't '("www"))
@@ -644,9 +662,6 @@
    (after-init . dape-breakpoint-load)
 
   :custom
-  ;; Turn on global bindings for setting breakpoints with mouse
-   (dape-breakpoint-global-mode +1)
-
   ;; Info buffers to the right
   ;; (dape-buffer-window-arrangement 'right)
   ;; Info buffers like gud (gdb-mi)
@@ -657,6 +672,9 @@
   ;; (dape-cwd-function #'projectile-project-root)
 
   :config
+  ;; Turn on global bindings for setting breakpoints with mouse
+   (dape-breakpoint-global-mode 1)
+
   ;; Pulse source line (performance hit)
   ;; (add-hook 'dape-display-source-hook #'pulse-momentary-highlight-one-line)
 
@@ -669,8 +687,8 @@
 
 ;; For a more ergonomic Emacs and `dape' experience
 (use-package repeat
-  :custom
-  (repeat-mode +1))
+  :init
+  (repeat-mode 1))
 
 ;; Left and right side windows occupy full frame height
 (use-package emacs
