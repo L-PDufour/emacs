@@ -11,9 +11,9 @@
             (setq gc-cons-threshold (* 16 1024 1024)
                   gc-cons-percentage 0.1)))
 
-;; IGC tuning (ignored on non-IGC builds)
-(setq igc-step-multiplier 2)
-(setq igc-cons-threshold (* 32 1024 1024))
+;; IGC tuning — `igc-step-interval' is the branch's only knob.
+(when (boundp 'igc-step-interval)
+  (setq igc-step-interval 0.1))
 
 (defvar my--file-name-handler-alist
   (default-toplevel-value 'file-name-handler-alist))
@@ -53,7 +53,7 @@
   (add-hook 'post-command-hook #'my--reset-inhibited-vars -100)
   (add-hook 'emacs-startup-hook #'my--reset-inhibited-vars 101))
 
-(setq read-process-output-max (* 4 1024 1024))
+(setq read-process-output-max (* 1024 1024))
 (setq process-adaptive-read-buffering nil)
 
 (setq user-emacs-directory (expand-file-name "var/" "~/.emacs.d/"))
@@ -64,8 +64,9 @@
 (setq package-archives nil)
 
 (when (featurep 'native-compile)
-  (setq native-comp-deferred-compilation t
-        native-comp-jit-compilation t
+  ;; `native-comp-deferred-compilation' is the obsolete alias of
+  ;; `native-comp-jit-compilation'; setting only the latter suffices.
+  (setq native-comp-jit-compilation t
         native-comp-async-report-warnings-errors 'silent
         native-comp-warning-on-missing-source nil)
   (when (fboundp 'startup-redirect-eln-cache)
@@ -97,20 +98,22 @@
       initial-major-mode 'fundamental-mode)
 
 (setq auto-mode-case-fold nil)
-(winner-mode +1)
+;; `winner-mode' itself is enabled in init.el — enabling it here too
+;; loaded winner.el during early-init for no benefit.
 
 (defun toggle-delete-other-windows ()
   "Delete other windows in frame if any, or restore previous window config."
   (interactive)
-  (if (and winner-mode
-  		   (equal (selected-window) (next-window)))
-  	  (winner-undo)
+  (if (and (bound-and-true-p winner-mode)
+  		 (equal (selected-window) (next-window)))
+  	(winner-undo)
     (delete-other-windows)))
 
 (global-set-key (kbd "C-x 1") #'toggle-delete-other-windows)
 
-(setq idle-update-delay 1.0
-      inhibit-compacting-font-caches t
+;; No `idle-update-delay': redisplay stopped consulting it in Emacs 30
+;; and master removed the variable entirely.
+(setq inhibit-compacting-font-caches t
       ffap-machine-p-known 'reject)
 (setq jit-lock-defer-time 0.05)
 ;; Skip expensive rendering mid-scroll

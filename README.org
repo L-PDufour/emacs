@@ -32,13 +32,15 @@ UI chrome before frames are drawn.
 ** Garbage Collection and IGC
 
 We run on the IGC (incremental garbage collector) branch. Crank GC
-thresholds sky-high during init, then reset. IGC-specific knobs
-control step size and threshold separately.
+thresholds sky-high during init, then reset.
 
 The =gc-cons-*= pair is the fallback for a non-IGC build — an MPS
-build collects incrementally and ignores it. The =igc-*= knobs are
-the reverse: unbound on a stock build, where =setq= just defines an
-unused variable.
+build collects incrementally and ignores it. The only tuning knob
+the igc branch actually exposes is =igc-step-interval=: how many
+seconds of GC work MPS may do when Emacs is idle (default 0 = do
+nothing when idle). Letting it reclaim a little during idle keeps
+pauses from piling up mid-edit. It is unbound on a stock build, so
+guard with =boundp= instead of defining a stray variable.
 
 No =focus-out= GC hook: =focus-out-hook= was made obsolete in Emacs
 27.1 and removed in 28, so it never fired (=after-focus-change-function=
@@ -55,9 +57,9 @@ avoid.
               (setq gc-cons-threshold (* 16 1024 1024)
                     gc-cons-percentage 0.1)))
 
-  ;; IGC tuning (ignored on non-IGC builds)
-  (setq igc-step-multiplier 2)
-  (setq igc-cons-threshold (* 32 1024 1024))
+  ;; IGC tuning — `igc-step-interval' is the branch's only knob.
+  (when (boundp 'igc-step-interval)
+    (setq igc-step-interval 0.1))
 #+end_src
 
 ** File Name Handler Cache
@@ -127,8 +129,14 @@ is Eglot: LSP servers send responses far bigger than the 4 kB
 default, and adaptive buffering only helps processes that trickle
 output.
 
+1 MiB, not more: Emacs enlarges the subprocess pipe to this value
+with =F_SETPIPE_SZ=, and Linux caps unprivileged pipes at
+=fs.pipe-max-size= (1 MiB by default). Asking for 4 MiB makes the
+=fcntl= fail silently and leaves the pipe at the 64 kB default —
+the bigger value defeats itself.
+
 #+begin_src emacs-lisp
-  (setq read-process-output-max (* 4 1024 1024))
+  (setq read-process-output-max (* 1024 1024))
   (setq process-adaptive-read-buffering nil)
 #+end_src
 
@@ -159,8 +167,9 @@ into our var directory.
 
 #+begin_src emacs-lisp
   (when (featurep 'native-compile)
-    (setq native-comp-deferred-compilation t
-          native-comp-jit-compilation t
+    ;; `native-comp-deferred-compilation' is the obsolete alias of
+    ;; `native-comp-jit-compilation'; setting only the latter suffices.
+    (setq native-comp-jit-compilation t
           native-comp-async-report-warnings-errors 'silent
           native-comp-warning-on-missing-source nil)
     (when (fboundp 'startup-redirect-eln-cache)
@@ -207,20 +216,22 @@ This avoids the flash of default UI.
 
 #+begin_src emacs-lisp
   (setq auto-mode-case-fold nil)
-  (winner-mode +1)
+  ;; `winner-mode' itself is enabled in init.el — enabling it here too
+  ;; loaded winner.el during early-init for no benefit.
 
   (defun toggle-delete-other-windows ()
     "Delete other windows in frame if any, or restore previous window config."
     (interactive)
-    (if (and winner-mode
-    		   (equal (selected-window) (next-window)))
-    	  (winner-undo)
+    (if (and (bound-and-true-p winner-mode)
+    		 (equal (selected-window) (next-window)))
+    	(winner-undo)
       (delete-other-windows)))
 
   (global-set-key (kbd "C-x 1") #'toggle-delete-other-windows)
 
-  (setq idle-update-delay 1.0
-        inhibit-compacting-font-caches t
+  ;; No `idle-update-delay': redisplay stopped consulting it in Emacs 30
+  ;; and master removed the variable entirely.
+  (setq inhibit-compacting-font-caches t
         ffap-machine-p-known 'reject)
   (setq jit-lock-defer-time 0.05)
   ;; Skip expensive rendering mid-scroll
@@ -897,13 +908,31 @@ it.
 #+end_src
 
 ** Mode Line
+
+Count Flymake diagnostics by *severity*, not by literal type:
+Eglot reports its diagnostics as =eglot-error= / =eglot-warning= /
+=eglot-note=, so matching on =:error= / =:warning= counted zero in
+every LSP-managed buffer and the mode line showed a green ✓ next to
+actual errors. =flymake--severity= resolves any type through its
+=flymake-category=, which covers both built-in backends and Eglot.
+
+No caching layer: =flymake-after-diagnostics-hook= does not exist
+(the =add-hook= calls silently did nothing, the cache never
+updated), and none is needed — the =:eval= runs on redisplay, which
+is also exactly when a stale count would otherwise linger.
+
 #+begin_src emacs-lisp
 (defun my/ml-flymake ()
-  "Flymake error/warning counts for the mode-line."
+  "Flymake error/warning counts for the mode-line, by severity."
   (when (bound-and-true-p flymake-mode)
-    (let* ((diags (flymake-diagnostics))
-           (errors   (cl-count :error   diags :key #'flymake-diagnostic-type))
-           (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
+    (let ((err-level (warning-numeric-level :error))
+          (warn-level (warning-numeric-level :warning))
+          (errors 0)
+          (warnings 0))
+      (dolist (d (flymake-diagnostics))
+        (let ((sev (flymake--severity (flymake-diagnostic-type d))))
+          (cond ((>= sev err-level)  (setq errors (1+ errors)))
+                ((>= sev warn-level) (setq warnings (1+ warnings))))))
       (concat
        (when (> errors 0)
          (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
@@ -911,23 +940,6 @@ it.
          (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
        (when (= (+ errors warnings) 0)
          (propertize " ✓" 'face '(:foreground "#81c784")))))))
-
-(defvar-local my/ml-flymake-cache "")
-
-(defun my/ml-flymake-update ()
-  "Cache flymake status string."
-  (setq my/ml-flymake-cache
-        (if (bound-and-true-p flymake-mode)
-            (let* ((diags (flymake-diagnostics))
-                   (errors (cl-count :error diags :key #'flymake-diagnostic-type))
-                   (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
-              (cond
-               ((> errors 0) (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
-               ((> warnings 0) (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
-               (t (propertize " ✓" 'face '(:foreground "#81c784")))))
-          "")))
-
-(add-hook 'flymake-after-diagnostics-hook #'my/ml-flymake-update)
 
 (setq-default mode-line-format
   '(" "
@@ -939,8 +951,6 @@ it.
     (:eval (my/ml-flymake))
     "  "
     mode-line-end-spaces))
-
-(add-hook 'flymake-after-diagnostics-hook #'force-mode-line-update)
 #+end_src
 
 * Programming
@@ -1229,10 +1239,7 @@ gates on an older pin.
      (add-hook 'dape-compile-hook #'kill-buffer)
     )
 
-  ;; For a more ergonomic Emacs and `dape' experience
-  (use-package repeat
-    :init
-    (repeat-mode 1))
+  ;; `repeat-mode' is already enabled in the core Emacs section.
 
   ;; Left and right side windows occupy full frame height
   (use-package emacs
@@ -1693,11 +1700,25 @@ every other package here, =surround= has to come from Nix — add
 
 ** Xclip
 
+Terminal frames only. A PGTK GUI frame already talks to the Wayland
+clipboard natively; loading xclip there is useless at best and can
+route kills through an external tool (on Wayland the =xclip= binary
+goes via XWayland's X clipboard) instead of the native one. In
+=emacs -nw= under a Wayland compositor, xclip.el picks =wl-copy= /
+=wl-paste= automatically. =tty-setup-hook= runs for the initial
+terminal of =emacs -nw= and for every =emacsclient -t= frame, and
+never for GUI frames — including under =--daemon=.
+
 #+begin_src emacs-lisp
   (use-package xclip
     :ensure nil
     :defer t
-    :hook (after-init . xclip-mode))
+    :init
+    (defun my/enable-xclip-on-tty ()
+      "Enable `xclip-mode' for terminal frames."
+      (unless (bound-and-true-p xclip-mode)
+        (xclip-mode 1)))
+    (add-hook 'tty-setup-hook #'my/enable-xclip-on-tty))
 #+end_src
 
 ** Popper

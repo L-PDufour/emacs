@@ -496,11 +496,16 @@
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (defun my/ml-flymake ()
-  "Flymake error/warning counts for the mode-line."
+  "Flymake error/warning counts for the mode-line, by severity."
   (when (bound-and-true-p flymake-mode)
-    (let* ((diags (flymake-diagnostics))
-           (errors   (cl-count :error   diags :key #'flymake-diagnostic-type))
-           (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
+    (let ((err-level (warning-numeric-level :error))
+          (warn-level (warning-numeric-level :warning))
+          (errors 0)
+          (warnings 0))
+      (dolist (d (flymake-diagnostics))
+        (let ((sev (flymake--severity (flymake-diagnostic-type d))))
+          (cond ((>= sev err-level)  (setq errors (1+ errors)))
+                ((>= sev warn-level) (setq warnings (1+ warnings))))))
       (concat
        (when (> errors 0)
          (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
@@ -508,23 +513,6 @@
          (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
        (when (= (+ errors warnings) 0)
          (propertize " ✓" 'face '(:foreground "#81c784")))))))
-
-(defvar-local my/ml-flymake-cache "")
-
-(defun my/ml-flymake-update ()
-  "Cache flymake status string."
-  (setq my/ml-flymake-cache
-        (if (bound-and-true-p flymake-mode)
-            (let* ((diags (flymake-diagnostics))
-                   (errors (cl-count :error diags :key #'flymake-diagnostic-type))
-                   (warnings (cl-count :warning diags :key #'flymake-diagnostic-type)))
-              (cond
-               ((> errors 0) (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
-               ((> warnings 0) (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
-               (t (propertize " ✓" 'face '(:foreground "#81c784")))))
-          "")))
-
-(add-hook 'flymake-after-diagnostics-hook #'my/ml-flymake-update)
 
 (setq-default mode-line-format
   '(" "
@@ -536,8 +524,6 @@
     (:eval (my/ml-flymake))
     "  "
     mode-line-end-spaces))
-
-(add-hook 'flymake-after-diagnostics-hook #'force-mode-line-update)
 
 (setq treesit-font-lock-level 4)
 (add-to-list 'auto-mode-alist '("\\.ts\\'"  . typescript-ts-mode))
@@ -742,10 +728,7 @@
    (add-hook 'dape-compile-hook #'kill-buffer)
   )
 
-;; For a more ergonomic Emacs and `dape' experience
-(use-package repeat
-  :init
-  (repeat-mode 1))
+;; `repeat-mode' is already enabled in the core Emacs section.
 
 ;; Left and right side windows occupy full frame height
 (use-package emacs
@@ -1055,7 +1038,12 @@
 (use-package xclip
   :ensure nil
   :defer t
-  :hook (after-init . xclip-mode))
+  :init
+  (defun my/enable-xclip-on-tty ()
+    "Enable `xclip-mode' for terminal frames."
+    (unless (bound-and-true-p xclip-mode)
+      (xclip-mode 1)))
+  (add-hook 'tty-setup-hook #'my/enable-xclip-on-tty))
 
 (use-package popper
   :ensure nil
