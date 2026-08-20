@@ -44,6 +44,9 @@
   (tab-width 4)
   (treesit-font-lock-level 4)
   (use-short-answers t)
+  ;; Keep `ispell-completion-at-point' out of text/org buffers: it loads a
+  ;; dictionary and can block completion.
+  (text-mode-ispell-word-completion nil)
   (redisplay-skip-fontification-on-input t)
   (bidi-paragraph-direction 'left-to-right)
   (bidi-inhibit-bpa t)
@@ -302,6 +305,8 @@
 (completion-styles '(orderless basic))
 (completion-category-defaults nil)
 (completion-category-overrides '((file (styles partial-completion))))
+;; Emacs 31+: make partial-completion behave like substring for paths.
+(completion-pcm-leading-wildcard t)
 :config
 (with-eval-after-load 'eglot
   (setq completion-category-overrides
@@ -350,6 +355,9 @@
   (corfu-on-exact-match nil)
   (corfu-preselect 'first)
   (corfu-preview-current nil)
+  :bind (:map corfu-map
+              ("M-q" . corfu-quick-complete)
+              ("C-q" . corfu-quick-insert))
   :init
   (global-corfu-mode)
   :config
@@ -366,14 +374,20 @@
 (add-hook 'org-mode-hook (lambda ()
   (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
 :config
-;; Only file completion globally makes sense
+;; A plain list, not `cape-capf-super'. Supering merges every candidate into
+;; one set sorted by Corfu, which discards the `sortText' relevance ranking
+;; the language server sends and interleaves templates with LSP candidates.
+;; In a list, Capfs are tried in order and the first non-nil one answers:
+;; `tempel-complete' is gated behind `tempel-trigger-prefix' ("<"), so it
+;; only fires when a template is asked for, and Eglot keeps its own ordering
+;; the rest of the time. Marking Eglot non-exclusive lets completion fall
+;; through to `cape-file' when the server returns no match.
 (add-hook 'eglot-managed-mode-hook
-(lambda ()
-  (setq-local completion-at-point-functions
-    (list (cape-capf-super
-           #'eglot-completion-at-point
-           #'tempel-expand
-           #'cape-file)))))
+          (lambda ()
+            (setq-local completion-at-point-functions
+                        (list #'tempel-complete
+                              (cape-capf-nonexclusive #'eglot-completion-at-point)
+                              #'cape-file))))
 (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme
