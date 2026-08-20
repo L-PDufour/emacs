@@ -535,7 +535,7 @@
 
 (use-package eglot
   :ensure nil
-  :hook (prog-mode . eglot-ensure)
+  :defer t
   :init
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   :custom
