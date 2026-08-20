@@ -1099,21 +1099,29 @@ so the bridge only engages once you run =M-x eglot=.
 Using Tempel instead of yasnippet — lighter, uses the same template
 file as =var/templates=.
 
-The Capfs use =tempel-expand=, which fires only on an exact template
-name. =tempel-complete= is unsuitable in a shared Capf list: when the
-text at point matches no template, =tempel--prefix-bounds= falls back to
-=bounds-of-thing-at-point=, so it offers *every* template at nearly any
-symbol and hides the LSP candidates behind it. Browse templates on
-purpose with =M-+= (=tempel-complete=) or =M-*= (=tempel-insert=).
+Two different Capfs, on purpose:
 
-Note there is no =tempel-trigger-prefix= any more — upstream removed it
-in favour of the prefix heuristic above, so setting it did nothing.
+- Non-Eglot buffers (prog/text/org) get =tempel-complete=, which lists
+  templates in the popup so they stay discoverable.
+- Eglot-managed buffers get =tempel-expand=, which fires only on an exact
+  template name. =tempel-complete= is unusable there: when the text at
+  point matches no template, =tempel--prefix-bounds= falls back to
+  =bounds-of-thing-at-point=, so it returns *every* template at nearly
+  any symbol and buries the LSP candidates.
+
+=M-+= (=tempel-complete=) and =M-*= (=tempel-insert=) browse templates on
+demand anywhere, including Eglot buffers.
+
+Newer Tempel has dropped =tempel-trigger-prefix= in favour of the prefix
+heuristic above; the setting below is inert on those versions and still
+gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package tempel
     :ensure nil
     :custom
     (tempel-path (expand-file-name "templates" user-emacs-directory))
+    (tempel-trigger-prefix "<")
     :bind (("M-+" . tempel-complete)
            ("M-*" . tempel-insert))
     :bind (:map tempel-map
@@ -1124,13 +1132,9 @@ in favour of the prefix heuristic above, so setting it did nothing.
            (org-mode  . tempel-setup-capf))
     :init
     (defun tempel-setup-capf ()
-      "Add `tempel-expand' to `completion-at-point-functions'.
-`tempel-expand' matches an exact template name only.  `tempel-complete'
-would offer every template at nearly any symbol, because
-`tempel--prefix-bounds' falls back to `bounds-of-thing-at-point'.  Browse
-templates deliberately with \[tempel-complete] instead."
+      "Add `tempel-complete' to `completion-at-point-functions'."
       (setq-local completion-at-point-functions
-                  (cons #'tempel-expand
+                  (cons #'tempel-complete
                         completion-at-point-functions))))
 
   (use-package tempel-collection

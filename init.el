@@ -642,37 +642,34 @@
      (project-eshell "Eshell")
      (project-any-command "Other"))))
 
-  (use-package tempel
-    :ensure nil
-    :custom
-    (tempel-path (expand-file-name "templates" user-emacs-directory))
-    :bind (("M-+" . tempel-complete)
-           ("M-*" . tempel-insert))
-    :bind (:map tempel-map
-                ("M-n" . tempel-next)
-                ("M-p" . tempel-previous))
-    :hook ((prog-mode . tempel-setup-capf)
-           (text-mode . tempel-setup-capf)
-           (org-mode  . tempel-setup-capf))
-    :init
-    (defun tempel-setup-capf ()
-      "Add `tempel-expand' to `completion-at-point-functions'.
-`tempel-expand' matches an exact template name only.  `tempel-complete'
-would offer every template at nearly any symbol, because
-`tempel--prefix-bounds' falls back to `bounds-of-thing-at-point'.  Browse
-templates deliberately with \[tempel-complete] instead."
-      (setq-local completion-at-point-functions
-                  (cons #'tempel-expand
-                        completion-at-point-functions))))
+(use-package tempel
+  :ensure nil
+  :custom
+  (tempel-path (expand-file-name "templates" user-emacs-directory))
+  (tempel-trigger-prefix "<")
+  :bind (("M-+" . tempel-complete)
+         ("M-*" . tempel-insert))
+  :bind (:map tempel-map
+              ("M-n" . tempel-next)
+              ("M-p" . tempel-previous))
+  :hook ((prog-mode . tempel-setup-capf)
+         (text-mode . tempel-setup-capf)
+         (org-mode  . tempel-setup-capf))
+  :init
+  (defun tempel-setup-capf ()
+    "Add `tempel-complete' to `completion-at-point-functions'."
+    (setq-local completion-at-point-functions
+                (cons #'tempel-complete
+                      completion-at-point-functions))))
 
-  (use-package tempel-collection
-    :ensure nil
-    :after tempel)
+(use-package tempel-collection
+  :ensure nil
+  :after tempel)
 
-  (use-package eglot-tempel
-    :ensure nil
-    :after tempel
-    :init (eglot-tempel-mode t))
+(use-package eglot-tempel
+  :ensure nil
+  :after tempel
+  :init (eglot-tempel-mode t))
 
 (use-package apheleia
   :ensure nil
