@@ -376,17 +376,23 @@
 :config
 ;; A plain list, not `cape-capf-super'. Supering merges every candidate into
 ;; one set sorted by Corfu, which discards the `sortText' relevance ranking
-;; the language server sends and interleaves templates with LSP candidates.
-;; In a list, Capfs are tried in order and the first non-nil one answers:
-;; `tempel-complete' is gated behind `tempel-trigger-prefix' ("<"), so it
-;; only fires when a template is asked for, and Eglot keeps its own ordering
-;; the rest of the time. Marking Eglot non-exclusive lets completion fall
-;; through to `cape-file' when the server returns no match.
+;; the language server sends. In a list, Capfs are tried in order and the
+;; first non-nil one answers, so Eglot keeps its own ordering.
+;;
+;; Eglot goes first and `tempel-expand' second, never `tempel-complete':
+;; `tempel--prefix-bounds' falls back to `bounds-of-thing-at-point' when the
+;; text at point matches no template, so `tempel-complete' returns every
+;; template at nearly any symbol and buries the LSP candidates.
+;; `tempel-expand' requires an exact template name, so it stays quiet.
+;; Use `M-+' to browse templates on demand.
+;;
+;; Eglot is marked non-exclusive so completion still falls through to
+;; `tempel-expand' and `cape-file' when the server returns no match.
 (add-hook 'eglot-managed-mode-hook
           (lambda ()
             (setq-local completion-at-point-functions
-                        (list #'tempel-complete
-                              (cape-capf-nonexclusive #'eglot-completion-at-point)
+                        (list (cape-capf-nonexclusive #'eglot-completion-at-point)
+                              #'tempel-expand
                               #'cape-file))))
 (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
@@ -636,34 +642,37 @@
      (project-eshell "Eshell")
      (project-any-command "Other"))))
 
-(use-package tempel
-  :ensure nil
-  :custom
-  (tempel-path (expand-file-name "templates" user-emacs-directory))
-  (tempel-trigger-prefix "<")
-  :bind (("M-+" . tempel-complete)
-         ("M-*" . tempel-insert))
-  :bind (:map tempel-map
-              ("M-n" . tempel-next)
-              ("M-p" . tempel-previous))
-  :hook ((prog-mode . tempel-setup-capf)
-         (text-mode . tempel-setup-capf)
-         (org-mode  . tempel-setup-capf))
-  :init
-  (defun tempel-setup-capf ()
-    "Add `tempel-complete' to `completion-at-point-functions'."
-    (setq-local completion-at-point-functions
-                (cons #'tempel-complete
-                      completion-at-point-functions))))
+  (use-package tempel
+    :ensure nil
+    :custom
+    (tempel-path (expand-file-name "templates" user-emacs-directory))
+    :bind (("M-+" . tempel-complete)
+           ("M-*" . tempel-insert))
+    :bind (:map tempel-map
+                ("M-n" . tempel-next)
+                ("M-p" . tempel-previous))
+    :hook ((prog-mode . tempel-setup-capf)
+           (text-mode . tempel-setup-capf)
+           (org-mode  . tempel-setup-capf))
+    :init
+    (defun tempel-setup-capf ()
+      "Add `tempel-expand' to `completion-at-point-functions'.
+`tempel-expand' matches an exact template name only.  `tempel-complete'
+would offer every template at nearly any symbol, because
+`tempel--prefix-bounds' falls back to `bounds-of-thing-at-point'.  Browse
+templates deliberately with \[tempel-complete] instead."
+      (setq-local completion-at-point-functions
+                  (cons #'tempel-expand
+                        completion-at-point-functions))))
 
-(use-package tempel-collection
-  :ensure nil
-  :after tempel)
+  (use-package tempel-collection
+    :ensure nil
+    :after tempel)
 
-(use-package eglot-tempel
-  :ensure nil
-  :after tempel
-  :init (eglot-tempel-mode t))
+  (use-package eglot-tempel
+    :ensure nil
+    :after tempel
+    :init (eglot-tempel-mode t))
 
 (use-package apheleia
   :ensure nil
