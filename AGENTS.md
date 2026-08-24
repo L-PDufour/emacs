@@ -9,14 +9,22 @@ from the source blocks in `README.org` and both files carry the header
 `Tangled from README.org — do not edit by hand`.
 
 - Make all config changes as `#+begin_src emacs-lisp` blocks in `README.org`.
-- After editing, re-tangle with `C-c C-v t` / `M-x org-babel-tangle`
-  (`org-babel-tangle` on the executable conflict-resolver for source blocks,
-  else it's `org-indent-mode`/`outline` keybinding). This regenerates both
-  `early-init.el` and `init.el`.
-- Header-args: `:tangle early-init.el` (line 18) and `:tangle init.el`
-  (line 261) control which file each section feeds. The global property
-  default is `:tangle no` (line 4), so a block only tangles where a
-  section or block overrides it.
+- Re-tangle after editing: saving `README.org` inside Emacs does it
+  automatically (`my/org-babel-tangle-config`, *Literate Config* section);
+  otherwise run `C-c C-v t` / `M-x org-babel-tangle`. Either regenerates
+  both `early-init.el` and `init.el`.
+- Commit the regenerated `.el` files together with the `README.org` change —
+  both are tracked, and a stale tangle is what actually runs at startup.
+- Which file a block feeds comes from the `:header-args:emacs-lisp:` property
+  of its section: `:tangle early-init.el` on *Early Init*, `:tangle init.el`
+  on *Init* and every top-level section after it. The global default on line 4
+  is `:tangle no`, so a block tangles only where a section or the block itself
+  overrides it.
+- Only `emacs-lisp` blocks tangle. The `yaml`, `nix` and `authinfo` blocks in
+  the prose are illustrations and never reach a `.el` file.
+- Tangle with the same Emacs you run this config on. Older Org versions
+  re-indent the tab-indented blocks differently and rewrite the whole file,
+  burying the real change in a whitespace diff.
 - Do not hand-edit `init.el` / `early-init.el` directly — the next tangle
   overwrites your changes.
 
@@ -50,15 +58,39 @@ tramp, etc.) is kept out of the config root. Note this means a bare
   fails silently and leaves the pipe at 64 kB.
 - Do not reintroduce obsolete/dead code that has been deliberately removed:
   `native-comp-deferred-compilation` alias (use `native-comp-jit-compilation`),
-  `idle-update-delay` (removed in Emacs 30), redundant `mode-line` cache hooks.
+  `idle-update-delay` (removed in Emacs 30), `eglot-events-buffer-size`
+  (obsolete since Eglot 1.16 — use `eglot-events-buffer-config`), redundant
+  `mode-line` cache hooks.
+- Packages deliberately dropped, not merely unconfigured: **Evil**/Meow (no
+  modal editing — plain Emacs bindings plus the repeat maps), and **Flycheck**
+  (diagnostics are Flymake's, under `C-c e`; running both double-reports every
+  error). Do not add them back.
+
+## LLM config
+
+`gptel` has exactly one backend: **DeepSeek** at `api.deepseek.com`. The key
+is read lazily by `my-gptel-key` — `~/.authinfo.gpg`
+(`machine api.deepseek.com login apikey password …`), then `DEEPSEEK_API_KEY`,
+then a prompt. Never commit a key, and do not add a second backend or a proxy
+without being asked for one.
 
 ## Verification
 
 There is **no test/lint/build tooling** in this repo. Verify a change by:
-1. Tangling from `README.org`.
-2. Launching Emacs and checking startup for errors / unexpected modeline output.
+1. Tangling from `README.org`, and checking `git diff` on the `.el` files
+   shows only the region you meant to touch.
+2. Byte-compiling the result (`emacs --batch -f batch-byte-compile init.el`)
+   to catch read errors and malformed `use-package` forms. Warnings about
+   free variables from Nix-provided packages are expected noise.
+3. Launching Emacs and checking startup for errors / unexpected modeline output.
 
 ## Vendored packages
 
 `site-lisp/templ-ts-mode/` is a vendored standalone package (a separate git
 repo) for the `templ` language. Treat it as third-party, not config.
+
+It is recorded as a **gitlink** (`160000`) with no `.gitmodules` entry, so a
+fresh `git clone` leaves the directory empty and nothing tells git where to
+fetch it from. Nothing here depends on it at startup, so this is untidy rather
+than broken — but either add a `.gitmodules` entry or commit the files
+outright before relying on a clean clone.

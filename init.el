@@ -551,7 +551,8 @@
   (eglot-send-changes-idle-time 0.5)
   (eglot-extend-to-xref t)
   (eglot-autoshutdown t)
-  (eglot-events-buffer-size 0)
+  ;; Replaces the obsolete `eglot-events-buffer-size'.
+  (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-sync-connect nil)
   (eglot-report-progress nil)
   (eglot-ignored-server-capabilities
@@ -572,40 +573,6 @@
   :after eglot
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)))
-
-(use-package flycheck
-  :ensure nil
-  :defer t
-  :commands (flycheck-mode global-flycheck-mode)
-  :config
-  ;; Error Lens-style tint across the whole line, not just the message.
-  ;; (setq flycheck-annotate-background t)
-  (global-flycheck-annotate-mode 1)
-  ;; Eglot keeps doing the LSP work; Flycheck renders the diagnostics.
-  (global-flycheck-eglot-mode 1))
-
-(defun my/use-flycheck ()
-  "Hand diagnostics over to Flycheck, disabling Flymake."
-  (interactive)
-  (remove-hook 'prog-mode-hook #'flymake-mode)
-  (dolist (buf (buffer-list))
-    (with-current-buffer buf
-      (when (bound-and-true-p flymake-mode)
-        (flymake-mode -1))))
-  (global-flycheck-mode 1)
-  (message "Diagnostics: Flycheck"))
-
-(defun my/use-flymake ()
-  "Hand diagnostics back to Flymake, disabling Flycheck."
-  (interactive)
-  (when (bound-and-true-p global-flycheck-mode)
-    (global-flycheck-mode -1))
-  (add-hook 'prog-mode-hook #'flymake-mode)
-  (dolist (buf (buffer-list))
-    (with-current-buffer buf
-      (when (derived-mode-p 'prog-mode)
-        (flymake-mode 1))))
-  (message "Diagnostics: Flymake"))
 
 (use-package xref
   :ensure nil
@@ -1138,59 +1105,26 @@
 (require 'auth-source)
 
 (defvar my-gptel--key-cache nil
-  "Alist of API keys entered by hand this session, keyed by host.")
+  "DeepSeek API key entered by hand this session, if any.")
 
-(defun my-gptel-key (host env-var)
-  "Return the API key for HOST.
-Search `auth-sources' for HOST first, then the ENV-VAR environment
-variable, and only then prompt — caching the answer for the session."
-  (or (auth-source-pick-first-password :host host :user "apikey")
-      (getenv env-var)
-      (alist-get host my-gptel--key-cache nil nil #'equal)
-      (setf (alist-get host my-gptel--key-cache nil nil #'equal)
-            (read-passwd (format "%s API key: " host)))))
+(defun my-gptel-key ()
+  "Return the DeepSeek API key.
+Search `auth-sources' for api.deepseek.com first, then the
+DEEPSEEK_API_KEY environment variable, and only then prompt — caching
+the answer for the session."
+  (or (auth-source-pick-first-password :host "api.deepseek.com"
+                                       :user "apikey")
+      (getenv "DEEPSEEK_API_KEY")
+      my-gptel--key-cache
+      (setq my-gptel--key-cache (read-passwd "DeepSeek API key: "))))
 
-(defun my-gptel-openrouter-key ()
-  "Return the OpenRouter API key."
-  (my-gptel-key "openrouter.ai" "OPENROUTER_API_KEY"))
+(defvar my-gptel-models '(deepseek-chat deepseek-reasoner)
+  "Models offered by the DeepSeek backend.
+Run `my-gptel-refresh-models' to replace this with whatever the API
+currently advertises.")
 
-(defun my-gptel-litellm-key ()
-  "Return the master key of the local LiteLLM proxy."
-  (my-gptel-key "litellm" "LITELLM_MASTER_KEY"))
-
-(defvar my-gptel-openrouter-models
-  '(anthropic/claude-sonnet-4.5
-    anthropic/claude-opus-4.1
-    anthropic/claude-haiku-4.5
-    openai/gpt-5.1
-    openai/gpt-5-mini
-    google/gemini-2.5-pro
-    google/gemini-2.5-flash
-    deepseek/deepseek-chat-v3.1
-    qwen/qwen3-coder
-    moonshotai/kimi-k2)
-  "Shortlist of models offered by the OpenRouter backend.
-OpenRouter carries hundreds of models and renames them often, so this
-is a hand-picked subset that will drift.  Run
-`my-gptel-openrouter-refresh-models' to replace it with the live
-catalogue.")
-
-(defvar my-gptel-litellm-models
-  '(deepseek-chat deepseek-reasoner sonnet)
-  "Model aliases served by the local LiteLLM proxy.
-These are the `model_name' values from the proxy's own config.yaml,
-not upstream model names — LiteLLM maps one to the other.  Run
-`my-gptel-litellm-refresh-models' to sync this list with the running
-proxy.")
-
-(defvar my-gptel-openrouter nil
-  "The OpenRouter gptel backend.")
-
-(defvar my-gptel-llama-cpp nil
-  "The local llama.cpp gptel backend.")
-
-(defvar my-gptel-litellm nil
-  "The gptel backend for a local LiteLLM proxy.")
+(defvar my-gptel-deepseek nil
+  "The DeepSeek gptel backend.")
 
 (use-package gptel
   :ensure nil
@@ -1198,42 +1132,24 @@ proxy.")
   (setq gptel-default-mode 'org-mode)
   (setq gptel-track-media t)
 
-  ;; Local model: no key, no network, no cost.  Reachable from the
-  ;; gptel menu or with the `local' preset.
-  (setq my-gptel-llama-cpp
-        (gptel-make-openai "llama.cpp"
-          :host "localhost:8999"
-          :protocol "http"
-          :endpoint "/v1/chat/completions"
-          :stream t
-          :key "dummy"
-          :models '(qwen3.5-9b)))
+  ;; `gptel-make-deepseek' knows about `deepseek-reasoner''s separate
+  ;; reasoning_content field, so prefer it; on an older Nix pin that
+  ;; lacks it the plain OpenAI constructor talks to the same endpoint.
+  (setq my-gptel-deepseek
+        (if (fboundp 'gptel-make-deepseek)
+            (gptel-make-deepseek "DeepSeek"
+              :stream t
+              :key #'my-gptel-key
+              :models my-gptel-models)
+          (gptel-make-openai "DeepSeek"
+            :host "api.deepseek.com"
+            :endpoint "/chat/completions"
+            :stream t
+            :key #'my-gptel-key
+            :models my-gptel-models)))
 
-  ;; OpenRouter speaks the OpenAI API, so `gptel-make-openai' is the
-  ;; right constructor — one key for every hosted model.
-  (setq my-gptel-openrouter
-        (gptel-make-openai "OpenRouter"
-          :host "openrouter.ai"
-          :endpoint "/api/v1/chat/completions"
-          :stream t
-          :key #'my-gptel-openrouter-key
-          :models my-gptel-openrouter-models))
-
-  ;; Optional LiteLLM proxy: one endpoint in front of DeepSeek and
-  ;; anything else worth routing directly, with its own key store and
-  ;; spend caps.  Registering it is free when the proxy is not running
-  ;; — nothing connects until the backend is selected.
-  (setq my-gptel-litellm
-        (gptel-make-openai "LiteLLM"
-          :host "localhost:4000"
-          :protocol "http"
-          :endpoint "/v1/chat/completions"
-          :stream t
-          :key #'my-gptel-litellm-key
-          :models my-gptel-litellm-models))
-
-  (setq gptel-backend my-gptel-openrouter)
-  (setq gptel-model 'anthropic/claude-sonnet-4.5)
+  (setq gptel-backend my-gptel-deepseek)
+  (setq gptel-model 'deepseek-chat)
 
   :bind
   (("C-c g g" . gptel)
@@ -1244,46 +1160,34 @@ proxy.")
    ("C-c g r" . gptel-rewrite)
    ("C-c g k" . gptel-abort)))
 
-(defun my-gptel--fetch-models (url &optional key)
-  "Return the model ids advertised at URL as a list of symbols.
-URL must be an OpenAI-style /models endpoint.  KEY, when non-nil, is
-sent as a bearer token."
-  (let* ((url-request-extra-headers
-          (and key (list (cons "Authorization" (concat "Bearer " key)))))
-         (buf (url-retrieve-synchronously url t nil 30)))
+(defun my-gptel-refresh-models ()
+  "Sync the backend's model list with what DeepSeek advertises.
+Doubles as a health check: an error here means the key is wrong, the
+account is out of credit, or the network is down."
+  (interactive)
+  (let* ((key (my-gptel-key))
+         (url-request-extra-headers
+          (list (cons "Authorization" (concat "Bearer " key))))
+         (buf (url-retrieve-synchronously "https://api.deepseek.com/models"
+                                          t nil 30)))
     (unless buf
-      (user-error "No response from %s" url))
+      (user-error "No response from api.deepseek.com"))
     (unwind-protect
         (with-current-buffer buf
           (goto-char (point-min))
           (unless (search-forward "\n\n" nil t)
-            (user-error "Malformed response from %s" url))
-          (let ((payload (json-parse-buffer :object-type 'plist
-                                            :array-type 'list)))
-            (or (mapcar (lambda (m) (intern (plist-get m :id)))
-                        (plist-get payload :data))
-                (user-error "No models listed at %s" url))))
+            (user-error "Malformed response from api.deepseek.com"))
+          (let* ((payload (json-parse-buffer :object-type 'plist
+                                             :array-type 'list))
+                 (models (mapcar (lambda (m) (intern (plist-get m :id)))
+                                 (plist-get payload :data))))
+            (unless models
+              (user-error "No models listed by api.deepseek.com"))
+            (setq my-gptel-models models)
+            (setf (gptel-backend-models my-gptel-deepseek) models)
+            (message "DeepSeek: %s"
+                     (mapconcat #'symbol-name models ", "))))
       (kill-buffer buf))))
-
-(defun my-gptel-openrouter-refresh-models ()
-  "Replace the OpenRouter backend's model list with the live catalogue."
-  (interactive)
-  (let ((models (my-gptel--fetch-models
-                 "https://openrouter.ai/api/v1/models")))
-    (setq my-gptel-openrouter-models models)
-    (setf (gptel-backend-models my-gptel-openrouter) models)
-    (message "OpenRouter: %d models available" (length models))))
-
-(defun my-gptel-litellm-refresh-models ()
-  "Sync the LiteLLM backend's model list with the running proxy.
-Doubles as a health check: an error here means the proxy is down, on
-another port, or refusing the master key."
-  (interactive)
-  (let ((models (my-gptel--fetch-models "http://localhost:4000/v1/models"
-                                        (my-gptel-litellm-key))))
-    (setq my-gptel-litellm-models models)
-    (setf (gptel-backend-models my-gptel-litellm) models)
-    (message "LiteLLM: %s" (mapconcat #'symbol-name models ", "))))
 
 (defvar my-gptel-code-directive
   "You are a programming assistant working inside Emacs on the user's project.
@@ -1566,41 +1470,26 @@ if it has one.  Reuses the buffer on subsequent calls."
   ;; than breaking init.
   (when (fboundp 'gptel-make-preset)
 
-    (gptel-make-preset 'local
-      :description "Local llama.cpp model — offline and free."
-      :backend "llama.cpp"
-      :model 'qwen3.5-9b
+    (gptel-make-preset 'chat
+      :description "Plain chat, no tools — the default, made explicit."
+      :backend "DeepSeek"
+      :model 'deepseek-chat
       :tools nil)
 
-    (gptel-make-preset 'quick
-      :description "Cheap fast hosted model for one-off questions."
-      :backend "OpenRouter"
-      :model 'google/gemini-2.5-flash
-      :tools nil)
-
-    (gptel-make-preset 'cheap
-      :description "DeepSeek through the local LiteLLM proxy."
-      :backend "LiteLLM"
+    (gptel-make-preset 'code
+      :description "Project-aware coding with the file-reading tools."
+      :backend "DeepSeek"
       :model 'deepseek-chat
       :system my-gptel-code-directive
       :tools '("project_root" "list_project_files" "search_project"
                "read_file" "read_buffer"))
 
-    (gptel-make-preset 'code
-      :description "Strong hosted model with project tools."
-      :backend "OpenRouter"
-      :model 'anthropic/claude-sonnet-4.5
-      :system my-gptel-code-directive
-      :tools '("project_root" "list_project_files" "search_project"
-               "read_file" "read_buffer"))
-
     (gptel-make-preset 'reason
-      :description "Slowest, strongest model for hard problems."
-      :backend "OpenRouter"
-      :model 'anthropic/claude-opus-4.1
+      :description "deepseek-reasoner for hard problems.  No tools."
+      :backend "DeepSeek"
+      :model 'deepseek-reasoner
       :system my-gptel-code-directive
-      :tools '("project_root" "list_project_files" "search_project"
-               "read_file" "read_buffer"))
+      :tools nil)
 
     (gptel-make-preset 'explain
       :description "Explain code to someone who has not seen it."
@@ -1777,7 +1666,6 @@ Name the moving parts, then walk through the flow.  No filler.")))
     "C-c g"   "gptel/llm"
     "C-c t"   "terminal"
     "C-c e"   "errors/flymake"
-    "C-c !"   "flycheck"
     "C-c TAB" "workspaces"
     "M-'"     "surround"))
 
