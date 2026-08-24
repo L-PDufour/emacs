@@ -1496,6 +1496,108 @@ if it has one.  Reuses the buffer on subsequent calls."
       :system "Explain what this code does, plainly and concretely.
 Name the moving parts, then walk through the flow.  No filler.")))
 
+(use-package gptel-preset-collection
+  :ensure nil
+  :if (locate-library "gptel-preset-collection")
+  :after gptel
+  :demand t)
+
+(defvar my-gptel-config-root
+  (file-name-directory my/literate-config-file)
+  "Root of this configuration repository.
+Deliberately not `user-emacs-directory' — `early-init.el' repoints
+that at `var/', so it names the state directory, not the config.")
+
+(defun my-gptel-agent-project-dir ()
+  "Project root for a new agent session, or `default-directory'.
+With a prefix argument, ask instead."
+  (if current-prefix-arg
+      (read-directory-name "Agent project: ")
+    (if-let ((pr (project-current)))
+        (project-root pr)
+      default-directory)))
+
+(defun my-gptel-agent-plan (&optional project-dir)
+  "Start a `gptel-agent' session in PROJECT-DIR under the plan preset.
+Plan mode gets read-only filesystem access: it can read, search and
+run diagnostics, but not edit, write or shell out.  This is the one
+to reach for first on an unfamiliar task."
+  (interactive (list (my-gptel-agent-project-dir)))
+  (gptel-agent project-dir 'gptel-plan))
+
+(defun my-gptel-check-config ()
+  "Check this configuration the way a human would before committing.
+Tangle README.org into a scratch directory, report whether the
+checked-in .el files still match it, then byte-compile the freshly
+tangled `init.el' in a subprocess and return the compiler's output."
+  (let* ((root my-gptel-config-root)
+         (org (expand-file-name "README.org" root))
+         (tmp (make-temp-file "gptel-check-" t))
+         (report nil))
+    (unless (file-readable-p org)
+      (error "No README.org under %s" root))
+    (unwind-protect
+        (let ((copy (expand-file-name "README.org" tmp)))
+          (copy-file org copy t)
+          (require 'ob-tangle)
+          (org-babel-tangle-file copy)
+          (dolist (f '("early-init.el" "init.el"))
+            (let ((fresh (expand-file-name f tmp))
+                  (live (expand-file-name f root)))
+              (push
+               (cond
+                ((not (file-exists-p fresh))
+                 (format "%s: README.org no longer tangles it" f))
+                ((not (file-exists-p live))
+                 (format "%s: tangled, but missing from the working tree" f))
+                ((eq 0 (call-process "diff" nil nil nil "-q" fresh live))
+                 (format "%s: in sync with README.org" f))
+                (t (format "%s: STALE — re-tangle before committing" f)))
+               report)))
+          (let ((fresh-init (expand-file-name "init.el" tmp))
+                (emacs (expand-file-name invocation-name invocation-directory)))
+            (when (file-exists-p fresh-init)
+              (push (with-temp-buffer
+                      (call-process emacs nil t nil "--batch"
+                                    "-f" "batch-byte-compile" fresh-init)
+                      (concat "byte-compile:\n"
+                              (if (= (buffer-size) 0)
+                                  "  clean"
+                                (buffer-string))))
+                    report))))
+      (delete-directory tmp t))
+    (string-join (nreverse report) "\n")))
+
+(use-package gptel-agent
+  :ensure nil
+  :if (locate-library "gptel-agent")
+  :after gptel
+  :demand t
+  :config
+  ;; Append rather than set: the default value points at the package's
+  ;; own agents/, and dropping it would lose the built-in sub-agents.
+  (add-to-list 'gptel-agent-dirs
+               (expand-file-name "agents/" my-gptel-config-root) t)
+  ;; Skills need no configuration: `.claude/skills/' is already on
+  ;; `gptel-agent-skill-dirs', relative entries are resolved against
+  ;; the project root, and relative beats absolute on a name clash.
+  (gptel-agent-update)
+  :bind
+  (("C-c g A" . gptel-agent)
+   ("C-c g P" . my-gptel-agent-plan)
+   ("C-c g c" . gptel-agent-compact)))
+
+(with-eval-after-load 'gptel
+  (gptel-make-tool
+   :name "check_config"
+   :function #'my-gptel-check-config
+   :description "Verify the Emacs configuration after editing README.org: \
+re-tangles it in a scratch directory, reports whether the checked-in \
+init.el and early-init.el are still in sync, and byte-compiles the \
+result.  Call this after every edit and fix what it reports."
+   :args (list)
+   :category "project"))
+
 (use-package tabspaces
   :ensure nil
   :hook (after-init . tabspaces-mode)

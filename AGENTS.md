@@ -84,6 +84,22 @@ There is **no test/lint/build tooling** in this repo. Verify a change by:
    free variables from Nix-provided packages are expected noise.
 3. Launching Emacs and checking startup for errors / unexpected modeline output.
 
+Steps 1 and 2 are also available as one call — `my-gptel-check-config`,
+exposed to gptel as the `check_config` tool (*Agentic gptel* section). It
+tangles into a scratch directory, diffs the result against the checked-in
+`.el` files, and byte-compiles in a subprocess, touching nothing in the
+working tree. Indent new source blocks with spaces, not tabs, so the tangle
+is stable across Org versions.
+
+## Agent definitions and skills
+
+- `agents/config-reviewer.md` — a `gptel-agent` sub-agent that reviews a
+  pending change to this config. Picked up via `gptel-agent-dirs`.
+- `.claude/skills/emacs-config/SKILL.md` — these conventions as a loadable
+  skill. `gptel-agent` builds its own system prompt and does **not** read this
+  file, so anything an agent must know has to live in the skill as well. Keep
+  the two in step.
+
 ## Vendored packages
 
 `site-lisp/templ-ts-mode/` is a vendored standalone package (a separate git

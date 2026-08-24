@@ -2382,6 +2382,214 @@ completion in chat buffers, and leaves your other settings alone.
 Presets arrived in gptel 0.9.8, so the whole block is guarded with
 ~fboundp~ — an older pin from Nix will simply skip it.
 
+** Agentic gptel
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+Two add-ons by gptel's own author turn the chat client into something
+that can carry a task on its own:
+[[https://github.com/karthink/gptel-agent][gptel-agent]] (file editing,
+async Bash, diagnostics, todo lists, sub-agents, skills) and
+[[https://github.com/karthink/gptel-preset-collection][gptel-preset-collection]]
+(=@include= with completion, =@notify=, =@expand=, =@visible-buffers=).
+
+Both are on MELPA, which means neither is here until Nix puts it on the
+load-path — so both blocks are guarded with =locate-library= and simply
+do not load otherwise.  *They also need a gptel newer than the latest
+stable release*, which is the real gate: the guards elsewhere in this
+section (=gptel-make-deepseek=, =gptel-make-preset=) exist because the
+pin has historically lagged.  If those guards are firing, these two
+packages will not work either.
+
+The point is not to reimplement a terminal coding agent.  It is that
+=@gptel-agent do X= works from a Magit buffer, a Dired listing, or a
+=*compilation*= window, against whatever is already on screen — and,
+over TRAMP, against a remote machine with no Emacs on it.  That is the
+part no external CLI agent can reach.
+
+#+begin_src emacs-lisp
+  (use-package gptel-preset-collection
+    :ensure nil
+    :if (locate-library "gptel-preset-collection")
+    :after gptel
+    :demand t)
+
+  (defvar my-gptel-config-root
+    (file-name-directory my/literate-config-file)
+    "Root of this configuration repository.
+  Deliberately not `user-emacs-directory' — `early-init.el' repoints
+  that at `var/', so it names the state directory, not the config.")
+
+  (defun my-gptel-agent-project-dir ()
+    "Project root for a new agent session, or `default-directory'.
+  With a prefix argument, ask instead."
+    (if current-prefix-arg
+        (read-directory-name "Agent project: ")
+      (if-let ((pr (project-current)))
+          (project-root pr)
+        default-directory)))
+
+  (defun my-gptel-agent-plan (&optional project-dir)
+    "Start a `gptel-agent' session in PROJECT-DIR under the plan preset.
+  Plan mode gets read-only filesystem access: it can read, search and
+  run diagnostics, but not edit, write or shell out.  This is the one
+  to reach for first on an unfamiliar task."
+    (interactive (list (my-gptel-agent-project-dir)))
+    (gptel-agent project-dir 'gptel-plan))
+
+  (defun my-gptel-check-config ()
+    "Check this configuration the way a human would before committing.
+  Tangle README.org into a scratch directory, report whether the
+  checked-in .el files still match it, then byte-compile the freshly
+  tangled `init.el' in a subprocess and return the compiler's output."
+    (let* ((root my-gptel-config-root)
+           (org (expand-file-name "README.org" root))
+           (tmp (make-temp-file "gptel-check-" t))
+           (report nil))
+      (unless (file-readable-p org)
+        (error "No README.org under %s" root))
+      (unwind-protect
+          (let ((copy (expand-file-name "README.org" tmp)))
+            (copy-file org copy t)
+            (require 'ob-tangle)
+            (org-babel-tangle-file copy)
+            (dolist (f '("early-init.el" "init.el"))
+              (let ((fresh (expand-file-name f tmp))
+                    (live (expand-file-name f root)))
+                (push
+                 (cond
+                  ((not (file-exists-p fresh))
+                   (format "%s: README.org no longer tangles it" f))
+                  ((not (file-exists-p live))
+                   (format "%s: tangled, but missing from the working tree" f))
+                  ((eq 0 (call-process "diff" nil nil nil "-q" fresh live))
+                   (format "%s: in sync with README.org" f))
+                  (t (format "%s: STALE — re-tangle before committing" f)))
+                 report)))
+            (let ((fresh-init (expand-file-name "init.el" tmp))
+                  (emacs (expand-file-name invocation-name invocation-directory)))
+              (when (file-exists-p fresh-init)
+                (push (with-temp-buffer
+                        (call-process emacs nil t nil "--batch"
+                                      "-f" "batch-byte-compile" fresh-init)
+                        (concat "byte-compile:\n"
+                                (if (= (buffer-size) 0)
+                                    "  clean"
+                                  (buffer-string))))
+                      report))))
+        (delete-directory tmp t))
+      (string-join (nreverse report) "\n")))
+
+  (use-package gptel-agent
+    :ensure nil
+    :if (locate-library "gptel-agent")
+    :after gptel
+    :demand t
+    :config
+    ;; Append rather than set: the default value points at the package's
+    ;; own agents/, and dropping it would lose the built-in sub-agents.
+    (add-to-list 'gptel-agent-dirs
+                 (expand-file-name "agents/" my-gptel-config-root) t)
+    ;; Skills need no configuration: `.claude/skills/' is already on
+    ;; `gptel-agent-skill-dirs', relative entries are resolved against
+    ;; the project root, and relative beats absolute on a name clash.
+    (gptel-agent-update)
+    :bind
+    (("C-c g A" . gptel-agent)
+     ("C-c g P" . my-gptel-agent-plan)
+     ("C-c g c" . gptel-agent-compact)))
+
+  (with-eval-after-load 'gptel
+    (gptel-make-tool
+     :name "check_config"
+     :function #'my-gptel-check-config
+     :description "Verify the Emacs configuration after editing README.org: \
+  re-tangles it in a scratch directory, reports whether the checked-in \
+  init.el and early-init.el are still in sync, and byte-compiles the \
+  result.  Call this after every edit and fix what it reports."
+     :args (list)
+     :category "project"))
+#+end_src
+
+| Keys      | Command                                             |
+|-----------+-----------------------------------------------------|
+| =C-c g A= | agent session for this project (=C-u= to pick a dir) |
+| =C-c g P= | same, but plan mode — read-only filesystem           |
+| =C-c g c= | compact the conversation up to point                 |
+
+*** Start in plan mode
+
+=gptel-plan= gets the reading tools and =Diagnostics= but not =Edit=,
+=Write= or =Bash=.  Nothing it does can be wrong in a way that costs
+anything, which makes it the cheap way to answer the open question:
+does DeepSeek actually hold a long tool loop together?  Find that out
+before handing it write access.  Two other things to know before you
+do:
+
+- =Edit= writes to *disk*, not to buffers.  =global-auto-revert-mode=
+  is on, so buffers do refresh — but with =auto-revert-use-notify= nil
+  it polls, and auto-revert will not touch a buffer with unsaved
+  changes.  Undo for an agent edit is git, not =C-/=.  Commit first.
+- Permissions are per-tool, not per-command: =Bash= is =:confirm t= and
+  that is the whole model, so =ls= prompts exactly like =rm -rf=.  The
+  confirmation is an overlay showing a real diff rather than a
+  minibuffer prompt, which helps, but there is no allowlist.  This is
+  the one place an ACP client driving OpenCode ([[https://github.com/xenodium/agent-shell][agent-shell]]) is still
+  ahead.
+
+*** Self-verification
+
+The lesson from karthink's own write-up: where the agent had a checker
+to run, it converged; where it did not, it stalled.  This repository
+has no test suite, but it has two things that fail loudly — a tangle
+that has drifted, and a byte-compiler.
+
+=check_config= runs both.  It copies README.org to a scratch directory,
+tangles it there, diffs the result against the checked-in =.el= files,
+then byte-compiles the fresh =init.el= in a subprocess.  It touches
+nothing in the working tree.
+
+That staleness check matters more than it looks.  =init.el= is
+generated, so an agent that edits README.org and stops has left the
+repository in a state where the *old* config is still what boots.  The
+byte-compiler will not catch that; a diff will.
+
+Nothing makes the model call it, so =.claude/skills/emacs-config/= says
+to — see below.
+
+*** Agents and skills
+
+Sub-agents are Markdown files with YAML frontmatter in
+=gptel-agent-dirs=; skills are directories containing a =SKILL.md= in
+=gptel-agent-skill-dirs=.  Two live in this repository:
+
+| Path                                  | What it is                             |
+|---------------------------------------+----------------------------------------|
+| =agents/config-reviewer.md=           | sub-agent: reviews a change to this config |
+| =.claude/skills/emacs-config/SKILL.md= | skill: the literate + Nix ground rules |
+
+The skill needs no configuration at all — =.claude/skills/= ships in
+the default =gptel-agent-skill-dirs=, relative entries resolve against
+the project root, and relative wins over absolute on a name clash.
+That is also why it is a skill rather than an addition to
+=my-gptel-code-directive=: gptel-agent builds its own system prompt and
+does *not* read AGENTS.md, so the conventions have to arrive through a
+channel it knows about.  It is loaded on demand, so it costs nothing
+until the model asks for it.
+
+*** What this does not replace
+
+=my-gptel-project= and the hand-written tools above still stand.  The
+tools are not redundant in practice because presets pick tools by
+name — the =code= preset names its own five, =gptel-agent= names its
+own — so the two sets never both fire on one request.  Deleting them
+would break =code= and =reason= for no gain.
+
+Worth knowing: =gptel-agent-preset= exists to route sub-agent calls to
+a cheaper model than the main loop.  With a single backend there is
+nothing cheaper to route to, so it is deliberately left at its default.
+
 
 * Tabspaces
 :PROPERTIES:
