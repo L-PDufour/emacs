@@ -691,6 +691,8 @@ from.
   (use-package consult
     :ensure nil
     :defer t
+    :custom
+    (consult-narrow-key "<")
     :bind (("C-x b"   . consult-buffer)
            ("M-y"     . consult-yank-pop)
            ("M-g g"   . consult-goto-line)
@@ -702,7 +704,7 @@ from.
     (advice-add #'register-preview :override #'consult-register-window)
     (setq xref-show-xrefs-function #'consult-xref
           xref-show-definitions-function #'consult-xref))
-#+end_src
+    #+end_src
 
 ** Embark
 
@@ -760,34 +762,34 @@ it.
 
 #+begin_src emacs-lisp
   (use-package cape
-  :ensure nil
-  :init
-  (add-hook 'emacs-lisp-mode-hook (lambda ()
-    (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
-  (add-hook 'org-mode-hook (lambda ()
-    (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
-  :config
-  ;; A plain list, not `cape-capf-super'. Supering merges every candidate into
-  ;; one set sorted by Corfu, which discards the `sortText' relevance ranking
-  ;; the language server sends. In a list, Capfs are tried in order and the
-  ;; first non-nil one answers, so Eglot keeps its own ordering.
-  ;;
-  ;; Eglot goes first and `tempel-expand' second, never `tempel-complete':
-  ;; `tempel--prefix-bounds' falls back to `bounds-of-thing-at-point' when the
-  ;; text at point matches no template, so `tempel-complete' returns every
-  ;; template at nearly any symbol and buries the LSP candidates.
-  ;; `tempel-expand' requires an exact template name, so it stays quiet.
-  ;; Use `M-+' to browse templates on demand.
-  ;;
-  ;; Eglot is marked non-exclusive so completion still falls through to
-  ;; `tempel-expand' and `cape-file' when the server returns no match.
-  (add-hook 'eglot-managed-mode-hook
-            (lambda ()
-              (setq-local completion-at-point-functions
-                          (list (cape-capf-nonexclusive #'eglot-completion-at-point)
-                                #'tempel-expand
-                                #'cape-file))))
-  (add-to-list 'completion-at-point-functions #'cape-file 'append))
+    :ensure nil
+    :init
+    (add-hook 'emacs-lisp-mode-hook (lambda ()
+  									(add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+    (add-hook 'org-mode-hook (lambda ()
+  							 (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+    :config
+    ;; A plain list, not `cape-capf-super'. Supering merges every candidate into
+    ;; one set sorted by Corfu, which discards the `sortText' relevance ranking
+    ;; the language server sends. In a list, Capfs are tried in order and the
+    ;; first non-nil one answers, so Eglot keeps its own ordering.
+    ;;
+    ;; Eglot goes first and `tempel-expand' second, never `tempel-complete':
+    ;; `tempel--prefix-bounds' falls back to `bounds-of-thing-at-point' when the
+    ;; text at point matches no template, so `tempel-complete' returns every
+    ;; template at nearly any symbol and buries the LSP candidates.
+    ;; `tempel-expand' requires an exact template name, so it stays quiet.
+    ;; Use `M-+' to browse templates on demand.
+    ;;
+    ;; Eglot is marked non-exclusive so completion still falls through to
+    ;; `tempel-expand' and `cape-file' when the server returns no match.
+    (add-hook 'eglot-managed-mode-hook
+  			(lambda ()
+                (setq-local completion-at-point-functions
+                            (list (cape-capf-nonexclusive #'eglot-completion-at-point)
+  								#'tempel-expand
+  								#'cape-file))))
+    (add-to-list 'completion-at-point-functions #'cape-file 'append))
 #+end_src
 
 * Theme and Icons
@@ -922,35 +924,35 @@ updated), and none is needed — the =:eval= runs on redisplay, which
 is also exactly when a stale count would otherwise linger.
 
 #+begin_src emacs-lisp
-(defun my/ml-flymake ()
-  "Flymake error/warning counts for the mode-line, by severity."
-  (when (bound-and-true-p flymake-mode)
-    (let ((err-level (warning-numeric-level :error))
-          (warn-level (warning-numeric-level :warning))
-          (errors 0)
-          (warnings 0))
-      (dolist (d (flymake-diagnostics))
-        (let ((sev (flymake--severity (flymake-diagnostic-type d))))
-          (cond ((>= sev err-level)  (setq errors (1+ errors)))
-                ((>= sev warn-level) (setq warnings (1+ warnings))))))
-      (concat
-       (when (> errors 0)
-         (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
-       (when (> warnings 0)
-         (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
-       (when (= (+ errors warnings) 0)
-         (propertize " ✓" 'face '(:foreground "#81c784")))))))
+  (defun my/ml-flymake ()
+    "Flymake error/warning counts for the mode-line, by severity."
+    (when (bound-and-true-p flymake-mode)
+      (let ((err-level (warning-numeric-level :error))
+            (warn-level (warning-numeric-level :warning))
+            (errors 0)
+            (warnings 0))
+        (dolist (d (flymake-diagnostics))
+          (let ((sev (flymake--severity (flymake-diagnostic-type d))))
+            (cond ((>= sev err-level)  (setq errors (1+ errors)))
+                  ((>= sev warn-level) (setq warnings (1+ warnings))))))
+        (concat
+         (when (> errors 0)
+           (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
+         (when (> warnings 0)
+           (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
+         (when (= (+ errors warnings) 0)
+           (propertize " ✓" 'face '(:foreground "#81c784")))))))
 
-(setq-default mode-line-format
-  '(" "
-    (:eval (if (buffer-modified-p)
-               (propertize "●" 'face '(:foreground "#ffb74d"))
-             " "))
-    " %b "
-    "%l:%C  "
-    (:eval (my/ml-flymake))
-    "  "
-    mode-line-end-spaces))
+  (setq-default mode-line-format
+  			  '(" "
+  				(:eval (if (buffer-modified-p)
+  						   (propertize "●" 'face '(:foreground "#ffb74d"))
+  						 " "))
+  				" %b "
+  				"%l:%C  "
+  				(:eval (my/ml-flymake))
+  				"  "
+  				mode-line-end-spaces))
 #+end_src
 
 * Programming
@@ -989,7 +991,29 @@ Eglot 1.16 (Emacs 30) and replaced by the plist
 =eglot-events-buffer-config=, so setting the old name now only earns a
 warning and logs everything anyway.  =:size 0= disables the log; raise
 it to a few thousand when a server misbehaves and =M-x eglot-events-buffer=
-has to show the traffic.
+has to show the traffic. Even with the buffer off, the default
+=jsonrpc--log-event= still serializes every JSON-RPC payload into it, so
+=jsonrpc-event-hook= is emptied too — the tradeoff is that bumping the size
+later for debugging buys you nothing until the hook is restored.
+
+Performance tuning from [[https://www.jamescherti.com/emacs-eglot-performance/][Configuring Emacs Eglot for Optimal Performance]]:
+
+- =eglot-max-file-watches= caps OS file descriptors consumed watching the
+  tree (a =defvar=, global across all servers; default 10000).
+- =eglot-code-action-indications= is emptied so Eglot stops polling the
+  server for available code actions on idle — no lightbulb/margin/eldoc
+  hint, but =M-x eglot-code-actions= still works.
+- =eglot-ignored-server-capabilities= grows beyond the formatting pair:
+  nothing here uses LSP folding or on-type formatting, and inlay hints,
+  symbol highlighting, code lenses, document links and color swatches are
+  all dropped for responsiveness. Each one is a deliberate feature loss.
+
+=eglot-ignored-server-capabilities= is read at request time by
+=eglot-server-capable= with dynamic scope, so it can be re-enabled
+per-buffer (e.g. =setq-local= in a mode hook before the server connects).
+=:colorProvider= is an exception: Eglot 1.23 has no client-side
+implementation of document colors, so the symbol is inert either way — it
+is listed here for intent and future-proofing only.
 
 #+begin_src emacs-lisp
   (use-package eglot
@@ -1005,8 +1029,20 @@ has to show the traffic.
     (eglot-events-buffer-config '(:size 0 :format full))
     (eglot-sync-connect nil)
     (eglot-report-progress nil)
+    (eglot-max-file-watches 3000)
+    (eglot-code-action-indications nil)
     (eglot-ignored-server-capabilities
-     '(:documentFormattingProvider :documentRangeFormattingProvider))
+     '(:documentFormattingProvider
+       :documentRangeFormattingProvider
+       :documentOnTypeFormattingProvider
+       :inlayHintProvider
+       :documentHighlightProvider
+       :codeLensProvider
+       :documentLinkProvider
+       :colorProvider
+       :foldingRangeProvider))
+    ;; A defvar, but :custom sets its global default like any other var.
+    (jsonrpc-event-hook nil)
 
     :config
     (add-to-list 'eglot-server-programs
@@ -1023,7 +1059,14 @@ has to show the traffic.
     :after eglot
     :bind (:map eglot-mode-map
                 ([remap xref-find-apropos] . consult-eglot-symbols)))
+  (use-package consult-eglot-embark
+    :ensure nil
+    :after (embark consult-eglot)
+    :config (consult-eglot-embark-mode))
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Xref
 

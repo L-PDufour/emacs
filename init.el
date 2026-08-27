@@ -321,6 +321,8 @@
 (use-package consult
   :ensure nil
   :defer t
+  :custom
+  (consult-narrow-key "<")
   :bind (("C-x b"   . consult-buffer)
          ("M-y"     . consult-yank-pop)
          ("M-g g"   . consult-goto-line)
@@ -367,34 +369,34 @@
     (add-to-list 'savehist-additional-variables 'corfu-history)))
 
 (use-package cape
-:ensure nil
-:init
-(add-hook 'emacs-lisp-mode-hook (lambda ()
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
-(add-hook 'org-mode-hook (lambda ()
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
-:config
-;; A plain list, not `cape-capf-super'. Supering merges every candidate into
-;; one set sorted by Corfu, which discards the `sortText' relevance ranking
-;; the language server sends. In a list, Capfs are tried in order and the
-;; first non-nil one answers, so Eglot keeps its own ordering.
-;;
-;; Eglot goes first and `tempel-expand' second, never `tempel-complete':
-;; `tempel--prefix-bounds' falls back to `bounds-of-thing-at-point' when the
-;; text at point matches no template, so `tempel-complete' returns every
-;; template at nearly any symbol and buries the LSP candidates.
-;; `tempel-expand' requires an exact template name, so it stays quiet.
-;; Use `M-+' to browse templates on demand.
-;;
-;; Eglot is marked non-exclusive so completion still falls through to
-;; `tempel-expand' and `cape-file' when the server returns no match.
-(add-hook 'eglot-managed-mode-hook
-          (lambda ()
-            (setq-local completion-at-point-functions
-                        (list (cape-capf-nonexclusive #'eglot-completion-at-point)
-                              #'tempel-expand
-                              #'cape-file))))
-(add-to-list 'completion-at-point-functions #'cape-file 'append))
+  :ensure nil
+  :init
+  (add-hook 'emacs-lisp-mode-hook (lambda ()
+									(add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+  (add-hook 'org-mode-hook (lambda ()
+							 (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
+  :config
+  ;; A plain list, not `cape-capf-super'. Supering merges every candidate into
+  ;; one set sorted by Corfu, which discards the `sortText' relevance ranking
+  ;; the language server sends. In a list, Capfs are tried in order and the
+  ;; first non-nil one answers, so Eglot keeps its own ordering.
+  ;;
+  ;; Eglot goes first and `tempel-expand' second, never `tempel-complete':
+  ;; `tempel--prefix-bounds' falls back to `bounds-of-thing-at-point' when the
+  ;; text at point matches no template, so `tempel-complete' returns every
+  ;; template at nearly any symbol and buries the LSP candidates.
+  ;; `tempel-expand' requires an exact template name, so it stays quiet.
+  ;; Use `M-+' to browse templates on demand.
+  ;;
+  ;; Eglot is marked non-exclusive so completion still falls through to
+  ;; `tempel-expand' and `cape-file' when the server returns no match.
+  (add-hook 'eglot-managed-mode-hook
+			(lambda ()
+              (setq-local completion-at-point-functions
+                          (list (cape-capf-nonexclusive #'eglot-completion-at-point)
+								#'tempel-expand
+								#'cape-file))))
+  (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme
   :ensure nil
@@ -515,15 +517,15 @@
          (propertize " ✓" 'face '(:foreground "#81c784")))))))
 
 (setq-default mode-line-format
-  '(" "
-    (:eval (if (buffer-modified-p)
-               (propertize "●" 'face '(:foreground "#ffb74d"))
-             " "))
-    " %b "
-    "%l:%C  "
-    (:eval (my/ml-flymake))
-    "  "
-    mode-line-end-spaces))
+			  '(" "
+				(:eval (if (buffer-modified-p)
+						   (propertize "●" 'face '(:foreground "#ffb74d"))
+						 " "))
+				" %b "
+				"%l:%C  "
+				(:eval (my/ml-flymake))
+				"  "
+				mode-line-end-spaces))
 
 (setq treesit-font-lock-level 4)
 (add-to-list 'auto-mode-alist '("\\.ts\\'"  . typescript-ts-mode))
@@ -555,8 +557,20 @@
   (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-sync-connect nil)
   (eglot-report-progress nil)
+  (eglot-max-file-watches 3000)
+  (eglot-code-action-indications nil)
   (eglot-ignored-server-capabilities
-   '(:documentFormattingProvider :documentRangeFormattingProvider))
+   '(:documentFormattingProvider
+     :documentRangeFormattingProvider
+     :documentOnTypeFormattingProvider
+     :inlayHintProvider
+     :documentHighlightProvider
+     :codeLensProvider
+     :documentLinkProvider
+     :colorProvider
+     :foldingRangeProvider))
+  ;; A defvar, but :custom sets its global default like any other var.
+  (jsonrpc-event-hook nil)
 
   :config
   (add-to-list 'eglot-server-programs
@@ -573,6 +587,10 @@
   :after eglot
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)))
+(use-package consult-eglot-embark
+  :ensure nil
+  :after (embark consult-eglot)
+  :config (consult-eglot-embark-mode))
 
 (use-package xref
   :ensure nil
