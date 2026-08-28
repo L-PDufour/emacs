@@ -59,6 +59,15 @@
    '(search-ring regexp-search-ring kill-ring))
   (window-combination-resize t)
   (set-mark-command-repeat-pop t)
+  ;; Scrolling — see jamescherti.com/emacs-scrolling-better-performance-usability
+  (scroll-conservatively 20)
+  (scroll-margin 3)
+  (scroll-preserve-screen-position t)
+  (scroll-error-top-bottom t)
+  (hscroll-margin 2)
+  (hscroll-step 1)
+  (auto-window-vscroll nil)
+  (mouse-wheel-progressive-speed nil)
   :hook
   (prog-mode . display-line-numbers-mode)
 
@@ -74,6 +83,8 @@
     (string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
+  (unless standard-display-table
+    (setq standard-display-table (make-display-table)))
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
   (modify-coding-system-alist 'file "" 'utf-8)
 
@@ -169,7 +180,8 @@
   (setq isearch-lazy-count t
         lazy-count-prefix-format "(%s/%s) "
         lazy-count-suffix-format nil
-        search-whitespace-regexp ".*?")
+        search-whitespace-regexp ".*?"
+        isearch-allow-scroll 'unlimited)
   :bind (("C-s" . isearch-forward)
          ("C-r" . isearch-backward)))
 
@@ -241,7 +253,7 @@
   (org-return-follows-link t)
   (org-log-done 'time)
   (org-log-into-drawer t)
-  (org-directory "~/Sync/personal/")
+  (org-directory "/var/lib/syncthing/Sync/personal/")
   (org-default-notes-file (expand-file-name "inbox.org" org-directory))
   (org-confirm-babel-evaluate
    (lambda (lang _body)
@@ -255,6 +267,36 @@
   ((org-mode . org-indent-mode)
    (org-mode . auto-save-mode))
   :bind ("C-c c" . org-capture))
+
+(defun my/project-readme-org ()
+  "Return the README.org of the git project containing
+`default-directory', falling back to `org-default-notes-file'."
+  (or (when-let ((root (locate-dominating-file default-directory ".git")))
+        (let ((readme (expand-file-name "README.org" root)))
+          (and (file-exists-p readme) readme)))
+      org-default-notes-file))
+
+(defun my/capture-project-task-target ()
+  "Return a marker at the top of the task list in the project README.org.
+Places point right after the first `* TODO' heading so the new task
+becomes the first item; falls back to the top of the file."
+  (let ((readme (my/project-readme-org)))
+    (with-current-buffer (find-file-noselect readme)
+      (goto-char (point-min))
+      (if (re-search-forward "^\\* TODO" nil t)
+          (forward-line 1)
+        (goto-char (point-min)))
+      (point-marker))))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry
+         (file+headline org-default-notes-file "Inbox")
+         "* TODO %?\n  %i\n  %a"
+         :empty-lines 1)
+        ("p" "Project task" entry
+         (file+function my/project-readme-org my/capture-project-task-target)
+         "* TODO %^{Task}\n  :PROPERTIES:\n  :PROJECT: %:default-directory-basename\n  :CREATED: %U\n  :END:\n%?\n  %a"
+         :jump-to-captured t)))
 
 (use-package org-appear
   :ensure nil
@@ -759,6 +801,12 @@
   :ensure nil
   :after geiser)
 
+(use-package comint
+  :ensure nil
+  :custom
+  (comint-scroll-to-bottom-on-input t)
+  (comint-scroll-to-bottom-on-output nil))
+
 (use-package rainbow-delimiters
   :ensure nil
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -1041,7 +1089,7 @@
      "\\*eat\\*"
      compilation-mode))
   (popper-display-control t)
-  (popper-window-height 0.33)
+  (popper-window-height 12)
   (popper-group-function #'popper-group-by-project)
   :init
   (popper-mode +1)
