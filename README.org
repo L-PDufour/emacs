@@ -579,6 +579,23 @@ from.
 ** Org Mode
 
 #+begin_src emacs-lisp
+  (defconst my/sync-root "/var/lib/syncthing/Sync/"
+    "Root of the Syncthing shares.")
+
+  (defconst my/org-root (expand-file-name "personal/" my/sync-root)
+    "Directory holding personal org files.")
+
+  (defconst my/family-root (expand-file-name "family/" my/sync-root)
+    "Directory holding family org files.")
+
+  (defconst my/org-task-files
+    (list (expand-file-name "inbox.org" my/org-root)
+          (expand-file-name "projects.org" my/org-root)
+          (expand-file-name "weekly.org" my/org-root)
+          (expand-file-name "habits.org" my/org-root)
+          (expand-file-name "tasks-family.org" my/family-root))
+    "Task-bearing org files the agenda scans. Reference files stay out.")
+
   (use-package org
     :ensure nil
     :defer t
@@ -594,13 +611,25 @@ from.
     (org-return-follows-link t)
     (org-log-done 'time)
     (org-log-into-drawer t)
+    (org-clock-persist 'clock)
     (org-directory "/var/lib/syncthing/Sync/personal/")
     (org-default-notes-file (expand-file-name "inbox.org" org-directory))
+    (org-agenda-files my/org-task-files)
+    (org-todo-keywords
+     '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "CANCELLED(c)")))
+    (org-refile-targets
+     (list (list (expand-file-name "projects.org" my/org-root) :maxlevel 2)
+           (list (expand-file-name "weekly.org" my/org-root) :maxlevel 2)
+           (list (expand-file-name "tasks-family.org" my/family-root) :maxlevel 1)
+           (list (expand-file-name "plan.org" my/org-root) :maxlevel 1)))
+    (org-refile-use-outline-path 'file)
     (org-confirm-babel-evaluate
      (lambda (lang _body)
   	 (not (and (equal lang "emacs-lisp")
   			   (my/literate-config-buffer-p)))))
     :config
+    (add-to-list 'org-modules 'org-habit)
+    (org-load-modules-maybe 'force)
     (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
   							  org-level-5 org-level-6 org-level-7 org-level-8))
   	(set-face-attribute face nil :weight 'bold))
@@ -638,6 +667,17 @@ from.
   		 (file+function my/project-readme-org my/capture-project-task-target)
   		 "* TODO %^{Task}\n  :PROPERTIES:\n  :PROJECT: %:default-directory-basename\n  :CREATED: %U\n  :END:\n%?\n  %a"
   		 :jump-to-captured t)))
+
+  (defun my/org-open-weekly-review ()
+    "Open weekly.org and refresh its dynamic block(s) (the clocktable)."
+    (interactive)
+    (let ((file (expand-file-name "weekly.org" my/org-root)))
+      (with-current-buffer (find-file-noselect file)
+        (let ((buffer-undo-list t))
+          (org-update-all-dblocks))
+        (pop-to-buffer (current-buffer)))))
+
+  (global-set-key (kbd "C-c R") #'my/org-open-weekly-review)
 
   (use-package org-appear
     :ensure nil
@@ -830,10 +870,10 @@ it.
     ;; merged table uses `identity', which Corfu honors.
     (add-hook 'eglot-managed-mode-hook
   			(lambda ()
-  			  (setq-local completion-at-point-functions
-  						  (list (cape-capf-super #'eglot-completion-at-point
-  												 #'tempel-complete
-  												 #'cape-file)))))
+                (setq-local completion-at-point-functions
+                            (list (cape-capf-super #'eglot-completion-at-point
+                                                   #'tempel-complete
+                                                   #'cape-file)))))
     (add-to-list 'completion-at-point-functions #'cape-file 'append))
 #+end_src
 
