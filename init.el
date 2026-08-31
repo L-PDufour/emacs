@@ -418,26 +418,26 @@ becomes the first item; falls back to the top of the file."
   (add-hook 'org-mode-hook (lambda ()
 							 (add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
   :config
-  ;; A plain list, not `cape-capf-super'. Supering merges every candidate into
-  ;; one set sorted by Corfu, which discards the `sortText' relevance ranking
-  ;; the language server sends. In a list, Capfs are tried in order and the
-  ;; first non-nil one answers, so Eglot keeps its own ordering.
+  ;; A single `cape-capf-super', not a plain list of Capfs.
+  ;; `completion-at-point' runs the hook via `run-hook-wrapped', which aborts
+  ;; at the first Capf that returns non-nil, so a sequential list never
+  ;; combines candidates. `eglot-completion-at-point' returns a non-nil table
+  ;; whenever the server supports completion, so anything after it in a list
+  ;; is never reached. Supering is the only way to merge Eglot and Tempel
+  ;; into one completion result.
   ;;
-  ;; Eglot goes first and `tempel-expand' second, never `tempel-complete':
-  ;; `tempel--prefix-bounds' falls back to `bounds-of-thing-at-point' when the
-  ;; text at point matches no template, so `tempel-complete' returns every
-  ;; template at nearly any symbol and buries the LSP candidates.
-  ;; `tempel-expand' requires an exact template name, so it stays quiet.
-  ;; Use `M-+' to browse templates on demand.
-  ;;
-  ;; Eglot is marked non-exclusive so completion still falls through to
-  ;; `tempel-expand' and `cape-file' when the server returns no match.
+  ;; `cape-capf-super' filters each table's candidates through
+  ;; `all-completions', so `tempel-complete' only contributes templates whose
+  ;; name matches the typed prefix -- it does not bury the LSP candidates.
+  ;; Eglot's `sortText' ordering survives too: `cape--super-all' applies each
+  ;; table's own `display-sort-function' (Eglot's sorts by `sortText') and the
+  ;; merged table uses `identity', which Corfu honors.
   (add-hook 'eglot-managed-mode-hook
 			(lambda ()
               (setq-local completion-at-point-functions
-                          (list (cape-capf-nonexclusive #'eglot-completion-at-point)
-								#'tempel-expand
-								#'cape-file))))
+                          (list (cape-capf-super #'eglot-completion-at-point
+                                                 #'tempel-complete
+                                                 #'cape-file)))))
   (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme

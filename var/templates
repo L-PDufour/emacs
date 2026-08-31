@@ -210,6 +210,10 @@ c-ts-mode
 ;; Pragma once (modern alternative)
 (pragma "#pragma once" n n)
 
+go-ts-mode
+
+(tsnip "package main" n n "func main() {" n> "fmt.Println(" q ")" n "}" >)
+
 js-mode js-ts-mode typescript-mode typescript-ts-mode
 (clog "console.log('"
      (p (save-excursion
