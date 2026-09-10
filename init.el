@@ -73,23 +73,23 @@
 
   :config
   (let ((mono-font "FiraCode Nerd Font")
-        (sans-font "DejaVu Sans"))
-    (set-face-attribute 'default nil :family mono-font :weight 'medium :height 160)
-    (set-face-attribute 'fixed-pitch nil :family mono-font :weight 'medium :height 160)
-    (set-face-attribute 'variable-pitch nil :family sans-font :height 160))
+		(sans-font "DejaVu Sans"))
+	(set-face-attribute 'default nil :family mono-font :weight 'medium :height 160)
+	(set-face-attribute 'fixed-pitch nil :family mono-font :weight 'medium :height 160)
+	(set-face-attribute 'variable-pitch nil :family sans-font :height 160))
 
   (defun skip-these-buffers (_window buffer _bury-or-kill)
-    "Function for `switch-to-prev-buffer-skip'."
-    (string-match "\\*[^*]+\\*" (buffer-name buffer)))
+	"Function for `switch-to-prev-buffer-skip'."
+	(string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
   (unless standard-display-table
-    (setq standard-display-table (make-display-table)))
+	(setq standard-display-table (make-display-table)))
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
   (modify-coding-system-alist 'file "" 'utf-8)
 
   (add-hook 'after-save-hook
-            #'executable-make-buffer-file-executable-if-script-p)
+			#'executable-make-buffer-file-executable-if-script-p)
 
   :init
   (tool-bar-mode -1)
@@ -114,10 +114,10 @@
   (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
   (add-hook 'after-init-hook
-            (lambda ()
-              (with-current-buffer (get-buffer-create "*scratch*")
-                (insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
-                                (emacs-init-time)))))))
+			(lambda ()
+			  (with-current-buffer (get-buffer-create "*scratch*")
+				(insert (format ";;    Welcome to Emacs!\n;;\n;;    Loading time : %s\n"
+								(emacs-init-time)))))))
 
 (use-package gnus
   :ensure nil
@@ -125,35 +125,35 @@
   :config
   (setq gnus-select-method '(nnnil ""))
   (setq gnus-secondary-select-methods
-        '((nnimap "gmail"
-                  (nnimap-address "imap.gmail.com")
-                  (nnimap-server-port 993)
-                  (nnimap-stream ssl)
-                  (nnir-search-engine imap)
-                  (nnimap-authinfo-file "~/.authinfo.gpg"))))
+		'((nnimap "gmail"
+				  (nnimap-address "imap.gmail.com")
+				  (nnimap-server-port 993)
+				  (nnimap-stream ssl)
+				  (nnir-search-engine imap)
+				  (nnimap-authinfo-file "~/.authinfo.gpg"))))
   (setq message-send-mail-function 'smtpmail-send-it
-        smtpmail-smtp-server "smtp.gmail.com"
-        smtpmail-smtp-service 587
-        smtpmail-stream-type 'starttls)
+		smtpmail-smtp-server "smtp.gmail.com"
+		smtpmail-smtp-service 587
+		smtpmail-stream-type 'starttls)
   (setq gnus-summary-line-format "%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n"
-        gnus-use-cache t
-        gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date)
-        gnus-summary-thread-gathering-function 'gnus-gather-threads-by-subject))
+		gnus-use-cache t
+		gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date)
+		gnus-summary-thread-gathering-function 'gnus-gather-threads-by-subject))
 
 (use-package window
   :ensure nil
   :custom
   (display-buffer-alist
    '(("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 0))
-     ("\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 1)))))
+	  (display-buffer-in-side-window)
+	  (window-height . 0.25)
+	  (side . bottom)
+	  (slot . 0))
+	 ("\\*\\(Flymake diagnostics\\|xref\\|Completions\\)\\*"
+	  (display-buffer-in-side-window)
+	  (window-height . 0.25)
+	  (side . bottom)
+	  (slot . 1)))))
 
 (use-package dired
   :ensure nil
@@ -171,19 +171,19 @@
   :ensure nil
   :after dired
   :bind (:map dired-mode-map
-              ("<tab>" . dired-subtree-toggle)
-              ("<backtab>" . dired-subtree-remove)))
+			  ("<tab>" . dired-subtree-toggle)
+			  ("<backtab>" . dired-subtree-remove)))
 
 (use-package isearch
   :ensure nil
   :config
   (setq isearch-lazy-count t
-        lazy-count-prefix-format "(%s/%s) "
-        lazy-count-suffix-format nil
-        search-whitespace-regexp ".*?"
-        isearch-allow-scroll 'unlimited)
+		lazy-count-prefix-format "(%s/%s) "
+		lazy-count-suffix-format nil
+		search-whitespace-regexp ".*?"
+		isearch-allow-scroll 'unlimited)
   :bind (("C-s" . isearch-forward)
-         ("C-r" . isearch-backward)))
+		 ("C-r" . isearch-backward)))
 
 (use-package eldoc
   :ensure nil
@@ -202,21 +202,21 @@
   :config
   (defvar flymake-repeat-map
 	(let ((map (make-sparse-keymap)))
-      (define-key map (kbd "n") #'flymake-goto-next-error)
-      (define-key map (kbd "p") #'flymake-goto-prev-error)
-      map)
+	  (define-key map (kbd "n") #'flymake-goto-next-error)
+	  (define-key map (kbd "p") #'flymake-goto-prev-error)
+	  map)
 	"Repeat map for Flymake error navigation.")
   (put 'flymake-goto-next-error 'repeat-map 'flymake-repeat-map)
   (put 'flymake-goto-prev-error 'repeat-map 'flymake-repeat-map)
   (defun consult-flymake-project ()
-    "Jump to Flymake diagnostic in project."
-    (interactive)
-    (consult-flymake t))
+	"Jump to Flymake diagnostic in project."
+	(interactive)
+	(consult-flymake t))
   :bind (:map flymake-mode-map
-              ("C-c e e" . consult-flymake)
-              ("C-c e l" . consult-flymake-project)
-              ("C-c e n" . flymake-goto-next-error)
-              ("C-c e p" . flymake-goto-prev-error)))
+			  ("C-c e e" . consult-flymake)
+			  ("C-c e l" . consult-flymake-project)
+			  ("C-c e n" . flymake-goto-next-error)
+			  ("C-c e p" . flymake-goto-prev-error)))
 
 (defvar my/literate-config-file
   (expand-file-name "README.org" "~/.emacs.d/")
@@ -225,18 +225,18 @@
 (defun my/literate-config-buffer-p ()
   "Return non-nil if the current buffer visits `my/literate-config-file'."
   (and buffer-file-name
-       (file-equal-p buffer-file-name my/literate-config-file)))
+	   (file-equal-p buffer-file-name my/literate-config-file)))
 
 (defun my/org-babel-tangle-config ()
   "Tangle the literate config when it is saved."
   (when (my/literate-config-buffer-p)
-    (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle)
-      (message "Tangled %s" (file-name-nondirectory my/literate-config-file)))))
+	(let ((org-confirm-babel-evaluate nil))
+	  (org-babel-tangle)
+	  (message "Tangled %s" (file-name-nondirectory my/literate-config-file)))))
 
 (add-hook 'org-mode-hook
-          (lambda ()
-            (add-hook 'after-save-hook #'my/org-babel-tangle-config nil t)))
+		  (lambda ()
+			(add-hook 'after-save-hook #'my/org-babel-tangle-config nil t)))
 
 (use-package org
   :ensure nil
@@ -245,7 +245,7 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    (append org-babel-load-languages
-           '((sqlite . t)
+		   '((sqlite . t)
 			 (sql . t))))
   :custom
   (org-M-RET-may-split-line '((default . nil)))
@@ -257,8 +257,8 @@
   (org-default-notes-file (expand-file-name "inbox.org" org-directory))
   (org-confirm-babel-evaluate
    (lambda (lang _body)
-     (not (and (equal lang "emacs-lisp")
-               (my/literate-config-buffer-p)))))
+	 (not (and (equal lang "emacs-lisp")
+			   (my/literate-config-buffer-p)))))
   :config
   (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
 							  org-level-5 org-level-6 org-level-7 org-level-8))
@@ -272,31 +272,31 @@
   "Return the README.org of the git project containing
 `default-directory', falling back to `org-default-notes-file'."
   (or (when-let ((root (locate-dominating-file default-directory ".git")))
-        (let ((readme (expand-file-name "README.org" root)))
-          (and (file-exists-p readme) readme)))
-      org-default-notes-file))
+		(let ((readme (expand-file-name "README.org" root)))
+		  (and (file-exists-p readme) readme)))
+	  org-default-notes-file))
 
 (defun my/capture-project-task-target ()
   "Return a marker at the top of the task list in the project README.org.
 Places point right after the first `* TODO' heading so the new task
 becomes the first item; falls back to the top of the file."
   (let ((readme (my/project-readme-org)))
-    (with-current-buffer (find-file-noselect readme)
-      (goto-char (point-min))
-      (if (re-search-forward "^\\* TODO" nil t)
-          (forward-line 1)
-        (goto-char (point-min)))
-      (point-marker))))
+	(with-current-buffer (find-file-noselect readme)
+	  (goto-char (point-min))
+	  (if (re-search-forward "^\\* TODO" nil t)
+		  (forward-line 1)
+		(goto-char (point-min)))
+	  (point-marker))))
 
 (setq org-capture-templates
-      '(("t" "Todo" entry
-         (file+headline org-default-notes-file "Inbox")
-         "* TODO %?\n  %i\n  %a"
-         :empty-lines 1)
-        ("p" "Project task" entry
-         (file+function my/project-readme-org my/capture-project-task-target)
-         "* TODO %^{Task}\n  :PROPERTIES:\n  :PROJECT: %:default-directory-basename\n  :CREATED: %U\n  :END:\n%?\n  %a"
-         :jump-to-captured t)))
+	  '(("t" "Todo" entry
+		 (file+headline org-default-notes-file "Inbox")
+		 "* TODO %?\n  %i\n  %a"
+		 :empty-lines 1)
+		("p" "Project task" entry
+		 (file+function my/project-readme-org my/capture-project-task-target)
+		 "* TODO %^{Task}\n  :PROPERTIES:\n  :PROJECT: %:default-directory-basename\n  :CREATED: %U\n  :END:\n%?\n  %a"
+		 :jump-to-captured t)))
 
 (use-package org-appear
   :ensure nil
@@ -314,10 +314,10 @@ becomes the first item; falls back to the top of the file."
   :ensure nil
   :defer t
   :bind (:map smerge-mode-map
-              ("C-c ^ u" . smerge-keep-upper)
-              ("C-c ^ l" . smerge-keep-lower)
-              ("C-c ^ n" . smerge-next)
-              ("C-c ^ p" . smerge-previous)))
+			  ("C-c ^ u" . smerge-keep-upper)
+			  ("C-c ^ l" . smerge-keep-lower)
+			  ("C-c ^ n" . smerge-next)
+			  ("C-c ^ p" . smerge-previous)))
 
 (use-package vertico
   :ensure nil
@@ -327,34 +327,34 @@ becomes the first item; falls back to the top of the file."
   (vertico-resize nil)
   (vertico-cycle nil)
   :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
+			  ("RET" . vertico-directory-enter)
+			  ("DEL" . vertico-directory-delete-char)
+			  ("M-DEL" . vertico-directory-delete-word))
   :config
   (advice-add #'vertico--format-candidate :around
-              (lambda (orig cand prefix suffix index _start)
-                (setq cand (funcall orig cand prefix suffix index _start))
-                (concat
-                 (if (= vertico--index index)
-                     (propertize "» " 'face '(:foreground "#80adf0" :weight bold))
-                   "  ")
-                 cand))))
+			  (lambda (orig cand prefix suffix index _start)
+				(setq cand (funcall orig cand prefix suffix index _start))
+				(concat
+				 (if (= vertico--index index)
+					 (propertize "» " 'face '(:foreground "#80adf0" :weight bold))
+				   "  ")
+				 cand))))
 
 (use-package orderless
-:ensure nil
-:after vertico
-:custom
-(completion-styles '(orderless basic))
-(completion-category-defaults nil)
-(completion-category-overrides '((file (styles partial-completion))))
-;; Emacs 31+: make partial-completion behave like substring for paths.
-(completion-pcm-leading-wildcard t)
-:config
-(with-eval-after-load 'eglot
-  (setq completion-category-overrides
-    '((file (styles partial-completion))
-      (eglot (styles orderless))
-      (eglot-capf (styles orderless))))))
+  :ensure nil
+  :after vertico
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion))))
+  ;; Emacs 31+: make partial-completion behave like substring for paths.
+  (completion-pcm-leading-wildcard t)
+  :config
+  (with-eval-after-load 'eglot
+	(setq completion-category-overrides
+		  '((file (styles partial-completion))
+			(eglot (styles orderless))
+			(eglot-capf (styles orderless))))))
 
 (use-package marginalia
   :ensure nil
@@ -365,23 +365,26 @@ becomes the first item; falls back to the top of the file."
   :defer t
   :custom
   (consult-narrow-key "<")
+  (consult-async-input-debounce 0.05)
+  (consult-async-input-throttle 0.1)
+  (consult-async-refresh-delay 0.05)
   :bind (("C-x b"   . consult-buffer)
-         ("M-y"     . consult-yank-pop)
-         ("M-g g"   . consult-goto-line)
-         ("M-g i"   . consult-imenu)
-         ("M-s r"   . consult-ripgrep)
-         ("M-s l"   . consult-line)
-         ("M-s g"   . consult-grep))
+		 ("M-y"     . consult-yank-pop)
+		 ("M-g g"   . consult-goto-line)
+		 ("M-g i"   . consult-imenu)
+		 ("M-s r"   . consult-ripgrep)
+		 ("M-s l"   . consult-line)
+		 ("M-s g"   . consult-grep))
   :init
   (advice-add #'register-preview :override #'consult-register-window)
   (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref))
+		xref-show-definitions-function #'consult-xref))
 
 (use-package embark
   :ensure nil
   :defer t
   :bind (("C-." . embark-act)
-         ("M-." . embark-dwim)))
+		 ("M-." . embark-dwim)))
 
 (use-package embark-consult
   :ensure nil
@@ -400,15 +403,15 @@ becomes the first item; falls back to the top of the file."
   (corfu-preselect 'first)
   (corfu-preview-current nil)
   :bind (:map corfu-map
-              ("M-q" . corfu-quick-complete)
-              ("C-q" . corfu-quick-insert))
+			  ("M-q" . corfu-quick-complete)
+			  ("C-q" . corfu-quick-insert))
   :init
   (global-corfu-mode)
   :config
   (corfu-popupinfo-mode 1)
   (corfu-history-mode 1)
   (with-eval-after-load 'savehist
-    (add-to-list 'savehist-additional-variables 'corfu-history)))
+	(add-to-list 'savehist-additional-variables 'corfu-history)))
 
 (use-package cape
   :ensure nil
@@ -434,10 +437,10 @@ becomes the first item; falls back to the top of the file."
   ;; merged table uses `identity', which Corfu honors.
   (add-hook 'eglot-managed-mode-hook
 			(lambda ()
-              (setq-local completion-at-point-functions
-                          (list (cape-capf-super #'eglot-completion-at-point
-                                                 #'tempel-complete
-                                                 #'cape-file)))))
+			  (setq-local completion-at-point-functions
+						  (list (cape-capf-super #'eglot-completion-at-point
+												 #'tempel-complete
+												 #'cape-file)))))
   (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme
@@ -542,21 +545,21 @@ becomes the first item; falls back to the top of the file."
 (defun my/ml-flymake ()
   "Flymake error/warning counts for the mode-line, by severity."
   (when (bound-and-true-p flymake-mode)
-    (let ((err-level (warning-numeric-level :error))
-          (warn-level (warning-numeric-level :warning))
-          (errors 0)
-          (warnings 0))
-      (dolist (d (flymake-diagnostics))
-        (let ((sev (flymake--severity (flymake-diagnostic-type d))))
-          (cond ((>= sev err-level)  (setq errors (1+ errors)))
-                ((>= sev warn-level) (setq warnings (1+ warnings))))))
-      (concat
-       (when (> errors 0)
-         (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
-       (when (> warnings 0)
-         (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
-       (when (= (+ errors warnings) 0)
-         (propertize " ✓" 'face '(:foreground "#81c784")))))))
+	(let ((err-level (warning-numeric-level :error))
+		  (warn-level (warning-numeric-level :warning))
+		  (errors 0)
+		  (warnings 0))
+	  (dolist (d (flymake-diagnostics))
+		(let ((sev (flymake--severity (flymake-diagnostic-type d))))
+		  (cond ((>= sev err-level)  (setq errors (1+ errors)))
+				((>= sev warn-level) (setq warnings (1+ warnings))))))
+	  (concat
+	   (when (> errors 0)
+		 (propertize (format " !%d" errors) 'face '(:foreground "#e57373")))
+	   (when (> warnings 0)
+		 (propertize (format " ⚠%d" warnings) 'face '(:foreground "#ffb74d")))
+	   (when (= (+ errors warnings) 0)
+		 (propertize " ✓" 'face '(:foreground "#81c784")))))))
 
 (setq-default mode-line-format
 			  '(" "
@@ -573,18 +576,18 @@ becomes the first item; falls back to the top of the file."
 (add-to-list 'auto-mode-alist '("\\.ts\\'"  . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 (setq major-mode-remap-alist
-      '((c-mode          . c-ts-mode)
-        (c++-mode        . c++-ts-mode)
-        (css-mode        . css-ts-mode)
-        (js-mode         . js-ts-mode)
-        (js-json-mode    . json-ts-mode)
-        (python-mode     . python-ts-mode)
-        (sh-mode         . bash-ts-mode)
-        (typescript-mode . typescript-ts-mode)
-        (yaml-mode       . yaml-ts-mode)
-        (toml-mode       . toml-ts-mode)
-        (go-mode         . go-ts-mode)
-        (rust-mode       . rust-ts-mode)))
+	  '((c-mode          . c-ts-mode)
+		(c++-mode        . c++-ts-mode)
+		(css-mode        . css-ts-mode)
+		(js-mode         . js-ts-mode)
+		(js-json-mode    . json-ts-mode)
+		(python-mode     . python-ts-mode)
+		(sh-mode         . bash-ts-mode)
+		(typescript-mode . typescript-ts-mode)
+		(yaml-mode       . yaml-ts-mode)
+		(toml-mode       . toml-ts-mode)
+		(go-mode         . go-ts-mode)
+		(rust-mode       . rust-ts-mode)))
 
 (use-package eglot
   :ensure nil
@@ -596,39 +599,39 @@ becomes the first item; falls back to the top of the file."
   (eglot-extend-to-xref t)
   (eglot-autoshutdown t)
   ;; Replaces the obsolete `eglot-events-buffer-size'.
-  (eglot-events-buffer-config '(:size 0 :format full))
+  ;; (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-sync-connect nil)
   (eglot-report-progress nil)
   (eglot-max-file-watches 3000)
   (eglot-code-action-indications nil)
   (eglot-ignored-server-capabilities
    '(:documentFormattingProvider
-     :documentRangeFormattingProvider
-     :documentOnTypeFormattingProvider
-     :inlayHintProvider
-     :documentHighlightProvider
-     :codeLensProvider
-     :documentLinkProvider
-     :colorProvider
-     :foldingRangeProvider))
+	 :documentRangeFormattingProvider
+	 :documentOnTypeFormattingProvider
+	 :inlayHintProvider
+	 :documentHighlightProvider
+	 :codeLensProvider
+	 :documentLinkProvider
+	 :colorProvider
+	 :foldingRangeProvider))
   ;; A defvar, but :custom sets its global default like any other var.
   (jsonrpc-event-hook nil)
 
   :config
   (add-to-list 'eglot-server-programs
-               '(((js-mode :language-id "javascript")
-                  (js-ts-mode :language-id "javascript")
-                  (tsx-ts-mode :language-id "typescriptreact")
-                  (typescript-ts-mode :language-id "typescript"))
-                 "deno" "lsp"
-                 :initializationOptions (:enable t :lint t :unstable t)))
+			   '(((js-mode :language-id "javascript")
+				  (js-ts-mode :language-id "javascript")
+				  (tsx-ts-mode :language-id "typescriptreact")
+				  (typescript-ts-mode :language-id "typescript"))
+				 "deno" "lsp"
+				 :initializationOptions (:enable t :lint t :unstable t)))
   (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
 
 (use-package consult-eglot
   :ensure nil
   :after eglot
   :bind (:map eglot-mode-map
-              ([remap xref-find-apropos] . consult-eglot-symbols)))
+			  ([remap xref-find-apropos] . consult-eglot-symbols)))
 (use-package consult-eglot-embark
   :ensure nil
   :after (embark consult-eglot)
@@ -649,11 +652,11 @@ becomes the first item; falls back to the top of the file."
   :custom
   (project-switch-commands
    '((project-find-file "Find file")
-     (project-find-regexp "Find regexp")
-     (project-find-dir "Find directory")
-     (project-vc-dir "VC-Dir")
-     (project-eshell "Eshell")
-     (project-any-command "Other"))))
+	 (project-find-regexp "Find regexp")
+	 (project-find-dir "Find directory")
+	 (project-vc-dir "VC-Dir")
+	 (project-eshell "Eshell")
+	 (project-any-command "Other"))))
 
 (use-package tempel
   :ensure nil
@@ -661,19 +664,19 @@ becomes the first item; falls back to the top of the file."
   (tempel-path (expand-file-name "templates" user-emacs-directory))
   (tempel-trigger-prefix "<")
   :bind (("M-+" . tempel-complete)
-         ("M-*" . tempel-insert))
+		 ("M-*" . tempel-insert))
   :bind (:map tempel-map
-              ("M-n" . tempel-next)
-              ("M-p" . tempel-previous))
+			  ("M-n" . tempel-next)
+			  ("M-p" . tempel-previous))
   :hook ((prog-mode . tempel-setup-capf)
-         (text-mode . tempel-setup-capf)
-         (org-mode  . tempel-setup-capf))
+		 (text-mode . tempel-setup-capf)
+		 (org-mode  . tempel-setup-capf))
   :init
   (defun tempel-setup-capf ()
-    "Add `tempel-complete' to `completion-at-point-functions'."
-    (setq-local completion-at-point-functions
-                (cons #'tempel-complete
-                      completion-at-point-functions))))
+	"Add `tempel-complete' to `completion-at-point-functions'."
+	(setq-local completion-at-point-functions
+				(cons #'tempel-complete
+					  completion-at-point-functions))))
 
 (use-package tempel-collection
   :ensure nil
@@ -690,13 +693,13 @@ becomes the first item; falls back to the top of the file."
   :config
   (apheleia-global-mode 1)
   (add-to-list 'apheleia-formatters
-               '(templ-format "go" "tool" "templ" "fmt" filepath))
+			   '(templ-format "go" "tool" "templ" "fmt" filepath))
   (add-to-list 'apheleia-formatters
-               '(deno-format "deno" "fmt" "--ext" "ts" "-"))
+			   '(deno-format "deno" "fmt" "--ext" "ts" "-"))
   (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
-        '("nixfmt"))
+		'("nixfmt"))
   (setf (alist-get 'nix-mode apheleia-mode-alist)
-        'nixfmt-rfc-style)
+		'nixfmt-rfc-style)
   (setf (alist-get 'golangci-fmt apheleia-formatters)
 		'("golangci-lint" "fmt" "--stdin" filepath))
   (setf (alist-get 'go-mode apheleia-mode-alist) 'golangci-fmt)
@@ -727,32 +730,32 @@ becomes the first item; falls back to the top of the file."
 
   :hook
   ;; Save breakpoints on quit
-   (kill-emacs . dape-breakpoint-save)
+  (kill-emacs . dape-breakpoint-save)
   ;; Load breakpoints on startup
-   (after-init . dape-breakpoint-load)
+  (after-init . dape-breakpoint-load)
 
   :custom
   ;; Info buffers to the right
   ;; (dape-buffer-window-arrangement 'right)
   ;; Info buffers like gud (gdb-mi)
-   (dape-buffer-window-arrangement 'gud)
-   (dape-info-hide-mode-line nil)
+  (dape-buffer-window-arrangement 'gud)
+  (dape-info-hide-mode-line nil)
 
   ;; Projectile users
   ;; (dape-cwd-function #'projectile-project-root)
 
   :config
   ;; Turn on global bindings for setting breakpoints with mouse
-   (dape-breakpoint-global-mode 1)
+  (dape-breakpoint-global-mode 1)
 
   ;; Pulse source line (performance hit)
   ;; (add-hook 'dape-display-source-hook #'pulse-momentary-highlight-one-line)
 
   ;; Save buffers on startup, useful for interpreted languages
-   (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
+  (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
 
   ;; Kill compile buffer on build success
-   (add-hook 'dape-compile-hook #'kill-buffer)
+  (add-hook 'dape-compile-hook #'kill-buffer)
   )
 
 ;; `repeat-mode' is already enabled in the core Emacs section.
@@ -1137,6 +1140,11 @@ becomes the first item; falls back to the top of the file."
   :ensure nil
   :after ghostel
   :hook (eshell-load . ghostel-eshell-visual-command-mode))
+
+(use-package ghostel-comint
+  :ensure nil
+  :after ghostel
+  :hook (after-init . ghostel-comint-global-mode))
 
 (use-package ghostel-compile
   :ensure nil
@@ -1537,29 +1545,29 @@ if it has one.  Reuses the buffer on subsequent calls."
   (when (fboundp 'gptel-make-preset)
 
     (gptel-make-preset 'chat
-      :description "Plain chat, no tools — the default, made explicit."
-      :backend "DeepSeek"
-      :model 'deepseek-chat
-      :tools nil)
+					   :description "Plain chat, no tools — the default, made explicit."
+					   :backend "DeepSeek"
+					   :model 'deepseek-chat
+					   :tools nil)
 
     (gptel-make-preset 'code
-      :description "Project-aware coding with the file-reading tools."
-      :backend "DeepSeek"
-      :model 'deepseek-chat
-      :system my-gptel-code-directive
-      :tools '("project_root" "list_project_files" "search_project"
-               "read_file" "read_buffer"))
+					   :description "Project-aware coding with the file-reading tools."
+					   :backend "DeepSeek"
+					   :model 'deepseek-chat
+					   :system my-gptel-code-directive
+					   :tools '("project_root" "list_project_files" "search_project"
+								"read_file" "read_buffer"))
 
     (gptel-make-preset 'reason
-      :description "deepseek-reasoner for hard problems.  No tools."
-      :backend "DeepSeek"
-      :model 'deepseek-reasoner
-      :system my-gptel-code-directive
-      :tools nil)
+					   :description "deepseek-reasoner for hard problems.  No tools."
+					   :backend "DeepSeek"
+					   :model 'deepseek-reasoner
+					   :system my-gptel-code-directive
+					   :tools nil)
 
     (gptel-make-preset 'explain
-      :description "Explain code to someone who has not seen it."
-      :system "Explain what this code does, plainly and concretely.
+					   :description "Explain code to someone who has not seen it."
+					   :system "Explain what this code does, plainly and concretely.
 Name the moving parts, then walk through the flow.  No filler.")))
 
 (use-package gptel-preset-collection
@@ -1674,7 +1682,7 @@ result.  Call this after every edit and fix what it reports."
   (tabspaces-remove-to-default t)
   (tabspaces-include-buffers '("*scratch*"))
   (tabspaces-session t)
-  (tabspaces-session-auto-restore t)
+  (tabspaces-session-auto-restore nil)
   (tabspaces-initialize-project-with-todo nil)
   :config
   (with-eval-after-load 'consult

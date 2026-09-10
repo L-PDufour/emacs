@@ -4,12 +4,12 @@
 ;;; Code:
 
 (setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.6)
+	  gc-cons-percentage 0.6)
 
 (add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq gc-cons-threshold (* 16 1024 1024)
-                  gc-cons-percentage 0.1)))
+		  (lambda ()
+			(setq gc-cons-threshold (* 16 1024 1024)
+				  gc-cons-percentage 0.1)))
 
 ;; IGC tuning — `igc-step-interval' is the branch's only knob.
 (when (boundp 'igc-step-interval)
@@ -22,33 +22,33 @@
   (set-default-toplevel-value
    'file-name-handler-alist
    (if (locate-file-internal "calc-loaddefs.el" load-path)
-       nil
-     (list (rassq 'jka-compr-handler my--file-name-handler-alist))))
+	   nil
+	 (list (rassq 'jka-compr-handler my--file-name-handler-alist))))
   (add-hook 'emacs-startup-hook
-            (lambda ()
-              (set-default-toplevel-value
-               'file-name-handler-alist
-               (delete-dups (append file-name-handler-alist
-                                    my--file-name-handler-alist))))
-            101))
+			(lambda ()
+			  (set-default-toplevel-value
+			   'file-name-handler-alist
+			   (delete-dups (append file-name-handler-alist
+									my--file-name-handler-alist))))
+			101))
 
 (unless noninteractive
   ;; Hide the mode line until init installs the real one.
   (put 'mode-line-format 'initial-value
-       (default-toplevel-value 'mode-line-format))
+	   (default-toplevel-value 'mode-line-format))
   (setq-default mode-line-format nil)
 
   (setq-default inhibit-redisplay t
-                inhibit-message t)
+				inhibit-message t)
 
   (defun my--reset-inhibited-vars ()
-    "Restore redisplay, messages, and the mode line after startup."
-    (setq-default inhibit-redisplay nil
-                  inhibit-message nil)
-    (unless (default-toplevel-value 'mode-line-format)
-      (setq-default mode-line-format
-                    (get 'mode-line-format 'initial-value)))
-    (remove-hook 'post-command-hook #'my--reset-inhibited-vars))
+	"Restore redisplay, messages, and the mode line after startup."
+	(setq-default inhibit-redisplay nil
+				  inhibit-message nil)
+	(unless (default-toplevel-value 'mode-line-format)
+	  (setq-default mode-line-format
+					(get 'mode-line-format 'initial-value)))
+	(remove-hook 'post-command-hook #'my--reset-inhibited-vars))
 
   (add-hook 'post-command-hook #'my--reset-inhibited-vars -100)
   (add-hook 'emacs-startup-hook #'my--reset-inhibited-vars 101))
@@ -67,11 +67,11 @@
   ;; `native-comp-deferred-compilation' is the obsolete alias of
   ;; `native-comp-jit-compilation'; setting only the latter suffices.
   (setq native-comp-jit-compilation t
-        native-comp-async-report-warnings-errors 'silent
-        native-comp-warning-on-missing-source nil)
+		native-comp-async-report-warnings-errors 'silent
+		native-comp-warning-on-missing-source nil)
   (when (fboundp 'startup-redirect-eln-cache)
-    (startup-redirect-eln-cache
-     (expand-file-name "eln-cache/" user-emacs-directory))))
+	(startup-redirect-eln-cache
+	 (expand-file-name "eln-cache/" user-emacs-directory))))
 
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
@@ -79,23 +79,23 @@
 (push '(horizontal-scroll-bars) default-frame-alist)
 
 (setq menu-bar-mode nil
-      tool-bar-mode nil
-      scroll-bar-mode nil)
+	  tool-bar-mode nil
+	  scroll-bar-mode nil)
 
 ;; Never pop GUI dialogs — keep everything in the minibuffer.
 (setq use-file-dialog nil
-      use-dialog-box nil)
+	  use-dialog-box nil)
 
 (setq frame-resize-pixelwise t
-      frame-inhibit-implied-resize t
-      frame-title-format '("%b – Emacs")
-      icon-title-format frame-title-format)
+	  frame-inhibit-implied-resize t
+	  frame-title-format '("%b – Emacs")
+	  icon-title-format frame-title-format)
 
 (setq inhibit-startup-screen t
-      inhibit-startup-echo-area-message user-login-name
-      inhibit-startup-buffer-menu t
-      initial-scratch-message nil
-      initial-major-mode 'fundamental-mode)
+	  inhibit-startup-echo-area-message user-login-name
+	  inhibit-startup-buffer-menu t
+	  initial-scratch-message nil
+	  initial-major-mode 'fundamental-mode)
 
 (setq auto-mode-case-fold nil)
 ;; `winner-mode' itself is enabled in init.el — enabling it here too
@@ -105,16 +105,16 @@
   "Delete other windows in frame if any, or restore previous window config."
   (interactive)
   (if (and (bound-and-true-p winner-mode)
-  		 (equal (selected-window) (next-window)))
-  	(winner-undo)
-    (delete-other-windows)))
+		   (equal (selected-window) (next-window)))
+	  (winner-undo)
+	(delete-other-windows)))
 
 (global-set-key (kbd "C-x 1") #'toggle-delete-other-windows)
 
 ;; No `idle-update-delay': redisplay stopped consulting it in Emacs 30
 ;; and master removed the variable entirely.
 (setq inhibit-compacting-font-caches t
-      ffap-machine-p-known 'reject)
+	  ffap-machine-p-known 'reject)
 (setq jit-lock-defer-time 0.05)
 ;; Skip expensive rendering mid-scroll
 (setq fast-but-imprecise-scrolling t)
