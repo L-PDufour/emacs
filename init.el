@@ -1218,90 +1218,119 @@ becomes the first item; falls back to the top of the file."
 
 (require 'auth-source)
 
-(defvar my-gptel--key-cache nil
-  "DeepSeek API key entered by hand this session, if any.")
+  (defvar my-gptel--key-cache nil
+    "DeepSeek API key entered by hand this session, if any.")
 
-(defun my-gptel-key ()
-  "Return the DeepSeek API key.
-Search `auth-sources' for api.deepseek.com first, then the
-DEEPSEEK_API_KEY environment variable, and only then prompt — caching
-the answer for the session."
-  (or (auth-source-pick-first-password :host "api.deepseek.com"
-                                       :user "apikey")
-      (getenv "DEEPSEEK_API_KEY")
-      my-gptel--key-cache
-      (setq my-gptel--key-cache (read-passwd "DeepSeek API key: "))))
+  (defun my-gptel-key ()
+    "Return the DeepSeek API key.
+  Search `auth-sources' for api.deepseek.com first, then the
+  DEEPSEEK_API_KEY environment variable, and only then prompt — caching
+  the answer for the session."
+    (or (auth-source-pick-first-password :host "api.deepseek.com"
+                                         :user "apikey")
+        (getenv "DEEPSEEK_API_KEY")
+        my-gptel--key-cache
+        (setq my-gptel--key-cache (read-passwd "DeepSeek API key: "))))
 
-(defvar my-gptel-models '(deepseek-chat deepseek-reasoner)
-  "Models offered by the DeepSeek backend.
-Run `my-gptel-refresh-models' to replace this with whatever the API
-currently advertises.")
+  (defvar my-gptel-models '(deepseek-chat deepseek-reasoner)
+    "Models offered by the DeepSeek backend.
+  Run `my-gptel-refresh-models' to replace this with whatever the API
+  currently advertises.")
 
-(defvar my-gptel-deepseek nil
-  "The DeepSeek gptel backend.")
+  (defvar my-gptel-deepseek nil
+    "The DeepSeek gptel backend.")
 
-(use-package gptel
-  :ensure nil
-  :config
-  (setq gptel-default-mode 'org-mode)
-  (setq gptel-track-media t)
+(use-package eca
+    :ensure nil
+    :defer t
+    :custom
+    ;; Connect to the ECA server as soon as a workspace is opened.
+    (eca-auto-connect t)
+    ;; Keep the server log quiet until something misbehaves; bump to
+    ;; `debug' and reopen it with `C-c a l' when a request goes wrong.
+    (eca-log-level 'info)
+    :bind
+    ;; `C-c e …' is the errors/flymake prefix here (`C-c e e' is
+    ;; `consult-flymake'), so ECA gets its own `C-c a' prefix instead of
+    ;; shadowing it.
+    (("C-c a c" . eca-chat)
+     ("C-c a s" . eca-workspace-start)
+     ("C-c a l" . eca-show-logs)
+     ("C-c a r" . eca-restart)
+     :map eca-chat-mode-map
+     ("C-c C-s" . eca-chat-send-prompt)
+     ("C-c C-q" . eca-chat-quit))
+    :config
+    ;; Offer ECA from the project switch menu, like Ghostel and Eshell.
+    (add-to-list 'project-switch-commands '(eca-chat "ECA chat") t))
 
-  ;; `gptel-make-deepseek' knows about `deepseek-reasoner''s separate
-  ;; reasoning_content field, so prefer it; on an older Nix pin that
-  ;; lacks it the plain OpenAI constructor talks to the same endpoint.
-  (setq my-gptel-deepseek
-        (if (fboundp 'gptel-make-deepseek)
-            (gptel-make-deepseek "DeepSeek"
+  (use-package eca-chat
+    :ensure nil
+    :after eca)
+  
+
+  (use-package gptel
+    :ensure nil
+    :config
+    (setq gptel-default-mode 'org-mode)
+    (setq gptel-track-media t)
+
+    ;; `gptel-make-deepseek' knows about `deepseek-reasoner''s separate
+    ;; reasoning_content field, so prefer it; on an older Nix pin that
+    ;; lacks it the plain OpenAI constructor talks to the same endpoint.
+    (setq my-gptel-deepseek
+          (if (fboundp 'gptel-make-deepseek)
+              (gptel-make-deepseek "DeepSeek"
+                :stream t
+                :key #'my-gptel-key
+                :models my-gptel-models)
+            (gptel-make-openai "DeepSeek"
+              :host "api.deepseek.com"
+              :endpoint "/chat/completions"
               :stream t
               :key #'my-gptel-key
-              :models my-gptel-models)
-          (gptel-make-openai "DeepSeek"
-            :host "api.deepseek.com"
-            :endpoint "/chat/completions"
-            :stream t
-            :key #'my-gptel-key
-            :models my-gptel-models)))
+              :models my-gptel-models)))
 
-  (setq gptel-backend my-gptel-deepseek)
-  (setq gptel-model 'deepseek-chat)
+    (setq gptel-backend my-gptel-deepseek)
+    (setq gptel-model 'deepseek-chat)
 
-  :bind
-  (("C-c g g" . gptel)
-   ("C-c g s" . gptel-send)
-   ("C-c g m" . gptel-menu)
-   ("C-c g a" . gptel-add)
-   ("C-c g f" . gptel-add-file)
-   ("C-c g r" . gptel-rewrite)
-   ("C-c g k" . gptel-abort)))
+    :bind
+    (("C-c g g" . gptel)
+     ("C-c g s" . gptel-send)
+     ("C-c g m" . gptel-menu)
+     ("C-c g a" . gptel-add)
+     ("C-c g f" . gptel-add-file)
+     ("C-c g r" . gptel-rewrite)
+     ("C-c g k" . gptel-abort)))
 
-(defun my-gptel-refresh-models ()
-  "Sync the backend's model list with what DeepSeek advertises.
-Doubles as a health check: an error here means the key is wrong, the
-account is out of credit, or the network is down."
-  (interactive)
-  (let* ((key (my-gptel-key))
-         (url-request-extra-headers
-          (list (cons "Authorization" (concat "Bearer " key))))
-         (buf (url-retrieve-synchronously "https://api.deepseek.com/models"
-                                          t nil 30)))
-    (unless buf
-      (user-error "No response from api.deepseek.com"))
-    (unwind-protect
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (unless (search-forward "\n\n" nil t)
-            (user-error "Malformed response from api.deepseek.com"))
-          (let* ((payload (json-parse-buffer :object-type 'plist
-                                             :array-type 'list))
-                 (models (mapcar (lambda (m) (intern (plist-get m :id)))
-                                 (plist-get payload :data))))
-            (unless models
-              (user-error "No models listed by api.deepseek.com"))
-            (setq my-gptel-models models)
-            (setf (gptel-backend-models my-gptel-deepseek) models)
-            (message "DeepSeek: %s"
-                     (mapconcat #'symbol-name models ", "))))
-      (kill-buffer buf))))
+  (defun my-gptel-refresh-models ()
+    "Sync the backend's model list with what DeepSeek advertises.
+  Doubles as a health check: an error here means the key is wrong, the
+  account is out of credit, or the network is down."
+    (interactive)
+    (let* ((key (my-gptel-key))
+           (url-request-extra-headers
+            (list (cons "Authorization" (concat "Bearer " key))))
+           (buf (url-retrieve-synchronously "https://api.deepseek.com/models"
+                                            t nil 30)))
+      (unless buf
+        (user-error "No response from api.deepseek.com"))
+      (unwind-protect
+          (with-current-buffer buf
+            (goto-char (point-min))
+            (unless (search-forward "\n\n" nil t)
+              (user-error "Malformed response from api.deepseek.com"))
+            (let* ((payload (json-parse-buffer :object-type 'plist
+                                               :array-type 'list))
+                   (models (mapcar (lambda (m) (intern (plist-get m :id)))
+                                   (plist-get payload :data))))
+              (unless models
+                (user-error "No models listed by api.deepseek.com"))
+              (setq my-gptel-models models)
+              (setf (gptel-backend-models my-gptel-deepseek) models)
+              (message "DeepSeek: %s"
+                       (mapconcat #'symbol-name models ", "))))
+        (kill-buffer buf))))
 
 (defvar my-gptel-code-directive
   "You are a programming assistant working inside Emacs on the user's project.

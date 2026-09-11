@@ -1972,6 +1972,35 @@ Two models are served there: =deepseek-chat= for everything, and
   (defvar my-gptel-deepseek nil
     "The DeepSeek gptel backend.")
 
+(use-package eca
+    :ensure nil
+    :defer t
+    :custom
+    ;; Connect to the ECA server as soon as a workspace is opened.
+    (eca-auto-connect t)
+    ;; Keep the server log quiet until something misbehaves; bump to
+    ;; `debug' and reopen it with `C-c a l' when a request goes wrong.
+    (eca-log-level 'info)
+    :bind
+    ;; `C-c e …' is the errors/flymake prefix here (`C-c e e' is
+    ;; `consult-flymake'), so ECA gets its own `C-c a' prefix instead of
+    ;; shadowing it.
+    (("C-c a c" . eca-chat)
+     ("C-c a s" . eca-workspace-start)
+     ("C-c a l" . eca-show-logs)
+     ("C-c a r" . eca-restart)
+     :map eca-chat-mode-map
+     ("C-c C-s" . eca-chat-send-prompt)
+     ("C-c C-q" . eca-chat-quit))
+    :config
+    ;; Offer ECA from the project switch menu, like Ghostel and Eshell.
+    (add-to-list 'project-switch-commands '(eca-chat "ECA chat") t))
+
+  (use-package eca-chat
+    :ensure nil
+    :after eca)
+  
+
   (use-package gptel
     :ensure nil
     :config
