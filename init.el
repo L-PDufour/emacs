@@ -249,10 +249,11 @@
 
 (defconst my/org-task-files
   (list (expand-file-name "inbox.org" my/org-root)
-        (expand-file-name "projects.org" my/org-root)
+        (expand-file-name "work.org" my/org-root)
+        (expand-file-name "home.org" my/org-root)
         (expand-file-name "weekly.org" my/org-root)
         (expand-file-name "habits.org" my/org-root)
-        (expand-file-name "tasks-family.org" my/family-root))
+        (expand-file-name "family.org" my/family-root))
   "Task-bearing org files the agenda scans. Reference files stay out.")
 
 (use-package org
@@ -277,21 +278,29 @@
   (org-todo-keywords
    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "CANCELLED(c)")))
   (org-refile-targets
-   (list (list (expand-file-name "projects.org" my/org-root) :maxlevel 2)
+   (list (list (expand-file-name "work.org" my/org-root) :maxlevel 2)
+         (list (expand-file-name "home.org" my/org-root) :maxlevel 2)
          (list (expand-file-name "weekly.org" my/org-root) :maxlevel 2)
-         (list (expand-file-name "tasks-family.org" my/family-root) :maxlevel 1)
-         (list (expand-file-name "plan.org" my/org-root) :maxlevel 1)))
+         (list (expand-file-name "family.org" my/family-root) :maxlevel 1)))
   (org-refile-use-outline-path 'file)
   (org-confirm-babel-evaluate
    (lambda (lang _body)
 	 (not (and (equal lang "emacs-lisp")
 			   (my/literate-config-buffer-p)))))
+  
   :config
   (add-to-list 'org-modules 'org-habit)
   (org-load-modules-maybe 'force)
   (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4
 							  org-level-5 org-level-6 org-level-7 org-level-8))
 	(set-face-attribute face nil :weight 'bold))
+  (setq org-tag-persistent-alist
+    '(("@work"       . ?w)
+      ("@home"       . ?h)
+      ("@todo"   . ?t)
+      ("@dashboard". ?d)
+      ("@family"     . ?f)
+      ("@errands"    . ?r)))
   :hook
   ((org-mode . org-indent-mode)
    (org-mode . auto-save-mode))
@@ -475,12 +484,6 @@ becomes the first item; falls back to the top of the file."
   ;; Eglot's `sortText' ordering survives too: `cape--super-all' applies each
   ;; table's own `display-sort-function' (Eglot's sorts by `sortText') and the
   ;; merged table uses `identity', which Corfu honors.
-  (add-hook 'eglot-managed-mode-hook
-			(lambda ()
-              (setq-local completion-at-point-functions
-                          (list (cape-capf-super #'eglot-completion-at-point
-                                                 #'tempel-complete
-                                                 #'cape-file)))))
   (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme
@@ -702,7 +705,6 @@ becomes the first item; falls back to the top of the file."
   :ensure nil
   :custom
   (tempel-path (expand-file-name "templates" user-emacs-directory))
-  (tempel-trigger-prefix "<")
   :bind (("M-+" . tempel-complete)
 		 ("M-*" . tempel-insert))
   :bind (:map tempel-map
@@ -712,11 +714,12 @@ becomes the first item; falls back to the top of the file."
 		 (text-mode . tempel-setup-capf)
 		 (org-mode  . tempel-setup-capf))
   :init
-  (defun tempel-setup-capf ()
-	"Add `tempel-complete' to `completion-at-point-functions'."
-	(setq-local completion-at-point-functions
-				(cons #'tempel-complete
-					  completion-at-point-functions))))
+       (defun tempel-setup-capf ()
+  (add-hook 'completion-at-point-functions #'tempel-expand -1 'local))
+;; Put tempel-expand on the list whenever you start programming or
+;; writing prose.
+(add-hook 'prog-mode-hook 'tempel-setup-capf)
+(add-hook 'text-mode-hook 'tempel-setup-capf))
 
 (use-package tempel-collection
   :ensure nil
