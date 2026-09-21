@@ -635,14 +635,14 @@ becomes the first item; falls back to the top of the file."
 (use-package eglot
   :ensure nil
   :defer t
-  :init
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+  ;; :init
+  ;; (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   :custom
   (eglot-send-changes-idle-time 0.5)
   (eglot-extend-to-xref t)
   (eglot-autoshutdown t)
   ;; Replaces the obsolete `eglot-events-buffer-size'.
-  ;; (eglot-events-buffer-config '(:size 0 :format full))
+  (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-sync-connect nil)
   (eglot-report-progress nil)
   (eglot-max-file-watches 3000)
@@ -661,14 +661,10 @@ becomes the first item; falls back to the top of the file."
   (jsonrpc-event-hook nil)
 
   :config
+  (add-to-list 'eglot-server-programs '(nix-mode . ("nixd")))
   (add-to-list 'eglot-server-programs
-			   '(((js-mode :language-id "javascript")
-				  (js-ts-mode :language-id "javascript")
-				  (tsx-ts-mode :language-id "typescriptreact")
-				  (typescript-ts-mode :language-id "typescript"))
-				 "deno" "lsp"
-				 :initializationOptions (:enable t :lint t :unstable t)))
-  (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
+               '((js-mode js-ts-mode rjsx-mode typescript-mode tsx-ts-mode)
+                 . ("tsc" "--lsp" "--stdio"))))
 
 (use-package consult-eglot
   :ensure nil
@@ -737,8 +733,6 @@ becomes the first item; falls back to the top of the file."
   (apheleia-global-mode 1)
   (add-to-list 'apheleia-formatters
 			   '(templ-format "go" "tool" "templ" "fmt" filepath))
-  (add-to-list 'apheleia-formatters
-			   '(deno-format "deno" "fmt" "--ext" "ts" "-"))
   (setf (alist-get 'nixfmt-rfc-style apheleia-formatters)
 		'("nixfmt"))
   (setf (alist-get 'nix-mode apheleia-mode-alist)
@@ -747,9 +741,13 @@ becomes the first item; falls back to the top of the file."
 		'("golangci-lint" "fmt" "--stdin" filepath))
   (setf (alist-get 'go-mode apheleia-mode-alist) 'golangci-fmt)
   (setf (alist-get 'go-ts-mode apheleia-mode-alist) 'golangci-fmt)
-  (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'deno-format)
   (setf (alist-get 'templ-ts-mode apheleia-mode-alist) 'templ-format)
-  (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'deno-format))
+  (add-to-list 'apheleia-formatters '(biome "biome" "format" "--stdin-file-path" filepath))
+  (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'biome)
+  (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'biome)
+  (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'biome)
+  (setf (alist-get 'json-ts-mode apheleia-mode-alist) 'biome)
+  (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'biome))
 
 (use-package indent-bars
   :ensure nil
