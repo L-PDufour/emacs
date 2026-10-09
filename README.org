@@ -233,7 +233,6 @@ This avoids the flash of default UI.
   ;; and master removed the variable entirely.
   (setq inhibit-compacting-font-caches t
   	  ffap-machine-p-known 'reject)
-  (setq jit-lock-defer-time 0.05)
   ;; Skip expensive rendering mid-scroll
   (setq fast-but-imprecise-scrolling t)
   (set-language-environment "UTF-8")
@@ -245,6 +244,15 @@ This avoids the flash of default UI.
   ;; PGTK (Wayland/Sway): don't stall waiting for GTK events
   (when (boundp 'pgtk-wait-for-event-timeout)
     (setq pgtk-wait-for-event-timeout 0.001))
+
+  ;; PGTK: don't route keyboard input through GtkIMContext. The context
+  ;; adds a round-trip per key event and is only needed for GTK input
+  ;; methods (fcitx/ibus); re-enable if you type CJK. `pgtk-use-im-context'
+  ;; is a *function* on this build (src/pgtkim.c), not a variable: the
+  ;; startup knob is `pgtk-use-im-context-on-new-connection', read by
+  ;; `pgtk-use-im-context-handler' on `after-init-hook' (lisp/term/pgtk-win.el).
+  (when (boundp 'pgtk-use-im-context-on-new-connection)
+    (setq pgtk-use-im-context-on-new-connection nil))
 #+end_src
 
 ** Footer
@@ -1736,11 +1744,38 @@ every other package here, =surround= has to come from Nix — add
 
 ** Envrc (direnv)
 
+The Emacs daemon can start before =__NIXOS_SET_ENVIRONMENT_DONE= is set,
+which makes every zsh child (=M-x compile=, =shell-command=, eat, ...)
+source =/etc/zshenv= and reset =PATH= to the bare NixOS session value,
+dropping any direnv/dev-shell =PATH=. Mark the session environment as done
+so zsh leaves the inherited environment alone. Also refresh direnv when an
+=.envrc= / flake file is saved, since envrc caches direnv output for the
+whole session.
+
 #+begin_src emacs-lisp
+  ;; The Emacs daemon may be started without `__NIXOS_SET_ENVIRONMENT_DONE', in
+  ;; which case every zsh child (M-x compile, shell-command, eat, ...) sources
+  ;; /etc/zshenv -> set-environment, resetting PATH to the bare NixOS session
+  ;; value and dropping the direnv/dev-shell PATH.  Mark the session environment
+  ;; as done so zsh leaves the inherited environment alone.
+  (setenv "__NIXOS_SET_ENVIRONMENT_DONE" "1")
+
   (use-package envrc
     :ensure nil
     :diminish envrc-mode
-    :hook (after-init . envrc-global-mode))
+    :hook (after-init . envrc-global-mode)
+    :config
+    ;; envrc caches direnv output for the whole Emacs session, keyed only on
+    ;; (env-dir . global-env), so edits to the flake/.envrc are not picked up
+    ;; until a reload.  Refresh whenever one of those files is saved.
+    (defun my/envrc-reload-after-save ()
+      "Reload direnv when an .envrc/flake file is saved."
+      (when (and (buffer-file-name)
+                 (member (file-name-nondirectory (buffer-file-name))
+                         '(".envrc" "flake.nix" "flake.lock"))
+                 (locate-dominating-file default-directory ".envrc"))
+        (ignore-errors (envrc-reload))))
+    (add-hook 'after-save-hook #'my/envrc-reload-after-save))
 #+end_src
 
 ** Tramp
@@ -2760,6 +2795,30 @@ would break =code= and =reason= for no gain.
 Worth knowing: =gptel-agent-preset= exists to route sub-agent calls to
 a cheaper model than the main loop.  With a single backend there is
 nothing cheaper to route to, so it is deliberately left at its default.
+
+
+* Agent Shell
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
+
+An ACP client driving OpenCode, provided by Nix (not package.el).
+Its streaming renderer is the cost center under a long reply: every
+chunk re-runs the markdown passes, and fenced code blocks each spin up
+a language major mode and call =font-lock-ensure= per render.  The one
+knob worth turning is block highlighting; the layout is unchanged, only
+the keyword colours go.
+
+#+begin_src emacs-lisp
+  (use-package agent-shell
+    :ensure nil
+    :if (locate-library "agent-shell")
+    :custom
+    ;; Skip per-fenced-block syntax highlighting.  The renderer still
+    ;; strips the fences and inserts the action label; it just does not
+    ;; font-lock every code block on every streamed chunk.
+    (agent-shell-highlight-blocks nil))
+#+end_src
 
 
 * Tabspaces

@@ -115,7 +115,6 @@
 ;; and master removed the variable entirely.
 (setq inhibit-compacting-font-caches t
 	  ffap-machine-p-known 'reject)
-(setq jit-lock-defer-time 0.05)
 ;; Skip expensive rendering mid-scroll
 (setq fast-but-imprecise-scrolling t)
 (set-language-environment "UTF-8")
@@ -127,6 +126,15 @@
 ;; PGTK (Wayland/Sway): don't stall waiting for GTK events
 (when (boundp 'pgtk-wait-for-event-timeout)
   (setq pgtk-wait-for-event-timeout 0.001))
+
+;; PGTK: don't route keyboard input through GtkIMContext. The context
+;; adds a round-trip per key event and is only needed for GTK input
+;; methods (fcitx/ibus); re-enable if you type CJK. `pgtk-use-im-context'
+;; is a *function* on this build (src/pgtkim.c), not a variable: the
+;; startup knob is `pgtk-use-im-context-on-new-connection', read by
+;; `pgtk-use-im-context-handler' on `after-init-hook' (lisp/term/pgtk-win.el).
+(when (boundp 'pgtk-use-im-context-on-new-connection)
+  (setq pgtk-use-im-context-on-new-connection nil))
 
 (provide 'early-init)
 ;;; early-init.el ends here

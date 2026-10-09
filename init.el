@@ -1081,10 +1081,29 @@ becomes the first item; falls back to the top of the file."
   :ensure nil
   :mode ("\\.pdf\\'" . pdf-view-mode))
 
+;; The Emacs daemon may be started without `__NIXOS_SET_ENVIRONMENT_DONE', in
+;; which case every zsh child (M-x compile, shell-command, eat, ...) sources
+;; /etc/zshenv -> set-environment, resetting PATH to the bare NixOS session
+;; value and dropping the direnv/dev-shell PATH.  Mark the session environment
+;; as done so zsh leaves the inherited environment alone.
+(setenv "__NIXOS_SET_ENVIRONMENT_DONE" "1")
+
 (use-package envrc
   :ensure nil
   :diminish envrc-mode
-  :hook (after-init . envrc-global-mode))
+  :hook (after-init . envrc-global-mode)
+  :config
+  ;; envrc caches direnv output for the whole Emacs session, keyed only on
+  ;; (env-dir . global-env), so edits to the flake/.envrc are not picked up
+  ;; until a reload.  Refresh whenever one of those files is saved.
+  (defun my/envrc-reload-after-save ()
+    "Reload direnv when an .envrc/flake file is saved."
+    (when (and (buffer-file-name)
+               (member (file-name-nondirectory (buffer-file-name))
+                       '(".envrc" "flake.nix" "flake.lock"))
+               (locate-dominating-file default-directory ".envrc"))
+      (ignore-errors (envrc-reload))))
+  (add-hook 'after-save-hook #'my/envrc-reload-after-save))
 
 (use-package tramp
   :ensure nil
@@ -1741,6 +1760,15 @@ init.el and early-init.el are still in sync, and byte-compiles the \
 result.  Call this after every edit and fix what it reports."
    :args (list)
    :category "project"))
+
+(use-package agent-shell
+  :ensure nil
+  :if (locate-library "agent-shell")
+  :custom
+  ;; Skip per-fenced-block syntax highlighting.  The renderer still
+  ;; strips the fences and inserts the action label; it just does not
+  ;; font-lock every code block on every streamed chunk.
+  (agent-shell-highlight-blocks nil))
 
 (use-package tabspaces
   :ensure nil
