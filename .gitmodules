@@ -1,0 +1,3 @@
+[submodule "site-lisp/templ-ts-mode"]
+	path = site-lisp/templ-ts-mode
+	url = https://github.com/L-PDufour/templ-ts-mode.git

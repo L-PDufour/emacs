@@ -1,6 +1,6 @@
 ---
 name: emacs-config
-description: Ground rules for editing this Emacs configuration — it is a literate Org config on NixOS with an IGC-branch Emacs under Sway/Wayland. Load this before changing README.org, init.el, early-init.el, or any use-package block, and before adding, removing or configuring a package.
+description: Ground rules for editing this Emacs configuration — it is a literate Org config on NixOS with an IGC-branch Emacs under Sway/Wayland, and on OpenBSD with the ports Emacs. Load this before changing README.org, init.el, early-init.el, or any use-package block, and before adding, removing or configuring a package.
 ---
 
 # Editing this Emacs configuration
@@ -31,26 +31,39 @@ byte-compiles the result. Fix whatever it reports before saying you are done.
 A change is not finished when the prose reads well. It is finished when
 `check_config` comes back in sync and clean.
 
-Warnings about free variables from Nix-provided packages are expected noise —
-those packages are not on the load-path of the subprocess doing the compile.
+Warnings about free variables from packages that are not on the load-path of
+the subprocess doing the compile are expected noise.
 
 Indent new source blocks with **spaces, not tabs**. Org re-indents tab-indented
 blocks differently across versions, which rewrites the whole file and buries
 the real change in a whitespace diff.
 
-## Packages come from Nix, not package.el
+## Packages: Nix under NixOS, package.el on OpenBSD
 
-Every `use-package` uses `:ensure nil`. **Never** add `:ensure t` or
-`:straight t` — nothing here installs packages, and a package that is not in
-the home-manager profile simply is not on the load-path.
+The bootstrap in `README.org` detects the package source once:
 
-To add a package: guard it with `:if (locate-library "...")` so init still
-works before Nix catches up, and tell the user the home-manager change is
-theirs to make.
+- `/etc/NIXOS` exists or `NIX_PROFILES` is set → Nix/home-manager provides
+  every package. `use-package-always-ensure` and `package-archives` are nil.
+- Otherwise (the OpenBSD laptop) → `package.el` installs from GNU, NonGNU and
+  MELPA into `var/elpa`, and `use-package-always-ensure` is t.
 
-`package-archives` and `package-enable-at-startup` are nil, but the
-`package-initialize` call in `init.el` is **load-bearing** — it activates the
-Nix-provided packages under `site-lisp/elpa/` and loads their autoloads.
+A third-party `use-package` form therefore carries **no `:ensure` keyword**: it
+inherits the mode. `:ensure nil` is reserved for built-ins (`emacs`, `org`,
+`dired`, `eshell`, `gnus`, `tramp`, `xref`, `window`, `smerge-mode`, `project`,
+`isearch`, `flymake`, `eldoc`, `comint`, `eglot`, `which-key`), sub-features
+that are not separate packages (`ghostel-eshell`, `eca-chat`, …), the vendored
+`templ-ts-mode`, and `gptel-preset-collection` (installed by `package-vc`).
+Never add `:straight t`.
+
+To add a package on NixOS: add the `epkgs.*` entry to the home-manager package
+list — that change is the user's to make. On OpenBSD the form installs it on
+the next start; run `M-x package-refresh-contents` first if the archive
+metadata is stale.
+
+`package-enable-at-startup` is nil in both modes and the `package-initialize`
+call in `init.el` is **load-bearing**: it activates the Nix packages under
+`site-lisp/elpa/` or the native ones under `var/elpa/` and loads their
+autoloads. Do not remove it and do not enable `package-enable-at-startup`.
 
 ## `user-emacs-directory` is not the config root
 
@@ -65,6 +78,10 @@ config repository use `my-gptel-config-root` or
   stock build — always guard with `boundp`. `igc-step-multiplier` and
   `igc-cons-threshold` do not exist. `focus-out-hook` was removed in Emacs 28;
   use `after-focus-change-function`.
+- **OpenBSD**: the ports Emacs is 31.1, built with tree-sitter but **without**
+  native compilation. Guard those knobs with `featurep`/`boundp` as the config
+  already does. `system-type` is `berkeley-unix`; libghostty does not exist
+  there, so `ghostel` is skipped.
 - **PGTK/Wayland**: GUI frames use the Wayland clipboard natively. The `xclip`
   shim is tty-only, via `tty-setup-hook`.
 - `read-process-output-max` stays at 1 MiB. Larger values defeat themselves
@@ -91,5 +108,7 @@ Never commit a key. Do not add a second backend or a proxy unless asked.
 
 ## Vendored code
 
-`site-lisp/templ-ts-mode/` is third-party, not config. It is a gitlink with no
-`.gitmodules` entry, so a fresh clone leaves it empty. Leave it alone.
+`site-lisp/templ-ts-mode/` is third-party, not config. It is a submodule —
+`.gitmodules` points at `L-PDufour/templ-ts-mode`, pinned to a commit on the
+fork's `wip` branch. On a fresh clone run `git submodule update --init`; do not
+edit files inside it.

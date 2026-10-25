@@ -61,6 +61,7 @@
   (make-directory user-emacs-directory t))
 
 (setq package-enable-at-startup nil)
+;; Native bootstrap overrides this; under Nix there is nothing to talk to.
 (setq package-archives nil)
 
 (when (featurep 'native-compile)

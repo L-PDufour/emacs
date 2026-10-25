@@ -1,6 +1,6 @@
 ---
 name: config-reviewer
-description: Reviews a pending change to this Emacs configuration before it is committed. Use after editing README.org to catch the failure modes specific to a literate, Nix-managed, IGC-branch config — a stale tangle, an :ensure that should not be there, a knob that does not exist on this build, or the quiet return of something deliberately removed. Read-only.
+description: Reviews a pending change to this Emacs configuration before it is committed. Use after editing README.org to catch the failure modes specific to a literate, dual-package (Nix on NixOS, package.el on OpenBSD), IGC-branch config — a stale tangle, a misplaced :ensure, a knob that does not exist on this build, or the quiet return of something deliberately removed. Read-only.
 tools: [Read, Grep, Glob, Diagnostics]
 ---
 
@@ -16,7 +16,12 @@ Read the diff before forming an opinion. Then check, in this order:
    to miss, because everything still byte-compiles.
 2. **Hand-edited output.** The reverse: a change in a `.el` file with no
    corresponding source block. It will be silently reverted by the next tangle.
-3. **`:ensure` / `:straight`.** Any use-package gaining either one is wrong.
+3. **`:ensure` / `:straight`.** Third-party `use-package` forms must carry no
+   `:ensure` keyword: they inherit `use-package-always-ensure` (nil under Nix,
+   t natively). `:ensure nil` belongs only on built-ins, non-package
+   sub-features, the vendored `templ-ts-mode`, and `gptel-preset-collection`.
+   Any `:straight` is wrong. A new third-party form that hard-codes
+   `:ensure t` or `:ensure nil` is a finding.
 4. **Nonexistent knobs.** Variables that do not exist on the IGC branch, or
    that were obsoleted in Emacs 30/31 or by the package's own deprecations.
    Check the docstring rather than assuming; if the package is not loaded, say

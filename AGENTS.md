@@ -1,6 +1,7 @@
 # AGENTS.md
 
-Emacs configuration for **NixOS + the IGC branch + Sway (PGTK/Wayland)**.
+Emacs configuration for **NixOS + the IGC branch + Sway (PGTK/Wayland)**, and
+for the same config on an **OpenBSD** laptop running the ports Emacs.
 
 ## Literate config — edit README.org, not the .el files
 
@@ -28,15 +29,31 @@ from the source blocks in `README.org` and both files carry the header
 - Do not hand-edit `init.el` / `early-init.el` directly — the next tangle
   overwrites your changes.
 
-## Packages come from Nix, not package.el
+## Packages: Nix on NixOS, package.el on OpenBSD
 
-- All packages are provided by **Nix/home-manager** on the load-path. Every
-  `use-package` uses `:ensure nil`. **Never** add `:ensure t` or `:straight t`.
-- `package-archives` and `package-enable-at-startup` are nil; the call to
+- The bootstrap in `README.org` detects the package source once:
+  `/etc/NIXOS` or a non-empty `NIX_PROFILES` means **Nix/home-manager**
+  provides every package; otherwise (the OpenBSD laptop) **package.el**
+  installs from GNU, NonGNU and MELPA into `var/elpa`.
+- A third-party `use-package` form carries **no `:ensure` keyword** — it
+  inherits `use-package-always-ensure`, which is nil under Nix and t natively.
+  `:ensure nil` is kept for built-ins (`emacs`, `org`, `dired`, `eshell`,
+  `gnus`, `tramp`, `xref`, `window`, `smerge-mode`, `project`, `isearch`,
+  `flymake`, `eldoc`, `comint`, `eglot`, `which-key`), sub-features that are
+  not separate packages (`ghostel-eshell`, `ghostel-comint`,
+  `ghostel-compile`, `eca-chat`), the vendored `templ-ts-mode`, and
+  `gptel-preset-collection` (installed by `package-vc`). **Never** add
+  `:straight t`.
+- To add a package on NixOS, add the `epkgs.*` entry to the home-manager
+  package list — that change is the user's to make. On OpenBSD the form
+  installs it on the next start.
+- `package-enable-at-startup` is nil in both modes; the call to
   `package-initialize` in `init.el` is **load-bearing** — it activates the
-  Nix-provided packages under `site-lisp/elpa/` and loads their autoloads.
-  Drop it and autoloaded symbols like `global-corfu-mode` go void.
-- `elpa/` and `var/*` are gitignored (runtime/cache state).
+  Nix-provided packages under `site-lisp/elpa/` or the native ones under
+  `var/elpa/`, and loads their autoloads. Drop it and autoloaded symbols like
+  `global-corfu-mode` go void.
+- `elpa/` and `var/*` are gitignored (runtime/cache state). Native packages
+  live in `var/elpa`, so a checkout stays clean after packages install.
 
 ## Runtime state lives under `var/`
 
@@ -51,6 +68,10 @@ tramp, etc.) is kept out of the config root. Note this means a bare
   `boundp` (it's unbound on stock builds). `igc-step-multiplier`,
   `igc-cons-threshold` do NOT exist. `focus-out-hook` is gone (removed in 28);
   use `after-focus-change-function`.
+- **OpenBSD**: the ports Emacs is 31.1, built with tree-sitter but **without**
+  native compilation. Guard those knobs with `featurep`/`boundp` as the config
+  already does. `system-type` is `berkeley-unix`; libghostty does not exist
+  there, so `ghostel` is skipped.
 - **PGTK/Wayland**: GUI frames use the Wayland clipboard natively; the `xclip`
   shim is enabled only on tty frames via `tty-setup-hook`.
 - `read-process-output-max` stays at 1 MiB — larger values defeat themselves
@@ -81,8 +102,11 @@ There is **no test/lint/build tooling** in this repo. Verify a change by:
    shows only the region you meant to touch.
 2. Byte-compiling the result (`emacs --batch -f batch-byte-compile init.el`)
    to catch read errors and malformed `use-package` forms. Warnings about
-   free variables from Nix-provided packages are expected noise.
+   free variables from packages absent on the subprocess load-path are
+   expected noise.
 3. Launching Emacs and checking startup for errors / unexpected modeline output.
+   On OpenBSD, the first launch installs packages and may prompt once per
+   tree-sitter grammar; check `*Warnings*` afterwards.
 
 Steps 1 and 2 are also available as one call — `my-gptel-check-config`,
 exposed to gptel as the `check_config` tool (*Agentic gptel* section). It
@@ -105,8 +129,8 @@ is stable across Org versions.
 `site-lisp/templ-ts-mode/` is a vendored standalone package (a separate git
 repo) for the `templ` language. Treat it as third-party, not config.
 
-It is recorded as a **gitlink** (`160000`) with no `.gitmodules` entry, so a
-fresh `git clone` leaves the directory empty and nothing tells git where to
-fetch it from. Nothing here depends on it at startup, so this is untidy rather
-than broken — but either add a `.gitmodules` entry or commit the files
-outright before relying on a clean clone.
+It is a submodule: `.gitmodules` points at
+`https://github.com/L-PDufour/templ-ts-mode.git`, and the gitlink is pinned to
+a commit on that fork's `wip` branch. A fresh clone needs
+`git submodule update --init` before the mode will load; do not edit files
+inside it from this repo.

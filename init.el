@@ -1,18 +1,42 @@
 ;;; init.el --- Main configuration -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; Tangled from README.org — do not edit by hand.
-;; Based on Emacs-Kick by Rahul Martim Juliato, adapted for NixOS + IGC + Sway.
+;; Based on Emacs-Kick by Rahul Martim Juliato, adapted for NixOS + IGC + Sway,
+;; with a native package.el path for OpenBSD.
 ;;; Code:
 
-(setq package-archives nil)
-(setq package-enable-at-startup nil)
+(defvar my/nix-packages-p
+  (or (file-exists-p "/etc/NIXOS")
+      (getenv "NIX_PROFILES"))
+  "Non-nil when packages are provided by Nix/home-manager.
+/etc/NIXOS marks NixOS; NIX_PROFILES also covers non-NixOS Nix profiles.")
+
+;; Native installs land in var/elpa, which is gitignored.
+(setq package-user-dir (expand-file-name "elpa/" user-emacs-directory))
 
 (require 'package)
-;; Activates Nix-provided packages and loads their autoloads.
+(unless my/nix-packages-p
+  (setq package-archives
+        '(("gnu"    . "https://elpa.gnu.org/packages/")
+          ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+          ("melpa"  . "https://melpa.org/packages/"))))
+;; Activates Nix's site-lisp/elpa or native var/elpa and loads autoloads.
 ;; Required: package-enable-at-startup is nil, so nothing else does this.
 (package-initialize)
+
 (require 'use-package)
-(setq use-package-always-ensure nil)
+;; Nix provides every package: never install.  Native: install on demand.
+(setq use-package-always-ensure (not my/nix-packages-p))
+
+(unless my/nix-packages-p
+  ;; In no archive, so package.el cannot find it; package-vc clones it.
+  (unless (package-installed-p 'gptel-preset-collection)
+    (condition-case err
+        (package-vc-install "https://github.com/karthink/gptel-preset-collection")
+      (error
+       (display-warning 'my-packages
+                        (format "Could not install gptel-preset-collection: %s"
+                                (error-message-string err)))))))
 
 (setq custom-file (expand-file-name "custom.el" "~/.emacs.d/"))
 (when (file-exists-p custom-file)
@@ -168,7 +192,6 @@
    (dired-mode . hl-line-mode)))
 
 (use-package dired-subtree
-  :ensure nil
   :after dired
   :bind (:map dired-mode-map
 			  ("<tab>" . dired-subtree-toggle)
@@ -238,8 +261,15 @@
 		  (lambda ()
 			(add-hook 'after-save-hook #'my/org-babel-tangle-config nil t)))
 
-(defconst my/sync-root "/var/lib/syncthing/Sync/"
-  "Root of the Syncthing shares.")
+(defconst my/sync-root
+  (or (getenv "MY_SYNC_ROOT")
+      ;; NixOS runs Syncthing as a system service.
+      (if (file-directory-p "/var/lib/syncthing/Sync/")
+          "/var/lib/syncthing/Sync/"
+        (expand-file-name "~/Sync/")))
+  "Root of the Syncthing shares.
+Set MY_SYNC_ROOT to override; the fallback is ~/Sync/ when the NixOS
+service directory is absent.")
 
 (defconst my/org-root (expand-file-name "personal/" my/sync-root)
   "Directory holding personal org files.")
@@ -272,7 +302,7 @@
   (org-log-done 'time)
   (org-log-into-drawer t)
   (org-clock-persist 'clock)
-  (org-directory "/var/lib/syncthing/Sync/personal/")
+  (org-directory my/org-root)
   (org-default-notes-file (expand-file-name "inbox.org" org-directory))
   (org-agenda-files my/org-task-files)
   (org-todo-keywords
@@ -348,7 +378,6 @@ becomes the first item; falls back to the top of the file."
 (global-set-key (kbd "C-c R") #'my/org-open-weekly-review)
 
 (use-package org-appear
-  :ensure nil
   :hook (org-mode . org-appear-mode))
 
 (use-package which-key
@@ -369,7 +398,6 @@ becomes the first item; falls back to the top of the file."
 			  ("C-c ^ p" . smerge-previous)))
 
 (use-package vertico
-  :ensure nil
   :hook (after-init . vertico-mode)
   :custom
   (vertico-count 10)
@@ -390,7 +418,6 @@ becomes the first item; falls back to the top of the file."
 				 cand))))
 
 (use-package orderless
-  :ensure nil
   :after vertico
   :custom
   (completion-styles '(orderless basic))
@@ -406,11 +433,9 @@ becomes the first item; falls back to the top of the file."
 			(eglot-capf (styles orderless))))))
 
 (use-package marginalia
-  :ensure nil
   :hook (after-init . marginalia-mode))
 
 (use-package consult
-  :ensure nil
   :defer t
   :custom
   (consult-narrow-key "<")
@@ -430,17 +455,14 @@ becomes the first item; falls back to the top of the file."
 		xref-show-definitions-function #'consult-xref))
 
 (use-package embark
-  :ensure nil
   :defer t
   :bind (("C-." . embark-act)
 		 ("M-." . embark-dwim)))
 
 (use-package embark-consult
-  :ensure nil
   :after (embark consult))
 
 (use-package corfu
-  :ensure nil
   :custom
   (corfu-auto nil)
   ;; (corfu-auto-delay 0.1)
@@ -463,7 +485,6 @@ becomes the first item; falls back to the top of the file."
 	(add-to-list 'savehist-additional-variables 'corfu-history)))
 
 (use-package cape
-  :ensure nil
   :init
   (add-hook 'emacs-lisp-mode-hook (lambda ()
 									(add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
@@ -487,14 +508,12 @@ becomes the first item; falls back to the top of the file."
   (add-to-list 'completion-at-point-functions #'cape-file 'append))
 
 (use-package catppuccin-theme
-  :ensure nil
   :custom
   (catppuccin-flavor 'frappe)
   :config
   (load-theme 'catppuccin :no-confirm))
 
 (use-package ligature
-  :ensure nil
   :config
   ;; Enable the "www" ligature in every possible major mode
   (ligature-set-ligatures 't '("www"))
@@ -565,22 +584,18 @@ becomes the first item; falls back to the top of the file."
   (global-ligature-mode t))
 
 (use-package nerd-icons
-  :ensure nil
   :defer t)
 
 (use-package nerd-icons-dired
-  :ensure nil
   :hook (dired-mode . nerd-icons-dired-mode))
 
 (use-package nerd-icons-completion
-  :ensure nil
   :after (:all nerd-icons marginalia)
   :config
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 (use-package nerd-icons-corfu
-  :ensure nil
   :after corfu
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
@@ -632,6 +647,33 @@ becomes the first item; falls back to the top of the file."
 		(go-mode         . go-ts-mode)
 		(rust-mode       . rust-ts-mode)))
 
+;; Emacs 31 can install a missing grammar on demand, but ships no recipes:
+;; `treesit-language-source-alist' is empty by default.  These cover every
+;; language the remap above can reach.  templ has its own installer in
+;; templ-ts-mode.  Nix ships the grammars already, so this is only exercised
+;; on the native side.
+(setq treesit-language-source-alist
+      '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+        (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+        (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+        (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+        (go         . ("https://github.com/tree-sitter/tree-sitter-go"))
+        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+        (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+        (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+        (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"))
+        (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))
+        (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript"
+                       "master" "tsx/src"))
+        (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript"
+                       "master" "typescript/src"))
+        (yaml       . ("https://github.com/tree-sitter-grammars/tree-sitter-yaml"))))
+
+;; Ask before downloading and compiling a grammar; it lands in
+;; var/tree-sitter.  The variable arrived in Emacs 31.1.
+(when (boundp 'treesit-auto-install-grammar)
+  (setq treesit-auto-install-grammar 'ask))
+
 (use-package eglot
   :ensure nil
   :defer t
@@ -661,18 +703,18 @@ becomes the first item; falls back to the top of the file."
   (jsonrpc-event-hook nil)
 
   :config
-  (add-to-list 'eglot-server-programs '(nix-mode . ("nixd")))
+  ;; nixd only exists where Nix does; on OpenBSD the entry is pointless.
+  (when (executable-find "nixd")
+    (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
   (add-to-list 'eglot-server-programs
                '((js-mode js-ts-mode rjsx-mode typescript-mode tsx-ts-mode)
                  . ("tsc" "--lsp" "--stdio"))))
 
 (use-package consult-eglot
-  :ensure nil
   :after eglot
   :bind (:map eglot-mode-map
 			  ([remap xref-find-apropos] . consult-eglot-symbols)))
 (use-package consult-eglot-embark
-  :ensure nil
   :after (embark consult-eglot)
   :config (consult-eglot-embark-mode))
 
@@ -698,7 +740,6 @@ becomes the first item; falls back to the top of the file."
 	 (project-any-command "Other"))))
 
 (use-package tempel
-  :ensure nil
   :custom
   (tempel-path (expand-file-name "templates" user-emacs-directory))
   :bind (("M-+" . tempel-complete)
@@ -718,16 +759,13 @@ becomes the first item; falls back to the top of the file."
 (add-hook 'text-mode-hook 'tempel-setup-capf))
 
 (use-package tempel-collection
-  :ensure nil
   :after tempel)
 
 (use-package eglot-tempel
-  :ensure nil
   :after tempel
   :init (eglot-tempel-mode t))
 
 (use-package apheleia
-  :ensure nil
   :diminish
   :config
   (apheleia-global-mode 1)
@@ -750,7 +788,6 @@ becomes the first item; falls back to the top of the file."
   (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'biome))
 
 (use-package indent-bars
-  :ensure nil
   :hook ((prog-mode . indent-bars-mode))
   :custom
   (indent-bars-treesit-support t)
@@ -803,15 +840,14 @@ becomes the first item; falls back to the top of the file."
 
 ;; Left and right side windows occupy full frame height
 (use-package emacs
+  :ensure nil
   :custom
   (window-sides-vertical t))
 
 (use-package nix-mode
-  :ensure nil
   :mode "\\.nix\\'")
 
 (use-package lua-mode
-  :ensure nil
   :mode "\\.lua\\'"
   :interpreter "lua")
 
@@ -821,7 +857,6 @@ becomes the first item; falls back to the top of the file."
   :mode "\\.templ\\'")
 
 (use-package go-eldoc
-  :ensure nil
   :hook (go-mode . go-eldoc-setup))
 
 (defun my-go-mode-setup ()
@@ -832,17 +867,14 @@ becomes the first item; falls back to the top of the file."
 (add-hook 'go-ts-mode-hook #'my-go-mode-setup)
 
 (use-package markdown-mode
-  :ensure nil
   :defer t
   :mode (("\\.md\\'" . markdown-mode)
          ("README\\.md\\'" . gfm-mode)))
 
 (use-package geiser
-  :ensure nil
   :config (setq geiser-default-implementation 'guile))
 
 (use-package geiser-guile
-  :ensure nil
   :after geiser)
 
 (use-package comint
@@ -852,19 +884,15 @@ becomes the first item; falls back to the top of the file."
   (comint-scroll-to-bottom-on-output nil))
 
 (use-package rainbow-delimiters
-  :ensure nil
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package dotenv-mode
-  :ensure nil
   :defer t)
 
 (use-package magit
-  :ensure nil
   :defer t)
 
 (use-package diff-hl
-  :ensure nil
   :hook
   ((after-init             . global-diff-hl-mode)
    (magit-post-refresh     . diff-hl-magit-post-refresh)
@@ -877,7 +905,6 @@ becomes the first item; falls back to the top of the file."
   (diff-hl-disable-on-remote t))
 
 (use-package undo-fu
-  :ensure nil
   :commands (undo-fu-only-undo undo-fu-only-redo)
   :config
   (global-unset-key (kbd "C-z"))
@@ -885,7 +912,6 @@ becomes the first item; falls back to the top of the file."
   (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
 
 (use-package undo-fu-session
-  :ensure nil
   :config
   (setq undo-fu-session-directory
         (expand-file-name "undo-fu-session" user-emacs-directory))
@@ -896,7 +922,6 @@ becomes the first item; falls back to the top of the file."
   (undo-fu-session-global-mode))
 
 (use-package vundo
-  :ensure nil
   :bind ("C-x u" . vundo))
 
 (defun my-smarter-move-beginning-of-line (arg)
@@ -1054,7 +1079,6 @@ becomes the first item; falls back to the top of the file."
 (setq repeat-exit-timeout 3)
 
 (use-package expreg
-  :ensure nil
   :bind (("C-=" . expreg-expand)
          ("C--" . expreg-contract))
   :config
@@ -1068,17 +1092,14 @@ becomes the first item; falls back to the top of the file."
   (put 'expreg-contract 'repeat-map 'expreg-repeat-map))
 
 (use-package surround
-  :ensure nil
   :bind-keymap ("M-'" . surround-keymap))
 
 (use-package avy
-  :ensure nil
   :bind
   ("C-;" . avy-goto-char-2)
   ("C-c C-j" . avy-resume))
 
 (use-package pdf-tools
-  :ensure nil
   :mode ("\\.pdf\\'" . pdf-view-mode))
 
 ;; The Emacs daemon may be started without `__NIXOS_SET_ENVIRONMENT_DONE', in
@@ -1086,10 +1107,10 @@ becomes the first item; falls back to the top of the file."
 ;; /etc/zshenv -> set-environment, resetting PATH to the bare NixOS session
 ;; value and dropping the direnv/dev-shell PATH.  Mark the session environment
 ;; as done so zsh leaves the inherited environment alone.
-(setenv "__NIXOS_SET_ENVIRONMENT_DONE" "1")
+(when (file-exists-p "/etc/NIXOS")
+  (setenv "__NIXOS_SET_ENVIRONMENT_DONE" "1"))
 
 (use-package envrc
-  :ensure nil
   :diminish envrc-mode
   :hook (after-init . envrc-global-mode)
   :config
@@ -1114,7 +1135,6 @@ becomes the first item; falls back to the top of the file."
         tramp-verbose 1))
 
 (use-package helpful
-  :ensure nil
   :bind
   ([remap describe-command]  . helpful-command)
   ([remap describe-function] . helpful-callable)
@@ -1123,16 +1143,13 @@ becomes the first item; falls back to the top of the file."
   ([remap describe-variable] . helpful-variable))
 
 (use-package editorconfig
-  :ensure nil
   :diminish
   :config (editorconfig-mode 1))
 
 (use-package diminish
-  :ensure nil
   :config (diminish 'line-number-mode))
 
 (use-package xclip
-  :ensure nil
   :defer t
   :init
   (defun my/enable-xclip-on-tty ()
@@ -1142,7 +1159,6 @@ becomes the first item; falls back to the top of the file."
   (add-hook 'tty-setup-hook #'my/enable-xclip-on-tty))
 
 (use-package popper
-  :ensure nil
   :bind (("M-o"   . popper-toggle)
          ("M-O"   . popper-cycle)
          ("C-M-o" . popper-toggle-type))
@@ -1175,7 +1191,6 @@ becomes the first item; falls back to the top of the file."
    (eshell-mode . (lambda () (setenv "TERM" "xterm-256color")))))
 
 (use-package eat
-  :ensure nil
   :custom
   (eat-term-name "xterm-256color")
   (eat-kill-buffer-on-exit t)
@@ -1184,7 +1199,7 @@ becomes the first item; falls back to the top of the file."
    (eshell-mode . eat-eshell-visual-command-mode)))
 
 (use-package ghostel
-  :ensure nil
+  :if (not (eq system-type 'berkeley-unix))
   :bind (("C-x m" . ghostel)
          :map ghostel-semi-char-mode-map
          ("C-s" . consult-line)
@@ -1212,13 +1227,11 @@ becomes the first item; falls back to the top of the file."
   :hook (after-init . ghostel-compile-global-mode))
 
 (use-package elfeed
-  :ensure nil
   :defer t
   :custom
   (elfeed-db-directory (expand-file-name "elfeed" user-emacs-directory)))
 
 (use-package elfeed-org
-  :ensure nil
   :after elfeed
   :config (elfeed-org)
   :custom
@@ -1226,7 +1239,6 @@ becomes the first item; falls back to the top of the file."
    (list (expand-file-name "elfeed.org" user-emacs-directory))))
 
 (use-package elfeed-tube
-  :ensure nil
   :after elfeed
   :config (elfeed-tube-setup)
   :bind (:map elfeed-show-mode-map
@@ -1261,7 +1273,6 @@ becomes the first item; falls back to the top of the file."
     "The DeepSeek gptel backend.")
 
 (use-package eca
-    :ensure nil
     :defer t
     :custom
     ;; Connect to the ECA server as soon as a workspace is opened.
@@ -1290,7 +1301,6 @@ becomes the first item; falls back to the top of the file."
   
 
   (use-package gptel
-    :ensure nil
     :config
     (setq gptel-default-mode 'org-mode)
     (setq gptel-track-media t)
@@ -1661,7 +1671,9 @@ Name the moving parts, then walk through the flow.  No filler.")))
 
 (use-package gptel-preset-collection
   :ensure nil
-  :if (locate-library "gptel-preset-collection")
+  ;; Natively package-vc has just installed it; under Nix it may be absent.
+  :if (or (not my/nix-packages-p)
+          (locate-library "gptel-preset-collection"))
   :after gptel
   :demand t)
 
@@ -1732,8 +1744,8 @@ tangled `init.el' in a subprocess and return the compiler's output."
     (string-join (nreverse report) "\n")))
 
 (use-package gptel-agent
-  :ensure nil
-  :if (locate-library "gptel-agent")
+  :if (or (not my/nix-packages-p)
+          (locate-library "gptel-agent"))
   :after gptel
   :demand t
   :config
@@ -1762,8 +1774,8 @@ result.  Call this after every edit and fix what it reports."
    :category "project"))
 
 (use-package agent-shell
-  :ensure nil
-  :if (locate-library "agent-shell")
+  :if (or (not my/nix-packages-p)
+          (locate-library "agent-shell"))
   :custom
   ;; Skip per-fenced-block syntax highlighting.  The renderer still
   ;; strips the fences and inserts the action label; it just does not
@@ -1771,7 +1783,6 @@ result.  Call this after every edit and fix what it reports."
   (agent-shell-highlight-blocks nil))
 
 (use-package tabspaces
-  :ensure nil
   :hook (after-init . tabspaces-mode)
   :custom
   (tabspaces-keymap-prefix "C-c TAB")

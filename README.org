@@ -10,8 +10,40 @@ Files produced:
 - =~/.emacs.d/early-init.el=
 - =~/.emacs.d/init.el=
 
-*Important*: All packages are installed via Nix/home-manager. Every =use-package=
-declaration uses =:ensure nil=. Do not add =:straight t= or =:ensure t= here.
+*Important*: This config runs in two package modes. Under Nix (NixOS, or any
+Nix profile in =NIX_PROFILES=) every package comes from Nix/home-manager.
+Everywhere else — the OpenBSD laptop — =package.el= installs the same packages
+from GNU, NonGNU and MELPA into =var/elpa=.
+
+Third-party =use-package= forms therefore carry no =:ensure= of their own: they
+inherit =use-package-always-ensure=, which is nil under Nix and t natively.
+Built-in features, sub-features that are not separate packages, the vendored
+=templ-ts-mode=, and the GitHub-only =gptel-preset-collection= keep
+=:ensure nil=. Do not add =:straight t= anywhere.
+
+* OpenBSD
+
+The same config runs on the OpenBSD laptop without Nix. Install Emacs and the
+external tools that are not Emacs packages, clone the branch, fetch the
+submodule, and start Emacs:
+
+#+begin_src sh
+pkg_add emacs        # gtk3 flavor by default; pgtk is available for Wayland
+pkg_add ripgrep fd   # consult's search commands
+git clone -b dual-package <repo> ~/.emacs.d
+git -C ~/.emacs.d submodule update --init
+emacs
+#+end_src
+
+The first start downloads the packages into =~/.emacs.d/var/elpa= and asks
+once per tree-sitter grammar it has to compile (it needs a C compiler, which
+is in base). Later starts use the installed copies; run
+=M-x package-refresh-contents= before adding a package to an old session.
+
+Not everything is an Emacs package: LSP servers, formatters, =direnv=, and
+=guile= still come from =pkg_add=. =nixd= and =nixfmt= only exist on the
+NixOS side. =ghostel= is skipped on =berkeley-unix= because libghostty has no
+OpenBSD port; use =eat= (=M-x eat=) instead.
 
 * Early Init
 :PROPERTIES:
@@ -151,12 +183,16 @@ stays clean.
     (make-directory user-emacs-directory t))
 #+end_src
 
-** Disable package.el
+** Package Activation
 
-Nix manages every package. =package.el= has nothing to do.
+Package activation is explicit in both modes. =package-enable-at-startup=
+stays nil, and the bootstrap in =init.el= calls =package-initialize= after
+it has decided which archives, if any, to use. That keeps the Nix
+loaddefs and the native =var/elpa= under one code path.
 
 #+begin_src emacs-lisp
   (setq package-enable-at-startup nil)
+  ;; Native bootstrap overrides this; under Nix there is nothing to talk to.
   (setq package-archives nil)
 #+end_src
 
@@ -275,34 +311,71 @@ Everything from here forward tangles into =init.el=.
   ;;; init.el --- Main configuration -*- lexical-binding: t; -*-
   ;;; Commentary:
   ;; Tangled from README.org — do not edit by hand.
-  ;; Based on Emacs-Kick by Rahul Martim Juliato, adapted for NixOS + IGC + Sway.
+  ;; Based on Emacs-Kick by Rahul Martim Juliato, adapted for NixOS + IGC + Sway,
+  ;; with a native package.el path for OpenBSD.
   ;;; Code:
 #+end_src
 
 ** Bootstrap
 
-Nix provides all packages on the load-path already. We just need
-=use-package= (built-in since Emacs 29) and tell it never to install
-anything.
+Packages come from one of two places, and each =use-package= form configures
+the same package either way.
 
-=package-initialize= is load-bearing, despite =package.el= having no
-archives to talk to. =early-init.el= sets =package-enable-at-startup= to
-nil, which stops Emacs from running =package-activate-all= on its own, so
-this call is the only thing that activates the packages Nix put under
-=site-lisp/elpa/= and loads their =*-autoloads.el=. Drop it and every
-autoloaded symbol goes void — =global-corfu-mode=, =popper-mode=,
-=diff-hl-margin-mode= and friends all fail at =:init= / =:config= time.
+Under Nix — NixOS, or any Nix profile exported in =NIX_PROFILES= — the
+home-manager profile has already put every package on the load-path, so
+=use-package= (built-in since Emacs 29) must only configure them. Everywhere
+else, notably OpenBSD, =package.el= installs the same packages from GNU,
+NonGNU and MELPA into =var/elpa=, which is gitignored state.
+
+Detection is deliberately boring: =/etc/NIXOS= exists on NixOS, and
+=NIX_PROFILES= is set for any Nix profile. Neither exists on OpenBSD.
+
+=package-initialize= is load-bearing in both modes. =early-init.el= sets
+=package-enable-at-startup= to nil, which stops Emacs from running
+=package-activate-all= on its own, so this call is the only thing that
+activates the packages — Nix's under =site-lisp/elpa/= or native ones under
+=var/elpa/= — and loads their =*-autoloads.el=. Drop it and every autoloaded
+symbol goes void: =global-corfu-mode=, =popper-mode=, =diff-hl-margin-mode=
+and friends all fail at =:init= / =:config= time.
+
+Natively, a package missing from the archives installs with
+=use-package-ensure-installed=, which refreshes the archive metadata on demand
+and only warns when an install fails, so an offline first start still opens
+Emacs. Nothing here pins a version: the native side follows MELPA.
 
 #+begin_src emacs-lisp
-  (setq package-archives nil)
-  (setq package-enable-at-startup nil)
+  (defvar my/nix-packages-p
+    (or (file-exists-p "/etc/NIXOS")
+        (getenv "NIX_PROFILES"))
+    "Non-nil when packages are provided by Nix/home-manager.
+  /etc/NIXOS marks NixOS; NIX_PROFILES also covers non-NixOS Nix profiles.")
+
+  ;; Native installs land in var/elpa, which is gitignored.
+  (setq package-user-dir (expand-file-name "elpa/" user-emacs-directory))
 
   (require 'package)
-  ;; Activates Nix-provided packages and loads their autoloads.
+  (unless my/nix-packages-p
+    (setq package-archives
+          '(("gnu"    . "https://elpa.gnu.org/packages/")
+            ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+            ("melpa"  . "https://melpa.org/packages/"))))
+  ;; Activates Nix's site-lisp/elpa or native var/elpa and loads autoloads.
   ;; Required: package-enable-at-startup is nil, so nothing else does this.
   (package-initialize)
+
   (require 'use-package)
-  (setq use-package-always-ensure nil)
+  ;; Nix provides every package: never install.  Native: install on demand.
+  (setq use-package-always-ensure (not my/nix-packages-p))
+
+  (unless my/nix-packages-p
+    ;; In no archive, so package.el cannot find it; package-vc clones it.
+    (unless (package-installed-p 'gptel-preset-collection)
+      (condition-case err
+          (package-vc-install "https://github.com/karthink/gptel-preset-collection")
+        (error
+         (display-warning 'my-packages
+                          (format "Could not install gptel-preset-collection: %s"
+                                  (error-message-string err)))))))
 #+end_src
 
 ** File Paths
@@ -481,7 +554,6 @@ Keep all generated state under =var/=.
      (dired-mode . hl-line-mode)))
 
   (use-package dired-subtree
-    :ensure nil
     :after dired
     :bind (:map dired-mode-map
   			  ("<tab>" . dired-subtree-toggle)
@@ -587,8 +659,15 @@ from.
 ** Org Mode
 
 #+begin_src emacs-lisp
-  (defconst my/sync-root "/var/lib/syncthing/Sync/"
-    "Root of the Syncthing shares.")
+  (defconst my/sync-root
+    (or (getenv "MY_SYNC_ROOT")
+        ;; NixOS runs Syncthing as a system service.
+        (if (file-directory-p "/var/lib/syncthing/Sync/")
+            "/var/lib/syncthing/Sync/"
+          (expand-file-name "~/Sync/")))
+    "Root of the Syncthing shares.
+  Set MY_SYNC_ROOT to override; the fallback is ~/Sync/ when the NixOS
+  service directory is absent.")
 
   (defconst my/org-root (expand-file-name "personal/" my/sync-root)
     "Directory holding personal org files.")
@@ -621,7 +700,7 @@ from.
     (org-log-done 'time)
     (org-log-into-drawer t)
     (org-clock-persist 'clock)
-    (org-directory "/var/lib/syncthing/Sync/personal/")
+    (org-directory my/org-root)
     (org-default-notes-file (expand-file-name "inbox.org" org-directory))
     (org-agenda-files my/org-task-files)
     (org-todo-keywords
@@ -697,7 +776,6 @@ from.
   (global-set-key (kbd "C-c R") #'my/org-open-weekly-review)
 
   (use-package org-appear
-    :ensure nil
     :hook (org-mode . org-appear-mode))
 #+end_src
 
@@ -735,7 +813,6 @@ from.
 
 #+begin_src emacs-lisp
   (use-package vertico
-    :ensure nil
     :hook (after-init . vertico-mode)
     :custom
     (vertico-count 10)
@@ -760,7 +837,6 @@ from.
 
 #+begin_src emacs-lisp
   (use-package orderless
-    :ensure nil
     :after vertico
     :custom
     (completion-styles '(orderless basic))
@@ -780,7 +856,6 @@ from.
 
 #+begin_src emacs-lisp
   (use-package marginalia
-    :ensure nil
     :hook (after-init . marginalia-mode))
 #+end_src
 
@@ -788,7 +863,6 @@ from.
 
 #+begin_src emacs-lisp
   (use-package consult
-    :ensure nil
     :defer t
     :custom
     (consult-narrow-key "<")
@@ -822,13 +896,11 @@ it.
 
 #+begin_src emacs-lisp
   (use-package embark
-    :ensure nil
     :defer t
     :bind (("C-." . embark-act)
   		 ("M-." . embark-dwim)))
 
   (use-package embark-consult
-    :ensure nil
     :after (embark consult))
 #+end_src
 
@@ -836,7 +908,6 @@ it.
 
 #+begin_src emacs-lisp
   (use-package corfu
-    :ensure nil
     :custom
     (corfu-auto nil)
     ;; (corfu-auto-delay 0.1)
@@ -864,7 +935,6 @@ it.
 
 #+begin_src emacs-lisp
   (use-package cape
-    :ensure nil
     :init
     (add-hook 'emacs-lisp-mode-hook (lambda ()
   									(add-to-list 'completion-at-point-functions #'cape-elisp-block 'append)))
@@ -897,7 +967,6 @@ it.
 
 #+begin_src emacs-lisp
   (use-package catppuccin-theme
-    :ensure nil
     :custom
     (catppuccin-flavor 'frappe)
     :config
@@ -909,7 +978,6 @@ it.
 
 #+begin_src emacs-lisp
   (use-package ligature
-    :ensure nil
     :config
     ;; Enable the "www" ligature in every possible major mode
     (ligature-set-ligatures 't '("www"))
@@ -984,22 +1052,18 @@ it.
 
 #+begin_src emacs-lisp
   (use-package nerd-icons
-    :ensure nil
     :defer t)
 
   (use-package nerd-icons-dired
-    :ensure nil
     :hook (dired-mode . nerd-icons-dired-mode))
 
   (use-package nerd-icons-completion
-    :ensure nil
     :after (:all nerd-icons marginalia)
     :config
     (nerd-icons-completion-mode)
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
   (use-package nerd-icons-corfu
-    :ensure nil
     :after corfu
     :config
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
@@ -1075,6 +1139,33 @@ is also exactly when a stale count would otherwise linger.
   		(toml-mode       . toml-ts-mode)
   		(go-mode         . go-ts-mode)
   		(rust-mode       . rust-ts-mode)))
+
+  ;; Emacs 31 can install a missing grammar on demand, but ships no recipes:
+  ;; `treesit-language-source-alist' is empty by default.  These cover every
+  ;; language the remap above can reach.  templ has its own installer in
+  ;; templ-ts-mode.  Nix ships the grammars already, so this is only exercised
+  ;; on the native side.
+  (setq treesit-language-source-alist
+        '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+          (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+          (go         . ("https://github.com/tree-sitter/tree-sitter-go"))
+          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+          (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+          (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"))
+          (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))
+          (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript"
+                         "master" "tsx/src"))
+          (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript"
+                         "master" "typescript/src"))
+          (yaml       . ("https://github.com/tree-sitter-grammars/tree-sitter-yaml"))))
+
+  ;; Ask before downloading and compiling a grammar; it lands in
+  ;; var/tree-sitter.  The variable arrived in Emacs 31.1.
+  (when (boundp 'treesit-auto-install-grammar)
+    (setq treesit-auto-install-grammar 'ask))
 #+end_src
 
 ** Eglot (LSP)
@@ -1141,18 +1232,18 @@ is listed here for intent and future-proofing only.
     (jsonrpc-event-hook nil)
 
     :config
-    (add-to-list 'eglot-server-programs '(nix-mode . ("nixd")))
+    ;; nixd only exists where Nix does; on OpenBSD the entry is pointless.
+    (when (executable-find "nixd")
+      (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
     (add-to-list 'eglot-server-programs
                  '((js-mode js-ts-mode rjsx-mode typescript-mode tsx-ts-mode)
                    . ("tsc" "--lsp" "--stdio"))))
 
   (use-package consult-eglot
-    :ensure nil
     :after eglot
     :bind (:map eglot-mode-map
   			  ([remap xref-find-apropos] . consult-eglot-symbols)))
   (use-package consult-eglot-embark
-    :ensure nil
     :after (embark consult-eglot)
     :config (consult-eglot-embark-mode))
 #+end_src
@@ -1215,7 +1306,6 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package tempel
-    :ensure nil
     :custom
     (tempel-path (expand-file-name "templates" user-emacs-directory))
     :bind (("M-+" . tempel-complete)
@@ -1235,11 +1325,9 @@ gates on an older pin.
   (add-hook 'text-mode-hook 'tempel-setup-capf))
 
   (use-package tempel-collection
-    :ensure nil
     :after tempel)
 
   (use-package eglot-tempel
-    :ensure nil
     :after tempel
     :init (eglot-tempel-mode t))
 #+end_src
@@ -1248,7 +1336,6 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package apheleia
-    :ensure nil
     :diminish
     :config
     (apheleia-global-mode 1)
@@ -1275,7 +1362,6 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package indent-bars
-    :ensure nil
     :hook ((prog-mode . indent-bars-mode))
     :custom
     (indent-bars-treesit-support t)
@@ -1332,6 +1418,7 @@ gates on an older pin.
 
   ;; Left and right side windows occupy full frame height
   (use-package emacs
+    :ensure nil
     :custom
     (window-sides-vertical t))
 #+end_src
@@ -1343,11 +1430,9 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package nix-mode
-    :ensure nil
     :mode "\\.nix\\'")
 
   (use-package lua-mode
-    :ensure nil
     :mode "\\.lua\\'"
     :interpreter "lua")
 
@@ -1357,7 +1442,6 @@ gates on an older pin.
     :mode "\\.templ\\'")
 
   (use-package go-eldoc
-    :ensure nil
     :hook (go-mode . go-eldoc-setup))
 
   (defun my-go-mode-setup ()
@@ -1368,17 +1452,14 @@ gates on an older pin.
   (add-hook 'go-ts-mode-hook #'my-go-mode-setup)
 
   (use-package markdown-mode
-    :ensure nil
     :defer t
     :mode (("\\.md\\'" . markdown-mode)
            ("README\\.md\\'" . gfm-mode)))
 
   (use-package geiser
-    :ensure nil
     :config (setq geiser-default-implementation 'guile))
 
   (use-package geiser-guile
-    :ensure nil
     :after geiser)
 
   (use-package comint
@@ -1388,11 +1469,9 @@ gates on an older pin.
     (comint-scroll-to-bottom-on-output nil))
 
   (use-package rainbow-delimiters
-    :ensure nil
     :hook (prog-mode . rainbow-delimiters-mode))
 
   (use-package dotenv-mode
-    :ensure nil
     :defer t)
 #+end_src
 
@@ -1405,7 +1484,6 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package magit
-    :ensure nil
     :defer t)
 #+end_src
 
@@ -1413,7 +1491,6 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package diff-hl
-    :ensure nil
     :hook
     ((after-init             . global-diff-hl-mode)
      (magit-post-refresh     . diff-hl-magit-post-refresh)
@@ -1434,7 +1511,6 @@ gates on an older pin.
 
 #+begin_src emacs-lisp
   (use-package undo-fu
-    :ensure nil
     :commands (undo-fu-only-undo undo-fu-only-redo)
     :config
     (global-unset-key (kbd "C-z"))
@@ -1442,7 +1518,6 @@ gates on an older pin.
     (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
 
   (use-package undo-fu-session
-    :ensure nil
     :config
     (setq undo-fu-session-directory
           (expand-file-name "undo-fu-session" user-emacs-directory))
@@ -1453,7 +1528,6 @@ gates on an older pin.
     (undo-fu-session-global-mode))
 
   (use-package vundo
-    :ensure nil
     :bind ("C-x u" . vundo))
 #+end_src
 
@@ -1675,7 +1749,6 @@ Note =C--= shadows the global =negative-argument=; use =C-u -= or
 
 #+begin_src emacs-lisp
   (use-package expreg
-    :ensure nil
     :bind (("C-=" . expreg-expand)
            ("C--" . expreg-contract))
     :config
@@ -1708,14 +1781,12 @@ pressed (=:bind-keymap= autoloads on the prefix).
 Any of the pair characters work on either side, so =M-' d )= is the
 same as =M-' d (=. Quotes, backticks and =*= / =_= are pairs too.
 
-=M-'= is =abbrev-prefix-mark= by default; this shadows it. As with
-every other package here, =surround= has to come from Nix — add
-=epkgs.surround= to the home-manager =emacs= package list, or the
-=:bind-keymap= will fail to autoload.
+=M-'= is =abbrev-prefix-mark= by default; this shadows it. Under Nix,
+=surround= has to be in the home-manager =emacs= package list or the
+=:bind-keymap= cannot autoload; on the native side package.el installs it.
 
 #+begin_src emacs-lisp
   (use-package surround
-    :ensure nil
     :bind-keymap ("M-'" . surround-keymap))
 #+end_src
 
@@ -1728,7 +1799,6 @@ every other package here, =surround= has to come from Nix — add
 
 #+begin_src emacs-lisp
   (use-package avy
-    :ensure nil
     :bind
     ("C-;" . avy-goto-char-2)
     ("C-c C-j" . avy-resume))
@@ -1738,7 +1808,6 @@ every other package here, =surround= has to come from Nix — add
 
 #+begin_src emacs-lisp
   (use-package pdf-tools
-    :ensure nil
     :mode ("\\.pdf\\'" . pdf-view-mode))
 #+end_src
 
@@ -1748,9 +1817,10 @@ The Emacs daemon can start before =__NIXOS_SET_ENVIRONMENT_DONE= is set,
 which makes every zsh child (=M-x compile=, =shell-command=, eat, ...)
 source =/etc/zshenv= and reset =PATH= to the bare NixOS session value,
 dropping any direnv/dev-shell =PATH=. Mark the session environment as done
-so zsh leaves the inherited environment alone. Also refresh direnv when an
-=.envrc= / flake file is saved, since envrc caches direnv output for the
-whole session.
+so zsh leaves the inherited environment alone. This only means anything on
+NixOS, so it is skipped elsewhere. Also refresh direnv when an =.envrc= /
+flake file is saved, since envrc caches direnv output for the whole
+session.
 
 #+begin_src emacs-lisp
   ;; The Emacs daemon may be started without `__NIXOS_SET_ENVIRONMENT_DONE', in
@@ -1758,10 +1828,10 @@ whole session.
   ;; /etc/zshenv -> set-environment, resetting PATH to the bare NixOS session
   ;; value and dropping the direnv/dev-shell PATH.  Mark the session environment
   ;; as done so zsh leaves the inherited environment alone.
-  (setenv "__NIXOS_SET_ENVIRONMENT_DONE" "1")
+  (when (file-exists-p "/etc/NIXOS")
+    (setenv "__NIXOS_SET_ENVIRONMENT_DONE" "1"))
 
   (use-package envrc
-    :ensure nil
     :diminish envrc-mode
     :hook (after-init . envrc-global-mode)
     :config
@@ -1794,7 +1864,6 @@ whole session.
 
 #+begin_src emacs-lisp
   (use-package helpful
-    :ensure nil
     :bind
     ([remap describe-command]  . helpful-command)
     ([remap describe-function] . helpful-callable)
@@ -1807,7 +1876,6 @@ whole session.
 
 #+begin_src emacs-lisp
   (use-package editorconfig
-    :ensure nil
     :diminish
     :config (editorconfig-mode 1))
 #+end_src
@@ -1816,7 +1884,6 @@ whole session.
 
 #+begin_src emacs-lisp
   (use-package diminish
-    :ensure nil
     :config (diminish 'line-number-mode))
 #+end_src
 
@@ -1833,7 +1900,6 @@ never for GUI frames — including under =--daemon=.
 
 #+begin_src emacs-lisp
   (use-package xclip
-    :ensure nil
     :defer t
     :init
     (defun my/enable-xclip-on-tty ()
@@ -1847,7 +1913,6 @@ never for GUI frames — including under =--daemon=.
 
 #+begin_src emacs-lisp
   (use-package popper
-    :ensure nil
     :bind (("M-o"   . popper-toggle)
            ("M-O"   . popper-cycle)
            ("C-M-o" . popper-toggle-type))
@@ -1887,7 +1952,6 @@ never for GUI frames — including under =--daemon=.
      (eshell-mode . (lambda () (setenv "TERM" "xterm-256color")))))
 
   (use-package eat
-    :ensure nil
     :custom
     (eat-term-name "xterm-256color")
     (eat-kill-buffer-on-exit t)
@@ -1903,9 +1967,13 @@ never for GUI frames — including under =--daemon=.
 Terminal emulator powered by libghostty-vt. Faster and more correct
 than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
 
+libghostty ships binaries for Linux, macOS and FreeBSD but not OpenBSD,
+and building the Zig module there is not worth it. The whole block is
+skipped on =berkeley-unix=; eat is the fallback terminal.
+
 #+begin_src emacs-lisp
   (use-package ghostel
-    :ensure nil
+    :if (not (eq system-type 'berkeley-unix))
     :bind (("C-x m" . ghostel)
            :map ghostel-semi-char-mode-map
            ("C-s" . consult-line)
@@ -1939,13 +2007,11 @@ than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
 
 #+begin_src emacs-lisp
   (use-package elfeed
-    :ensure nil
     :defer t
     :custom
     (elfeed-db-directory (expand-file-name "elfeed" user-emacs-directory)))
 
   (use-package elfeed-org
-    :ensure nil
     :after elfeed
     :config (elfeed-org)
     :custom
@@ -1953,7 +2019,6 @@ than eat/vterm for heavy TUI use (btop, yazi image previews, etc).
      (list (expand-file-name "elfeed.org" user-emacs-directory))))
 
   (use-package elfeed-tube
-    :ensure nil
     :after elfeed
     :config (elfeed-tube-setup)
     :bind (:map elfeed-show-mode-map
@@ -2009,7 +2074,6 @@ Two models are served there: =deepseek-chat= for everything, and
     "The DeepSeek gptel backend.")
 
 (use-package eca
-    :ensure nil
     :defer t
     :custom
     ;; Connect to the ECA server as soon as a workspace is opened.
@@ -2038,7 +2102,6 @@ Two models are served there: =deepseek-chat= for everything, and
   
 
   (use-package gptel
-    :ensure nil
     :config
     (setq gptel-default-mode 'org-mode)
     (setq gptel-track-media t)
@@ -2600,13 +2663,13 @@ async Bash, diagnostics, todo lists, sub-agents, skills) and
 [[https://github.com/karthink/gptel-preset-collection][gptel-preset-collection]]
 (=@include= with completion, =@notify=, =@expand=, =@visible-buffers=).
 
-Both are on MELPA, which means neither is here until Nix puts it on the
-load-path — so both blocks are guarded with =locate-library= and simply
-do not load otherwise.  *They also need a gptel newer than the latest
-stable release*, which is the real gate: the guards elsewhere in this
-section (=gptel-make-deepseek=, =gptel-make-preset=) exist because the
-pin has historically lagged.  If those guards are firing, these two
-packages will not work either.
+Both are on MELPA. Under Nix they are present only when home-manager
+provides them and simply do not load otherwise; on the native side
+package.el installs them.  *They also need a gptel newer than the latest
+stable release*, which is why the native side points at MELPA rather than
+MELPA Stable: the guards elsewhere in this section (=gptel-make-deepseek=,
+=gptel-make-preset=) exist because a Nix pin has historically lagged.  If
+those guards are firing, these two packages will not work either.
 
 The point is not to reimplement a terminal coding agent.  It is that
 =@gptel-agent do X= works from a Magit buffer, a Dired listing, or a
@@ -2617,7 +2680,9 @@ part no external CLI agent can reach.
 #+begin_src emacs-lisp
   (use-package gptel-preset-collection
     :ensure nil
-    :if (locate-library "gptel-preset-collection")
+    ;; Natively package-vc has just installed it; under Nix it may be absent.
+    :if (or (not my/nix-packages-p)
+            (locate-library "gptel-preset-collection"))
     :after gptel
     :demand t)
 
@@ -2688,8 +2753,8 @@ part no external CLI agent can reach.
       (string-join (nreverse report) "\n")))
 
   (use-package gptel-agent
-    :ensure nil
-    :if (locate-library "gptel-agent")
+    :if (or (not my/nix-packages-p)
+            (locate-library "gptel-agent"))
     :after gptel
     :demand t
     :config
@@ -2773,7 +2838,7 @@ Sub-agents are Markdown files with YAML frontmatter in
 | Path                                  | What it is                             |
 |---------------------------------------+----------------------------------------|
 | =agents/config-reviewer.md=           | sub-agent: reviews a change to this config |
-| =.claude/skills/emacs-config/SKILL.md= | skill: the literate + Nix ground rules |
+| =.claude/skills/emacs-config/SKILL.md= | skill: the literate + dual-package ground rules |
 
 The skill needs no configuration at all — =.claude/skills/= ships in
 the default =gptel-agent-skill-dirs=, relative entries resolve against
@@ -2802,7 +2867,8 @@ nothing cheaper to route to, so it is deliberately left at its default.
 :header-args:emacs-lisp: :tangle init.el
 :END:
 
-An ACP client driving OpenCode, provided by Nix (not package.el).
+An ACP client driving OpenCode, provided by Nix on NixOS and installed
+from MELPA on the native side.
 Its streaming renderer is the cost center under a long reply: every
 chunk re-runs the markdown passes, and fenced code blocks each spin up
 a language major mode and call =font-lock-ensure= per render.  The one
@@ -2811,8 +2877,8 @@ the keyword colours go.
 
 #+begin_src emacs-lisp
   (use-package agent-shell
-    :ensure nil
-    :if (locate-library "agent-shell")
+    :if (or (not my/nix-packages-p)
+            (locate-library "agent-shell"))
     :custom
     ;; Skip per-fenced-block syntax highlighting.  The renderer still
     ;; strips the fences and inserts the action label; it just does not
@@ -2866,7 +2932,6 @@ buffers.
 
 #+begin_src emacs-lisp
   (use-package tabspaces
-    :ensure nil
     :hook (after-init . tabspaces-mode)
     :custom
     (tabspaces-keymap-prefix "C-c TAB")
